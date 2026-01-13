@@ -104,9 +104,11 @@ export default function Home() {
         return;
       }
     } else {
+      // Generate numeric ID based on timestamp for manual insertion (since DB column is not IDENTITY)
+      const newId = Date.now();
       const { error } = await supabase
         .from('tasks')
-        .insert([dbPayload]);
+        .insert([{ ...dbPayload, id: newId }]);
 
       if (error) {
         console.error('Error creating task:', error);
