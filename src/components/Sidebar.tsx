@@ -72,7 +72,7 @@ export function Sidebar() {
                     {/* Close Button Inside Sidebar */}
                     <button
                         onClick={() => setCollapsed(true)}
-                        className="text-slate-400 hover:text-slate-600 transition-colors md:hidden ml-auto"
+                        className="text-slate-400 hover:text-slate-600 transition-colors lg:hidden ml-auto"
                         aria-label="Close Sidebar"
                     >
                         <X size={20} />

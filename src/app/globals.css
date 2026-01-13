@@ -68,7 +68,7 @@
 
   /* Main Content */
   .main-content {
-    @apply flex-1 p-4 md:p-6 lg:p-8 ml-0 lg:ml-[260px] min-h-screen transition-[margin] duration-300;
+    @apply flex-1 w-full p-4 md:p-6 lg:p-8 ml-0 lg:ml-[260px] min-h-screen transition-[margin] duration-300;
   }
 
   /* Cards */
