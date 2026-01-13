@@ -38,7 +38,7 @@ interface NavSection {
 
 export function Sidebar() {
     const pathname = usePathname();
-    const [collapsed, setCollapsed] = useState(false);
+    const [collapsed, setCollapsed] = useState(true);
     const [openSections, setOpenSections] = useState<Record<string, boolean>>({
         main: true,
         analytics: true,
@@ -47,59 +47,21 @@ export function Sidebar() {
         labels: true
     });
 
-    const toggleSection = (section: string) => {
-        setOpenSections(prev => ({ ...prev, [section]: !prev[section] }));
-    };
-
-    const navSections: Record<string, NavSection> = {
-        main: {
-            title: 'MAIN',
-            items: [
-                { label: 'Dashboard', icon: <LayoutDashboard size={20} />, href: '/' },
-                { label: 'Task Tracker', icon: <ClipboardList size={20} />, href: '/tracker' },
-                { label: 'Schedule', icon: <Calendar size={20} />, href: '/schedule' },
-            ]
-        },
-        analytics: {
-            title: 'ANALYTICS',
-            items: [
-                { label: 'Reports', icon: <BarChart3 size={20} />, href: '/reports' },
-                { label: 'Analytics', icon: <Search size={20} />, href: '/analytics' },
-                { label: 'Attendance', icon: <CalendarDays size={20} />, href: '/attendance' },
-            ]
-        },
-        projects: {
-            title: 'PROJECTS',
-            items: [
-                { label: 'Manage Projects', icon: <Database size={20} />, href: '/projects' },
-                { label: 'Completed', icon: <CheckSquare size={20} />, href: '/projects/completed' },
-                { label: 'Rejected', icon: <XSquare size={20} />, href: '/projects/rejected' },
-                { label: 'Milestones', icon: <Target size={20} />, href: '/projects/milestones' },
-            ]
-        },
-        requests: {
-            title: 'REQUESTS',
-            items: [
-                { label: 'Submit Request', icon: <PlusCircle size={20} />, href: '/requests/new' },
-                { label: 'My Requests', icon: <UserSquare size={20} />, href: '/requests/mine' },
-                { label: 'Admin Requests', icon: <Settings size={20} />, href: '/requests/admin' },
-            ]
-        }
-    };
+    // ...
 
     return (
         <>
-            {/* Floating Toggle Button (Visible only when collapsed) */}
+            {/* Floating Toggle Button (Visible only when collapsed on mobile) */}
             <button
                 onClick={() => setCollapsed(false)}
-                className={`fixed top-4 left-4 z-[60] p-2 rounded-lg bg-indigo-900 text-white shadow-lg transition-all duration-300 hover:bg-indigo-800 ${!collapsed ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
+                className={`md:hidden fixed top-4 left-4 z-[60] p-2 rounded-lg bg-indigo-900 text-white shadow-lg transition-all duration-300 hover:bg-indigo-800 ${!collapsed ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
                 aria-label="Open Sidebar"
             >
                 <Menu size={24} />
             </button>
 
             {/* Sidebar */}
-            <nav className={`sidebar ${collapsed ? '-translate-x-full' : 'translate-x-0'}`}>
+            <nav className={`sidebar ${collapsed ? '-translate-x-full' : 'translate-x-0'} md:translate-x-0`}>
                 <div className="sidebar-header">
                     <div className="logo">
                         <div className="logo-icon">

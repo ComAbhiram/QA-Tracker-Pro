@@ -140,7 +140,7 @@ export default function TaskModal({ isOpen, onClose, task, onSave }: TaskModalPr
                 </div>
 
                 {/* Content */}
-                <form onSubmit={handleSubmit} className="p-8 space-y-8">
+                <form onSubmit={handleSubmit} className="p-4 md:p-8 space-y-8">
 
                     {/* Project & Phase */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
