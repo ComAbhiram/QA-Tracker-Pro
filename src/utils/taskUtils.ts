@@ -1,0 +1,26 @@
+import { Task } from '@/lib/types';
+
+export function getEffectiveStatus(task: Task): string {
+    // If the status is already a terminal or paused state, return it as is.
+    const terminalStatuses = ['Completed', 'Rejected', 'On Hold', 'Forecast'];
+    if (terminalStatuses.includes(task.status)) {
+        return task.status;
+    }
+
+    if (!task.endDate) {
+        return task.status;
+    }
+
+    // Parse end date and set deadline time to 18:30:00 (6:30 PM)
+    const endDate = new Date(task.endDate);
+    const deadline = new Date(endDate);
+    deadline.setHours(18, 30, 0, 0);
+
+    const now = new Date();
+
+    if (now > deadline) {
+        return 'Overdue';
+    }
+
+    return task.status;
+}
