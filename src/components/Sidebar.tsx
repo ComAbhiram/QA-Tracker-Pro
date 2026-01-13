@@ -54,14 +54,14 @@ export function Sidebar() {
             {/* Floating Toggle Button (Visible only when collapsed on mobile) */}
             <button
                 onClick={() => setCollapsed(false)}
-                className={`md:hidden fixed top-4 left-4 z-[60] p-2 rounded-lg bg-indigo-900 text-white shadow-lg transition-all duration-300 hover:bg-indigo-800 ${!collapsed ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
+                className={`lg:hidden fixed top-4 left-4 z-[60] p-2 rounded-lg bg-indigo-900 text-white shadow-lg transition-all duration-300 hover:bg-indigo-800 ${!collapsed ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
                 aria-label="Open Sidebar"
             >
                 <Menu size={24} />
             </button>
 
             {/* Sidebar */}
-            <nav className={`sidebar ${collapsed ? '-translate-x-full' : 'translate-x-0'} md:translate-x-0`}>
+            <nav className={`sidebar ${collapsed ? '-translate-x-full' : 'translate-x-0'} lg:translate-x-0`}>
                 <div className="sidebar-header">
                     <div className="logo">
                         <div className="logo-icon">
@@ -111,7 +111,13 @@ export function Sidebar() {
                 </div>
             </nav>
 
-            {/* Overlay for mobile (optional, but good practice if I were implementing mobile sidebar fully) */}
+            {/* Overlay for mobile */}
+            {!collapsed && (
+                <div
+                    className="fixed inset-0 bg-black/50 z-40 lg:hidden backdrop-blur-sm transition-opacity duration-300"
+                    onClick={() => setCollapsed(true)}
+                />
+            )}
         </>
     );
 }
