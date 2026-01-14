@@ -14,10 +14,13 @@ export const TEAM_MEMBERS: TeamMemberConfig[] = [
     { name: 'Kiran', hubstaffName: 'Kiran P S', department: 'DESIGNERS' },
     { name: 'Alfiya', hubstaffName: 'Alfiya Noori', department: 'DESIGNERS' },
     { name: 'Neethu', hubstaffName: 'Neethu Shaji', department: 'DESIGNERS' },
+    { name: 'Nikitha', hubstaffName: 'SKIP_HUBSTAFF_NIKITHA', department: 'DESIGNERS' },
 
     // PHP
     { name: 'Akhila', hubstaffName: 'Akhila Mohanan', department: 'PHP' },
-    { name: 'Rmees', hubstaffName: 'Ramees Nuhman', department: 'PHP' },
+    { name: 'Ramees', hubstaffName: 'Ramees Nuhman', department: 'PHP' },
+    { name: 'Suchith', hubstaffName: 'Suchith Lal', department: 'PHP' },
+    { name: 'Priya', hubstaffName: 'Priya K', department: 'PHP' },
 
     // HTML
     { name: 'Josin', hubstaffName: 'Josin Joseph', department: 'HTML' },
@@ -26,11 +29,11 @@ export const TEAM_MEMBERS: TeamMemberConfig[] = [
     { name: 'Sreegith', hubstaffName: 'Sreegith VA', department: 'HTML' },
     { name: 'Amrutha', hubstaffName: 'amrutha ms', department: 'HTML' },
     { name: 'Abish', hubstaffName: 'Abish', department: 'HTML' },
-    { name: 'Samir', hubstaffName: 'Samir Mulashiya', department: 'HTML' },
+    { name: 'Samir', hubstaffName: 'SKIP_HUBSTAFF_SAMIR', department: 'HTML' },
 
     // APP
     { name: 'Vaishnav', hubstaffName: 'Vaishnav Vijayan', department: 'APP' },
-    { name: 'M Afsal', hubstaffName: 'Mohammed Afsal', department: 'APP' },
+    { name: 'Afsal', hubstaffName: 'Mohammed Afsal', department: 'APP' },
     { name: 'Joshua', hubstaffName: 'Joshua Johnson', department: 'APP' },
     { name: 'Bijith', hubstaffName: 'Bijith P N', department: 'APP' },
     { name: 'Nikhil', hubstaffName: 'Nikhil Govind', department: 'APP' },
@@ -40,6 +43,7 @@ export const TEAM_MEMBERS: TeamMemberConfig[] = [
     { name: 'Deepu', hubstaffName: 'Deepu Nr', department: 'WPD' },
     { name: 'Sonu', hubstaffName: 'Sonu Sivaraman', department: 'WPD' },
     { name: 'Jishnu', hubstaffName: 'Jishnu V Gopal', department: 'WPD' },
+    { name: 'Hasna', hubstaffName: 'SKIP_HUBSTAFF_HASNA', department: 'WPD' },
 
     // QA
     { name: 'Aswathi', hubstaffName: 'Aswathi M Ashok', department: 'QA' },

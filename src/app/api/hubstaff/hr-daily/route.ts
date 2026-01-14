@@ -16,7 +16,12 @@ export async function GET(request: NextRequest) {
         const accessToken = await getValidAccessToken();
         const orgId = process.env.HUBSTAFF_ORG_ID;
 
+        // DEBUG LOGGING
+        console.log(`[HR_DAILY] OrgID configured: ${!!orgId}`);
+        console.log(`[HR_DAILY] Access Token retrieved: ${!!accessToken}`);
+
         if (!accessToken || !orgId) {
+            console.error('[HR_DAILY] Missing credentials - sending 500 error');
             return NextResponse.json({
                 error: 'Hubstaff credentials not configured',
                 message: 'Please update your authentication settings.'
