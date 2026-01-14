@@ -117,11 +117,11 @@ export default function TaskModal({ isOpen, onClose, task, onSave }: TaskModalPr
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
-            <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-200 m-4 custom-scrollbar">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200 p-4">
+            <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[85dvh] overflow-y-auto animate-in zoom-in-95 duration-200 custom-scrollbar">
 
                 {/* Header */}
-                <div className="sticky top-0 bg-white/90 backdrop-blur-md z-10 flex items-center justify-between p-6 border-b border-slate-100 bg-gradient-to-r from-white to-slate-50">
+                <div className="sticky top-0 bg-white/90 backdrop-blur-md z-10 flex items-center justify-between p-4 md:p-6 border-b border-slate-100 bg-gradient-to-r from-white to-slate-50">
                     <div className="flex items-center gap-4">
                         <div className={`p-3 rounded-2xl ${task ? 'bg-indigo-50 text-indigo-600' : 'bg-emerald-50 text-emerald-600'} shadow-sm`}>
                             {task ? <Activity size={24} /> : <Briefcase size={24} />}
@@ -140,7 +140,7 @@ export default function TaskModal({ isOpen, onClose, task, onSave }: TaskModalPr
                 </div>
 
                 {/* Content */}
-                <form onSubmit={handleSubmit} className="p-4 md:p-8 space-y-8">
+                <form onSubmit={handleSubmit} className="p-4 pb-10 md:p-6 space-y-8">
 
                     {/* Project & Phase */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">

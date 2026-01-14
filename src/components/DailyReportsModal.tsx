@@ -596,11 +596,12 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
     };
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
-            <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto custom-scrollbar animate-in zoom-in-95 duration-200 m-4">
+    return (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200 p-4">
+            <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[85dvh] overflow-y-auto custom-scrollbar animate-in zoom-in-95 duration-200">
 
                 {/* Header */}
-                <div className="flex items-center justify-between p-6 border-b border-slate-100">
+                <div className="flex items-center justify-between p-4 md:p-6 border-b border-slate-100">
                     <div className="flex items-center gap-3">
                         <div className="bg-gradient-to-br from-sky-500 to-indigo-600 p-2.5 rounded-xl">
                             <FileText className="text-white" size={24} />
@@ -619,7 +620,7 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                 </div>
 
                 {/* Content - List Style */}
-                <div className="p-6 space-y-3">
+                <div className="p-4 pb-10 md:p-6 space-y-3">
 
                     {/* Tracker Screenshot */}
                     <button
