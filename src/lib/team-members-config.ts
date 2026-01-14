@@ -14,35 +14,31 @@ export const TEAM_MEMBERS: TeamMemberConfig[] = [
     { name: 'Kiran', hubstaffName: 'Kiran P S', department: 'DESIGNERS' },
     { name: 'Alfiya', hubstaffName: 'Alfiya Noori', department: 'DESIGNERS' },
     { name: 'Neethu', hubstaffName: 'Neethu Shaji', department: 'DESIGNERS' },
-    { name: 'Nikitha', hubstaffName: 'Nikitha', department: 'DESIGNERS' },
 
     // PHP
     { name: 'Akhila', hubstaffName: 'Akhila Mohanan', department: 'PHP' },
-    { name: 'Rmees', hubstaffName: 'Rmees', department: 'PHP' },
-    { name: 'Suchith', hubstaffName: 'Suchith', department: 'PHP' },
-    { name: 'Priya', hubstaffName: 'Priya', department: 'PHP' },
+    { name: 'Rmees', hubstaffName: 'Ramees Nuhman', department: 'PHP' },
 
     // HTML
     { name: 'Josin', hubstaffName: 'Josin Joseph', department: 'HTML' },
-    { name: 'Vishnu', hubstaffName: 'Vishnu', department: 'HTML' },
+    { name: 'Vishnu', hubstaffName: 'Vishnu shaji', department: 'HTML' },
     { name: 'Ajay', hubstaffName: 'Ajay', department: 'HTML' },
-    { name: 'Sreegith', hubstaffName: 'Sreegith', department: 'HTML' },
-    { name: 'Amrutha', hubstaffName: 'Amrutha ms', department: 'HTML' },
+    { name: 'Sreegith', hubstaffName: 'Sreegith VA', department: 'HTML' },
+    { name: 'Amrutha', hubstaffName: 'amrutha ms', department: 'HTML' },
     { name: 'Abish', hubstaffName: 'Abish', department: 'HTML' },
-    { name: 'Samir', hubstaffName: 'Samir', department: 'HTML' },
+    { name: 'Samir', hubstaffName: 'Samir Mulashiya', department: 'HTML' },
 
     // APP
     { name: 'Vaishnav', hubstaffName: 'Vaishnav Vijayan', department: 'APP' },
-    { name: 'M Afsal', hubstaffName: 'M Afsal', department: 'APP' },
+    { name: 'M Afsal', hubstaffName: 'Mohammed Afsal', department: 'APP' },
     { name: 'Joshua', hubstaffName: 'Joshua Johnson', department: 'APP' },
     { name: 'Bijith', hubstaffName: 'Bijith P N', department: 'APP' },
-    { name: 'Nikhil', hubstaffName: 'Nikhil', department: 'APP' },
-    { name: 'Sejal', hubstaffName: 'Sejal', department: 'APP' },
+    { name: 'Nikhil', hubstaffName: 'Nikhil Govind', department: 'APP' },
+    { name: 'Sejal', hubstaffName: 'Sejal Sebastian', department: 'APP' },
 
     // WPD
-    { name: 'Hasna', hubstaffName: 'Hasna', department: 'WPD' },
     { name: 'Deepu', hubstaffName: 'Deepu Nr', department: 'WPD' },
-    { name: 'Sonu', hubstaffName: 'Sonu', department: 'WPD' },
+    { name: 'Sonu', hubstaffName: 'Sonu Sivaraman', department: 'WPD' },
     { name: 'Jishnu', hubstaffName: 'Jishnu V Gopal', department: 'WPD' },
 
     // QA
@@ -51,7 +47,7 @@ export const TEAM_MEMBERS: TeamMemberConfig[] = [
 ];
 
 export function getTeamMemberByHubstaffName(hubstaffName: string): TeamMemberConfig | undefined {
-    return TEAM_MEMBERS.find(m => m.hubstaffName === hubstaffName);
+    return TEAM_MEMBERS.find(m => m.hubstaffName.toLowerCase() === hubstaffName.toLowerCase());
 }
 
 export function getTeamMembersByDepartment(department: TeamMemberConfig['department']): TeamMemberConfig[] {
