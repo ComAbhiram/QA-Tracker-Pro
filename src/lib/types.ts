@@ -74,7 +74,7 @@ export const mapTaskFromDB = (task: DBTask): Task => ({
     pc: task.pc,
     assignedTo: task.assigned_to,
     assignedTo2: task.assigned_to2,
-    status: task.status,
+    status: task.status || 'In Progress',
     startDate: task.start_date,
     endDate: task.end_date,
     includeSaturday: task.include_saturday || false,
