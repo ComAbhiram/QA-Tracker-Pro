@@ -24,9 +24,9 @@ export async function GET(request: NextRequest) {
         console.log(`[HR_DAILY] Access Token retrieved: ${!!accessToken}`);
 
         if (!accessToken || !orgId) {
-            console.error('[HR_DAILY] Missing credentials - sending 500 error');
+            console.error(`[HR_DAILY] Missing credentials. OrgID: ${!!orgId}, Token: ${!!accessToken}`);
             return NextResponse.json({
-                error: 'Hubstaff credentials not configured',
+                error: `Hubstaff credentials error: OrgID=${!!orgId ? 'OK' : 'MISSING'}, Token=${!!accessToken ? 'OK' : 'MISSING'}`,
                 message: 'Please update your authentication settings.'
             }, { status: 500 });
         }
