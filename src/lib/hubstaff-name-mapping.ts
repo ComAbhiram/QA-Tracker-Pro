@@ -2,7 +2,19 @@
 export const HUBSTAFF_TO_QA_NAME_MAP: Record<string, string> = {
     'Aswathi M Ashok': 'Aswathi',
     'Minnu Sebastian': 'Minnu',
-    // Add more mappings as needed
+    'Justin Jose': 'Justin',
+    'Kiran P S': 'Kiran',
+    'Alfiya Noori': 'Alfiya',
+    'Neethu Shaji': 'Neethu',
+    'Akhila Mohanan': 'Akhila',
+    'Josin Joseph': 'Josin',
+    'Amrutha ms': 'Amrutha',
+    'Vaishnav Vijayan': 'Vaishnav',
+    'Joshua Johnson': 'Joshua',
+    'Bijith P N': 'Bijith',
+    'Deepu Nr': 'Deepu',
+    'Jishnu V Gopal': 'Jishnu',
+    'Amrutha lakshmi': 'Amrutha',
 };
 
 /**

@@ -1,54 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { TEAM_MEMBERS, DEPARTMENTS, type TeamMemberConfig } from '@/lib/team-members-config';
+import { getValidAccessToken } from '@/lib/hubstaff-auth';
 
 const HUBSTAFF_API_BASE = 'https://api.hubstaff.com/v2';
-const HUBSTAFF_AUTH_BASE = 'https://account.hubstaff.com/access_tokens';
-
-// Cache for access token (shared with other Hubstaff APIs)
-let cachedAccessToken: string | null = null;
-let tokenExpiry: number = 0;
-
-async function getAccessToken(refreshToken: string): Promise<string | null> {
-    // Return cached token if still valid
-    if (cachedAccessToken && Date.now() < tokenExpiry) {
-        console.log('Using cached access token');
-        return cachedAccessToken;
-    }
-
-    try {
-        console.log('Exchanging refresh token for access token...');
-        const response = await fetch(HUBSTAFF_AUTH_BASE, {
-            method: 'POST',
-            body: new URLSearchParams({
-                grant_type: 'refresh_token',
-                refresh_token: refreshToken,
-            }).toString(),
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            cache: 'no-store', // Ensure we don't get a cached stale token
-        });
-
-        if (!response.ok) {
-            const errorText = await response.text();
-            console.error('Token exchange error:', response.status, errorText);
-            return null;
-        }
-
-        const data = await response.json();
-        cachedAccessToken = data.access_token;
-
-        // Set expiry to 5 minutes before actual expiry for safety
-        const expiresIn = data.expires_in || 3600;
-        tokenExpiry = Date.now() + (expiresIn - 300) * 1000;
-
-        console.log('Successfully obtained access token');
-        return cachedAccessToken;
-    } catch (error) {
-        console.error('Error exchanging token:', error);
-        return null;
-    }
-}
 
 export async function GET(request: NextRequest) {
     try {
@@ -59,22 +13,13 @@ export async function GET(request: NextRequest) {
             return NextResponse.json({ error: 'Date parameter is required' }, { status: 400 });
         }
 
-        const refreshToken = process.env.HUBSTAFF_REFRESH_TOKEN;
-        let accessToken = process.env.HUBSTAFF_ACCESS_TOKEN;
-
-        if (refreshToken) {
-            const refreshedToken = await getAccessToken(refreshToken);
-            if (refreshedToken) {
-                accessToken = refreshedToken;
-            }
-        }
-
+        const accessToken = await getValidAccessToken();
         const orgId = process.env.HUBSTAFF_ORG_ID;
 
         if (!accessToken || !orgId) {
             return NextResponse.json({
                 error: 'Hubstaff credentials not configured',
-                message: 'Please add HUBSTAFF_ACCESS_TOKEN and HUBSTAFF_ORG_ID to your .env.local file'
+                message: 'Please update your authentication settings.'
             }, { status: 500 });
         }
 
