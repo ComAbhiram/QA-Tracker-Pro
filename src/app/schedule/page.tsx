@@ -88,7 +88,7 @@ export default function Schedule() {
 
     const getStatusColor = (task: Task) => {
         const status = getEffectiveStatus(task);
-        const s = status.toLowerCase();
+        const s = (status || '').toLowerCase();
         if (s === 'completed') return 'bg-emerald-100 text-emerald-700 border-emerald-200';
         if (s === 'in progress' || s === 'being developed') return 'bg-blue-100 text-blue-700 border-blue-200';
         if (s === 'overdue') return 'bg-red-100 text-red-700 border-red-200';
@@ -100,7 +100,7 @@ export default function Schedule() {
 
     const getTaskBorderColor = (task: Task) => {
         const status = getEffectiveStatus(task);
-        const s = status.toLowerCase();
+        const s = (status || '').toLowerCase();
         if (s === 'completed') return 'border-emerald-200 bg-emerald-50';
         if (s === 'in progress' || s === 'being developed') return 'border-blue-200 bg-blue-50';
         if (s === 'overdue') return 'border-red-200 bg-red-50';
@@ -112,7 +112,7 @@ export default function Schedule() {
 
     const getStatusBadgeColor = (task: Task) => {
         const status = getEffectiveStatus(task);
-        const s = status.toLowerCase();
+        const s = (status || '').toLowerCase();
         if (s === 'completed') return 'bg-emerald-100 text-emerald-700';
         if (s === 'in progress' || s === 'being developed') return 'bg-blue-100 text-blue-700';
         if (s === 'overdue') return 'bg-red-100 text-red-700';
