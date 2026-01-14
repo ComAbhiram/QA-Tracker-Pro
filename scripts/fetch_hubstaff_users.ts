@@ -2,53 +2,26 @@
 import dotenv from 'dotenv';
 import path from 'path';
 
-// Load environment variables from .env.local
+// Load env FIRST for the auth lib to work
 dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
 
-const HUBSTAFF_API_BASE = 'https://api.hubstaff.com/v2';
-const HUBSTAFF_AUTH_BASE = 'https://account.hubstaff.com/access_tokens';
-
-async function getAccessToken(refreshToken: string): Promise<string | null> {
-    try {
-        console.log('Exchanging refresh token...');
-        const response = await fetch(HUBSTAFF_AUTH_BASE, {
-            method: 'POST',
-            body: new URLSearchParams({
-                grant_type: 'refresh_token',
-                refresh_token: refreshToken,
-            }).toString(),
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-        });
-
-        if (!response.ok) {
-            console.error('Token exchange failed:', await response.text());
-            return null;
-        }
-
-        const data = await response.json();
-        return data.access_token;
-    } catch (error) {
-        console.error('Error exchanging token:', error);
-        return null;
-    }
-}
-
 async function main() {
-    const refreshToken = process.env.HUBSTAFF_REFRESH_TOKEN;
-    const orgId = process.env.HUBSTAFF_ORG_ID;
+    // Dynamic import to ensure env is loaded
+    const { getValidAccessToken } = await import('../src/lib/hubstaff-auth');
 
-    if (!refreshToken || !orgId) {
-        console.error('Missing HUBSTAFF_REFRESH_TOKEN or HUBSTAFF_ORG_ID');
+    console.log('Fetching Hubstaff users...');
+    const accessToken = await getValidAccessToken();
+
+    if (!accessToken) {
+        console.error('Failed to get access token');
         return;
     }
 
-    const accessToken = await getAccessToken(refreshToken);
-    if (!accessToken) return;
+    const orgId = process.env.HUBSTAFF_ORG_ID;
+    const HUBSTAFF_API_BASE = 'https://api.hubstaff.com/v2';
 
-    console.log('Fetching organization members...');
-    const response = await fetch(`${HUBSTAFF_API_BASE}/organizations/${orgId}/members`, {
+    console.log(`Fetching organization members for Org ID: ${orgId}...`);
+    const response = await fetch(`${HUBSTAFF_API_BASE}/organizations/${orgId}/members?include=users`, {
         headers: {
             'Authorization': `Bearer ${accessToken}`,
             'Content-Type': 'application/json',
@@ -63,10 +36,21 @@ async function main() {
     const data = await response.json();
     const members = data.members || [];
 
+    // Check if users are included in side-loading
+    const users = data.users || []; // 'include=users' usually puts them here
+
     console.log('\n=== HUBSTAFF MEMBERS ===');
-    members.forEach((m: any) => {
-        console.log(`ID: ${m.user_id}, Name: "${m.name}"`);
-    });
+
+    if (users.length > 0) {
+        users.forEach((u: any) => {
+            console.log(`ID: ${u.id}, Name: "${u.name}"`);
+        });
+    } else {
+        // Fallback to iterating members and trying to guess or fetch
+        members.forEach((m: any) => {
+            console.log(`Member ID: ${m.id}, User ID: ${m.user_id}, Name: "${m.name}"`);
+        });
+    }
 }
 
 main();

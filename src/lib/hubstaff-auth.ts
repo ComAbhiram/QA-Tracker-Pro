@@ -1,7 +1,5 @@
-import fs from 'fs/promises';
-import path from 'path';
+import { supabase } from '@/lib/supabase';
 
-const TOKEN_FILE_PATH = path.join(process.cwd(), '.hubstaff_tokens.json');
 const HUBSTAFF_AUTH_BASE = 'https://account.hubstaff.com/access_tokens';
 
 interface TokenData {
@@ -17,9 +15,19 @@ let refreshPromise: Promise<string | null> | null = null;
 async function saveTokens(data: TokenData) {
     memoryTokenCache = data;
     try {
-        await fs.writeFile(TOKEN_FILE_PATH, JSON.stringify(data, null, 2));
+        const { error } = await supabase
+            .from('hubstaff_tokens')
+            .upsert({
+                id: 1,
+                access_token: data.access_token,
+                refresh_token: data.refresh_token,
+                expires_at: data.expires_at,
+                updated_at: new Date().toISOString()
+            });
+
+        if (error) console.error('Failed to save tokens to Supabase:', error);
     } catch (error) {
-        console.error('Failed to save tokens to file:', error);
+        console.error('Failed to save tokens:', error);
     }
 }
 
@@ -27,12 +35,23 @@ async function loadTokens(): Promise<TokenData | null> {
     if (memoryTokenCache) return memoryTokenCache;
 
     try {
-        const fileContent = await fs.readFile(TOKEN_FILE_PATH, 'utf-8');
-        const data = JSON.parse(fileContent);
-        memoryTokenCache = data;
-        return data;
+        const { data, error } = await supabase
+            .from('hubstaff_tokens')
+            .select('*')
+            .eq('id', 1)
+            .single();
+
+        if (error || !data) return null;
+
+        const tokens = {
+            access_token: data.access_token,
+            refresh_token: data.refresh_token,
+            expires_at: Number(data.expires_at)
+        };
+        memoryTokenCache = tokens;
+        return tokens;
     } catch (error) {
-        // File doesn't exist or is invalid, fall back to null
+        console.error('Error loading tokens:', error);
         return null;
     }
 }
@@ -55,7 +74,7 @@ export async function getValidAccessToken(): Promise<string | null> {
     refreshPromise = (async () => {
         try {
             // Determine which refresh token to use:
-            // 1. The one from our cache (most recent)
+            // 1. The one from our DB (most recent)
             // 2. The one from env (fallback for initial setup)
             const refreshTokenToUse = cached?.refresh_token || process.env.HUBSTAFF_REFRESH_TOKEN;
 
