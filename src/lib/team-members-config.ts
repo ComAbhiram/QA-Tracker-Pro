@@ -47,6 +47,7 @@ export const TEAM_MEMBERS: TeamMemberConfig[] = [
 ];
 
 export function getTeamMemberByHubstaffName(hubstaffName: string): TeamMemberConfig | undefined {
+    if (!hubstaffName) return undefined;
     return TEAM_MEMBERS.find(m => m.hubstaffName.toLowerCase() === hubstaffName.toLowerCase());
 }
 
