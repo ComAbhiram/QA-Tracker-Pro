@@ -47,7 +47,43 @@ export function Sidebar() {
         labels: true
     });
 
-    // ...
+    const toggleSection = (section: string) => {
+        setOpenSections(prev => ({ ...prev, [section]: !prev[section] }));
+    };
+
+    const navSections: Record<string, NavSection> = {
+        main: {
+            title: 'MAIN',
+            items: [
+                { label: 'Dashboard', icon: <LayoutDashboard size={18} />, href: '/' },
+                { label: 'Task Tracker', icon: <ClipboardList size={18} />, href: '/tasks' },
+                { label: 'Schedule', icon: <CalendarDays size={18} />, href: '/schedule' },
+            ]
+        },
+        analytics: {
+            title: 'ANALYTICS',
+            items: [
+                { label: 'Reports', icon: <BarChart3 size={18} />, href: '/reports' },
+                { label: 'Analytics', icon: <Search size={18} />, href: '/analytics' },
+                { label: 'Attendance', icon: <Calendar size={18} />, href: '/attendance' },
+            ]
+        },
+        projects: {
+            title: 'PROJECTS',
+            items: [
+                { label: 'Manage Projects', icon: <Database size={18} />, href: '/projects' },
+                { label: 'Completed', icon: <CheckSquare size={18} />, href: '/projects/completed' },
+                { label: 'Rejected', icon: <XSquare size={18} />, href: '/projects/rejected' },
+                { label: 'Milestones', icon: <Target size={18} />, href: '/milestones' },
+            ]
+        },
+        requests: {
+            title: 'REQUESTS',
+            items: [
+                { label: 'Submit Request', icon: <PlusCircle size={18} />, href: '/requests/new' },
+            ]
+        }
+    };
 
     return (
         <>
