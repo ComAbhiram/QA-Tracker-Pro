@@ -379,7 +379,7 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                                             ${task.status}
                                         </span>
                                     </td>
-                                        <td style="padding: 12px 16px; color: #475569; font-size: 13px; border-right: 1px solid #f1f5f9;">${task.assignedTo || 'Unassigned'}</td>
+                                        <td style="padding: 12px 16px; color: #475569; font-size: 13px; border-right: 1px solid #f1f5f9;">${task.assignedTo || 'Unassigned'}${task.assignedTo2 ? `, ${task.assignedTo2}` : ''}</td>
                                         <td style="padding: 12px 16px; color: #475569; font-size: 13px; border-right: 1px solid #f1f5f9;">${task.startDate ? formatDate(task.startDate) : 'TBD'}</td>
                                         <td style="padding: 12px 16px; color: #475569; font-size: 13px; border-right: 1px solid #f1f5f9;">${task.endDate ? formatDate(task.endDate) : 'TBD'}</td>
                                         <td style="padding: 12px 16px; color: #475569; font-size: 12px;">${task.comments || '-'}</td>
@@ -521,7 +521,7 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                                                 ${getEffectiveStatus(task)}
                                             </span>
                                         </td>
-                                        <td style="padding: 14px 16px; color: #475569; font-size: 13px; border-right: 1px solid #f1f5f9;">${task.assignedTo || 'Unassigned'}</td>
+                                        <td style="padding: 14px 16px; color: #475569; font-size: 13px; border-right: 1px solid #f1f5f9;">${task.assignedTo || 'Unassigned'}${task.assignedTo2 ? `, ${task.assignedTo2}` : ''}</td>
                                         <td style="padding: 14px 16px; color: #475569; font-size: 13px;">${task.startDate ? formatDate(task.startDate) : 'TBD'} - ${task.endDate ? formatDate(task.endDate) : 'TBD'}</td>
                                     </tr>
                                 `).join('')
@@ -587,7 +587,7 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
             report += `${t.projectName}\n`;
             report += `  Phase: ${t.subPhase || 'N/A'}\n`;
             report += `  Status: ${getEffectiveStatus(t)}\n`;
-            report += `  Assignee: ${t.assignedTo || 'Unassigned'}\n`;
+            report += `  Assignee: ${t.assignedTo || 'Unassigned'}${t.assignedTo2 ? `, ${t.assignedTo2}` : ''}\n`;
             report += `  Timeline: ${start} - ${end}\n\n`;
         });
 

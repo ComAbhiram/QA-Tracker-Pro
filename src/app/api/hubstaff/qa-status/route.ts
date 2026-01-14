@@ -246,8 +246,8 @@ function generateWorkStatusText(
 ): string {
     const formattedDate = formatDateDDMMYYYY(date);
 
-    let text = `📋 Work Status - ${formattedDate}\n`;
-    text += `👤 QA Name: ${qaName}\n\n`;
+    let text = `📋 *Work Status - ${formattedDate}*\n`;
+    text += `👤 *QA Name:* ${qaName}\n\n`;
 
     // Categorize tasks
     const activeTasks = tasks.filter(t => t.status !== 'Completed');
@@ -255,44 +255,38 @@ function generateWorkStatusText(
 
     // === ACTIVE TASKS ===
     if (activeTasks.length > 0) {
-        text += `🔄 === ACTIVE TASKS ===\n\n`;
+        text += `🔄 *=== ACTIVE TASKS ===*\n\n`;
         activeTasks.forEach((task, index) => {
             text += `*${index + 1}. ${task.subPhase || task.projectName}*\n`;
-            text += `📁 Project: ${task.projectName}\n`;
-            text += `📅 Start Date: ${task.startDate ? formatDateDDMMYYYY(task.startDate) : 'Not set'}\n`;
-            text += `⏰ Expected End Date: ${task.endDate ? formatDateDDMMYYYY(task.endDate) : 'Not set'}\n`;
-            text += `✅ Actual End Date: ${task.actualEndDate ? formatDateDDMMYYYY(task.actualEndDate) : 'Not completed'}\n`;
-            text += `📊 Status: ${task.status}\n`;
+            text += `📁 *Project:* ${task.projectName}\n`;
+            text += `📅 *Start Date:* ${task.startDate ? formatDateDDMMYYYY(task.startDate) : 'Not set'}\n`;
+            text += `⏰ *Expected End Date:* ${task.endDate ? formatDateDDMMYYYY(task.endDate) : 'Not set'}\n`;
+            text += `✅ *Actual End Date:* ${task.actualEndDate ? formatDateDDMMYYYY(task.actualEndDate) : 'Not completed'}\n`;
+            text += `📊 *Status:* ${task.status}\n`;
             const isDeviated = task.deviationReason && task.deviationReason.trim() !== '';
-            text += `✅ Deviated: ${isDeviated ? 'Yes' : 'No'}\n`;
+            text += `✅ *Deviated:* ${isDeviated ? 'Yes' : 'No'}\n`;
             text += `\n`;
         });
     }
 
     // === COMPLETED TODAY ===
     if (completedTasks.length > 0) {
-        text += `🎉 === COMPLETED TODAY ===\n\n`;
+        text += `🎉 *=== COMPLETED TODAY ===*\n\n`;
         completedTasks.forEach((task, index) => {
             text += `*${index + 1}. ${task.subPhase || task.projectName}*\n`;
-            text += `📁 Project: ${task.projectName}\n`;
-            text += `📅 Start Date: ${task.startDate ? formatDateDDMMYYYY(task.startDate) : 'Not set'}\n`;
-            text += `⏰ Expected End Date: ${task.endDate ? formatDateDDMMYYYY(task.endDate) : 'Not set'}\n`;
-            text += `✅ Actual End Date: ${task.actualEndDate ? formatDateDDMMYYYY(task.actualEndDate) : 'N/A'}\n`;
-            text += `📊 Status: ${task.status}\n`;
+            text += `📁 *Project:* ${task.projectName}\n`;
+            text += `📅 *Start Date:* ${task.startDate ? formatDateDDMMYYYY(task.startDate) : 'Not set'}\n`;
+            text += `⏰ *Expected End Date:* ${task.endDate ? formatDateDDMMYYYY(task.endDate) : 'Not set'}\n`;
+            text += `✅ *Actual End Date:* ${task.actualEndDate ? formatDateDDMMYYYY(task.actualEndDate) : 'N/A'}\n`;
+            text += `📊 *Status:* ${task.status}\n`;
             const isDeviated = task.deviationReason && task.deviationReason.trim() !== '';
-            text += `✅ Deviated: ${isDeviated ? 'Yes' : 'No'}\n`;
+            text += `✅ *Deviated:* ${isDeviated ? 'Yes' : 'No'}\n`;
             text += `\n`;
         });
     }
 
     // === SUMMARY ===
-    const rejectedCount = tasks.filter(t => t.status === 'Rejected').length; // Note: Rejected are currently filtered out of 'relevantTasks' in the GET, so specific logic might be needed if Rejected should appear in Summary.
-    // The previous logic filtered out Rejected from Active. 
-    // To include Rejected in summary, they must be in 'tasks' passed to this function.
-    // The GET filter explicitly removes Rejected unless they are somehow relevant. 
-    // If the user wants "Rejected Tasks: 0" in summary, it's fine if they are filtered out (count is 0). 
-    // If they want to see rejected tasks, I should include them in the GET filter but exclude from Active/Completed sections.
-    // Assuming for now Rejected count is just 0 as per typical daily status unless explicitly rejected today.
+    const rejectedCount = tasks.filter(t => t.status === 'Rejected').length;
 
     // Calculating Overdue
     const overdueCount = tasks.filter(t => {
@@ -301,12 +295,12 @@ function generateWorkStatusText(
         return date > endDate;
     }).length;
 
-    text += `📊 === SUMMARY ===\n`;
-    text += `📋 Total Tasks for Today: ${tasks.length}\n`;
-    text += `🔄 Active Tasks: ${activeTasks.length}\n`;
-    text += `🎉 Completed Today: ${completedTasks.length}\n`;
-    text += `❌ Rejected Tasks: ${rejectedCount}\n`;
-    text += `🚨 Overdue Tasks: ${overdueCount}`;
+    text += `📊 *=== SUMMARY ===*\n`;
+    text += `📋 *Total Tasks for Today:* ${tasks.length}\n`;
+    text += `🔄 *Active Tasks:* ${activeTasks.length}\n`;
+    text += `🎉 *Completed Today:* ${completedTasks.length}\n`;
+    text += `❌ *Rejected Tasks:* ${rejectedCount}\n`;
+    text += `🚨 *Overdue Tasks:* ${overdueCount}`;
 
     return text;
 }

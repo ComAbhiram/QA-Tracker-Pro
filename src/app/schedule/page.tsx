@@ -297,7 +297,7 @@ export default function Schedule() {
                                                 <div className="p-1.5 bg-white rounded-full text-slate-400 shadow-sm">
                                                     <User size={14} />
                                                 </div>
-                                                <span className="font-medium">{task.assignedTo || 'Unassigned'}</span>
+                                                <span className="font-medium">{task.assignedTo || 'Unassigned'}{task.assignedTo2 ? `, ${task.assignedTo2}` : ''}</span>
                                             </div>
 
                                             <div className="flex items-center gap-3 text-sm text-slate-600">
