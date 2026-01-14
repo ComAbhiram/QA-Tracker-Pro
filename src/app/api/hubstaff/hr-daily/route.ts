@@ -2,9 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { TEAM_MEMBERS, DEPARTMENTS, type TeamMemberConfig } from '@/lib/team-members-config';
 import { getValidAccessToken } from '@/lib/hubstaff-auth';
 
+export const dynamic = 'force-dynamic';
+
 const HUBSTAFF_API_BASE = 'https://api.hubstaff.com/v2';
 
 export async function GET(request: NextRequest) {
+    console.log('[HR_DAILY] Request received. Version: v2-Fixed-Names');
     try {
         const { searchParams } = new URL(request.url);
         const date = searchParams.get('date');
