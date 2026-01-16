@@ -180,7 +180,7 @@ export default function Attendance() {
             {/* Header */}
             <div className="flex justify-between items-center">
                 <div>
-                    <h1 className="text-3xl font-bold text-slate-800">Team Attendance & Activity</h1>
+                    <h1 className="text-3xl font-bold text-slate-800">Team Attendance & Activity <span className="text-xs font-normal text-slate-400 align-middle ml-2">v2.2</span></h1>
                     <p className="text-slate-500 mt-1">Hubstaff time tracking integration</p>
                 </div>
             </div>
