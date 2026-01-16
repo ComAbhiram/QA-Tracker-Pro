@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getValidAccessToken } from '@/lib/hubstaff-auth';
 
 const HUBSTAFF_API_BASE = 'https://api.hubstaff.com/v2';
+export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;

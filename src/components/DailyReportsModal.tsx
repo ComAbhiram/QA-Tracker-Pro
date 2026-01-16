@@ -249,7 +249,7 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
             // Fetch Hubstaff activity for today
             let hubstaffData: any = null;
             try {
-                const hubstaffResponse = await fetch(`/api/hubstaff?date=${today}`);
+                const hubstaffResponse = await fetch(`/api/hubstaff?date=${today}`, { cache: 'no-store' });
                 if (hubstaffResponse.ok) {
                     hubstaffData = await hubstaffResponse.json();
                     console.log('Today Work Status - Hubstaff Data:', hubstaffData);
@@ -295,7 +295,9 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                         );
 
                         if (rawQaActivities.length === 0) {
-                            return '<p style="color: #64748b; font-size: 14px; margin: 0;">No QA activity recorded for today</p>';
+                            // DEBUG: Show what users WERE found to help diagnose mismatches
+                            const foundUsers = hubstaffData.activities.map((a: any) => a.userName).filter((v: string, i: number, a: string[]) => a.indexOf(v) === i).join(', ');
+                            return `<p style="color: #64748b; font-size: 14px; margin: 0;">No QA activity recorded for today. (Found: ${foundUsers || 'None'})</p>`;
                         }
 
                         // Aggregate activities by user
