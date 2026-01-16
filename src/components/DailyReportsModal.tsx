@@ -251,6 +251,7 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                 const hubstaffResponse = await fetch(`/api/hubstaff?date=${today}`);
                 if (hubstaffResponse.ok) {
                     hubstaffData = await hubstaffResponse.json();
+                    console.log('Today Work Status - Hubstaff Data:', hubstaffData);
                 }
             } catch (err) {
                 console.error('Failed to fetch Hubstaff data:', err);
@@ -370,8 +371,8 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                                     <tr style="border-bottom: 1px solid #e2e8f0; ${index % 2 === 0 ? 'background: #f8fafc;' : 'background: white;'}">
                                         <td style="padding: 12px 16px; color: #1e293b; font-weight: 600; font-size: 13px; border-right: 1px solid #f1f5f9;">${task.projectName}</td>
                                         <td style="padding: 12px 16px; color: #475569; font-size: 13px; border-right: 1px solid #f1f5f9;">${task.subPhase || 'N/A'}</td>
-                                    <td style="padding: 12px 16px; text-align: center; border-right: 1px solid #f1f5f9;">
-                                        <span style="display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; white-space: nowrap; min-width: 100px; text-align: center;
+                                    <td style="padding: 12px 16px; text-align: center; vertical-align: middle; border-right: 1px solid #f1f5f9;">
+                                        <span style="display: flex; align-items: center; justify-content: center; margin: 0 auto; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; white-space: nowrap; width: 110px;
                                             ${task.status === 'Completed' ? 'background: #dcfce7; color: #166534; border: 1px solid #bbf7d0;' :
                             task.status === 'In Progress' ? 'background: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe;' :
                                 task.status === 'Yet to Start' ? 'background: #fef3c7; color: #92400e; border: 1px solid #fde68a;' :

@@ -145,6 +145,7 @@ export async function GET(request: NextRequest) {
         }
 
         console.log(`Found ${activities.length} activities, total time: ${totalTime}s`);
+        console.log('Activities Users:', activities.map(a => a.userName));
 
         return NextResponse.json({
             date,
