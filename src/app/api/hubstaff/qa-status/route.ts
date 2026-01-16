@@ -65,12 +65,14 @@ export async function GET(request: NextRequest) {
                 return false; // Completed but no date (or assume not today)
             }
 
-            // Check for Active (Not Completed/Rejected) and within schedule
+            // Check for Active (Not Completed/Rejected)
             if (task.status !== 'Rejected') {
                 if (!task.startDate || !task.endDate) return false;
                 const start = new Date(task.startDate).toISOString().split('T')[0];
-                const end = new Date(task.endDate).toISOString().split('T')[0];
-                return date >= start && date <= end;
+
+                // Active or Overdue: Include if report date is on or after start date
+                // We filter out future tasks (date < start)
+                return date >= start;
             }
 
             return false;
