@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Task, mapTaskFromDB } from '@/lib/types';
+import { QA_MEMBERS } from '@/lib/team-members-config';
 import { getEffectiveStatus } from '@/utils/taskUtils';
 import { X, Camera, FileText, Calendar, ClipboardList, ChevronRight } from 'lucide-react';
 import html2canvas from 'html2canvas';
@@ -286,9 +287,11 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                         <h3 style="color: #1e293b; font-size: 18px; margin-bottom: 16px; font-weight: 600;">Hubstaff Activity - QA Team</h3>
                         ${(() => {
                         // Filter for QA members only
-                        const qaMembers = ['Minnu Sebastian', 'Aswathi M Ashok'];
+                        // We use the centralized config to determine who is a QA
+                        const qaHubstaffNames = QA_MEMBERS.map(m => m.hubstaffName);
+
                         const rawQaActivities = hubstaffData.activities.filter((a: any) =>
-                            qaMembers.includes(a.userName)
+                            qaHubstaffNames.includes(a.userName)
                         );
 
                         if (rawQaActivities.length === 0) {
