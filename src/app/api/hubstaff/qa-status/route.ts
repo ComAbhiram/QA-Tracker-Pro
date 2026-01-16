@@ -65,8 +65,8 @@ export async function GET(request: NextRequest) {
                 return false; // Completed but no date (or assume not today)
             }
 
-            // Check for Active (Not Completed/Rejected)
-            if (task.status !== 'Rejected') {
+            // Check for Active (Not Completed/Rejected/On Hold)
+            if (task.status !== 'Rejected' && task.status !== 'On Hold') {
                 if (!task.startDate || !task.endDate) return false;
                 const start = new Date(task.startDate).toISOString().split('T')[0];
 
