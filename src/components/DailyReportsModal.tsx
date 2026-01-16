@@ -139,7 +139,7 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                             <tr style="background: linear-gradient(to right, #0ea5e9, #6366f1);">
                                 <th style="padding: 16px; text-align: left; color: white; font-weight: 600; font-size: 14px; border-right: 1px solid rgba(255,255,255,0.2);">Project</th>
                                 <th style="padding: 16px; text-align: left; color: white; font-weight: 600; font-size: 14px; border-right: 1px solid rgba(255,255,255,0.2);">Phase</th>
-                                <th style="padding: 16px; text-align: left; color: white; font-weight: 600; font-size: 14px; border-right: 1px solid rgba(255,255,255,0.2);">Status</th>
+                                <th style="padding: 16px; text-align: center; color: white; font-weight: 600; font-size: 14px; border-right: 1px solid rgba(255,255,255,0.2);">Status</th>
                                 <th style="padding: 16px; text-align: left; color: white; font-weight: 600; font-size: 14px;">Timeline</th>
                             </tr>
                         </thead>
@@ -150,8 +150,8 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                                     <tr style="border-bottom: 1px solid #e2e8f0; ${index % 2 === 0 ? 'background: #f8fafc;' : 'background: white;'}">
                                         <td style="padding: 16px; color: #1e293b; font-weight: 600; font-size: 14px; border-right: 1px solid #f1f5f9;">${task.projectName}</td>
                                         <td style="padding: 16px; color: #475569; font-size: 14px; border-right: 1px solid #f1f5f9;">${task.subPhase || 'N/A'}</td>
-                                        <td style="padding: 16px; border-right: 1px solid #f1f5f9;">
-                                            <span style="display: inline-block; padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: 600; white-space: nowrap; min-width: 110px; text-align: center;
+                                        <td style="padding: 16px; text-align: center; border-right: 1px solid #f1f5f9;">
+                                            <span style="display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; white-space: nowrap; min-width: 100px; text-align: center;
                                                 ${task.status === 'Completed' ? 'background: #dcfce7; color: #166534; border: 1px solid #bbf7d0;' :
                             task.status === 'In Progress' ? 'background: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe;' :
                                 task.status === 'Yet to Start' ? 'background: #fef3c7; color: #92400e; border: 1px solid #fde68a;' :
@@ -356,7 +356,7 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                             <tr style="background: linear-gradient(to right, #0ea5e9, #6366f1);">
                                 <th style="padding: 12px 16px; text-align: left; color: white; font-weight: 600; font-size: 13px; border-right: 1px solid rgba(255,255,255,0.2);">Project</th>
                                 <th style="padding: 12px 16px; text-align: left; color: white; font-weight: 600; font-size: 13px; border-right: 1px solid rgba(255,255,255,0.2);">Phase</th>
-                                <th style="padding: 12px 16px; text-align: left; color: white; font-weight: 600; font-size: 13px; border-right: 1px solid rgba(255,255,255,0.2);">Status</th>
+                                <th style="padding: 12px 16px; text-align: center; color: white; font-weight: 600; font-size: 13px; border-right: 1px solid rgba(255,255,255,0.2);">Status</th>
                                 <th style="padding: 12px 16px; text-align: left; color: white; font-weight: 600; font-size: 13px; border-right: 1px solid rgba(255,255,255,0.2);">Assignee</th>
                                 <th style="padding: 12px 16px; text-align: left; color: white; font-weight: 600; font-size: 13px; border-right: 1px solid rgba(255,255,255,0.2);">From Date</th>
                                 <th style="padding: 12px 16px; text-align: left; color: white; font-weight: 600; font-size: 13px; border-right: 1px solid rgba(255,255,255,0.2);">End Date</th>
@@ -370,8 +370,8 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                                     <tr style="border-bottom: 1px solid #e2e8f0; ${index % 2 === 0 ? 'background: #f8fafc;' : 'background: white;'}">
                                         <td style="padding: 12px 16px; color: #1e293b; font-weight: 600; font-size: 13px; border-right: 1px solid #f1f5f9;">${task.projectName}</td>
                                         <td style="padding: 12px 16px; color: #475569; font-size: 13px; border-right: 1px solid #f1f5f9;">${task.subPhase || 'N/A'}</td>
-                                    <td style="padding: 12px 16px; border-right: 1px solid #f1f5f9;">
-                                        <span style="display: inline-block; padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: 600; white-space: nowrap; min-width: 110px; text-align: center;
+                                    <td style="padding: 12px 16px; text-align: center; border-right: 1px solid #f1f5f9;">
+                                        <span style="display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; white-space: nowrap; min-width: 100px; text-align: center;
                                             ${task.status === 'Completed' ? 'background: #dcfce7; color: #166534; border: 1px solid #bbf7d0;' :
                             task.status === 'In Progress' ? 'background: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe;' :
                                 task.status === 'Yet to Start' ? 'background: #fef3c7; color: #92400e; border: 1px solid #fde68a;' :
@@ -499,7 +499,7 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                             <tr style="background: linear-gradient(to right, #0ea5e9, #6366f1);">
                                 <th style="padding: 14px 16px; text-align: left; color: white; font-weight: 600; font-size: 13px; border-right: 1px solid rgba(255,255,255,0.2);">Project Name</th>
                                 <th style="padding: 14px 16px; text-align: left; color: white; font-weight: 600; font-size: 13px; border-right: 1px solid rgba(255,255,255,0.2);">Phase</th>
-                                <th style="padding: 14px 16px; text-align: left; color: white; font-weight: 600; font-size: 13px; border-right: 1px solid rgba(255,255,255,0.2);">Status</th>
+                                <th style="padding: 14px 16px; text-align: center; color: white; font-weight: 600; font-size: 13px; border-right: 1px solid rgba(255,255,255,0.2);">Status</th>
                                 <th style="padding: 14px 16px; text-align: left; color: white; font-weight: 600; font-size: 13px; border-right: 1px solid rgba(255,255,255,0.2);">Assignee</th>
                                 <th style="padding: 14px 16px; text-align: left; color: white; font-weight: 600; font-size: 13px; border-right: 1px solid rgba(255,255,255,0.2);">Timeline</th>
                             </tr>
@@ -511,8 +511,8 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                                     <tr style="border-bottom: 1px solid #e2e8f0; ${index % 2 === 0 ? 'background: #f8fafc;' : 'background: white;'}">
                                         <td style="padding: 14px 16px; color: #1e293b; font-weight: 600; font-size: 14px; border-right: 1px solid #f1f5f9;">${task.projectName}</td>
                                         <td style="padding: 14px 16px; color: #475569; font-size: 13px; border-right: 1px solid #f1f5f9;">${task.subPhase || '-'}</td>
-                                        <td style="padding: 14px 16px; border-right: 1px solid #f1f5f9;">
-                                             <span style="display: inline-block; padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: 600; white-space: nowrap; min-width: 110px; text-align: center;
+                                        <td style="padding: 14px 16px; text-align: center; border-right: 1px solid #f1f5f9;">
+                                             <span style="display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; white-space: nowrap; min-width: 100px; text-align: center;
                                                 ${getEffectiveStatus(task) === 'In Progress' ? 'background: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe;' :
                             getEffectiveStatus(task) === 'Yet to Start' ? 'background: #fef3c7; color: #92400e; border: 1px solid #fde68a;' :
                                 getEffectiveStatus(task) === 'On Hold' ? 'background: #fee2e2; color: #991b1b; border: 1px solid #fecaca;' :
