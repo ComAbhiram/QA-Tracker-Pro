@@ -33,21 +33,44 @@ export async function GET(request: NextRequest) {
 
         // Fetch activities for the date
         const activitiesUrl = `${HUBSTAFF_API_BASE}/organizations/${orgId}/activities/daily?date[start]=${date}&date[stop]=${date}`;
-        const activitiesResponse = await fetch(activitiesUrl, {
-            headers: {
-                'Authorization': `Bearer ${accessToken}`,
-                'Content-Type': 'application/json',
-            },
-        });
+        // Initialize activities array and pagination
+        let activities: any[] = [];
+        let nextPageStartId: any = undefined;
+        let hasMore = true;
 
-        if (!activitiesResponse.ok) {
-            const errorText = await activitiesResponse.text();
-            console.error('Failed to fetch activities:', errorText);
-            throw new Error(`Failed to fetch activities: ${activitiesResponse.statusText}`);
+        while (hasMore) {
+            let pagedUrl = activitiesUrl;
+            if (nextPageStartId) {
+                pagedUrl += `&page_start_id=${nextPageStartId}`;
+            }
+
+            console.log(`[HR_DAILY] Fetching page: ${pagedUrl}`);
+
+            const response = await fetch(pagedUrl, {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('Failed to fetch activities:', errorText);
+                throw new Error(`Failed to fetch activities: ${response.statusText}`);
+            }
+
+            const data = await response.json();
+            if (data.daily_activities) {
+                activities = [...activities, ...data.daily_activities];
+            }
+
+            // Check pagination
+            if (data.pagination && data.pagination.next_page_start_id) {
+                nextPageStartId = data.pagination.next_page_start_id;
+            } else {
+                hasMore = false;
+            }
         }
-
-        const activitiesData = await activitiesResponse.json();
-        const activities = activitiesData.daily_activities || [];
 
         console.log(`HR Daily: Found ${activities.length} activities for date ${date}`);
         if (activities.length > 0) {

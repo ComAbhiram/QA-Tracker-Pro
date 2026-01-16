@@ -144,101 +144,125 @@ export async function GET(request: NextRequest) {
 
                     if (userId) {
                         // Fetch activities for this user and date
-                        const activitiesResponse = await fetch(
-                            `${HUBSTAFF_API_BASE}/organizations/${orgId}/activities/daily?date[start]=${date}&date[stop]=${date}&user_ids=${userId}`,
-                            {
-                                headers: {
-                                    'Authorization': `Bearer ${accessToken}`,
-                                    'Content-Type': 'application/json',
-                                },
+                        // Fetch activities for this user and date with pagination
+                        let dailyActivities: any[] = [];
+                        let nextPageStartId: any = undefined;
+                        let hasMore = true;
+
+                        while (hasMore) {
+                            let pagedUrl = `${HUBSTAFF_API_BASE}/organizations/${orgId}/activities/daily?date[start]=${date}&date[stop]=${date}&user_ids=${userId}`;
+                            if (nextPageStartId) {
+                                pagedUrl += `&page_start_id=${nextPageStartId}`;
                             }
-                        );
 
-                        if (activitiesResponse.ok) {
-                            const activitiesData = await activitiesResponse.json();
-                            const dailyActivities = activitiesData.daily_activities || [];
-
-                            // Fetch project names
-                            const projectIds: number[] = [...new Set(dailyActivities.map((a: any) => a.project_id).filter(Boolean))] as number[];
-                            const projectNamesMap: Record<number, string> = {};
-
-                            await Promise.all(
-                                projectIds.map(async (pid: number) => {
-                                    try {
-                                        const projectResponse = await fetch(
-                                            `${HUBSTAFF_API_BASE}/projects/${pid}`,
-                                            {
-                                                headers: {
-                                                    'Authorization': `Bearer ${accessToken}`,
-                                                    'Content-Type': 'application/json',
-                                                },
-                                            }
-                                        );
-
-                                        if (projectResponse.ok) {
-                                            const projectData = await projectResponse.json();
-                                            const project = projectData.project || projectData;
-                                            projectNamesMap[pid] = project.name || `Project ${pid}`;
-                                        }
-                                    } catch (error) {
-                                        console.error(`Error fetching project ${pid}:`, error);
-                                    }
-                                })
+                            const activitiesResponse = await fetch(
+                                pagedUrl,
+                                {
+                                    headers: {
+                                        'Authorization': `Bearer ${accessToken}`,
+                                        'Content-Type': 'application/json',
+                                    },
+                                }
                             );
 
-                            // Aggregate activity data
-                            let totalTime = 0;
-                            let totalActivityWeighted = 0;
-                            const projectSet = new Set<string>();
-
-                            dailyActivities.forEach((activity: any) => {
-                                const timeWorked = activity.tracked || 0;
-                                const activityPct = timeWorked > 0 ? Math.round((activity.overall / timeWorked) * 100) : 0;
-
-                                totalTime += timeWorked;
-                                totalActivityWeighted += activityPct * timeWorked;
-
-                                if (activity.project_id && projectNamesMap[activity.project_id]) {
-                                    projectSet.add(projectNamesMap[activity.project_id]);
+                            if (activitiesResponse.ok) {
+                                const activitiesData = await activitiesResponse.json();
+                                if (activitiesData.daily_activities) {
+                                    dailyActivities = [...dailyActivities, ...activitiesData.daily_activities];
                                 }
-                            });
 
-                            hubstaffActivity = {
-                                timeWorked: totalTime,
-                                activityPercentage: totalTime > 0 ? Math.round(totalActivityWeighted / totalTime) : 0,
-                                projects: Array.from(projectSet),
-                            };
+                                if (activitiesData.pagination && activitiesData.pagination.next_page_start_id) {
+                                    nextPageStartId = activitiesData.pagination.next_page_start_id;
+                                } else {
+                                    hasMore = false;
+                                }
+                            } else {
+                                console.error('Error fetching Hubstaff activities page:', await activitiesResponse.text());
+                                hasMore = false;
+                            }
                         }
+
+                        // Fetch project names
+                        const projectIds: number[] = [...new Set(dailyActivities.map((a: any) => a.project_id).filter(Boolean))] as number[];
+                        const projectNamesMap: Record<number, string> = {};
+
+                        await Promise.all(
+                            projectIds.map(async (pid: number) => {
+                                try {
+                                    const projectResponse = await fetch(
+                                        `${HUBSTAFF_API_BASE}/projects/${pid}`,
+                                        {
+                                            headers: {
+                                                'Authorization': `Bearer ${accessToken}`,
+                                                'Content-Type': 'application/json',
+                                            },
+                                        }
+                                    );
+
+                                    if (projectResponse.ok) {
+                                        const projectData = await projectResponse.json();
+                                        const project = projectData.project || projectData;
+                                        projectNamesMap[pid] = project.name || `Project ${pid}`;
+                                    }
+                                } catch (error) {
+                                    console.error(`Error fetching project ${pid}:`, error);
+                                }
+                            })
+                        );
+
+                        // Aggregate activity data
+                        let totalTime = 0;
+                        let totalActivityWeighted = 0;
+                        const projectSet = new Set<string>();
+
+                        dailyActivities.forEach((activity: any) => {
+                            const timeWorked = activity.tracked || 0;
+                            const activityPct = timeWorked > 0 ? Math.round((activity.overall / timeWorked) * 100) : 0;
+
+                            totalTime += timeWorked;
+                            totalActivityWeighted += activityPct * timeWorked;
+
+                            if (activity.project_id && projectNamesMap[activity.project_id]) {
+                                projectSet.add(projectNamesMap[activity.project_id]);
+                            }
+                        });
+
+                        hubstaffActivity = {
+                            timeWorked: totalTime,
+                            activityPercentage: totalTime > 0 ? Math.round(totalActivityWeighted / totalTime) : 0,
+                            projects: Array.from(projectSet),
+                        };
                     }
                 }
-            } catch (error) {
-                console.error('Error fetching Hubstaff activity:', error);
             }
+            } catch (error) {
+            console.error('Error fetching Hubstaff activity:', error);
         }
+    }
 
         // Generate formatted text report
         const formattedText = generateWorkStatusText(qaName, date, relevantTasks);
-        console.log('[API] Generated formatted text length:', formattedText.length);
-        console.log('[API] Formatted text start:', formattedText.substring(0, 20));
+    console.log('[API] Generated formatted text length:', formattedText.length);
+    console.log('[API] Formatted text start:', formattedText.substring(0, 20));
 
-        return NextResponse.json({
-            qaName,
-            date,
-            hubstaffActivity,
-            tasks: relevantTasks,
-            formattedText,
-        });
+    return NextResponse.json({
+        qaName,
+        date,
+        hubstaffActivity,
+        tasks: relevantTasks,
+        formattedText,
+    });
 
-    } catch (error) {
-        console.error('Error generating QA work status:', error);
-        return NextResponse.json(
-            {
-                error: 'Failed to generate work status',
-                message: error instanceof Error ? error.message : 'Unknown error',
-            },
-            { status: 500 }
-        );
-    }
+} catch (error) {
+    console.error('Error generating QA work status:', error);
+    return NextResponse.json(
+        {
+            error: 'Failed to generate work status',
+            message: error instanceof Error ? error.message : 'Unknown error',
+        },
+        { status: 500 }
+    );
+}
 }
 
 function generateWorkStatusText(

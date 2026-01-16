@@ -34,35 +34,50 @@ export async function GET(request: NextRequest) {
             apiUrl += `&user_ids=${userId}`;
         }
 
-        // Fetch activities from Hubstaff API
-        const response = await fetch(
-            apiUrl,
-            {
+        // Initialize activities array and pagination
+        let allActivities: any[] = [];
+        let nextPageStartId: any = undefined;
+        let hasMore = true;
+
+        while (hasMore) {
+            let pagedUrl = apiUrl;
+            if (nextPageStartId) {
+                pagedUrl += `&page_start_id=${nextPageStartId}`;
+            }
+
+            console.log(`Fetching Hubstaff page: ${pagedUrl}`);
+
+            const response = await fetch(pagedUrl, {
                 headers: {
                     'Authorization': `Bearer ${accessToken}`,
                     'Content-Type': 'application/json',
                 },
-            }
-        );
+            });
 
-        if (!response.ok) {
-            const errorText = await response.text();
-            console.error('Hubstaff API error:', response.status, errorText);
-            return NextResponse.json(
-                {
-                    error: 'Failed to fetch from Hubstaff',
-                    status: response.status,
-                    details: errorText
-                },
-                { status: response.status }
-            );
+            if (!response.ok) {
+                const errorText = await response.text();
+                // If we have partial data, maybe we should return it? For now, throw/error.
+                console.error('Hubstaff API error on page fetch:', response.status, errorText);
+                throw new Error(`Hubstaff API error: ${response.status} ${errorText}`);
+            }
+
+            const data = await response.json();
+            if (data.daily_activities) {
+                allActivities = [...allActivities, ...data.daily_activities];
+            }
+
+            // Check pagination
+            if (data.pagination && data.pagination.next_page_start_id) {
+                nextPageStartId = data.pagination.next_page_start_id;
+            } else {
+                hasMore = false;
+            }
         }
 
-        const data = await response.json();
-        console.log('Hubstaff API response:', JSON.stringify(data, null, 2));
+        console.log(`Total raw activities fetched: ${allActivities.length}`);
 
         // Fetch user names for all unique user IDs
-        const userIds: number[] = [...new Set((data.daily_activities || []).map((a: any) => a.user_id))] as number[];
+        const userIds: number[] = [...new Set(allActivities.map((a: any) => a.user_id))] as number[];
         const userNamesMap: Record<number, string> = {};
 
         await Promise.all(
@@ -91,7 +106,7 @@ export async function GET(request: NextRequest) {
         );
 
         // Fetch project names for all unique project IDs
-        const projectIds: number[] = [...new Set((data.daily_activities || []).map((a: any) => a.project_id).filter(Boolean))] as number[];
+        const projectIds: number[] = [...new Set(allActivities.map((a: any) => a.project_id).filter(Boolean))] as number[];
         const projectNamesMap: Record<number, string> = {};
 
         await Promise.all(
@@ -123,28 +138,25 @@ export async function GET(request: NextRequest) {
         const activities: any[] = [];
         let totalTime = 0;
 
-        // Parse Hubstaff response (structure may vary)
-        if (data.daily_activities) {
-            data.daily_activities.forEach((activity: any) => {
-                const timeWorked = activity.tracked || 0;
-                totalTime += timeWorked;
+        allActivities.forEach((activity: any) => {
+            const timeWorked = activity.tracked || 0;
+            totalTime += timeWorked;
 
-                activities.push({
-                    userId: activity.user_id,
-                    userName: userNamesMap[activity.user_id] || 'Unknown',
-                    date: date,
-                    timeWorked: timeWorked,
-                    // Calculate activity percentage: (overall activity / tracked time) * 100
-                    // overall is the sum of keyboard + mouse activity in seconds
-                    // tracked is the total time tracked in seconds
-                    activityPercentage: timeWorked > 0 ? Math.round((activity.overall / timeWorked) * 100) : 0,
-                    projectName: activity.project_id ? (projectNamesMap[activity.project_id] || null) : null,
-                    projectId: activity.project_id,
-                });
+            activities.push({
+                userId: activity.user_id,
+                userName: userNamesMap[activity.user_id] || 'Unknown',
+                date: date,
+                timeWorked: timeWorked,
+                // Calculate activity percentage: (overall activity / tracked time) * 100
+                // overall is the sum of keyboard + mouse activity in seconds
+                // tracked is the total time tracked in seconds
+                activityPercentage: timeWorked > 0 ? Math.round((activity.overall / timeWorked) * 100) : 0,
+                projectName: activity.project_id ? (projectNamesMap[activity.project_id] || null) : null,
+                projectId: activity.project_id,
             });
-        }
+        });
 
-        console.log(`Found ${activities.length} activities, total time: ${totalTime}s`);
+        console.log(`Final processed activities: ${activities.length}, total time: ${totalTime}s`);
         console.log('Activities Users:', activities.map(a => a.userName));
 
         return NextResponse.json({
