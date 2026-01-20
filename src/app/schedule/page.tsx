@@ -89,37 +89,40 @@ export default function Schedule() {
     const getStatusColor = (task: Task) => {
         const status = getEffectiveStatus(task);
         const s = (status || '').toLowerCase();
-        if (s === 'completed') return 'bg-emerald-100 text-emerald-700 border-emerald-200';
-        if (s === 'in progress' || s === 'being developed') return 'bg-blue-100 text-blue-700 border-blue-200';
-        if (s === 'overdue') return 'bg-red-100 text-red-700 border-red-200';
-        if (s.includes('qa') || s === 'ready for qa' || s === 'assigned to qa') return 'bg-purple-100 text-purple-700 border-purple-200';
-        if (s === 'yet to start' || s === 'forecast') return 'bg-amber-100 text-amber-700 border-amber-200';
-        if (s === 'on hold') return 'bg-slate-100 text-slate-700 border-slate-200';
-        return 'bg-sky-100 text-sky-700 border-sky-200';
+        if (s === 'completed') return 'bg-emerald-600 text-white border-emerald-700 shadow-sm';
+        if (s === 'in progress' || s === 'being developed') return 'bg-blue-600 text-white border-blue-700 shadow-sm';
+        if (s === 'rejected') return 'bg-red-600 text-white border-red-700 shadow-sm';
+        if (s === 'overdue') return 'bg-rose-600 text-white border-rose-700 shadow-sm';
+        if (s.includes('qa') || s === 'ready for qa' || s === 'assigned to qa') return 'bg-purple-600 text-white border-purple-700 shadow-sm';
+        if (s === 'yet to start' || s === 'forecast') return 'bg-amber-500 text-white border-amber-600 shadow-sm';
+        if (s === 'on hold') return 'bg-slate-600 text-white border-slate-700 shadow-sm';
+        return 'bg-sky-600 text-white border-sky-700 shadow-sm';
     };
 
     const getTaskBorderColor = (task: Task) => {
         const status = getEffectiveStatus(task);
         const s = (status || '').toLowerCase();
-        if (s === 'completed') return 'border-emerald-200 bg-emerald-50';
-        if (s === 'in progress' || s === 'being developed') return 'border-blue-200 bg-blue-50';
-        if (s === 'overdue') return 'border-red-200 bg-red-50';
-        if (s.includes('qa') || s === 'ready for qa' || s === 'assigned to qa') return 'border-purple-200 bg-purple-50';
-        if (s === 'yet to start' || s === 'forecast') return 'border-amber-200 bg-amber-50';
-        if (s === 'on hold') return 'border-slate-200 bg-slate-50';
-        return 'border-sky-200 bg-sky-50';
+        if (s === 'completed') return 'border-emerald-600 bg-emerald-600 text-white';
+        if (s === 'in progress' || s === 'being developed') return 'border-blue-600 bg-blue-600 text-white';
+        if (s === 'rejected') return 'border-red-600 bg-red-600 text-white';
+        if (s === 'overdue') return 'border-rose-600 bg-rose-600 text-white';
+        if (s.includes('qa') || s === 'ready for qa' || s === 'assigned to qa') return 'border-purple-600 bg-purple-600 text-white';
+        if (s === 'yet to start' || s === 'forecast') return 'border-amber-500 bg-amber-500 text-white';
+        if (s === 'on hold') return 'border-slate-500 bg-slate-500 text-white';
+        return 'border-sky-600 bg-sky-600 text-white';
     };
 
     const getStatusBadgeColor = (task: Task) => {
         const status = getEffectiveStatus(task);
         const s = (status || '').toLowerCase();
-        if (s === 'completed') return 'bg-emerald-100 text-emerald-700';
-        if (s === 'in progress' || s === 'being developed') return 'bg-blue-100 text-blue-700';
-        if (s === 'overdue') return 'bg-red-100 text-red-700';
-        if (s.includes('qa') || s === 'ready for qa' || s === 'assigned to qa') return 'bg-purple-100 text-purple-700';
-        if (s === 'yet to start' || s === 'forecast') return 'bg-amber-100 text-amber-700';
-        if (s === 'on hold') return 'bg-slate-100 text-slate-700';
-        return 'bg-sky-100 text-sky-700';
+        if (s === 'completed') return 'bg-emerald-600 text-white';
+        if (s === 'in progress' || s === 'being developed') return 'bg-blue-600 text-white';
+        if (s === 'rejected') return 'bg-red-600 text-white';
+        if (s === 'overdue') return 'bg-rose-600 text-white';
+        if (s.includes('qa') || s === 'ready for qa' || s === 'assigned to qa') return 'bg-purple-600 text-white';
+        if (s === 'yet to start' || s === 'forecast') return 'bg-amber-500 text-white';
+        if (s === 'on hold') return 'bg-slate-600 text-white';
+        return 'bg-sky-600 text-white';
     };
 
     const handleTaskClick = (task: Task) => {

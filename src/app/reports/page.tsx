@@ -81,7 +81,13 @@ export default function Reports() {
                 const assigned2 = (t.assignedTo2 || '').trim().toLowerCase();
                 const match2 = assigned2 === qName || (sName && assigned2 === sName);
 
-                if (!match1 && !match2) return false;
+                // If strict matches fail, try relaxed partial matching (e.g. "minnu" inside "minnu sebastian")
+                if (!match1 && !match2) {
+                    const fuzzy1 = (assigned1 && qName.includes(assigned1)) || (assigned1 && assigned1.includes(qName));
+                    const fuzzy2 = (assigned2 && qName.includes(assigned2)) || (assigned2 && assigned2.includes(qName));
+
+                    if (!fuzzy1 && !fuzzy2) return false;
+                }
             }
 
             // Filter by Date (checking overlapping intervals or simple created_at filtering; 
