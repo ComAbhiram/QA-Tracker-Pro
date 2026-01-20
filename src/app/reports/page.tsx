@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Task, mapTaskFromDB } from '@/lib/types';
 import { getEffectiveStatus } from '@/utils/taskUtils';
+import { getTeamMemberByHubstaffName } from '@/lib/team-members-config';
 import { BarChart3, TrendingUp, Users, Calendar, Download, Filter } from 'lucide-react';
 
 export default function Reports() {
@@ -53,6 +54,8 @@ export default function Reports() {
         setLoading(false);
     }
 
+
+
     const getFilteredTasks = () => {
         return tasks.filter(t => {
             const effectiveStatus = getEffectiveStatus(t);
@@ -61,7 +64,25 @@ export default function Reports() {
             if (selectedProject && t.projectName !== selectedProject) return false;
 
             // Filter by QA
-            if (selectedQA && t.assignedTo !== selectedQA) return false;
+            // Filter by QA
+            if (selectedQA) {
+                // Get config to find the short name (e.g. "Aswathi") from Hubstaff name (e.g. "Aswathi M Ashok")
+                const memberConfig = getTeamMemberByHubstaffName(selectedQA);
+                const shortName = memberConfig?.name;
+
+                const qName = selectedQA.trim().toLowerCase();
+                const sName = shortName ? shortName.trim().toLowerCase() : '';
+
+                // Check primary assignee
+                const assigned1 = (t.assignedTo || '').trim().toLowerCase();
+                const match1 = assigned1 === qName || (sName && assigned1 === sName);
+
+                // Check secondary assignee
+                const assigned2 = (t.assignedTo2 || '').trim().toLowerCase();
+                const match2 = assigned2 === qName || (sName && assigned2 === sName);
+
+                if (!match1 && !match2) return false;
+            }
 
             // Filter by Date (checking overlapping intervals or simple created_at filtering; 
             // User requested "from to end date wise". Interpreting as tasks active in this range)
