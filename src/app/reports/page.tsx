@@ -90,16 +90,15 @@ export default function Reports() {
                 }
             }
 
-            // Filter by Date (checking overlapping intervals or simple created_at filtering; 
-            // User requested "from to end date wise". Interpreting as tasks active in this range)
+            // Filter by Date (checking overlapping intervals)
             if (dateRange.start && dateRange.end) {
                 if (!t.startDate || !t.endDate) return false; // Skip if no dates
-                const rangeStart = new Date(dateRange.start).toISOString().split('T')[0];
-                const rangeEnd = new Date(dateRange.end).toISOString().split('T')[0];
-                const taskStart = new Date(t.startDate).toISOString().split('T')[0];
-                const taskEnd = new Date(t.endDate).toISOString().split('T')[0];
-                // Check overlap
-                return taskStart <= rangeEnd && taskEnd >= rangeStart;
+
+                // Compare YYYY-MM-DD strings directly to avoid Javascript Date timezone shifts
+                const taskStart = t.startDate.substring(0, 10);
+                const taskEnd = t.endDate.substring(0, 10);
+
+                return taskStart <= dateRange.end && taskEnd >= dateRange.start;
             }
 
             return true;
