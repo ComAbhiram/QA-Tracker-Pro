@@ -76,11 +76,16 @@ export default function Tracker() {
             status: taskData.status,
             assigned_to: taskData.assignedTo,
             assigned_to2: taskData.assignedTo2,
+            pc: taskData.pc,
             start_date: taskData.startDate || null,
             end_date: taskData.endDate || null,
+            start_time: taskData.startTime || null,
+            end_time: taskData.endTime || null,
             bug_count: taskData.bugCount,
             html_bugs: taskData.htmlBugs,
-            functional_bugs: taskData.functionalBugs
+            functional_bugs: taskData.functionalBugs,
+            deviation_reason: taskData.deviationReason,
+            comments: taskData.comments
         };
 
         if (editingTask) {
