@@ -206,18 +206,18 @@ export default function Schedule() {
             </header>
 
             {/* Content Area */}
-            <div className={`bg-white rounded-2xl shadow-xl shadow-slate-200/50 border border-white/20 overflow-hidden backdrop-blur-xl ${viewMode === 'calendar' ? 'h-[calc(100vh-250px)] min-h-[600px]' : 'min-h-[600px]'}`}>
+            <div className={`bg-white rounded-2xl shadow-xl shadow-slate-200/50 border border-white/20 backdrop-blur-xl ${viewMode === 'calendar' ? 'h-[calc(100vh-220px)] overflow-y-auto custom-scrollbar' : 'min-h-[600px]'}`}>
 
                 {viewMode === 'calendar' && (
-                    <div className="h-full flex flex-col">
-                        <div className="grid grid-cols-7 border-b border-slate-200 bg-slate-50/80">
+                    <div className="min-h-full flex flex-col">
+                        <div className="grid grid-cols-7 border-b border-slate-200 bg-slate-50/80 sticky top-0 z-10 shadow-sm">
                             {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-                                <div key={day} className="py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">
+                                <div key={day} className="py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider backdrop-blur-md bg-slate-50/90">
                                     {day}
                                 </div>
                             ))}
                         </div>
-                        <div className="grid grid-cols-7 auto-rows-fr flex-1">
+                        <div className="grid grid-cols-7 auto-rows-[minmax(160px,1fr)] flex-1">
                             {startPadding.map((_, i) => (
                                 <div key={`empty-${i}`} className="bg-slate-50/30 border-r border-b border-slate-100"></div>
                             ))}
