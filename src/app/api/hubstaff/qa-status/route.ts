@@ -234,35 +234,34 @@ export async function GET(request: NextRequest) {
                         };
                     }
                 }
-            }
             } catch (error) {
-            console.error('Error fetching Hubstaff activity:', error);
+                console.error('Error fetching Hubstaff activity:', error);
+            }
         }
-    }
 
         // Generate formatted text report
         const formattedText = generateWorkStatusText(qaName, date, relevantTasks);
-    console.log('[API] Generated formatted text length:', formattedText.length);
-    console.log('[API] Formatted text start:', formattedText.substring(0, 20));
+        console.log('[API] Generated formatted text length:', formattedText.length);
+        console.log('[API] Formatted text start:', formattedText.substring(0, 20));
 
-    return NextResponse.json({
-        qaName,
-        date,
-        hubstaffActivity,
-        tasks: relevantTasks,
-        formattedText,
-    });
+        return NextResponse.json({
+            qaName,
+            date,
+            hubstaffActivity,
+            tasks: relevantTasks,
+            formattedText,
+        });
 
-} catch (error) {
-    console.error('Error generating QA work status:', error);
-    return NextResponse.json(
-        {
-            error: 'Failed to generate work status',
-            message: error instanceof Error ? error.message : 'Unknown error',
-        },
-        { status: 500 }
-    );
-}
+    } catch (error) {
+        console.error('Error generating QA work status:', error);
+        return NextResponse.json(
+            {
+                error: 'Failed to generate work status',
+                message: error instanceof Error ? error.message : 'Unknown error',
+            },
+            { status: 500 }
+        );
+    }
 }
 
 function generateWorkStatusText(
