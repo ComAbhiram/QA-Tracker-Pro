@@ -287,24 +287,24 @@ export default function Schedule() {
                                         className={`rounded-2xl p-6 shadow-sm hover:shadow-md transition-all cursor-pointer group relative border ${getTaskBorderColor(task)}`}
                                     >
                                         <div className="flex justify-between items-start mb-4">
-                                            <span className={`text-[11px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-lg ${getStatusBadgeColor(task)}`}>
+                                            <span className={`text-[11px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-lg bg-black/20 text-white`}>
                                                 {getEffectiveStatus(task)}
                                             </span>
                                         </div>
 
-                                        <h3 className="font-bold text-xl text-slate-800 mb-1 group-hover:text-indigo-600 transition-colors">{task.projectName}</h3>
-                                        <p className="text-sm text-slate-500 mb-6 font-medium">{task.subPhase || 'No phase'}</p>
+                                        <h3 className="font-bold text-xl text-white mb-1">{task.projectName}</h3>
+                                        <p className="text-sm text-white/80 mb-6 font-medium">{task.subPhase || 'No phase'}</p>
 
-                                        <div className="space-y-3 pt-4 border-t border-slate-200/50">
-                                            <div className="flex items-center gap-3 text-sm text-slate-600">
-                                                <div className="p-1.5 bg-white rounded-full text-slate-400 shadow-sm">
+                                        <div className="space-y-3 pt-4 border-t border-white/20">
+                                            <div className="flex items-center gap-3 text-sm text-white/90">
+                                                <div className="p-1.5 bg-white/20 rounded-full text-white shadow-sm">
                                                     <User size={14} />
                                                 </div>
                                                 <span className="font-medium">{task.assignedTo || 'Unassigned'}{task.assignedTo2 ? `, ${task.assignedTo2}` : ''}</span>
                                             </div>
 
-                                            <div className="flex items-center gap-3 text-sm text-slate-600">
-                                                <div className="p-1.5 bg-white rounded-full text-slate-400 shadow-sm">
+                                            <div className="flex items-center gap-3 text-sm text-white/90">
+                                                <div className="p-1.5 bg-white/20 rounded-full text-white shadow-sm">
                                                     <Clock size={14} />
                                                 </div>
                                                 <span className="font-medium">
