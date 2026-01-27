@@ -19,6 +19,7 @@ interface ComboboxProps {
     disabled?: boolean;
     required?: boolean;
     isLoading?: boolean;
+    allowCustomValue?: boolean;
 }
 
 export default function Combobox({
@@ -32,6 +33,7 @@ export default function Combobox({
     disabled = false,
     required = false,
     isLoading = false,
+    allowCustomValue = false,
 }: ComboboxProps) {
     const [open, setOpen] = useState(false);
     const [search, setSearch] = useState('');
@@ -39,7 +41,10 @@ export default function Combobox({
 
     // Initial selected label
     const selectedOption = options.find((opt) => opt.id === value || opt.label === value);
-    // Note: We check label too because sometimes we might pass the name as value directly if ID isn't used
+    // If no option found but value exists and custom value is allowed, display the value itself
+    const displayLabel = selectedOption ? selectedOption.label : (value ? String(value) : placeholder);
+    const isValueSelected = !!value;
+    const isPlaceholder = !isValueSelected;
 
     // Close on click outside
     useEffect(() => {
@@ -57,6 +62,12 @@ export default function Combobox({
         option.label.toLowerCase().includes(search.toLowerCase())
     );
 
+    const handleSelect = (val: string | number) => {
+        onChange(val);
+        setOpen(false);
+        setSearch('');
+    };
+
     return (
         <div className={`relative w-full ${className}`} ref={containerRef}>
             <button
@@ -66,8 +77,8 @@ export default function Combobox({
                     } ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
                 disabled={disabled}
             >
-                <span className={`block truncate ${selectedOption ? 'text-slate-700 font-medium' : 'text-slate-400'}`}>
-                    {selectedOption ? selectedOption.label : placeholder}
+                <span className={`block truncate ${!isPlaceholder ? 'text-slate-700 font-medium' : 'text-slate-400'}`}>
+                    {displayLabel}
                 </span>
                 <ChevronsUpDown className="w-4 h-4 text-slate-400" />
             </button>
@@ -105,34 +116,48 @@ export default function Combobox({
                                 <div className="animate-spin w-4 h-4 border-2 border-indigo-500 border-t-transparent rounded-full" />
                                 <span>Loading...</span>
                             </div>
-                        ) : filteredOptions.length === 0 ? (
-                            <div className="py-6 text-center text-sm text-slate-500">
-                                {emptyMessage}
-                            </div>
                         ) : (
-                            filteredOptions.map((option) => (
-                                <button
-                                    key={option.id}
-                                    type="button"
-                                    onClick={() => {
-                                        // Allow passing either ID or Label depending on requirement
-                                        // But typically we return ID.
-                                        // Since the parent expects the value to match, we just trigger onChange
-                                        onChange(option.label); // Returning label as Project Name is string in DB
-                                        setOpen(false);
-                                        setSearch('');
-                                    }}
-                                    className={`w-full flex items-center justify-between px-3 py-2.5 text-sm rounded-lg transition-colors text-left ${(value === option.id || value === option.label)
-                                        ? 'bg-indigo-50 text-indigo-700 font-medium'
-                                        : 'text-slate-700 hover:bg-slate-50'
-                                        }`}
-                                >
-                                    <span>{option.label}</span>
-                                    {(value === option.id || value === option.label) && (
-                                        <Check className="w-4 h-4 text-indigo-600" />
-                                    )}
-                                </button>
-                            ))
+                            <>
+                                {filteredOptions.length === 0 && (
+                                    <div className="py-2 px-3 text-sm text-slate-500">
+                                        {emptyMessage}
+                                        {allowCustomValue && search && (
+                                            <button
+                                                type="button"
+                                                onClick={() => handleSelect(search)}
+                                                className="mt-2 w-full text-left px-3 py-2 text-sm bg-indigo-50 text-indigo-700 rounded-lg hover:bg-indigo-100 font-medium transition-colors"
+                                            >
+                                                Use "{search}"
+                                            </button>
+                                        )}
+                                    </div>
+                                )}
+                                {filteredOptions.map((option) => (
+                                    <button
+                                        key={option.id}
+                                        type="button"
+                                        onClick={() => handleSelect(option.id)} // Returning ID (which corresponds to mapped name)
+                                        className={`w-full flex items-center justify-between px-3 py-2.5 text-sm rounded-lg transition-colors text-left ${(value === option.id || value === option.label)
+                                            ? 'bg-indigo-50 text-indigo-700 font-medium'
+                                            : 'text-slate-700 hover:bg-slate-50'
+                                            }`}
+                                    >
+                                        <span>{option.label}</span>
+                                        {(value === option.id || value === option.label) && (
+                                            <Check className="w-4 h-4 text-indigo-600" />
+                                        )}
+                                    </button>
+                                ))}
+                                {allowCustomValue && search && filteredOptions.length > 0 && !filteredOptions.find(o => o.label.toLowerCase() === search.toLowerCase()) && (
+                                    <button
+                                        type="button"
+                                        onClick={() => handleSelect(search)}
+                                        className="w-full flex items-center gap-2 px-3 py-2.5 text-sm rounded-lg text-indigo-600 hover:bg-indigo-50 transition-colors border-t border-slate-100 mt-1"
+                                    >
+                                        <span>Use "{search}"</span>
+                                    </button>
+                                )}
+                            </>
                         )}
                     </div>
                 </div>

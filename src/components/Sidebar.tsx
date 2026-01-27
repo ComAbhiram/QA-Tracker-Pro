@@ -56,7 +56,7 @@ export function Sidebar() {
             title: 'MAIN',
             items: [
                 { label: 'Dashboard', icon: <LayoutDashboard size={18} />, href: '/' },
-                { label: 'Task Tracker', icon: <ClipboardList size={18} />, href: '/tasks' },
+                { label: 'Task Tracker', icon: <ClipboardList size={18} />, href: '/tracker' },
                 { label: 'Schedule', icon: <CalendarDays size={18} />, href: '/schedule' },
             ]
         },
@@ -66,7 +66,6 @@ export function Sidebar() {
                 { label: 'Reports', icon: <BarChart3 size={18} />, href: '/reports' },
                 { label: 'Analytics', icon: <Search size={18} />, href: '/analytics' },
                 { label: 'Attendance', icon: <Calendar size={18} />, href: '/attendance' },
-                { label: 'Manage QA Team', icon: <Settings size={18} />, href: '/settings/qa-team' },
             ]
         },
         projects: {

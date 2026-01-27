@@ -5,6 +5,7 @@ import { X, Save, Calendar, User, Briefcase, Activity } from 'lucide-react';
 import { Task } from '@/lib/types';
 import { supabase } from '@/lib/supabase';
 import Combobox from './ui/Combobox';
+import { mapHubstaffNameToQA } from '@/lib/hubstaff-name-mapping';
 
 interface TaskModalProps {
     isOpen: boolean;
@@ -17,6 +18,8 @@ export default function TaskModal({ isOpen, onClose, task, onSave }: TaskModalPr
     const [loading, setLoading] = useState(false);
     const [projects, setProjects] = useState<{ id: string | number; label: string }[]>([]);
     const [isFetchingProjects, setIsFetchingProjects] = useState(false);
+    const [hubstaffUsers, setHubstaffUsers] = useState<{ id: string; label: string }[]>([]);
+    const [loadingHubstaffUsers, setLoadingHubstaffUsers] = useState(false);
 
     // Initial state ...
     const initialState: Partial<Task> = {
@@ -54,6 +57,34 @@ export default function TaskModal({ isOpen, onClose, task, onSave }: TaskModalPr
 
         if (isOpen && projects.length === 0) {
             fetchProjects();
+        }
+    }, [isOpen]);
+
+    // Fetch Hubstaff users on mount
+    useEffect(() => {
+        const fetchHubstaffUsers = async () => {
+            setLoadingHubstaffUsers(true);
+            try {
+                const response = await fetch('/api/hubstaff/users');
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.members) {
+                        const formattedUsers = data.members.map((u: any) => ({
+                            id: mapHubstaffNameToQA(u.name), // Map full name to short QA name (e.g. Aswathi M Ashok -> Aswathi)
+                            label: u.name
+                        }));
+                        setHubstaffUsers(formattedUsers);
+                    }
+                }
+            } catch (error) {
+                console.error('Error fetching Hubstaff users:', error);
+            } finally {
+                setLoadingHubstaffUsers(false);
+            }
+        };
+
+        if (isOpen && hubstaffUsers.length === 0) {
+            fetchHubstaffUsers();
         }
     }, [isOpen]);
 
@@ -111,6 +142,13 @@ export default function TaskModal({ isOpen, onClose, task, onSave }: TaskModalPr
         setFormData(prev => ({
             ...prev,
             projectName: value ? String(value) : ''
+        }));
+    };
+
+    const handleAssigneeChange = (field: 'assignedTo' | 'assignedTo2', value: string | number | null) => {
+        setFormData(prev => ({
+            ...prev,
+            [field]: value ? String(value) : null
         }));
     };
 
@@ -277,26 +315,30 @@ export default function TaskModal({ isOpen, onClose, task, onSave }: TaskModalPr
                             <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
                                 <User size={16} className="text-indigo-500" /> Assigned To
                             </label>
-                            <input
-                                type="text"
-                                name="assignedTo"
+                            <Combobox
+                                options={hubstaffUsers}
                                 value={formData.assignedTo || ''}
-                                onChange={handleChange}
-                                className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all placeholder:text-slate-400 font-medium text-slate-700"
-                                placeholder="Lead Developer"
+                                onChange={(val) => handleAssigneeChange('assignedTo', val)}
+                                placeholder="Select or type name..."
+                                searchPlaceholder="Search developers..."
+                                emptyMessage="No users found."
+                                allowCustomValue={true}
+                                isLoading={loadingHubstaffUsers}
                             />
                         </div>
                         <div className="space-y-3">
                             <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
                                 <User size={16} className="text-indigo-500" /> Second Assignee
                             </label>
-                            <input
-                                type="text"
-                                name="assignedTo2"
+                            <Combobox
+                                options={hubstaffUsers}
                                 value={formData.assignedTo2 || ''}
-                                onChange={handleChange}
-                                className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all placeholder:text-slate-400 font-medium text-slate-700"
-                                placeholder="Co-Developer"
+                                onChange={(val) => handleAssigneeChange('assignedTo2', val)}
+                                placeholder="Select or type name..."
+                                searchPlaceholder="Search developers..."
+                                emptyMessage="No users found."
+                                allowCustomValue={true}
+                                isLoading={loadingHubstaffUsers}
                             />
                         </div>
                     </div>
