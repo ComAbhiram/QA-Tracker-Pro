@@ -132,11 +132,22 @@ export async function GET(request: NextRequest) {
                             const user = userData.user || userData;
                             const userName = user.name || `${user.first_name || ''} ${user.last_name || ''}`.trim();
 
-                            if (hubstaffName && userName === hubstaffName) {
+                            // 1. Direct Name Match (e.g. "Aswathi M Ashok" === "Aswathi M Ashok")
+                            if (userName === qaName) {
                                 userId = memberId;
+                                console.log(`[API] Matched user by direct name: "${userName}"`);
                                 break;
-                            } else if (mapHubstaffNameToQA(userName) === qaName) {
+                            }
+                            // 2. Reverse Lookup Match (Input was Short Name, e.g. "Aswathi", matches "Aswathi M Ashok")
+                            else if (hubstaffName && userName === hubstaffName) {
                                 userId = memberId;
+                                console.log(`[API] Matched user by reverse lookup: "${userName}"`);
+                                break;
+                            }
+                            // 3. Mapped Match (Input was Short Name, mapped user name matches input)
+                            else if (mapHubstaffNameToQA(userName) === qaName) {
+                                userId = memberId;
+                                console.log(`[API] Matched user by mapped name: "${userName}" -> "${qaName}"`);
                                 break;
                             }
                         }
