@@ -45,10 +45,16 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
 
     const fetchTeamMembers = async () => {
         try {
-            const response = await fetch('/api/hubstaff/users');
+            // Fetch from our new settings API which returns the SELECTED members
+            const response = await fetch('/api/settings/qa-members');
             if (response.ok) {
                 const data = await response.json();
-                setTeamMembers(data.members || []);
+                // Map the DB response to the format expected by the dropdown { id, name }
+                // Use hubstaff_name for the value as that's what we use for API queries
+                setTeamMembers(data.members.map((m: any) => ({
+                    id: m.hubstaff_user_id || m.id,
+                    name: m.hubstaff_name // Use full Hubstaff name for matching
+                })) || []);
             }
         } catch (err) {
             console.error('Error fetching team members:', err);

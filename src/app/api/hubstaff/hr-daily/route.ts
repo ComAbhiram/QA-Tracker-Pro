@@ -127,6 +127,23 @@ export async function GET(request: NextRequest) {
             })
         );
 
+        // Fetch configured QA members from DB
+        const { data: dbMembers, error: dbError } = await (await import('@/lib/supabase')).supabase
+            .from('qa_members')
+            .select('*');
+
+        if (dbError) {
+            console.error('Error fetching QA members from DB:', dbError);
+        }
+
+        const effectiveTeamMembers = (dbMembers && dbMembers.length > 0)
+            ? dbMembers.map(m => ({
+                name: m.name,
+                hubstaffName: m.hubstaff_name,
+                department: m.department || 'QA'
+            }))
+            : TEAM_MEMBERS; // Fallback to static if empty
+
         // Group activities by department
         const departmentData: Record<string, any[]> = {};
         DEPARTMENTS.forEach(dept => {
@@ -134,7 +151,7 @@ export async function GET(request: NextRequest) {
         });
 
         // Process each configured team member
-        TEAM_MEMBERS.forEach(member => {
+        effectiveTeamMembers.forEach((member: any) => {
             // Find activities for this member
             const memberActivities = activities.filter((activity: any) => {
                 const userName = userNamesMap[activity.user_id];

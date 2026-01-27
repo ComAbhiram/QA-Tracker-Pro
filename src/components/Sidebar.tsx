@@ -66,6 +66,7 @@ export function Sidebar() {
                 { label: 'Reports', icon: <BarChart3 size={18} />, href: '/reports' },
                 { label: 'Analytics', icon: <Search size={18} />, href: '/analytics' },
                 { label: 'Attendance', icon: <Calendar size={18} />, href: '/attendance' },
+                { label: 'Manage QA Team', icon: <Settings size={18} />, href: '/settings/qa-team' },
             ]
         },
         projects: {
@@ -74,7 +75,7 @@ export function Sidebar() {
                 { label: 'Manage Projects', icon: <Database size={18} />, href: '/projects' },
                 { label: 'Completed', icon: <CheckSquare size={18} />, href: '/projects/completed' },
                 { label: 'Rejected', icon: <XSquare size={18} />, href: '/projects/rejected' },
-                { label: 'Milestones', icon: <Target size={18} />, href: '/milestones' },
+                { label: 'Milestones', icon: <Target size={18} />, href: '/projects/milestones' },
             ]
         },
         requests: {
