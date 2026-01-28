@@ -158,7 +158,7 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                                         <td style="padding: 16px; color: #1e293b; font-weight: 600; font-size: 14px; border-right: 1px solid #f1f5f9;">${task.projectName}</td>
                                         <td style="padding: 16px; color: #475569; font-size: 14px; border-right: 1px solid #f1f5f9;">${task.subPhase || 'N/A'}</td>
                                         <td style="padding: 16px; text-align: center; border-right: 1px solid #f1f5f9;">
-                                            <span style="display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; white-space: nowrap; min-width: 100px; text-align: center;
+                                            <span style="display: inline-flex; align-items: center; justify-content: center; padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: 600; white-space: nowrap; min-width: 120px; height: 32px;
                                                 ${task.status === 'Completed' ? 'background: #dcfce7; color: #166534; border: 1px solid #bbf7d0;' :
                             task.status === 'In Progress' ? 'background: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe;' :
                                 task.status === 'Yet to Start' ? 'background: #fef3c7; color: #92400e; border: 1px solid #fde68a;' :
@@ -383,7 +383,7 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                                         <td style="padding: 12px 16px; color: #1e293b; font-weight: 600; font-size: 13px; border-right: 1px solid #f1f5f9;">${task.projectName}</td>
                                         <td style="padding: 12px 16px; color: #475569; font-size: 13px; border-right: 1px solid #f1f5f9;">${task.subPhase || 'N/A'}</td>
                                     <td style="padding: 12px 16px; text-align: center; vertical-align: middle; border-right: 1px solid #f1f5f9;">
-                                        <span style="display: flex; align-items: center; justify-content: center; margin: 0 auto; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; white-space: nowrap; width: 110px;
+                                        <span style="display: inline-flex; align-items: center; justify-content: center; margin: 0 auto; padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: 600; white-space: nowrap; min-width: 120px; height: 32px;
                                             ${task.status === 'Completed' ? 'background: #dcfce7; color: #166534; border: 1px solid #bbf7d0;' :
                             task.status === 'In Progress' ? 'background: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe;' :
                                 task.status === 'Yet to Start' ? 'background: #fef3c7; color: #92400e; border: 1px solid #fde68a;' :
@@ -524,7 +524,7 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                                         <td style="padding: 14px 16px; color: #1e293b; font-weight: 600; font-size: 14px; border-right: 1px solid #f1f5f9;">${task.projectName}</td>
                                         <td style="padding: 14px 16px; color: #475569; font-size: 13px; border-right: 1px solid #f1f5f9;">${task.subPhase || '-'}</td>
                                         <td style="padding: 14px 16px; text-align: center; border-right: 1px solid #f1f5f9;">
-                                             <span style="display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; white-space: nowrap; min-width: 100px; text-align: center;
+                                             <span style="display: inline-flex; align-items: center; justify-content: center; padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: 600; white-space: nowrap; min-width: 120px; height: 32px;
                                                 ${getEffectiveStatus(task) === 'In Progress' ? 'background: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe;' :
                             getEffectiveStatus(task) === 'Yet to Start' ? 'background: #fef3c7; color: #92400e; border: 1px solid #fde68a;' :
                                 getEffectiveStatus(task) === 'On Hold' ? 'background: #fee2e2; color: #991b1b; border: 1px solid #fecaca;' :
