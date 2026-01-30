@@ -37,6 +37,7 @@ export default function Schedule() {
         const { data, error } = await supabase
             .from('tasks')
             .select('*')
+            .neq('status', 'Completed') // Don't show completed tasks in schedule
             .or(`start_date.lte.${end.toISOString()},end_date.gte.${start.toISOString()}`);
 
         if (error) {
@@ -135,15 +136,22 @@ export default function Schedule() {
 
         const dbPayload: any = {
             project_name: taskData.projectName,
+            project_type: taskData.projectType,
             sub_phase: taskData.subPhase,
+            priority: taskData.priority,
+            pc: taskData.pc,
             status: taskData.status,
             assigned_to: taskData.assignedTo,
             assigned_to2: taskData.assignedTo2,
             start_date: taskData.startDate || null,
             end_date: taskData.endDate || null,
+            actual_completion_date: taskData.actualCompletionDate || null,
+            comments: taskData.comments,
+            current_updates: taskData.currentUpdates,
             bug_count: taskData.bugCount,
             html_bugs: taskData.htmlBugs,
-            functional_bugs: taskData.functionalBugs
+            functional_bugs: taskData.functionalBugs,
+            deviation_reason: taskData.deviationReason
         };
 
         const { error } = await supabase
