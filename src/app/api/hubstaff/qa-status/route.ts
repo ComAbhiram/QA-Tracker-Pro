@@ -316,7 +316,7 @@ function generateWorkStatusText(
     const formattedDate = formatDateDDMMYYYY(date);
 
     let text = `📋 *Work Status - ${formattedDate}*\n`;
-    text += `👤 *QA Name:* ${qaName}\n\n`;
+    text += `👤 *Name:* ${qaName}\n\n`;
 
     // Categorize tasks
     const activeTasks = tasks.filter(t => t.status !== 'Completed');
