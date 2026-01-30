@@ -93,8 +93,16 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                 return;
             }
 
-            navigator.clipboard.writeText(data.formattedText);
-            alert(`QA Work Status for ${selectedQA} copied to clipboard!`);
+            // Copy to clipboard with proper error handling
+            try {
+                await navigator.clipboard.writeText(data.formattedText);
+                console.log('[Frontend] Copied to clipboard:', data.formattedText.substring(0, 100));
+                alert(`Work Status for ${selectedQA} copied to clipboard!`);
+            } catch (clipboardError) {
+                console.error('Clipboard write failed:', clipboardError);
+                // Fallback: show the text in an alert so user can manually copy
+                alert('Failed to copy to clipboard. Here is the text:\n\n' + data.formattedText);
+            }
         } catch (error) {
             console.error('Error generating QA work status:', error);
             alert('Failed to generate QA work status: ' + (error instanceof Error ? error.message : String(error)));
