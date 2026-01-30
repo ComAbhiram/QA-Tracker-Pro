@@ -202,7 +202,7 @@ export default function Tracker() {
                                             <th className="px-4 py-4 font-semibold text-slate-600 text-left border-r border-slate-100">Edit</th>
                                             <th className="px-5 py-4 font-semibold text-slate-600 text-left border-r border-slate-100">Phase</th>
                                             <th className="px-4 py-4 font-semibold text-slate-600 text-left border-r border-slate-100">PC</th>
-                                            <th className="px-4 py-4 font-semibold text-slate-600 text-left border-r border-slate-100">QA2</th>
+                                            <th className="px-4 py-4 font-semibold text-slate-600 text-left border-r border-slate-100">Assignee 2</th>
                                             <th className="px-4 py-4 font-semibold text-slate-600 text-left border-r border-slate-100">Status</th>
                                             <th className="px-4 py-4 font-semibold text-slate-600 text-left border-r border-slate-100">Start</th>
                                             <th className="px-4 py-4 font-semibold text-slate-600 text-left border-r border-slate-100">End</th>
