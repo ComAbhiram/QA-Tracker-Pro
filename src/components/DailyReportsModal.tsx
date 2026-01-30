@@ -419,7 +419,7 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                                         <td style="padding: 12px 16px; color: #1e293b; font-weight: 600; font-size: 13px; border-right: 1px solid #f1f5f9;">${task.projectName}</td>
                                         <td style="padding: 12px 16px; color: #475569; font-size: 13px; border-right: 1px solid #f1f5f9;">${task.subPhase || 'N/A'}</td>
                                     <td style="padding: 12px 16px; text-align: center; vertical-align: middle; border-right: 1px solid #f1f5f9;">
-                                        <span style="display: inline-flex; align-items: center; justify-content: center; margin: 0 auto; padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: 600; white-space: nowrap; min-width: 120px; height: 32px;
+                                        <span style="display: inline-flex; align-items: center; justify-content: center; margin: 0 auto; padding: 0 16px; border-radius: 20px; font-size: 12px; font-weight: 600; white-space: nowrap; min-width: 120px; height: 32px; line-height: 32px;
                                             ${task.status === 'Completed' ? 'background: #dcfce7; color: #166534; border: 1px solid #bbf7d0;' :
                             task.status === 'In Progress' ? 'background: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe;' :
                                 task.status === 'Yet to Start' ? 'background: #fef3c7; color: #92400e; border: 1px solid #fde68a;' :
