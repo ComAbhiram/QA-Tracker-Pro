@@ -23,7 +23,8 @@ import {
     X,
     Database,
     Shield,
-    LogOut
+    LogOut,
+    TrendingUp
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
@@ -108,6 +109,7 @@ export function Sidebar() {
                 { label: 'Manage Projects', icon: <Database size={18} />, href: '/projects' },
                 { label: 'Completed', icon: <CheckSquare size={18} />, href: '/projects/completed' },
                 { label: 'Rejected', icon: <XSquare size={18} />, href: '/projects/rejected' },
+                { label: 'Forecast', icon: <TrendingUp size={18} />, href: '/projects/forecast' },
                 { label: 'Milestones', icon: <Target size={18} />, href: '/projects/milestones' },
             ]
         },

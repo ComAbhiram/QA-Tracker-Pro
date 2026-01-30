@@ -10,10 +10,33 @@ import { format } from 'date-fns';
 export default function CompletedProjects() {
     const [tasks, setTasks] = useState<Task[]>([]);
     const [loading, setLoading] = useState(true);
+    const [isQATeam, setIsQATeam] = useState(false);
 
     useEffect(() => {
         fetchCompletedTasks();
+        checkTeam();
     }, []);
+
+    const checkTeam = async () => {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+            const { data: profile } = await supabase
+                .from('user_profiles')
+                .select('team_id')
+                .eq('id', user.id)
+                .single();
+
+            if (profile?.team_id) {
+                const { data: team } = await supabase
+                    .from('teams')
+                    .select('name')
+                    .eq('id', profile.team_id)
+                    .single();
+
+                setIsQATeam(team?.name === 'QA Team');
+            }
+        }
+    };
 
     const fetchCompletedTasks = async () => {
         try {
@@ -90,16 +113,18 @@ export default function CompletedProjects() {
 
                             {/* Body */}
                             <div className="p-6 space-y-4">
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="bg-slate-50 rounded-xl p-3 border border-slate-100">
-                                        <div className="text-xs text-slate-500 font-semibold uppercase mb-1">HTML Bugs</div>
-                                        <div className="text-lg font-mono font-bold text-slate-700">{task.htmlBugs || 0}</div>
+                                {isQATeam && (
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="bg-slate-50 rounded-xl p-3 border border-slate-100">
+                                            <div className="text-xs text-slate-500 font-semibold uppercase mb-1">HTML Bugs</div>
+                                            <div className="text-lg font-mono font-bold text-slate-700">{task.htmlBugs || 0}</div>
+                                        </div>
+                                        <div className="bg-slate-50 rounded-xl p-3 border border-slate-100">
+                                            <div className="text-xs text-slate-500 font-semibold uppercase mb-1">Func. Bugs</div>
+                                            <div className="text-lg font-mono font-bold text-slate-700">{task.functionalBugs || 0}</div>
+                                        </div>
                                     </div>
-                                    <div className="bg-slate-50 rounded-xl p-3 border border-slate-100">
-                                        <div className="text-xs text-slate-500 font-semibold uppercase mb-1">Func. Bugs</div>
-                                        <div className="text-lg font-mono font-bold text-slate-700">{task.functionalBugs || 0}</div>
-                                    </div>
-                                </div>
+                                )}
 
                                 <div className="pt-4 border-t border-slate-50 flex items-center justify-between text-sm">
                                     <div className="flex items-center gap-2 text-slate-600">

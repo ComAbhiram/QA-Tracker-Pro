@@ -20,6 +20,7 @@ export default function TaskModal({ isOpen, onClose, task, onSave }: TaskModalPr
     const [isFetchingProjects, setIsFetchingProjects] = useState(false);
     const [hubstaffUsers, setHubstaffUsers] = useState<{ id: string; label: string }[]>([]);
     const [loadingHubstaffUsers, setLoadingHubstaffUsers] = useState(false);
+    const [isQATeam, setIsQATeam] = useState(false);
 
     // Initial state ...
     const initialState: Partial<Task> = {
@@ -85,6 +86,34 @@ export default function TaskModal({ isOpen, onClose, task, onSave }: TaskModalPr
 
         if (isOpen && hubstaffUsers.length === 0) {
             fetchHubstaffUsers();
+        }
+    }, [isOpen]);
+
+    // Detect if user is in QA Team
+    useEffect(() => {
+        const checkTeam = async () => {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+                const { data: profile } = await supabase
+                    .from('user_profiles')
+                    .select('team_id')
+                    .eq('id', user.id)
+                    .single();
+
+                if (profile?.team_id) {
+                    const { data: team } = await supabase
+                        .from('teams')
+                        .select('name')
+                        .eq('id', profile.team_id)
+                        .single();
+
+                    setIsQATeam(team?.name === 'QA Team');
+                }
+            }
+        };
+
+        if (isOpen) {
+            checkTeam();
         }
     }, [isOpen]);
 
@@ -426,6 +455,45 @@ export default function TaskModal({ isOpen, onClose, task, onSave }: TaskModalPr
                             />
                         </div>
                     </div>
+
+                    {/* Bug Fields - QA Team Only */}
+                    {isQATeam && (
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-6 border-t border-slate-100">
+                            <div className="space-y-3">
+                                <label className="text-sm font-semibold text-slate-700">Total Bugs</label>
+                                <input
+                                    type="number"
+                                    name="bugCount"
+                                    min="0"
+                                    value={formData.bugCount || 0}
+                                    onChange={handleChange}
+                                    className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all font-mono text-slate-700 font-medium"
+                                />
+                            </div>
+                            <div className="space-y-3">
+                                <label className="text-sm font-semibold text-slate-700">HTML Bugs</label>
+                                <input
+                                    type="number"
+                                    name="htmlBugs"
+                                    min="0"
+                                    value={formData.htmlBugs || 0}
+                                    onChange={handleChange}
+                                    className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all font-mono text-slate-700 font-medium"
+                                />
+                            </div>
+                            <div className="space-y-3">
+                                <label className="text-sm font-semibold text-slate-700">Func. Bugs</label>
+                                <input
+                                    type="number"
+                                    name="functionalBugs"
+                                    min="0"
+                                    value={formData.functionalBugs || 0}
+                                    onChange={handleChange}
+                                    className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all font-mono text-slate-700 font-medium"
+                                />
+                            </div>
+                        </div>
+                    )}
 
                     {/* Footer Actions */}
                     <div className="pt-6 flex items-center justify-end gap-3 border-t border-slate-100 mt-8">
