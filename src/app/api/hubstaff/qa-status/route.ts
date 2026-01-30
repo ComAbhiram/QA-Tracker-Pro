@@ -259,9 +259,13 @@ export async function GET(request: NextRequest) {
                         let totalActivityWeighted = 0;
                         const projectSet = new Set<string>();
 
-                        dailyActivities.forEach((activity: any) => {
+                        console.log(`[API] Processing ${dailyActivities.length} daily_activities for ${qaName}`);
+
+                        dailyActivities.forEach((activity: any, index: number) => {
                             const timeWorked = activity.tracked || 0;
                             const activityPct = timeWorked > 0 ? Math.round((activity.overall / timeWorked) * 100) : 0;
+
+                            console.log(`[API] Activity ${index + 1}: tracked=${timeWorked}s, overall=${activity.overall}s, activity%=${activityPct}%, project_id=${activity.project_id}`);
 
                             totalTime += timeWorked;
                             totalActivityWeighted += activityPct * timeWorked;
@@ -270,6 +274,9 @@ export async function GET(request: NextRequest) {
                                 projectSet.add(projectNamesMap[activity.project_id]);
                             }
                         });
+
+                        console.log(`[API] Total time: ${totalTime}s (${Math.floor(totalTime / 3600)}h ${Math.floor((totalTime % 3600) / 60)}m)`);
+                        console.log(`[API] Weighted activity: ${totalActivityWeighted}, Average: ${totalTime > 0 ? Math.round(totalActivityWeighted / totalTime) : 0}%`);
 
                         hubstaffActivity = {
                             timeWorked: totalTime,
