@@ -37,9 +37,9 @@ export default function Schedule() {
         const { data, error } = await supabase
             .from('tasks')
             .select('*')
-            .neq('status', 'Completed') // Don't show completed tasks in schedule
-            .gte('end_date', start.toISOString().split('T')[0])
-            .lte('start_date', end.toISOString().split('T')[0]);
+            // .neq('status', 'Completed') // Temporarily disabled to debug
+            .lte('start_date', end.toISOString().split('T')[0])
+            .gte('end_date', start.toISOString().split('T')[0]);
 
         if (error) {
             console.error('Error fetching tasks:', error);
