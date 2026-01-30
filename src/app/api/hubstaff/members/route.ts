@@ -47,7 +47,7 @@ export async function GET() {
         const formattedMembers = members.map((m: any) => {
             // Find the user details using user_id from member record
             const userId = m.user_id || m.id;
-            const user = userMap.get(userId);
+            const user: any = userMap.get(userId);
 
             // Prefer user.name, fallback to m.name or "Unknown"
             const name = (user ? user.name : m.name) || 'Unknown Member';
