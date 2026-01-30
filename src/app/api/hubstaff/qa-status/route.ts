@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { supabaseServer as supabase } from '@/lib/supabase-server';
 import { mapTaskFromDB, type Task } from '@/lib/types';
 import { formatDateDDMMYYYY, formatTime } from '@/lib/hubstaff-utils';
 import { mapHubstaffNameToQA, getHubstaffNameFromQA } from '@/lib/hubstaff-name-mapping';
@@ -33,13 +33,11 @@ export async function GET(request: NextRequest) {
         const mappedQaName = mapHubstaffNameToQA(qaName);
         console.log(`[API] Fetching tasks for QA: "${qaName}" (Mapped: "${mappedQaName}")`);
 
-        // Fetch tasks for this QA from Supabase
-        // checking both full name and mapped name to be safe
+        // Fetch ALL tasks and filter in code for better name matching
+        // This approach is more flexible for handling name variations
         const { data: tasksData, error: tasksError } = await supabase
             .from('tasks')
             .select('*')
-            // Check if assigned_to OR assigned_to2 matches either qaName OR mappedQaName
-            .or(`assigned_to.eq.${qaName},assigned_to.eq.${mappedQaName},assigned_to2.eq.${qaName},assigned_to2.eq.${mappedQaName}`)
             .order('created_at', { ascending: false });
 
         if (tasksError) {
@@ -52,10 +50,45 @@ export async function GET(request: NextRequest) {
 
         const tasks: Task[] = (tasksData || []).map(mapTaskFromDB);
 
+        // Filter tasks for this specific member using case-insensitive matching
+        const memberTasks = tasks.filter(task => {
+            const assigned1 = (task.assignedTo || '').trim().toLowerCase();
+            const assigned2 = (task.assignedTo2 || '').trim().toLowerCase();
+            const qName = qaName.trim().toLowerCase();
+            const mName = mappedQaName.trim().toLowerCase();
+
+            // Check if either assignee matches the full name or mapped name
+            const match1 = assigned1 === qName || assigned1 === mName;
+            const match2 = assigned2 === qName || assigned2 === mName;
+
+            // Also try partial matching (e.g., "aswathi" in "aswathi m ashok")
+            const fuzzy1 = (assigned1 && qName.includes(assigned1)) || (assigned1 && assigned1.includes(qName)) ||
+                (assigned1 && mName.includes(assigned1)) || (assigned1 && assigned1.includes(mName));
+            const fuzzy2 = (assigned2 && qName.includes(assigned2)) || (assigned2 && assigned2.includes(qName)) ||
+                (assigned2 && mName.includes(assigned2)) || (assigned2 && assigned2.includes(mName));
+
+            const isMatch = match1 || match2 || fuzzy1 || fuzzy2;
+
+            // Debug logging for first few tasks
+            if (tasks.indexOf(task) < 3) {
+                console.log(`[DEBUG] Task: ${task.projectName}, Assigned: "${assigned1}", Match: ${isMatch}`);
+                console.log(`  Comparing with qName: "${qName}", mName: "${mName}"`);
+            }
+
+            return isMatch;
+        });
+
+        console.log(`[API] Fetched ${tasks.length} total tasks from database`);
+        if (tasks.length > 0) {
+            console.log(`[API] Sample assignees from first 3 tasks:`, tasks.slice(0, 3).map(t => ({ project: t.projectName, assigned: t.assignedTo })));
+        }
+
+        console.log(`[API] Found ${memberTasks.length} tasks for ${qaName} (out of ${tasks.length} total)`);
+
         // Filter tasks relevant for the report
         // 1. Active: Scheduled for today AND not completed/rejected
         // 2. Completed Today: Status is completed AND actualEndDate is today
-        const relevantTasks = tasks.filter(task => {
+        const relevantTasks = memberTasks.filter(task => {
             // Check for Completed Today
             if (task.status === 'Completed') {
                 if (task.actualEndDate) {
