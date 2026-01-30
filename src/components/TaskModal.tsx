@@ -89,31 +89,23 @@ export default function TaskModal({ isOpen, onClose, task, onSave }: TaskModalPr
         }
     }, [isOpen]);
 
-    // Detect if user is in QA Team
+    // Detect if user is super admin
     useEffect(() => {
-        const checkTeam = async () => {
+        const checkRole = async () => {
             const { data: { user } } = await supabase.auth.getUser();
             if (user) {
                 const { data: profile } = await supabase
                     .from('user_profiles')
-                    .select('team_id')
+                    .select('role')
                     .eq('id', user.id)
                     .single();
 
-                if (profile?.team_id) {
-                    const { data: team } = await supabase
-                        .from('teams')
-                        .select('name')
-                        .eq('id', profile.team_id)
-                        .single();
-
-                    setIsQATeam(team?.name === 'QA Team');
-                }
+                setIsQATeam(profile?.role === 'super_admin');
             }
         };
 
         if (isOpen) {
-            checkTeam();
+            checkRole();
         }
     }, [isOpen]);
 

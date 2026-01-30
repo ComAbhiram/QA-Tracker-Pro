@@ -22,19 +22,11 @@ export default function CompletedProjects() {
         if (user) {
             const { data: profile } = await supabase
                 .from('user_profiles')
-                .select('team_id')
+                .select('role')
                 .eq('id', user.id)
                 .single();
 
-            if (profile?.team_id) {
-                const { data: team } = await supabase
-                    .from('teams')
-                    .select('name')
-                    .eq('id', profile.team_id)
-                    .single();
-
-                setIsQATeam(team?.name === 'QA Team');
-            }
+            setIsQATeam(profile?.role === 'super_admin');
         }
     };
 
