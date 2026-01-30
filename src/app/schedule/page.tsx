@@ -38,7 +38,8 @@ export default function Schedule() {
             .from('tasks')
             .select('*')
             .neq('status', 'Completed') // Don't show completed tasks in schedule
-            .or(`start_date.lte.${end.toISOString()},end_date.gte.${start.toISOString()}`);
+            .gte('end_date', start.toISOString().split('T')[0])
+            .lte('start_date', end.toISOString().split('T')[0]);
 
         if (error) {
             console.error('Error fetching tasks:', error);
