@@ -89,13 +89,17 @@ export default function Home() {
       end_time: taskData.endTime || null,
       bug_count: taskData.bugCount,
       html_bugs: taskData.htmlBugs,
-      functional_bugs: taskData.functionalBugs
+      functional_bugs: taskData.functionalBugs,
+      team_id: taskData.teamId
     };
 
     if (editingTask) {
+      // Don't update team_id on edit unless specifically needed (usually strict ownership prevents moving teams)
+      const { team_id, ...updatePayload } = dbPayload;
+
       const { error } = await supabase
         .from('tasks')
-        .update(dbPayload)
+        .update(updatePayload)
         .eq('id', editingTask.id);
 
       if (error) {

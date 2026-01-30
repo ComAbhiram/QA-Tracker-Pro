@@ -85,13 +85,17 @@ export default function Tracker() {
             html_bugs: taskData.htmlBugs,
             functional_bugs: taskData.functionalBugs,
             deviation_reason: taskData.deviationReason,
-            comments: taskData.comments
+            comments: taskData.comments,
+            team_id: taskData.teamId
         };
 
         if (editingTask) {
+            // Exclude team_id from update if not intending to transfer ownership
+            const { team_id, ...updatePayload } = dbPayload;
+
             const { error } = await supabase
                 .from('tasks')
-                .update(dbPayload)
+                .update(updatePayload)
                 .eq('id', editingTask.id);
 
             if (error) console.error('Error updating task:', error);
