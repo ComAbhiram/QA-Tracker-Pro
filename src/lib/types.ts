@@ -56,6 +56,7 @@ export interface Task {
     deviationReason: string | null;
     sprint: string | null;
     createdAt: string;
+    teamId?: string; // Multi-tenancy support
 }
 
 export interface Project {
@@ -65,6 +66,7 @@ export interface Project {
     status: string;
     hubstaffId: number | null;
     createdAt: string;
+    teamId?: string; // Multi-tenancy support
 }
 
 export const mapTaskFromDB = (task: DBTask): Task => ({
@@ -89,7 +91,8 @@ export const mapTaskFromDB = (task: DBTask): Task => ({
     functionalBugs: task.functional_bugs || 0,
     deviationReason: task.deviation_reason,
     sprint: task.sprint,
-    createdAt: task.created_at
+    createdAt: task.created_at,
+    teamId: (task as any).team_id
 });
 
 export const mapProjectFromDB = (project: DBProject): Project => ({
@@ -98,5 +101,6 @@ export const mapProjectFromDB = (project: DBProject): Project => ({
     description: project.description,
     status: project.status,
     hubstaffId: project.hubstaff_id,
-    createdAt: project.created_at
+    createdAt: project.created_at,
+    teamId: (project as any).team_id
 });
