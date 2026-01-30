@@ -100,8 +100,39 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                 alert(`Work Status for ${selectedQA} copied to clipboard!`);
             } catch (clipboardError) {
                 console.error('Clipboard write failed:', clipboardError);
-                // Fallback: show the text in an alert so user can manually copy
-                alert('Failed to copy to clipboard. Here is the text:\n\n' + data.formattedText);
+                // Fallback: Create a temporary textarea and select the text for manual copy
+                const textarea = document.createElement('textarea');
+                textarea.value = data.formattedText;
+                textarea.style.position = 'fixed';
+                textarea.style.top = '0';
+                textarea.style.left = '0';
+                textarea.style.width = '2em';
+                textarea.style.height = '2em';
+                textarea.style.padding = '0';
+                textarea.style.border = 'none';
+                textarea.style.outline = 'none';
+                textarea.style.boxShadow = 'none';
+                textarea.style.background = 'transparent';
+                document.body.appendChild(textarea);
+                textarea.focus();
+                textarea.select();
+
+                try {
+                    // Try the old execCommand method as fallback
+                    const successful = document.execCommand('copy');
+                    if (successful) {
+                        alert(`Work Status for ${selectedQA} copied to clipboard!`);
+                    } else {
+                        alert('Please press Ctrl+C (or Cmd+C on Mac) to copy the selected text');
+                    }
+                } catch (err) {
+                    alert('Please press Ctrl+C (or Cmd+C on Mac) to copy the selected text');
+                }
+
+                // Keep textarea visible for a moment so user can copy
+                setTimeout(() => {
+                    document.body.removeChild(textarea);
+                }, 3000);
             }
         } catch (error) {
             console.error('Error generating QA work status:', error);
