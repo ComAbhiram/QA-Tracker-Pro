@@ -88,16 +88,20 @@ export default function TaskModal({ isOpen, onClose, task, onSave }: TaskModalPr
         }
     }, [isOpen]);
 
+
     // Populate form data when task changes
     useEffect(() => {
         if (isOpen && task) {
             setFormData({
                 projectName: task.projectName,
+                projectType: task.projectType,
                 subPhase: task.subPhase,
+                priority: task.priority,
                 pc: task.pc,
                 status: task.status,
                 startDate: task.startDate ? new Date(task.startDate).toISOString().split('T')[0] : '',
                 endDate: task.endDate ? new Date(task.endDate).toISOString().split('T')[0] : '',
+                actualCompletionDate: task.actualCompletionDate ? new Date(task.actualCompletionDate).toISOString().split('T')[0] : '',
                 startTime: task.startTime,
                 endTime: task.endTime,
                 assignedTo: task.assignedTo,
@@ -106,7 +110,8 @@ export default function TaskModal({ isOpen, onClose, task, onSave }: TaskModalPr
                 htmlBugs: task.htmlBugs,
                 functionalBugs: task.functionalBugs,
                 deviationReason: task.deviationReason,
-                comments: task.comments
+                comments: task.comments,
+                currentUpdates: task.currentUpdates
             });
         } else if (isOpen && !task) {
             setFormData(initialState);
@@ -118,10 +123,20 @@ export default function TaskModal({ isOpen, onClose, task, onSave }: TaskModalPr
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: ['bugCount', 'htmlBugs', 'functionalBugs'].includes(name) ? parseInt(value) || 0 : value
-        }));
+
+        setFormData(prev => {
+            const newData = {
+                ...prev,
+                [name]: ['bugCount', 'htmlBugs', 'functionalBugs'].includes(name) ? parseInt(value) || 0 : value
+            };
+
+            // Auto-fill actualCompletionDate when status changes to "Completed"
+            if (name === 'status' && value === 'Completed' && !prev.actualCompletionDate) {
+                newData.actualCompletionDate = new Date().toISOString().split('T')[0];
+            }
+
+            return newData;
+        });
     };
 
     const [userTeamId, setUserTeamId] = useState<string | null>(null);
@@ -208,7 +223,7 @@ export default function TaskModal({ isOpen, onClose, task, onSave }: TaskModalPr
                 {/* Content */}
                 <form onSubmit={handleSubmit} className="p-4 pb-10 md:p-6 space-y-8">
 
-                    {/* Project & Phase */}
+                    {/* 1. Project Name & 2. Project Type */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div className="space-y-3">
                             <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
@@ -226,21 +241,86 @@ export default function TaskModal({ isOpen, onClose, task, onSave }: TaskModalPr
                         </div>
                         <div className="space-y-3">
                             <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-                                <Activity size={16} className="text-indigo-500" /> Phase (Sub-phase) <span className="text-red-500">*</span>
+                                <Activity size={16} className="text-indigo-500" /> Project Type
                             </label>
                             <input
                                 type="text"
-                                name="subPhase"
-                                required
-                                value={formData.subPhase || ''}
+                                name="projectType"
+                                value={formData.projectType || ''}
                                 onChange={handleChange}
                                 className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all placeholder:text-slate-400 font-medium text-slate-700"
-                                placeholder="e.g. Discovery, Development"
+                                placeholder="e.g. Web Development, Mobile App"
                             />
                         </div>
                     </div>
 
-                    {/* Status & Completion */}
+                    {/* 3. Priority & 4. PC */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div className="space-y-3">
+                            <label className="text-sm font-semibold text-slate-700">Priority</label>
+                            <select
+                                name="priority"
+                                value={formData.priority || ''}
+                                onChange={handleChange}
+                                className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all font-medium text-slate-700 appearance-none cursor-pointer"
+                            >
+                                <option value="">Select Priority</option>
+                                <option value="Low">Low</option>
+                                <option value="Medium">Medium</option>
+                                <option value="High">High</option>
+                                <option value="Urgent">Urgent</option>
+                            </select>
+                        </div>
+                        <div className="space-y-3">
+                            <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                                <User size={16} className="text-indigo-500" /> Project Coordinator (PC)
+                            </label>
+                            <input
+                                type="text"
+                                name="pc"
+                                value={formData.pc || ''}
+                                onChange={handleChange}
+                                className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all placeholder:text-slate-400 font-medium text-slate-700"
+                                placeholder="Project Coordinator Name"
+                            />
+                        </div>
+                    </div>
+
+                    {/* 5. Assignee 1 & 6. Assignee 2 */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div className="space-y-3">
+                            <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                                <User size={16} className="text-indigo-500" /> Assignee 1
+                            </label>
+                            <Combobox
+                                options={hubstaffUsers}
+                                value={formData.assignedTo || ''}
+                                onChange={(val) => handleAssigneeChange('assignedTo', val)}
+                                placeholder="Select or type name..."
+                                searchPlaceholder="Search developers..."
+                                emptyMessage="No users found."
+                                allowCustomValue={true}
+                                isLoading={loadingHubstaffUsers}
+                            />
+                        </div>
+                        <div className="space-y-3">
+                            <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                                <User size={16} className="text-indigo-500" /> Assignee 2
+                            </label>
+                            <Combobox
+                                options={hubstaffUsers}
+                                value={formData.assignedTo2 || ''}
+                                onChange={(val) => handleAssigneeChange('assignedTo2', val)}
+                                placeholder="Select or type name..."
+                                searchPlaceholder="Search developers..."
+                                emptyMessage="No users found."
+                                allowCustomValue={true}
+                                isLoading={loadingHubstaffUsers}
+                            />
+                        </div>
+                    </div>
+
+                    {/* 7. Status */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div className="space-y-3">
                             <label className="text-sm font-semibold text-slate-700">Status</label>
@@ -278,132 +358,71 @@ export default function TaskModal({ isOpen, onClose, task, onSave }: TaskModalPr
                         )}
                     </div>
 
-                    {/* Dates & Times */}
+                    {/* 8. Start Date & 9. End Date */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div className="space-y-3">
                             <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-                                <Calendar size={16} className="text-indigo-500" /> Start
-                            </label>
-                            <div className="flex gap-3">
-                                <input
-                                    type="date"
-                                    name="startDate"
-                                    value={formData.startDate || ''}
-                                    onChange={handleChange}
-                                    className="flex-1 px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all font-medium text-slate-700"
-                                />
-                                <input
-                                    type="time"
-                                    name="startTime"
-                                    value={formData.startTime || ''}
-                                    onChange={handleChange}
-                                    className="w-32 px-3 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all font-medium text-slate-700 text-center"
-                                />
-                            </div>
-                        </div>
-                        <div className="space-y-3">
-                            <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-                                <Calendar size={16} className="text-indigo-500" /> End
-                            </label>
-                            <div className="flex gap-3">
-                                <input
-                                    type="date"
-                                    name="endDate"
-                                    value={formData.endDate || ''}
-                                    onChange={handleChange}
-                                    className="flex-1 px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all font-medium text-slate-700"
-                                />
-                                <input
-                                    type="time"
-                                    name="endTime"
-                                    value={formData.endTime || ''}
-                                    onChange={handleChange}
-                                    className="w-32 px-3 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all font-medium text-slate-700 text-center"
-                                />
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* People */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <div className="space-y-3 md:col-span-2">
-                            <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-                                <User size={16} className="text-indigo-500" /> Project Coordinator (PC)
+                                <Calendar size={16} className="text-indigo-500" /> Start Date
                             </label>
                             <input
-                                type="text"
-                                name="pc"
-                                value={formData.pc || ''}
+                                type="date"
+                                name="startDate"
+                                value={formData.startDate || ''}
                                 onChange={handleChange}
-                                className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all placeholder:text-slate-400 font-medium text-slate-700"
-                                placeholder="Project Coordinator Name"
+                                className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all font-medium text-slate-700"
                             />
                         </div>
                         <div className="space-y-3">
                             <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-                                <User size={16} className="text-indigo-500" /> Assigned To
+                                <Calendar size={16} className="text-indigo-500" /> End Date
                             </label>
-                            <Combobox
-                                options={hubstaffUsers}
-                                value={formData.assignedTo || ''}
-                                onChange={(val) => handleAssigneeChange('assignedTo', val)}
-                                placeholder="Select or type name..."
-                                searchPlaceholder="Search developers..."
-                                emptyMessage="No users found."
-                                allowCustomValue={true}
-                                isLoading={loadingHubstaffUsers}
-                            />
-                        </div>
-                        <div className="space-y-3">
-                            <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-                                <User size={16} className="text-indigo-500" /> Second Assignee
-                            </label>
-                            <Combobox
-                                options={hubstaffUsers}
-                                value={formData.assignedTo2 || ''}
-                                onChange={(val) => handleAssigneeChange('assignedTo2', val)}
-                                placeholder="Select or type name..."
-                                searchPlaceholder="Search developers..."
-                                emptyMessage="No users found."
-                                allowCustomValue={true}
-                                isLoading={loadingHubstaffUsers}
+                            <input
+                                type="date"
+                                name="endDate"
+                                value={formData.endDate || ''}
+                                onChange={handleChange}
+                                className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all font-medium text-slate-700"
                             />
                         </div>
                     </div>
 
-                    {/* Bugs - Optional */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-6 border-t border-slate-100">
+                    {/* 10. Actual Completion Date */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div className="space-y-3">
-                            <label className="text-sm font-semibold text-slate-700">Total Bugs</label>
+                            <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                                <Calendar size={16} className="text-emerald-500" /> Actual Completion Date
+                                {formData.status === 'Completed' && <span className="text-xs text-emerald-600">(Auto-filled)</span>}
+                            </label>
                             <input
-                                type="number"
-                                name="bugCount"
-                                min="0"
-                                value={formData.bugCount || 0}
+                                type="date"
+                                name="actualCompletionDate"
+                                value={formData.actualCompletionDate || ''}
                                 onChange={handleChange}
-                                className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all font-mono text-slate-700 font-medium"
+                                className="w-full px-5 py-3 bg-emerald-50 border border-emerald-200 rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all font-medium text-slate-700"
+                            />
+                        </div>
+                    </div>
+
+                    {/* 11. Comments & 12. Current Updates */}
+                    <div className="grid grid-cols-1 gap-8">
+                        <div className="space-y-3">
+                            <label className="text-sm font-semibold text-slate-700">Comments</label>
+                            <textarea
+                                name="comments"
+                                value={formData.comments || ''}
+                                onChange={handleChange}
+                                className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all placeholder:text-slate-400 font-medium text-slate-700 min-h-[100px]"
+                                placeholder="General comments about the task..."
                             />
                         </div>
                         <div className="space-y-3">
-                            <label className="text-sm font-semibold text-slate-700">HTML Bugs</label>
-                            <input
-                                type="number"
-                                name="htmlBugs"
-                                min="0"
-                                value={formData.htmlBugs || 0}
+                            <label className="text-sm font-semibold text-slate-700">Current Updates</label>
+                            <textarea
+                                name="currentUpdates"
+                                value={formData.currentUpdates || ''}
                                 onChange={handleChange}
-                                className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all font-mono text-slate-700 font-medium"
-                            />
-                        </div>
-                        <div className="space-y-3">
-                            <label className="text-sm font-semibold text-slate-700">Func. Bugs</label>
-                            <input
-                                type="number"
-                                name="functionalBugs"
-                                min="0"
-                                value={formData.functionalBugs || 0}
-                                onChange={handleChange}
-                                className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all font-mono text-slate-700 font-medium"
+                                className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all placeholder:text-slate-400 font-medium text-slate-700 min-h-[100px]"
+                                placeholder="Current status updates..."
                             />
                         </div>
                     </div>

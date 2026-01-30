@@ -2,13 +2,16 @@
 export interface DBTask {
     id: number;
     project_name: string;
+    project_type: string | null;
     sub_phase: string | null;
+    priority: string | null;
     pc: string | null;
     assigned_to: string | null;
     assigned_to2: string | null;
     status: string;
     start_date: string | null;
     end_date: string | null;
+    actual_completion_date: string | null;
     include_saturday: boolean | null;
     actual_start_date: string | null;
     actual_end_date: string | null;
@@ -16,6 +19,7 @@ export interface DBTask {
     end_time: string | null;
     completed_at: string | null;
     comments: string | null;
+    current_updates: string | null;
     bug_count: number | null;
     html_bugs: number | null;
     functional_bugs: number | null;
@@ -36,13 +40,16 @@ export interface DBProject {
 export interface Task {
     id: number;
     projectName: string;
+    projectType: string | null;
     subPhase: string | null;
+    priority: string | null;
     pc: string | null;
     assignedTo: string | null;
     assignedTo2: string | null;
     status: string;
     startDate: string | null;
     endDate: string | null;
+    actualCompletionDate: string | null;
     includeSaturday: boolean;
     actualStartDate: string | null;
     actualEndDate: string | null;
@@ -50,6 +57,7 @@ export interface Task {
     endTime: string | null;
     completedAt: string | null;
     comments: string | null;
+    currentUpdates: string | null;
     bugCount: number;
     htmlBugs: number;
     functionalBugs: number;
@@ -72,13 +80,16 @@ export interface Project {
 export const mapTaskFromDB = (task: DBTask): Task => ({
     id: task.id,
     projectName: task.project_name,
+    projectType: task.project_type,
     subPhase: task.sub_phase,
+    priority: task.priority,
     pc: task.pc,
     assignedTo: task.assigned_to,
     assignedTo2: task.assigned_to2,
     status: task.status || 'In Progress',
     startDate: task.start_date,
     endDate: task.end_date,
+    actualCompletionDate: task.actual_completion_date,
     includeSaturday: task.include_saturday || false,
     actualStartDate: task.actual_start_date,
     actualEndDate: task.actual_end_date,
@@ -86,6 +97,7 @@ export const mapTaskFromDB = (task: DBTask): Task => ({
     endTime: task.end_time || '18:30',
     completedAt: task.completed_at,
     comments: task.comments,
+    currentUpdates: task.current_updates,
     bugCount: task.bug_count || 0,
     htmlBugs: task.html_bugs || 0,
     functionalBugs: task.functional_bugs || 0,
