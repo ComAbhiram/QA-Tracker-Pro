@@ -124,11 +124,39 @@ export default function TaskModal({ isOpen, onClose, task, onSave }: TaskModalPr
         }));
     };
 
+    const [userTeamId, setUserTeamId] = useState<string | null>(null);
+
+    // Fetch Team ID on mount
+    useEffect(() => {
+        const fetchTeam = async () => {
+            const { getCurrentUserTeam } = await import('@/utils/userUtils');
+            const team = await getCurrentUserTeam();
+            if (team) setUserTeamId(team.team_id);
+        };
+        fetchTeam();
+    }, []);
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
         try {
-            await onSave(formData);
+            // Use locally fetched teamId if not present in task
+            let teamId = task?.teamId || userTeamId;
+
+            if (!teamId) {
+                // Fallback try one last time
+                const { getCurrentUserTeam } = await import('@/utils/userUtils');
+                const userTeam = await getCurrentUserTeam();
+                if (userTeam) teamId = userTeam.team_id;
+            }
+
+            if (!teamId) {
+                alert('Error: Could not determine your Team ID. Please refresh the page.');
+                setLoading(false);
+                return;
+            }
+
+            await onSave({ ...formData, teamId });
             if (!task) setFormData(initialState);
         } catch (error) {
             console.error('Error saving task:', error);
