@@ -25,6 +25,7 @@ export interface DBTask {
     functional_bugs: number | null;
     deviation_reason: string | null;
     sprint: string | null;
+    sprint_link: string | null;
     created_at: string;
 }
 
@@ -63,6 +64,7 @@ export interface Task {
     functionalBugs: number;
     deviationReason: string | null;
     sprint: string | null;
+    sprintLink: string | null;
     createdAt: string;
     teamId?: string; // Multi-tenancy support
 }
@@ -103,6 +105,7 @@ export const mapTaskFromDB = (task: DBTask): Task => ({
     functionalBugs: task.functional_bugs || 0,
     deviationReason: task.deviation_reason,
     sprint: task.sprint,
+    sprintLink: task.sprint_link,
     createdAt: task.created_at,
     teamId: (task as any).team_id
 });

@@ -469,6 +469,32 @@ export default function TaskModal({ isOpen, onClose, task, onSave }: TaskModalPr
                         </div>
                     </div>
 
+                    {/* 13. Deviation Reason & 14. Sprint Link */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div className="space-y-3">
+                            <label className="text-sm font-semibold text-slate-700">Deviation Reason</label>
+                            <input
+                                type="text"
+                                name="deviationReason"
+                                value={formData.deviationReason || ''}
+                                onChange={handleChange}
+                                className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all placeholder:text-slate-400 font-medium text-slate-700"
+                                placeholder="Reason for any deviations..."
+                            />
+                        </div>
+                        <div className="space-y-3">
+                            <label className="text-sm font-semibold text-slate-700">Sprint Link</label>
+                            <input
+                                type="text"
+                                name="sprintLink"
+                                value={formData.sprintLink || ''}
+                                onChange={handleChange}
+                                className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all placeholder:text-slate-400 font-medium text-slate-700"
+                                placeholder="Sprint or task tracking link..."
+                            />
+                        </div>
+                    </div>
+
                     {/* Bug Fields - QA Team Only */}
                     {isQATeam && (
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-6 border-t border-slate-100">
