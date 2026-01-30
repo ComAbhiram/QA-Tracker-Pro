@@ -285,18 +285,20 @@ export default function TaskModal({ isOpen, onClose, task, onSave }: TaskModalPr
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div className="space-y-3">
                             <label className="text-sm font-semibold text-slate-700">Priority</label>
-                            <select
-                                name="priority"
+                            <Combobox
+                                options={[
+                                    { value: 'Low', label: 'Low' },
+                                    { value: 'Medium', label: 'Medium' },
+                                    { value: 'High', label: 'High' },
+                                    { value: 'Urgent', label: 'Urgent' }
+                                ]}
                                 value={formData.priority || ''}
-                                onChange={handleChange}
-                                className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all font-medium text-slate-700 appearance-none cursor-pointer"
-                            >
-                                <option value="">Select Priority</option>
-                                <option value="Low">Low</option>
-                                <option value="Medium">Medium</option>
-                                <option value="High">High</option>
-                                <option value="Urgent">Urgent</option>
-                            </select>
+                                onChange={(val) => setFormData(prev => ({ ...prev, priority: val }))}
+                                placeholder="Select or type priority..."
+                                searchPlaceholder="Search or type custom priority..."
+                                emptyMessage="No matching priority. Press Enter to use custom value."
+                                allowCustomValue={true}
+                            />
                         </div>
                         <div className="space-y-3">
                             <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
