@@ -85,6 +85,7 @@ export default function Tracker() {
             html_bugs: taskData.htmlBugs,
             functional_bugs: taskData.functionalBugs,
             deviation_reason: taskData.deviationReason,
+            sprint_link: taskData.sprintLink,
             comments: taskData.comments,
             team_id: taskData.teamId
         };
@@ -207,7 +208,9 @@ export default function Tracker() {
                                             <th className="px-4 py-4 font-semibold text-slate-600 text-left border-r border-slate-100">Start</th>
                                             <th className="px-4 py-4 font-semibold text-slate-600 text-left border-r border-slate-100">End</th>
                                             <th className="px-4 py-4 font-semibold text-slate-600 text-left border-r border-slate-100">Bugs</th>
-                                            <th className="px-5 py-4 font-semibold text-slate-600 text-left">Comments</th>
+                                            <th className="px-5 py-4 font-semibold text-slate-600 text-left border-r border-slate-100">Comments</th>
+                                            <th className="px-4 py-4 font-semibold text-slate-600 text-left border-r border-slate-100">Deviation Reason</th>
+                                            <th className="px-4 py-4 font-semibold text-slate-600 text-left">Sprint Link</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -252,8 +255,18 @@ export default function Tracker() {
                                                 <td className="px-4 py-4 text-slate-500 font-medium border-r border-slate-50">{task.startDate ? format(new Date(task.startDate), 'MMM d') : '-'}</td>
                                                 <td className="px-4 py-4 text-slate-500 font-medium border-r border-slate-50">{task.endDate ? format(new Date(task.endDate), 'MMM d') : '-'}</td>
                                                 <td className="px-4 py-4 text-center font-mono text-slate-600 border-r border-slate-50">{task.bugCount}</td>
-                                                <td className="px-5 py-4 text-sm text-slate-500 max-w-sm truncate" title={task.comments || ''}>
+                                                <td className="px-5 py-4 text-sm text-slate-500 max-w-sm truncate border-r border-slate-50" title={task.comments || ''}>
                                                     {task.comments || '-'}
+                                                </td>
+                                                <td className="px-4 py-4 text-sm text-slate-500 max-w-xs truncate border-r border-slate-50" title={task.deviationReason || ''}>
+                                                    {task.deviationReason || '-'}
+                                                </td>
+                                                <td className="px-4 py-4 text-sm text-slate-500 max-w-xs truncate" title={task.sprintLink || ''}>
+                                                    {task.sprintLink ? (
+                                                        <a href={task.sprintLink} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 hover:underline">
+                                                            Link
+                                                        </a>
+                                                    ) : '-'}
                                                 </td>
                                             </tr>
                                         ))}

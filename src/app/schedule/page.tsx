@@ -151,7 +151,8 @@ export default function Schedule() {
             bug_count: taskData.bugCount,
             html_bugs: taskData.htmlBugs,
             functional_bugs: taskData.functionalBugs,
-            deviation_reason: taskData.deviationReason
+            deviation_reason: taskData.deviationReason,
+            sprint_link: taskData.sprintLink
         };
 
         const { error } = await supabase

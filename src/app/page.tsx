@@ -96,6 +96,7 @@ export default function Home() {
       html_bugs: taskData.htmlBugs,
       functional_bugs: taskData.functionalBugs,
       deviation_reason: taskData.deviationReason,
+      sprint_link: taskData.sprintLink,
       team_id: taskData.teamId
     };
 
