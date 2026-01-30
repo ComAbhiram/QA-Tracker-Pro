@@ -1,0 +1,137 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { supabaseServer } from '@/lib/supabase-server';
+import { createClient } from '@supabase/supabase-js';
+
+// GET /api/teams - List all teams
+export async function GET() {
+    try {
+        const { data: teams, error } = await supabaseServer
+            .from('teams')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        return NextResponse.json({ teams });
+    } catch (error: any) {
+        console.error('Error fetching teams:', error);
+        return NextResponse.json(
+            { error: error.message || 'Failed to fetch teams' },
+            { status: 500 }
+        );
+    }
+}
+
+// POST /api/teams - Create new team with admin user
+export async function POST(request: NextRequest) {
+    try {
+        const body = await request.json();
+        const { teamName, adminEmail, adminPassword } = body;
+
+        if (!teamName || !adminEmail || !adminPassword) {
+            return NextResponse.json(
+                { error: 'Team name, admin email, and password are required' },
+                { status: 400 }
+            );
+        }
+
+        // Create admin client for user creation
+        const supabaseAdmin = createClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.SUPABASE_SERVICE_ROLE_KEY!,
+            {
+                auth: {
+                    autoRefreshToken: false,
+                    persistSession: false
+                }
+            }
+        );
+
+        // 1. Create team
+        const { data: team, error: teamError } = await supabaseServer
+            .from('teams')
+            .insert({ name: teamName })
+            .select()
+            .single();
+
+        if (teamError) throw teamError;
+
+        // 2. Create user account
+        const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
+            email: adminEmail,
+            password: adminPassword,
+            email_confirm: true
+        });
+
+        if (authError) {
+            // Rollback team creation
+            await supabaseServer.from('teams').delete().eq('id', team.id);
+            throw authError;
+        }
+
+        // 3. Create user profile linked to team
+        const { error: profileError } = await supabaseServer
+            .from('user_profiles')
+            .insert({
+                id: authData.user.id,
+                email: adminEmail,
+                team_id: team.id,
+                role: 'admin'
+            });
+
+        if (profileError) {
+            // Rollback user and team creation
+            await supabaseAdmin.auth.admin.deleteUser(authData.user.id);
+            await supabaseServer.from('teams').delete().eq('id', team.id);
+            throw profileError;
+        }
+
+        return NextResponse.json({
+            success: true,
+            team,
+            message: `Team "${teamName}" created successfully with admin ${adminEmail}`
+        });
+
+    } catch (error: any) {
+        console.error('Error creating team:', error);
+        return NextResponse.json(
+            { error: error.message || 'Failed to create team' },
+            { status: 500 }
+        );
+    }
+}
+
+// DELETE /api/teams/:id - Delete team
+export async function DELETE(request: NextRequest) {
+    try {
+        const url = new URL(request.url);
+        const teamId = url.searchParams.get('id');
+
+        if (!teamId) {
+            return NextResponse.json(
+                { error: 'Team ID is required' },
+                { status: 400 }
+            );
+        }
+
+        // Delete team (cascade will handle user_profiles)
+        const { error } = await supabaseServer
+            .from('teams')
+            .delete()
+            .eq('id', teamId);
+
+        if (error) throw error;
+
+        return NextResponse.json({
+            success: true,
+            message: 'Team deleted successfully'
+        });
+
+    } catch (error: any) {
+        console.error('Error deleting team:', error);
+        return NextResponse.json(
+            { error: error.message || 'Failed to delete team' },
+            { status: 500 }
+        );
+    }
+}
