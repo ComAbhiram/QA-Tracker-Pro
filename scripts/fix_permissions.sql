@@ -39,6 +39,12 @@ ALTER TABLE tasks ENABLE ROW LEVEL SECURITY;
 ALTER TABLE projects ENABLE ROW LEVEL SECURITY;
 ALTER TABLE teams ENABLE ROW LEVEL SECURITY;
 ALTER TABLE user_profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE qa_members ENABLE ROW LEVEL SECURITY;
+
+-- QA MEMBERS (Allow read access to authenticated users, strict logic if needed)
+CREATE POLICY "Allow read access to authenticated users" ON qa_members
+    FOR SELECT USING (auth.role() = 'authenticated');
+
 
 -- 4. Create Strict Policies
 
