@@ -306,10 +306,40 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                         <h3 style="color: #1e293b; font-size: 18px; margin-bottom: 16px; font-weight: 600;">Hubstaff Activity - ${teamName}</h3>
                         ${(() => {
                         // Filter activities (exclude 0% or empty)
-                        const relevantActivities = hubstaffData.activities.filter((a: any) => a.timeWorked > 0);
+                        const relevantActivities = hubstaffData.activities.filter((a: any) => {
+                            // 1. Must have time worked
+                            if (a.timeWorked <= 0) return false;
+
+                            // 2. Must be one of the assignees in today's tasks OR a known team member
+                            // (We use a dynamic list based on the tasks visible to this user)
+                            const activeAssignees = new Set<string>();
+                            todayTasks.forEach(t => {
+                                if (t.assignedTo) activeAssignees.add(t.assignedTo.toLowerCase());
+                                if (t.assignedTo2) activeAssignees.add(t.assignedTo2.toLowerCase());
+                            });
+
+                            // Check if Hubstaff name matches any assignee (loosely)
+                            // Ideally we have a robust mapping, but exact name or 'includes' helps
+                            // Hubstaff Name: "Aswathi M Ashok" -> Assignee might be "Aswathi"
+                            // We check if the Hubstaff user's name *contains* the assignee name (or vice versa)
+                            // But 'assignedTo' in our DB is often the Short Name (e.g. "Aswathi").
+                            // Hubstaff is Full Name.
+
+                            // Better: Check if any assignee name is found in the Hubstaff User Name
+                            const hubName = a.userName.toLowerCase();
+                            for (const assignee of activeAssignees) {
+                                // Simple inclusion check: "aswathi" in "aswathi m ashok"
+                                if (hubName.includes(assignee)) return true;
+                                // Reverse: "sreegith va" (hub) vs "sreegith" (db)
+                                if (assignee.includes(hubName)) return true;
+                            }
+                            return false;
+                        });
 
                         if (relevantActivities.length === 0) {
-                            return `<p style="color: #64748b; font-size: 14px; margin: 0;">No activity recorded for today.</p>`;
+                            // If filtering removed everyone, show a helpful message
+                            const activeAssignees = Array.from(new Set(todayTasks.map(t => t.assignedTo).filter(Boolean))).join(', ');
+                            return `<p style="color: #64748b; font-size: 14px; margin: 0;">No Hubstaff activity found for active assignees (${activeAssignees || 'None'}).</p>`;
                         }
 
                         // Aggregate activities by user
