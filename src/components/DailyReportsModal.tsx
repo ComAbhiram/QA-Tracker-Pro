@@ -2,7 +2,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Task, mapTaskFromDB } from '@/lib/types';
-import { QA_MEMBERS } from '@/lib/team-members-config';
 import { getEffectiveStatus } from '@/utils/taskUtils';
 import { X, Camera, FileText, Calendar, ClipboardList, ChevronRight } from 'lucide-react';
 import html2canvas from 'html2canvas';
@@ -19,6 +18,7 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
     const [teamMembers, setTeamMembers] = useState<{ id: number; name: string }[]>([]);
     const [selectedQA, setSelectedQA] = useState<string>('');
     const [selectedQADate, setSelectedQADate] = useState(new Date().toISOString().split('T')[0]);
+    const [teamName, setTeamName] = useState<string>('Team');
     const [scheduleDate, setScheduleDate] = useState(() => {
         const d = new Date();
         d.setDate(d.getDate() + 1);
@@ -29,8 +29,21 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
         if (isOpen) {
             fetchTasks();
             fetchTeamMembers();
+            fetchTeamInfo();
         }
     }, [isOpen]);
+
+    const fetchTeamInfo = async () => {
+        try {
+            const { getCurrentUserTeam } = await import('@/utils/userUtils');
+            const team = await getCurrentUserTeam();
+            if (team && team.team_name) {
+                setTeamName(team.team_name);
+            }
+        } catch (error) {
+            console.error('Error fetching team info:', error);
+        }
+    };
 
     const fetchTasks = async () => {
         const { data, error } = await supabase
@@ -288,26 +301,19 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                     <p style="color: #64748b; font-size: 16px; margin-bottom: 24px;">${new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
                     
                     ${hubstaffData ? `
-                    <!-- Hubstaff Activity Section - QA Members Only -->
+                    <!-- Hubstaff Activity Section - Dynamic Team -->
                     <div style="background: #f8fafc; border-left: 4px solid #0ea5e9; padding: 16px; margin-bottom: 24px; border-radius: 8px;">
-                        <h3 style="color: #1e293b; font-size: 18px; margin-bottom: 16px; font-weight: 600;">Hubstaff Activity - QA Team</h3>
+                        <h3 style="color: #1e293b; font-size: 18px; margin-bottom: 16px; font-weight: 600;">Hubstaff Activity - ${teamName}</h3>
                         ${(() => {
-                        // Filter for QA members only
-                        // We use the centralized config to determine who is a QA
-                        const qaHubstaffNames = QA_MEMBERS.map(m => m.hubstaffName);
+                        // Filter activities (exclude 0% or empty)
+                        const relevantActivities = hubstaffData.activities.filter((a: any) => a.timeWorked > 0);
 
-                        const rawQaActivities = hubstaffData.activities.filter((a: any) =>
-                            qaHubstaffNames.includes(a.userName)
-                        );
-
-                        if (rawQaActivities.length === 0) {
-                            // DEBUG: Show what users WERE found to help diagnose mismatches
-                            const foundUsers = hubstaffData.activities.map((a: any) => a.userName).filter((v: string, i: number, a: string[]) => a.indexOf(v) === i).join(', ');
-                            return `<p style="color: #64748b; font-size: 14px; margin: 0;">No QA activity recorded for today. (Found: ${foundUsers || 'None'})</p>`;
+                        if (relevantActivities.length === 0) {
+                            return `<p style="color: #64748b; font-size: 14px; margin: 0;">No activity recorded for today.</p>`;
                         }
 
                         // Aggregate activities by user
-                        const aggregatedActivities = rawQaActivities.reduce((acc: any, curr: any) => {
+                        const aggregatedActivities = relevantActivities.reduce((acc: any, curr: any) => {
                             if (!acc[curr.userName]) {
                                 acc[curr.userName] = {
                                     userName: curr.userName,
@@ -331,34 +337,34 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                             return acc;
                         }, {});
 
-                        return Object.values(aggregatedActivities).map((qa: any) => {
+                        return Object.values(aggregatedActivities).map((user: any) => {
                             // Calculate average based on ACTIVE time only
-                            const avgActivity = qa.activeTimeWorked > 0
-                                ? Math.round(qa.weightedActivitySum / qa.activeTimeWorked)
+                            const avgActivity = user.activeTimeWorked > 0
+                                ? Math.round(user.weightedActivitySum / user.activeTimeWorked)
                                 : 0;
-                            const projectList = Array.from(qa.projects).join(' / ') || 'N/A';
+                            const projectList = Array.from(user.projects).join(' / ') || 'N/A';
 
                             return `
-                                <div style="background: white; padding: 12px; margin-bottom: 12px; border-radius: 6px; border: 1px solid #e2e8f0;">
-                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                                        <p style="color: #1e293b; font-size: 15px; font-weight: 600; margin: 0;">${qa.userName}</p>
+                                    <div style="background: white; padding: 12px; margin-bottom: 12px; border-radius: 6px; border: 1px solid #e2e8f0;">
+                                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                            <p style="color: #1e293b; font-size: 15px; font-weight: 600; margin: 0;">${user.userName}</p>
+                                        </div>
+                                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
+                                            <div>
+                                                <p style="color: #64748b; font-size: 11px; margin: 0 0 2px 0;">Time Worked</p>
+                                                <p style="color: #0ea5e9; font-size: 16px; font-weight: 600; margin: 0;">${formatTime(user.timeWorked)}</p>
+                                            </div>
+                                            <div>
+                                                <p style="color: #64748b; font-size: 11px; margin: 0 0 2px 0;">Activity</p>
+                                                <p style="color: #10b981; font-size: 16px; font-weight: 600; margin: 0;">${avgActivity}%</p>
+                                            </div>
+                                            <div>
+                                                <p style="color: #64748b; font-size: 11px; margin: 0 0 2px 0;">Project</p>
+                                                <p style="color: #475569; font-size: 13px; font-weight: 500; margin: 0;">${projectList}</p>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
-                                        <div>
-                                            <p style="color: #64748b; font-size: 11px; margin: 0 0 2px 0;">Time Worked</p>
-                                            <p style="color: #0ea5e9; font-size: 16px; font-weight: 600; margin: 0;">${formatTime(qa.timeWorked)}</p>
-                                        </div>
-                                        <div>
-                                            <p style="color: #64748b; font-size: 11px; margin: 0 0 2px 0;">Activity</p>
-                                            <p style="color: #10b981; font-size: 16px; font-weight: 600; margin: 0;">${avgActivity}%</p>
-                                        </div>
-                                        <div>
-                                            <p style="color: #64748b; font-size: 11px; margin: 0 0 2px 0;">Project</p>
-                                            <p style="color: #475569; font-size: 13px; font-weight: 500; margin: 0;">${projectList}</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            `}).join('');
+                                `}).join('');
                     })()}
                     </div>
                     ` : ''}

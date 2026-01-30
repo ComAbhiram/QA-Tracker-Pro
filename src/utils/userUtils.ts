@@ -6,7 +6,14 @@ export async function getCurrentUserTeam() {
 
     const { data: profile, error } = await supabase
         .from('user_profiles')
-        .select('team_id, role')
+        .select(`
+            team_id, 
+            role,
+            teams (
+                id,
+                name
+            )
+        `)
         .eq('id', user.id)
         .single();
 
@@ -15,5 +22,9 @@ export async function getCurrentUserTeam() {
         return null;
     }
 
-    return profile;
+    return {
+        team_id: profile.team_id,
+        role: profile.role,
+        team_name: (profile.teams as any)?.name || 'Team'
+    };
 }
