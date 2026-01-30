@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
-import { mapTaskFromDB, Task } from '@/lib/types';
+import { mapTaskFromDB, Task, isTaskOverdue, getOverdueDays } from '@/lib/types';
 import { format } from 'date-fns';
-import { Search, Plus, Edit2 } from 'lucide-react';
+import { Search, Plus, Edit2, AlertCircle } from 'lucide-react';
 import TaskModal from '@/components/TaskModal';
 import Pagination from '@/components/Pagination';
 
@@ -233,13 +233,21 @@ export default function Tracker() {
                                                     ) : '-'}
                                                 </td>
                                                 <td className="px-4 py-4 border-r border-slate-50">
-                                                    <span className={`inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold border ${task.status === 'Completed' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' :
-                                                        task.status === 'In Progress' ? 'bg-blue-50 text-blue-700 border-blue-100' :
-                                                            task.status === 'Overdue' ? 'bg-red-50 text-red-700 border-red-100' :
-                                                                'bg-slate-50 text-slate-600 border-slate-100'
-                                                        }`}>
-                                                        {task.status}
-                                                    </span>
+                                                    <div className="flex items-center gap-2">
+                                                        <span className={`inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold border ${task.status === 'Completed' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' :
+                                                            task.status === 'In Progress' ? 'bg-blue-50 text-blue-700 border-blue-100' :
+                                                                task.status === 'Overdue' ? 'bg-red-50 text-red-700 border-red-100' :
+                                                                    'bg-slate-50 text-slate-600 border-slate-100'
+                                                            }`}>
+                                                            {task.status}
+                                                        </span>
+                                                        {isTaskOverdue(task) && (
+                                                            <span className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold bg-red-100 text-red-700 border border-red-200">
+                                                                <AlertCircle size={12} />
+                                                                {getOverdueDays(task)}d overdue
+                                                            </span>
+                                                        )}
+                                                    </div>
                                                 </td>
                                                 <td className="px-4 py-4 text-slate-500 font-medium border-r border-slate-50">{task.startDate ? format(new Date(task.startDate), 'MMM d') : '-'}</td>
                                                 <td className="px-4 py-4 text-slate-500 font-medium border-r border-slate-50">{task.endDate ? format(new Date(task.endDate), 'MMM d') : '-'}</td>

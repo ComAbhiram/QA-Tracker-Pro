@@ -3,10 +3,10 @@
 
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
-import { mapTaskFromDB, Task } from '@/lib/types';
+import { mapTaskFromDB, Task, isTaskOverdue, getOverdueDays } from '@/lib/types';
 import { getEffectiveStatus } from '@/utils/taskUtils';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, isToday, isWeekend, addMonths, subMonths, addDays, subDays } from 'date-fns';
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, List, Clock, User } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, List, Clock, User, AlertCircle } from 'lucide-react';
 import TaskModal from '@/components/TaskModal';
 
 export default function Schedule() {
@@ -287,9 +287,17 @@ export default function Schedule() {
                                         className={`rounded-2xl p-6 shadow-sm hover:shadow-md transition-all cursor-pointer group relative border ${getTaskBorderColor(task)}`}
                                     >
                                         <div className="flex justify-between items-start mb-4">
-                                            <span className={`text-[11px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-lg bg-black/20 text-white`}>
-                                                {getEffectiveStatus(task)}
-                                            </span>
+                                            <div className="flex items-center gap-2">
+                                                <span className={`text-[11px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-lg bg-black/20 text-white`}>
+                                                    {getEffectiveStatus(task)}
+                                                </span>
+                                                {isTaskOverdue(task) && (
+                                                    <span className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold bg-red-100 text-red-700 border border-red-200">
+                                                        <AlertCircle size={12} />
+                                                        {getOverdueDays(task)}d
+                                                    </span>
+                                                )}
+                                            </div>
                                         </div>
 
                                         <h3 className="font-bold text-xl text-white mb-1">{task.projectName}</h3>

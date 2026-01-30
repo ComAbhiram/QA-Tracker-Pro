@@ -153,7 +153,13 @@ export default function TaskModal({ isOpen, onClose, task, onSave }: TaskModalPr
 
             // Auto-fill actualCompletionDate when status changes to "Completed"
             if (name === 'status' && value === 'Completed' && !prev.actualCompletionDate) {
-                newData.actualCompletionDate = new Date().toISOString().split('T')[0];
+                const today = new Date().toISOString().split('T')[0];
+                newData.actualCompletionDate = today;
+
+                // If completed before end date, update end date to match completion date
+                if (prev.endDate && today < prev.endDate) {
+                    newData.endDate = today;
+                }
             }
 
             return newData;
