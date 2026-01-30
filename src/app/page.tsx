@@ -78,18 +78,24 @@ export default function Home() {
     // Map frontend Task format back to DBTask format
     const dbPayload: any = {
       project_name: taskData.projectName,
+      project_type: taskData.projectType,
       sub_phase: taskData.subPhase,
+      priority: taskData.priority,
       pc: taskData.pc,
       status: taskData.status,
       assigned_to: taskData.assignedTo,
       assigned_to2: taskData.assignedTo2,
       start_date: taskData.startDate || null,
       end_date: taskData.endDate || null,
+      actual_completion_date: taskData.actualCompletionDate || null,
       start_time: taskData.startTime || null,
       end_time: taskData.endTime || null,
+      comments: taskData.comments,
+      current_updates: taskData.currentUpdates,
       bug_count: taskData.bugCount,
       html_bugs: taskData.htmlBugs,
       functional_bugs: taskData.functionalBugs,
+      deviation_reason: taskData.deviationReason,
       team_id: taskData.teamId
     };
 
