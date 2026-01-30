@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { X, Save, Calendar, User, Briefcase, Activity } from 'lucide-react';
+import { X, Save, Calendar, User, Briefcase, Activity, Layers } from 'lucide-react';
 import { Task } from '@/lib/types';
 import { supabase } from '@/lib/supabase';
 import Combobox from './ui/Combobox';
@@ -311,6 +311,21 @@ export default function TaskModal({ isOpen, onClose, task, onSave }: TaskModalPr
                                 placeholder="Project Coordinator Name"
                             />
                         </div>
+                    </div>
+
+                    {/* 4.5. Phase/Task */}
+                    <div className="space-y-3">
+                        <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                            <Layers size={16} className="text-indigo-500" /> Phase/Task
+                        </label>
+                        <input
+                            type="text"
+                            name="subPhase"
+                            value={formData.subPhase || ''}
+                            onChange={handleChange}
+                            className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all placeholder:text-slate-400 font-medium text-slate-700"
+                            placeholder="e.g. Smoke Test, Dev Test, Before Live..."
+                        />
                     </div>
 
                     {/* 5. Assignee 1 & 6. Assignee 2 */}
