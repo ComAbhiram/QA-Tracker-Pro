@@ -84,7 +84,6 @@ export default function ProjectsPage() {
 
         if (!userTeamId) {
             setLastError('Error: User Team ID is missing. Please refresh the page.');
-            window.alert('Error: User Team ID is missing.');
             return;
         }
 
@@ -121,19 +120,17 @@ export default function ProjectsPage() {
             if (failedCount > 0) {
                 const msg = `Bulk import finished with errors.\nImported: ${importedCount}\nFailed: ${failedCount}\nLast Error: ${lastErrorMsg}`;
                 setLastError(msg);
-                window.alert(msg);
             } else if (importedCount === 0) {
                 const msg = `No projects imported. All ${hubstaffProjects.length} projects already exist or skipped.`;
-                window.alert(msg);
+                alert(msg);
             } else {
                 const msg = `Bulk import complete! Imported: ${importedCount}`;
-                window.alert(msg);
+                alert(msg);
             }
         } catch (error: any) {
             console.error('Error during bulk import:', error);
             const msg = `CRITICAL Error: ${error.message || JSON.stringify(error)}`;
             setLastError(msg);
-            window.alert(msg);
         } finally {
             setImportingAll(false);
         }

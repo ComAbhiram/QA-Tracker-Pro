@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
@@ -21,8 +21,11 @@ import {
     ChevronRight,
     Menu,
     X,
-    Database
+    Database,
+    Shield,
+    LogOut
 } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
 
 interface NavItem {
     label: string;
@@ -38,6 +41,10 @@ interface NavSection {
 
 export function Sidebar() {
     const pathname = usePathname();
+
+    // Hide sidebar on login page
+    if (pathname === '/login') return null;
+
     const [collapsed, setCollapsed] = useState(true);
     const [openSections, setOpenSections] = useState<Record<string, boolean>>({
         main: true,
@@ -51,6 +58,32 @@ export function Sidebar() {
         setOpenSections(prev => ({ ...prev, [section]: !prev[section] }));
     };
 
+    const [userRole, setUserRole] = useState<string | null>(null);
+    const [sidebarTitle, setSidebarTitle] = useState('QA Tracker');
+
+    useEffect(() => {
+        // Fetch user role for sidebar visibility
+        const fetchRole = async () => {
+            // Dynamic import to avoid circular dependency if any (though usually fine here)
+            const { supabase } = await import('@/lib/supabase');
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+                const { data: profile } = await supabase.from('user_profiles').select('role, team_id').eq('id', user.id).single();
+                if (profile) {
+                    setUserRole(profile.role);
+
+                    if (profile.team_id) {
+                        const { data: team } = await supabase.from('teams').select('name').eq('id', profile.team_id).single();
+                        if (team && team.name !== 'QA Team') {
+                            setSidebarTitle('Team Tracker');
+                        }
+                    }
+                }
+            }
+        };
+        fetchRole();
+    }, []);
+
     const navSections: Record<string, NavSection> = {
         main: {
             title: 'MAIN',
@@ -58,6 +91,7 @@ export function Sidebar() {
                 { label: 'Dashboard', icon: <LayoutDashboard size={18} />, href: '/' },
                 { label: 'Task Tracker', icon: <ClipboardList size={18} />, href: '/tracker' },
                 { label: 'Schedule', icon: <CalendarDays size={18} />, href: '/schedule' },
+                ...(userRole === 'super_admin' ? [{ label: 'Super Admin', icon: <Shield size={18} />, href: '/admin' }] : []),
             ]
         },
         analytics: {
@@ -103,7 +137,7 @@ export function Sidebar() {
                         <div className="logo-icon">
                             <LayoutDashboard size={20} />
                         </div>
-                        QA Tracker
+                        {sidebarTitle}
                     </div>
                     {/* Close Button Inside Sidebar */}
                     <button
@@ -144,6 +178,19 @@ export function Sidebar() {
                             </div>
                         </div>
                     ))}
+                </div>
+
+                <div className="mt-auto border-t border-slate-100 p-4">
+                    <button
+                        onClick={async () => {
+                            await supabase.auth.signOut();
+                            window.location.href = '/login';
+                        }}
+                        className={`flex items-center gap-3 w-full p-3 rounded-xl text-slate-600 hover:bg-red-50 hover:text-red-600 transition-all ${collapsed ? 'justify-center' : ''}`}
+                    >
+                        <LogOut size={20} />
+                        {!collapsed && <span className="font-medium">Sign Out</span>}
+                    </button>
                 </div>
             </nav>
 
