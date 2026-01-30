@@ -100,39 +100,54 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                 alert(`Work Status for ${selectedQA} copied to clipboard!`);
             } catch (clipboardError) {
                 console.error('Clipboard write failed:', clipboardError);
-                // Fallback: Create a temporary textarea and select the text for manual copy
+                // Fallback: Show modal with copyable text (better for mobile)
+                const modal = document.createElement('div');
+                modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:9999;padding:20px;';
+
+                const content = document.createElement('div');
+                content.style.cssText = 'background:white;border-radius:12px;padding:24px;max-width:600px;width:100%;max-height:80vh;display:flex;flex-direction:column;';
+
+                const title = document.createElement('h3');
+                title.textContent = 'Work Status Report';
+                title.style.cssText = 'margin:0 0 16px 0;font-size:18px;font-weight:600;color:#1e293b;';
+
                 const textarea = document.createElement('textarea');
                 textarea.value = data.formattedText;
-                textarea.style.position = 'fixed';
-                textarea.style.top = '0';
-                textarea.style.left = '0';
-                textarea.style.width = '2em';
-                textarea.style.height = '2em';
-                textarea.style.padding = '0';
-                textarea.style.border = 'none';
-                textarea.style.outline = 'none';
-                textarea.style.boxShadow = 'none';
-                textarea.style.background = 'transparent';
-                document.body.appendChild(textarea);
-                textarea.focus();
-                textarea.select();
+                textarea.style.cssText = 'width:100%;min-height:300px;padding:12px;border:1px solid #e2e8f0;border-radius:8px;font-family:monospace;font-size:13px;resize:vertical;margin-bottom:16px;';
+                textarea.readOnly = true;
 
-                try {
-                    // Try the old execCommand method as fallback
-                    const successful = document.execCommand('copy');
-                    if (successful) {
-                        alert(`Work Status for ${selectedQA} copied to clipboard!`);
-                    } else {
-                        alert('Please press Ctrl+C (or Cmd+C on Mac) to copy the selected text');
+                const buttonContainer = document.createElement('div');
+                buttonContainer.style.cssText = 'display:flex;gap:12px;justify-content:flex-end;';
+
+                const copyBtn = document.createElement('button');
+                copyBtn.textContent = 'Copy Text';
+                copyBtn.style.cssText = 'padding:10px 20px;background:#0ea5e9;color:white;border:none;border-radius:8px;font-weight:500;cursor:pointer;';
+                copyBtn.onclick = () => {
+                    textarea.select();
+                    try {
+                        document.execCommand('copy');
+                        copyBtn.textContent = '✓ Copied!';
+                        setTimeout(() => copyBtn.textContent = 'Copy Text', 2000);
+                    } catch (e) {
+                        alert('Please select the text and press Ctrl+C (or Cmd+C) to copy');
                     }
-                } catch (err) {
-                    alert('Please press Ctrl+C (or Cmd+C on Mac) to copy the selected text');
-                }
+                };
 
-                // Keep textarea visible for a moment so user can copy
-                setTimeout(() => {
-                    document.body.removeChild(textarea);
-                }, 3000);
+                const closeBtn = document.createElement('button');
+                closeBtn.textContent = 'Close';
+                closeBtn.style.cssText = 'padding:10px 20px;background:#64748b;color:white;border:none;border-radius:8px;font-weight:500;cursor:pointer;';
+                closeBtn.onclick = () => document.body.removeChild(modal);
+
+                buttonContainer.appendChild(copyBtn);
+                buttonContainer.appendChild(closeBtn);
+                content.appendChild(title);
+                content.appendChild(textarea);
+                content.appendChild(buttonContainer);
+                modal.appendChild(content);
+                document.body.appendChild(modal);
+
+                // Auto-select text for easy copying
+                textarea.select();
             }
         } catch (error) {
             console.error('Error generating QA work status:', error);
