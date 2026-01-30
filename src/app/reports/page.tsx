@@ -206,13 +206,13 @@ export default function Reports() {
                         </div>
                     </div>
                     <div className="flex-1 w-full">
-                        <label className="text-sm font-medium text-slate-600 mb-1 block">QA Member</label>
+                        <label className="text-sm font-medium text-slate-600 mb-1 block">Member</label>
                         <select
                             value={selectedQA}
                             onChange={e => setSelectedQA(e.target.value)}
                             className="w-full px-3 py-2 border rounded-lg text-sm"
                         >
-                            <option value="">All QA Members</option>
+                            <option value="">All Members</option>
                             {teamMembers.map(m => (
                                 <option key={m.id} value={m.name}>{m.name}</option>
                             ))}
