@@ -19,9 +19,23 @@ export default function ProjectsPage() {
     // Manual Create State
     const [newProjectName, setNewProjectName] = useState('');
     const [creating, setCreating] = useState(false);
+    const [lastError, setLastError] = useState<string | null>(null);
+
+    const [userTeamId, setUserTeamId] = useState<string | null>(null);
 
     useEffect(() => {
-        fetchProjects();
+        const init = async () => {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+                const { data } = await supabase.from('user_profiles').select('team_id').eq('id', user.id).single();
+                console.log('Fetched team_id:', data?.team_id);
+                if (data) setUserTeamId(data.team_id);
+            } else {
+                console.log('No user found in auth.getUser()');
+            }
+            fetchProjects();
+        };
+        init();
     }, []);
 
     const fetchProjects = async () => {
@@ -39,16 +53,22 @@ export default function ProjectsPage() {
         setLoading(false);
     };
 
-    const searchHubstaff = async () => {
-        if (!hubstaffSearch.trim()) return;
+    const [importingAll, setImportingAll] = useState(false);
+
+    const searchHubstaff = async (fetchAll: boolean = false) => {
+        if (!fetchAll && !hubstaffSearch.trim()) return;
         setIsSearching(true);
         try {
             const response = await fetch('/api/hubstaff/projects');
             if (response.ok) {
                 const data = await response.json();
-                const filtered = data.projects.filter((p: any) =>
-                    p.name.toLowerCase().includes(hubstaffSearch.toLowerCase())
-                );
+                let filtered = data.projects;
+
+                if (!fetchAll && hubstaffSearch.trim()) {
+                    filtered = filtered.filter((p: any) =>
+                        p.name.toLowerCase().includes(hubstaffSearch.toLowerCase())
+                    );
+                }
                 setHubstaffProjects(filtered);
             }
         } catch (error) {
@@ -58,13 +78,79 @@ export default function ProjectsPage() {
         }
     };
 
+    const importAllProjects = async () => {
+        setLastError(null);
+        if (!confirm(`Are you sure you want to import ${hubstaffProjects.length} projects? This might take a moment.`)) return;
+
+        if (!userTeamId) {
+            setLastError('Error: User Team ID is missing. Please refresh the page.');
+            window.alert('Error: User Team ID is missing.');
+            return;
+        }
+
+        setImportingAll(true);
+        let importedCount = 0;
+        let failedCount = 0;
+        let lastErrorMsg = '';
+
+        try {
+            for (const hp of hubstaffProjects) {
+                // Skip if already imported
+                const exists = projects.find(p => p.hubstaffId === hp.id || p.name === hp.name);
+                if (exists) continue;
+
+                const { error } = await supabase.from('projects').insert([{
+                    name: hp.name,
+                    hubstaff_id: hp.id,
+                    status: 'active',
+                    description: hp.description || '',
+                    team_id: userTeamId
+                }]);
+
+                if (error) {
+                    console.error(`Failed to import ${hp.name}:`, error);
+                    lastErrorMsg = error.message;
+                    failedCount++;
+                } else {
+                    importedCount++;
+                }
+            }
+
+            await fetchProjects();
+
+            if (failedCount > 0) {
+                const msg = `Bulk import finished with errors.\nImported: ${importedCount}\nFailed: ${failedCount}\nLast Error: ${lastErrorMsg}`;
+                setLastError(msg);
+                window.alert(msg);
+            } else if (importedCount === 0) {
+                const msg = `No projects imported. All ${hubstaffProjects.length} projects already exist or skipped.`;
+                window.alert(msg);
+            } else {
+                const msg = `Bulk import complete! Imported: ${importedCount}`;
+                window.alert(msg);
+            }
+        } catch (error: any) {
+            console.error('Error during bulk import:', error);
+            const msg = `CRITICAL Error: ${error.message || JSON.stringify(error)}`;
+            setLastError(msg);
+            window.alert(msg);
+        } finally {
+            setImportingAll(false);
+        }
+    };
+
     const importProject = async (hubstaffProject: any) => {
+        setLastError(null);
+        if (!userTeamId) {
+            setLastError('Error: User Team ID is missing.');
+            return;
+        }
         setImporting(hubstaffProject.id);
         try {
             // Check if already exists
             const exists = projects.find(p => p.hubstaffId === hubstaffProject.id || p.name === hubstaffProject.name);
             if (exists) {
-                alert('Project already exists in database.');
+                setLastError('Project already exists in database.');
                 return;
             }
 
@@ -72,15 +158,16 @@ export default function ProjectsPage() {
                 name: hubstaffProject.name,
                 hubstaff_id: hubstaffProject.id,
                 status: 'active',
-                description: hubstaffProject.description || ''
+                description: hubstaffProject.description || '',
+                team_id: userTeamId
             }]);
 
             if (error) throw error;
             await fetchProjects();
-            alert('Project imported successfully!');
-        } catch (error) {
+            alert('Project imported successfully!'); // Success can still be an alert
+        } catch (error: any) {
             console.error('Error importing project:', error);
-            alert('Failed to import project.');
+            setLastError(`Failed to import project: ${error.message || JSON.stringify(error)}`);
         } finally {
             setImporting(null);
         }
@@ -88,20 +175,30 @@ export default function ProjectsPage() {
 
     const createManualProject = async (e: React.FormEvent) => {
         e.preventDefault();
+        setLastError(null);
         if (!newProjectName.trim()) return;
+
+        if (!userTeamId) {
+            setLastError('Error: User Team ID is missing.');
+            window.alert('Error: User Team ID is missing.');
+            return;
+        }
+
         setCreating(true);
         try {
             // Check if already exists by name
             const exists = projects.find(p => p.name.toLowerCase() === newProjectName.trim().toLowerCase());
             if (exists) {
-                alert('Project name already exists.');
+                setLastError('Project name already exists.');
+                window.alert('Project name already exists.');
                 return;
             }
 
             const { error } = await supabase.from('projects').insert([{
                 name: newProjectName.trim(),
                 status: 'active',
-                description: 'Manually created'
+                description: 'Manually created',
+                team_id: userTeamId
             }]);
 
             if (error) throw error;
@@ -109,9 +206,10 @@ export default function ProjectsPage() {
             await fetchProjects();
             setActiveTab('list');
             alert('Project created successfully!');
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error creating project:', error);
-            alert('Failed to create project.');
+            const msg = `Failed to create project: ${error.message || JSON.stringify(error)}`;
+            setLastError(msg);
         } finally {
             setCreating(false);
         }
@@ -145,6 +243,19 @@ export default function ProjectsPage() {
                     </button>
                 </div>
             </header>
+
+            {/* ERROR DISPLAY */}
+            {lastError && (
+                <div className="bg-red-50 border border-red-200 p-4 rounded-xl mb-6 text-sm text-red-800 flex justify-between items-center">
+                    <div>
+                        <p><strong>Error Occurred:</strong></p>
+                        <p className="font-mono mt-1">{lastError}</p>
+                    </div>
+                    <button onClick={() => setLastError(null)} className="text-red-600 hover:text-red-900 font-bold px-3">
+                        Dismiss
+                    </button>
+                </div>
+            )}
 
             {/* LIST VIEW */}
             {activeTab === 'list' && (
@@ -216,13 +327,33 @@ export default function ProjectsPage() {
                                 />
                             </div>
                             <button
-                                onClick={searchHubstaff}
+                                onClick={() => searchHubstaff(false)}
                                 disabled={isSearching || !hubstaffSearch.trim()}
                                 className="px-6 py-3 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-colors disabled:opacity-50"
                             >
                                 {isSearching ? 'Searching...' : 'Search'}
                             </button>
+                            <button
+                                onClick={() => searchHubstaff(true)}
+                                disabled={isSearching}
+                                className="px-6 py-3 bg-slate-800 text-white font-bold rounded-xl hover:bg-slate-900 transition-colors disabled:opacity-50 whitespace-nowrap"
+                            >
+                                {isSearching ? 'Fetching...' : 'Fetch All'}
+                            </button>
                         </div>
+
+                        {hubstaffProjects.length > 0 && (
+                            <div className="flex justify-end mb-4">
+                                <button
+                                    onClick={importAllProjects}
+                                    disabled={importingAll}
+                                    className="px-4 py-2 bg-emerald-600 text-white font-bold rounded-lg hover:bg-emerald-700 transition-colors disabled:opacity-50 flex items-center gap-2"
+                                >
+                                    {importingAll ? <RefreshCw className="animate-spin" size={16} /> : <Database size={16} />}
+                                    Import All ({hubstaffProjects.length})
+                                </button>
+                            </div>
+                        )}
 
                         <div className="space-y-2">
                             {hubstaffProjects.map((hp) => {
