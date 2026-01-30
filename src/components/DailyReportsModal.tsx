@@ -58,16 +58,11 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
 
     const fetchTeamMembers = async () => {
         try {
-            // Fetch from our new settings API which returns the SELECTED members
-            const response = await fetch('/api/settings/qa-members');
+            // Fetch from our new members API which returns ALL Hubstaff members
+            const response = await fetch('/api/hubstaff/members');
             if (response.ok) {
                 const data = await response.json();
-                // Map the DB response to the format expected by the dropdown { id, name }
-                // Use hubstaff_name for the value as that's what we use for API queries
-                setTeamMembers(data.members.map((m: any) => ({
-                    id: m.hubstaff_user_id || m.id,
-                    name: m.hubstaff_name // Use full Hubstaff name for matching
-                })) || []);
+                setTeamMembers(data.members || []);
             }
         } catch (err) {
             console.error('Error fetching team members:', err);
@@ -784,32 +779,36 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                                 <ClipboardList className="text-white" size={20} />
                             </div>
                             <div className="flex-1">
-                                <h3 className="font-semibold text-slate-800">QA Work Status</h3>
-                                <p className="text-sm text-slate-500">Generate work status report for a specific QA member</p>
+                                <h3 className="font-semibold text-slate-800">Work Status</h3>
+                                <p className="text-sm text-slate-500">Generate work status report for a specific member</p>
                             </div>
                             <ChevronRight className={`text-slate-400 group-hover:text-sky-500 transition-all ${expandedSection === 'qa-status' ? 'rotate-90' : ''}`} size={20} />
                         </button>
 
                         {expandedSection === 'qa-status' && (
                             <div className="border-t border-slate-200 bg-slate-50 p-4 space-y-3">
-                                {/* QA Selector */}
+                                {/* Member Selector */}
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-2">
-                                        Select QA
+                                        Select Member
                                     </label>
-                                    <select
-                                        value={selectedQA}
-                                        onChange={(e) => setSelectedQA(e.target.value)}
-                                        className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 bg-white text-sm"
-                                    >
-                                        <option value="">Choose a QA...</option>
-                                        {teamMembers.map((member) => (
-                                            <option key={member.id} value={member.name}>
-                                                {member.name}
-                                            </option>
-                                        ))}
-                                    </select>
+                                    <div className="relative">
+                                        <select
+                                            value={selectedQA}
+                                            onChange={(e) => setSelectedQA(e.target.value)}
+                                            className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 text-sm appearance-none bg-white"
+                                        >
+                                            <option value="">Choose a Member...</option>
+                                            {teamMembers.map((member) => (
+                                                <option key={member.id} value={member.name}>
+                                                    {member.name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                        <ChevronRight className="absolute right-3 top-1/2 -translate-y-1/2 rotate-90 text-slate-400 pointer-events-none" size={16} />
+                                    </div>
                                 </div>
+
 
                                 {/* Date Selector */}
                                 <div>
@@ -861,6 +860,6 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                 </div>
 
             </div>
-        </div>
+        </div >
     );
 }
