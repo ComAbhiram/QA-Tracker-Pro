@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { supabaseServer } from '@/lib/supabase-server';
+import { createServerClient, type CookieOptions } from '@supabase/ssr';
+import { cookies } from 'next/headers';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
@@ -8,8 +9,23 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 // GET: Fetch all leaves filtered by user's team
 export async function GET(request: Request) {
     try {
+        const cookieStore = cookies();
+
+        // Create server client with cookies
+        const supabase = createServerClient(
+            supabaseUrl,
+            process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+            {
+                cookies: {
+                    get(name: string) {
+                        return cookieStore.get(name)?.value;
+                    },
+                },
+            }
+        );
+
         // Get the current user's team_id
-        const { data: { user } } = await supabaseServer.auth.getUser();
+        const { data: { user } } = await supabase.auth.getUser();
 
         if (!user) {
             return NextResponse.json(
@@ -19,7 +35,7 @@ export async function GET(request: Request) {
         }
 
         // Get user's team_id from user_profiles
-        const { data: profile } = await supabaseServer
+        const { data: profile } = await supabase
             .from('user_profiles')
             .select('team_id')
             .eq('id', user.id)
@@ -32,13 +48,14 @@ export async function GET(request: Request) {
             );
         }
 
-        const supabase = createClient(supabaseUrl, supabaseServiceKey);
+        // Use service role key for querying
+        const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
         const { searchParams } = new URL(request.url);
         const startDate = searchParams.get('start_date');
         const endDate = searchParams.get('end_date');
 
-        let query = supabase
+        let query = supabaseAdmin
             .from('leaves')
             .select('*')
             .eq('team_id', profile.team_id) // Filter by team
@@ -76,8 +93,23 @@ export async function GET(request: Request) {
 // POST: Create a new leave request
 export async function POST(request: Request) {
     try {
+        const cookieStore = cookies();
+
+        // Create server client with cookies
+        const supabase = createServerClient(
+            supabaseUrl,
+            process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+            {
+                cookies: {
+                    get(name: string) {
+                        return cookieStore.get(name)?.value;
+                    },
+                },
+            }
+        );
+
         // Get the current user's team_id
-        const { data: { user } } = await supabaseServer.auth.getUser();
+        const { data: { user } } = await supabase.auth.getUser();
 
         if (!user) {
             return NextResponse.json(
@@ -87,7 +119,7 @@ export async function POST(request: Request) {
         }
 
         // Get user's team_id from user_profiles
-        const { data: profile } = await supabaseServer
+        const { data: profile } = await supabase
             .from('user_profiles')
             .select('team_id')
             .eq('id', user.id)
@@ -100,7 +132,8 @@ export async function POST(request: Request) {
             );
         }
 
-        const supabase = createClient(supabaseUrl, supabaseServiceKey);
+        // Use service role key for inserting
+        const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
         const body = await request.json();
 
         const {
@@ -121,7 +154,7 @@ export async function POST(request: Request) {
         }
 
         // Insert the leave request with team_id
-        const { data, error } = await supabase
+        const { data, error } = await supabaseAdmin
             .from('leaves')
             .insert([
                 {
