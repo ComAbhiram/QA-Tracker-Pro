@@ -91,9 +91,6 @@ export function GuestProvider({ children }: { children: ReactNode }) {
     return <GuestContext.Provider value={value}>{children}</GuestContext.Provider>;
 }
 
-return <GuestContext.Provider value={value}>{children}</GuestContext.Provider>;
-}
-
 export function useGuestMode() {
     const context = useContext(GuestContext);
     if (context === undefined) {
