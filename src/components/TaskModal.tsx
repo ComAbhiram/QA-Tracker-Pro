@@ -287,13 +287,13 @@ export default function TaskModal({ isOpen, onClose, task, onSave }: TaskModalPr
                             <label className="text-sm font-semibold text-slate-700">Priority</label>
                             <Combobox
                                 options={[
-                                    { value: 'Low', label: 'Low' },
-                                    { value: 'Medium', label: 'Medium' },
-                                    { value: 'High', label: 'High' },
-                                    { value: 'Urgent', label: 'Urgent' }
+                                    { id: 'Low', label: 'Low' },
+                                    { id: 'Medium', label: 'Medium' },
+                                    { id: 'High', label: 'High' },
+                                    { id: 'Urgent', label: 'Urgent' }
                                 ]}
                                 value={formData.priority || ''}
-                                onChange={(val) => setFormData(prev => ({ ...prev, priority: val }))}
+                                onChange={(val) => setFormData(prev => ({ ...prev, priority: val ? String(val) : null }))}
                                 placeholder="Select or type priority..."
                                 searchPlaceholder="Search or type custom priority..."
                                 emptyMessage="No matching priority. Press Enter to use custom value."
