@@ -63,7 +63,7 @@ export default function LeaveModal({ isOpen, onClose, onSave }: LeaveModalProps)
 
     const handleMemberChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const selectedId = e.target.value;
-        const selectedMember = members.find(m => m.id === selectedId);
+        const selectedMember = members.find(m => String(m.id) === selectedId);
         setFormData({
             ...formData,
             team_member_id: selectedId,
