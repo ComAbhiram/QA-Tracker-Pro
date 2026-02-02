@@ -17,6 +17,19 @@ interface GuestContextType extends GuestSession {
 const GuestContext = createContext<GuestContextType | undefined>(undefined);
 
 const GUEST_SESSION_KEY = 'qa_tracker_guest_session';
+const GUEST_COOKIE_NAME = 'guest_mode';
+
+// Helper function to set cookie
+function setCookie(name: string, value: string, days: number = 7) {
+    const expires = new Date();
+    expires.setTime(expires.getTime() + days * 24 * 60 * 60 * 1000);
+    document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/;SameSite=Lax`;
+}
+
+// Helper function to delete cookie
+function deleteCookie(name: string) {
+    document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;`;
+}
 
 export function GuestProvider({ children }: { children: ReactNode }) {
     const [guestSession, setGuestSessionState] = useState<GuestSession>({
@@ -32,9 +45,14 @@ export function GuestProvider({ children }: { children: ReactNode }) {
             try {
                 const parsed = JSON.parse(stored);
                 setGuestSessionState(parsed);
+                // Ensure cookie is set
+                if (parsed.isGuest) {
+                    setCookie(GUEST_COOKIE_NAME, 'true');
+                }
             } catch (error) {
                 console.error('Failed to parse guest session:', error);
                 localStorage.removeItem(GUEST_SESSION_KEY);
+                deleteCookie(GUEST_COOKIE_NAME);
             }
         }
     }, []);
@@ -47,6 +65,8 @@ export function GuestProvider({ children }: { children: ReactNode }) {
         };
         setGuestSessionState(session);
         localStorage.setItem(GUEST_SESSION_KEY, JSON.stringify(session));
+        // Set cookie for server-side detection
+        setCookie(GUEST_COOKIE_NAME, 'true');
     };
 
     const clearGuestSession = () => {
@@ -57,6 +77,8 @@ export function GuestProvider({ children }: { children: ReactNode }) {
         };
         setGuestSessionState(session);
         localStorage.removeItem(GUEST_SESSION_KEY);
+        // Remove cookie
+        deleteCookie(GUEST_COOKIE_NAME);
     };
 
     const value: GuestContextType = {
@@ -67,6 +89,9 @@ export function GuestProvider({ children }: { children: ReactNode }) {
     };
 
     return <GuestContext.Provider value={value}>{children}</GuestContext.Provider>;
+}
+
+return <GuestContext.Provider value={value}>{children}</GuestContext.Provider>;
 }
 
 export function useGuestMode() {

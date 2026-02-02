@@ -35,30 +35,37 @@ export async function updateSession(request: NextRequest) {
         data: { user },
     } = await supabase.auth.getUser()
 
-    // Check if user is in guest mode (client-side localStorage check will be done in components)
-    // For middleware, we'll allow access to all routes if they're on /guest or have accessed it
+    // Check if user is in guest mode via cookie
+    const isGuestMode = request.cookies.get('guest_mode')?.value === 'true'
     const isGuestPath = request.nextUrl.pathname.startsWith('/guest')
+    const isLoginPath = request.nextUrl.pathname.startsWith('/login')
+    const isAuthPath = request.nextUrl.pathname.startsWith('/auth')
 
     // Protect routes
-    // 1. If not logged in and not on login/guest page, redirect to login
-    if (!user && !request.nextUrl.pathname.startsWith('/login') && !isGuestPath && !request.nextUrl.pathname.startsWith('/auth')) {
+    // 1. If not logged in and not in guest mode and not on login/guest page, redirect to login
+    if (!user && !isGuestMode && !isLoginPath && !isGuestPath && !isAuthPath) {
         // Allow public assets
         if (request.nextUrl.pathname.startsWith('/_next') ||
             request.nextUrl.pathname.includes('favicon.ico') ||
-            request.nextUrl.pathname.startsWith('/api') // Allow API for now (API routes will handle their own auth)
+            request.nextUrl.pathname.startsWith('/api')
         ) {
             return response
         }
 
-        // Allow access if coming from guest mode (we'll rely on client-side checks)
-        // This is a simplified approach - in production, you might want to use a cookie
         const url = request.nextUrl.clone()
         url.pathname = '/login'
         return NextResponse.redirect(url)
     }
 
-    // 2. If logged in and on login page, redirect to home
-    if (user && request.nextUrl.pathname.startsWith('/login')) {
+    // 2. If logged in (not guest) and on login page, redirect to home
+    if (user && !isGuestMode && isLoginPath) {
+        const url = request.nextUrl.clone()
+        url.pathname = '/'
+        return NextResponse.redirect(url)
+    }
+
+    // 3. If in guest mode and on login page, redirect to home
+    if (isGuestMode && isLoginPath) {
         const url = request.nextUrl.clone()
         url.pathname = '/'
         return NextResponse.redirect(url)
