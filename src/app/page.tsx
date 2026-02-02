@@ -37,7 +37,10 @@ export default function Home() {
 
     // Filter by team if in guest mode
     if (isGuest && selectedTeamId) {
+      console.log('Guest mode: Filtering by team_id:', selectedTeamId);
       query = query.eq('team_id', selectedTeamId);
+    } else {
+      console.log('Not in guest mode or no team selected. isGuest:', isGuest, 'selectedTeamId:', selectedTeamId);
     }
 
     const { data, error } = await query;
@@ -45,6 +48,7 @@ export default function Home() {
     if (error) {
       console.error('Error fetching tasks:', error);
     } else {
+      console.log('Fetched tasks:', data?.length || 0, 'tasks');
       setTasks((data || []).map(mapTaskFromDB));
     }
     setLoading(false);

@@ -16,7 +16,7 @@ export default function GuestBanner() {
     };
 
     return (
-        <div className="bg-gradient-to-r from-amber-500 to-orange-500 text-white px-6 py-3 shadow-md">
+        <div className="bg-gradient-to-r from-amber-500 to-orange-500 text-white px-6 py-3 shadow-md relative z-50">
             <div className="max-w-7xl mx-auto flex items-center justify-between">
                 <div className="flex items-center gap-3">
                     <div className="bg-white/20 p-2 rounded-lg backdrop-blur-sm">
