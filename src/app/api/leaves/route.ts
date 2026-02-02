@@ -1,12 +1,37 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { supabaseServer } from '@/lib/supabase-server';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
-// GET: Fetch all leaves
+// GET: Fetch all leaves filtered by user's team
 export async function GET(request: Request) {
     try {
+        // Get the current user's team_id
+        const { data: { user } } = await supabaseServer.auth.getUser();
+
+        if (!user) {
+            return NextResponse.json(
+                { error: 'Unauthorized' },
+                { status: 401 }
+            );
+        }
+
+        // Get user's team_id from user_profiles
+        const { data: profile } = await supabaseServer
+            .from('user_profiles')
+            .select('team_id')
+            .eq('id', user.id)
+            .single();
+
+        if (!profile || !profile.team_id) {
+            return NextResponse.json(
+                { error: 'User not associated with a team' },
+                { status: 400 }
+            );
+        }
+
         const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
         const { searchParams } = new URL(request.url);
@@ -16,6 +41,7 @@ export async function GET(request: Request) {
         let query = supabase
             .from('leaves')
             .select('*')
+            .eq('team_id', profile.team_id) // Filter by team
             .order('leave_date', { ascending: true });
 
         // Filter by date range if provided
@@ -50,6 +76,30 @@ export async function GET(request: Request) {
 // POST: Create a new leave request
 export async function POST(request: Request) {
     try {
+        // Get the current user's team_id
+        const { data: { user } } = await supabaseServer.auth.getUser();
+
+        if (!user) {
+            return NextResponse.json(
+                { error: 'Unauthorized' },
+                { status: 401 }
+            );
+        }
+
+        // Get user's team_id from user_profiles
+        const { data: profile } = await supabaseServer
+            .from('user_profiles')
+            .select('team_id')
+            .eq('id', user.id)
+            .single();
+
+        if (!profile || !profile.team_id) {
+            return NextResponse.json(
+                { error: 'User not associated with a team' },
+                { status: 400 }
+            );
+        }
+
         const supabase = createClient(supabaseUrl, supabaseServiceKey);
         const body = await request.json();
 
@@ -70,7 +120,7 @@ export async function POST(request: Request) {
             );
         }
 
-        // Insert the leave request
+        // Insert the leave request with team_id
         const { data, error } = await supabase
             .from('leaves')
             .insert([
@@ -80,7 +130,8 @@ export async function POST(request: Request) {
                     leave_date,
                     leave_type,
                     reason: reason || null,
-                    created_by: created_by || null
+                    created_by: created_by || null,
+                    team_id: profile.team_id // Add team_id
                 }
             ])
             .select()
