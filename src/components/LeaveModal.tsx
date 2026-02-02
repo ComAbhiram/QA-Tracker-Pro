@@ -18,12 +18,13 @@ export interface LeaveFormData {
 }
 
 const LEAVE_TYPES = [
-    'Sick Leave',
-    'Casual Leave',
-    'Vacation',
-    'Personal Leave',
-    'Emergency Leave',
-    'Other'
+    'Full Day Casual Leave',
+    'Full Day Sick Leave',
+    'Unplanned Leave',
+    'Half Day Morning Session Casual Leave',
+    'Half Day Morning Session Sick Leave',
+    'Half Day Afternoon Session Casual Leave',
+    'Half Day Afternoon Session Sick Leave'
 ];
 
 export default function LeaveModal({ isOpen, onClose, onSave }: LeaveModalProps) {

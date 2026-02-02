@@ -7,7 +7,15 @@ CREATE TABLE IF NOT EXISTS leaves (
   team_member_id TEXT NOT NULL,
   team_member_name TEXT NOT NULL,
   leave_date DATE NOT NULL,
-  leave_type TEXT NOT NULL CHECK (leave_type IN ('Sick Leave', 'Casual Leave', 'Vacation', 'Personal Leave', 'Emergency Leave', 'Other')),
+  leave_type TEXT NOT NULL CHECK (leave_type IN (
+    'Full Day Casual Leave', 
+    'Full Day Sick Leave', 
+    'Unplanned Leave', 
+    'Half Day Morning Session Casual Leave', 
+    'Half Day Morning Session Sick Leave', 
+    'Half Day Afternoon Session Casual Leave', 
+    'Half Day Afternoon Session Sick Leave'
+  )),
   reason TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   created_by UUID REFERENCES auth.users(id),

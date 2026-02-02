@@ -140,11 +140,17 @@ export default function LeavePage() {
 
     const getLeaveTypeColor = (type: string) => {
         const t = type.toLowerCase();
-        if (t.includes('sick')) return 'bg-red-600 text-white border-red-700';
-        if (t.includes('casual')) return 'bg-blue-600 text-white border-blue-700';
-        if (t.includes('vacation')) return 'bg-purple-600 text-white border-purple-700';
-        if (t.includes('personal')) return 'bg-amber-600 text-white border-amber-700';
-        if (t.includes('emergency')) return 'bg-rose-600 text-white border-rose-700';
+        // Unplanned leave - urgent red
+        if (t.includes('unplanned')) return 'bg-rose-600 text-white border-rose-700';
+        // Full day sick leave - red
+        if (t.includes('full day sick')) return 'bg-red-600 text-white border-red-700';
+        // Full day casual leave - blue
+        if (t.includes('full day casual')) return 'bg-blue-600 text-white border-blue-700';
+        // Half day sick leave - lighter red
+        if (t.includes('half day') && t.includes('sick')) return 'bg-red-500 text-white border-red-600';
+        // Half day casual leave - lighter blue
+        if (t.includes('half day') && t.includes('casual')) return 'bg-blue-500 text-white border-blue-600';
+        // Fallback
         return 'bg-slate-600 text-white border-slate-700';
     };
 
