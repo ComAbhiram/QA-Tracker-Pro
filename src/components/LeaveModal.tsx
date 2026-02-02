@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { X, Calendar, User, FileText, Tag } from 'lucide-react';
+import Combobox from './ui/Combobox';
 
 interface LeaveModalProps {
     isOpen: boolean;
@@ -61,8 +62,8 @@ export default function LeaveModal({ isOpen, onClose, onSave }: LeaveModalProps)
         }
     };
 
-    const handleMemberChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const selectedId = e.target.value;
+    const handleMemberChange = (value: string | number | null) => {
+        const selectedId = String(value || '');
         const selectedMember = members.find(m => String(m.id) === selectedId);
         setFormData({
             ...formData,
@@ -101,6 +102,12 @@ export default function LeaveModal({ isOpen, onClose, onSave }: LeaveModalProps)
 
     if (!isOpen) return null;
 
+    // Transform members to Combobox options format
+    const memberOptions = members.map(member => ({
+        id: member.id,
+        label: member.name
+    }));
+
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
@@ -127,22 +134,16 @@ export default function LeaveModal({ isOpen, onClose, onSave }: LeaveModalProps)
                             <User size={16} className="text-indigo-600" />
                             Team Member <span className="text-red-500">*</span>
                         </label>
-                        <select
+                        <Combobox
+                            options={memberOptions}
                             value={formData.team_member_id}
                             onChange={handleMemberChange}
-                            required
-                            disabled={fetchingMembers}
-                            className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all bg-white disabled:bg-slate-100"
-                        >
-                            <option value="">
-                                {fetchingMembers ? 'Loading members...' : 'Select team member'}
-                            </option>
-                            {members.map(member => (
-                                <option key={member.id} value={member.id}>
-                                    {member.name}
-                                </option>
-                            ))}
-                        </select>
+                            placeholder="Select or search team member..."
+                            searchPlaceholder="Search members..."
+                            emptyMessage="No members found."
+                            isLoading={fetchingMembers}
+                            required={true}
+                        />
                     </div>
 
                     {/* Leave Date */}
