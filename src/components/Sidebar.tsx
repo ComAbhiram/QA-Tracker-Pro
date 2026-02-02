@@ -116,7 +116,7 @@ export function Sidebar() {
         requests: {
             title: 'REQUESTS',
             items: [
-                { label: 'Submit Request', icon: <PlusCircle size={18} />, href: '/requests/new' },
+                { label: 'Leave', icon: <PlusCircle size={18} />, href: '/requests/new' },
             ]
         }
     };
