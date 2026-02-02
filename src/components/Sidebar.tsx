@@ -24,9 +24,11 @@ import {
     Database,
     Shield,
     LogOut,
-    TrendingUp
+    TrendingUp,
+    Eye
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
+import { useGuestMode } from '@/contexts/GuestContext';
 
 interface NavItem {
     label: string;
@@ -42,9 +44,10 @@ interface NavSection {
 
 export function Sidebar() {
     const pathname = usePathname();
+    const { isGuest, selectedTeamName, clearGuestSession } = useGuestMode();
 
-    // Hide sidebar on login page
-    if (pathname === '/login') return null;
+    // Hide sidebar on login and guest selection pages
+    if (pathname === '/login' || pathname === '/guest') return null;
 
     const [collapsed, setCollapsed] = useState(true);
     const [openSections, setOpenSections] = useState<Record<string, boolean>>({
@@ -137,9 +140,9 @@ export function Sidebar() {
                 <div className="sidebar-header">
                     <div className="logo">
                         <div className="logo-icon">
-                            <LayoutDashboard size={20} />
+                            {isGuest ? <Eye size={20} /> : <LayoutDashboard size={20} />}
                         </div>
-                        {sidebarTitle}
+                        {isGuest ? selectedTeamName || 'Guest View' : sidebarTitle}
                     </div>
                     {/* Close Button Inside Sidebar */}
                     <button
@@ -185,13 +188,18 @@ export function Sidebar() {
                 <div className="mt-auto border-t border-slate-100 p-4">
                     <button
                         onClick={async () => {
-                            await supabase.auth.signOut();
-                            window.location.href = '/login';
+                            if (isGuest) {
+                                clearGuestSession();
+                                window.location.href = '/login';
+                            } else {
+                                await supabase.auth.signOut();
+                                window.location.href = '/login';
+                            }
                         }}
                         className={`flex items-center gap-3 w-full p-3 rounded-xl text-slate-600 hover:bg-red-50 hover:text-red-600 transition-all ${collapsed ? 'justify-center' : ''}`}
                     >
                         <LogOut size={20} />
-                        {!collapsed && <span className="font-medium">Sign Out</span>}
+                        {!collapsed && <span className="font-medium">{isGuest ? 'Exit Guest Mode' : 'Sign Out'}</span>}
                     </button>
                 </div>
             </nav>

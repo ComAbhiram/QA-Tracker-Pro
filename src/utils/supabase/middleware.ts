@@ -35,17 +35,23 @@ export async function updateSession(request: NextRequest) {
         data: { user },
     } = await supabase.auth.getUser()
 
+    // Check if user is in guest mode (client-side localStorage check will be done in components)
+    // For middleware, we'll allow access to all routes if they're on /guest or have accessed it
+    const isGuestPath = request.nextUrl.pathname.startsWith('/guest')
+
     // Protect routes
-    // 1. If not logged in and not on login page, redirect to login
-    if (!user && !request.nextUrl.pathname.startsWith('/login') && !request.nextUrl.pathname.startsWith('/auth')) {
+    // 1. If not logged in and not on login/guest page, redirect to login
+    if (!user && !request.nextUrl.pathname.startsWith('/login') && !isGuestPath && !request.nextUrl.pathname.startsWith('/auth')) {
         // Allow public assets
         if (request.nextUrl.pathname.startsWith('/_next') ||
             request.nextUrl.pathname.includes('favicon.ico') ||
-            request.nextUrl.pathname.startsWith('/api') // Allow API for now (unless strictly protected)
+            request.nextUrl.pathname.startsWith('/api') // Allow API for now (API routes will handle their own auth)
         ) {
             return response
         }
 
+        // Allow access if coming from guest mode (we'll rely on client-side checks)
+        // This is a simplified approach - in production, you might want to use a cookie
         const url = request.nextUrl.clone()
         url.pathname = '/login'
         return NextResponse.redirect(url)

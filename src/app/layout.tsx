@@ -1,8 +1,9 @@
-
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { Sidebar } from "@/components/Sidebar";
+import { GuestProvider } from "@/contexts/GuestContext";
+import GuestBanner from "@/components/GuestBanner";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -25,12 +26,15 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-200">
-          <Sidebar />
-          <main className="main-content">
-            {children}
-          </main>
-        </div>
+        <GuestProvider>
+          <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-200">
+            <GuestBanner />
+            <Sidebar />
+            <main className="main-content">
+              {children}
+            </main>
+          </div>
+        </GuestProvider>
       </body>
     </html>
   );

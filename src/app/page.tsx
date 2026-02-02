@@ -10,6 +10,7 @@ import DailyReportsModal from '@/components/DailyReportsModal';
 import TaskModal from '@/components/TaskModal';
 import Pagination from '@/components/Pagination';
 import { Plus, FileText, Layers, Edit2 } from 'lucide-react';
+import { useGuestMode } from '@/contexts/GuestContext';
 
 export default function Home() {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -20,17 +21,26 @@ export default function Home() {
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+  const { isGuest, selectedTeamId } = useGuestMode();
 
   useEffect(() => {
     fetchTasks();
-  }, []);
+  }, [selectedTeamId]);
 
   async function fetchTasks() {
     setLoading(true);
-    const { data, error } = await supabase
+
+    let query = supabase
       .from('tasks')
       .select('*')
       .order('created_at', { ascending: false });
+
+    // Filter by team if in guest mode
+    if (isGuest && selectedTeamId) {
+      query = query.eq('team_id', selectedTeamId);
+    }
+
+    const { data, error } = await query;
 
     if (error) {
       console.error('Error fetching tasks:', error);
@@ -70,6 +80,11 @@ export default function Home() {
   };
 
   const handleEditTask = (task: Task) => {
+    if (isGuest) {
+      // In guest mode, show read-only view
+      alert('You are in guest mode. Editing is not allowed.');
+      return;
+    }
     setEditingTask(task);
     setIsTaskModalOpen(true);
   };
@@ -148,12 +163,14 @@ export default function Home() {
           >
             <FileText size={18} /> Daily Reports
           </button>
-          <button
-            onClick={handleAddTask}
-            className="btn btn-primary flex items-center gap-2"
-          >
-            <Plus size={18} /> New Task
-          </button>
+          {!isGuest && (
+            <button
+              onClick={handleAddTask}
+              className="btn btn-primary flex items-center gap-2"
+            >
+              <Plus size={18} /> New Task
+            </button>
+          )}
         </div>
       </div>
 
@@ -213,13 +230,15 @@ export default function Home() {
                         {task.endDate ? new Date(task.endDate).toLocaleDateString() : '-'}
                       </td>
                       <td className="px-6 py-4 text-right">
-                        <button
-                          onClick={() => handleEditTask(task)}
-                          className="text-slate-400 hover:text-sky-600 hover:bg-sky-50 p-2 rounded-lg transition-all"
-                          title="Edit Task"
-                        >
-                          <Edit2 size={16} />
-                        </button>
+                        {!isGuest && (
+                          <button
+                            onClick={() => handleEditTask(task)}
+                            className="text-slate-400 hover:text-sky-600 hover:bg-sky-50 p-2 rounded-lg transition-all"
+                            title="Edit Task"
+                          >
+                            <Edit2 size={16} />
+                          </button>
+                        )}
                       </td>
                     </tr>
                   ))

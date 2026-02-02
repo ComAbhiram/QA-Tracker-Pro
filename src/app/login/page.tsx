@@ -6,7 +6,7 @@
 import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
-import { Lock, Mail, Loader2, LayoutDashboard } from 'lucide-react';
+import { Lock, Mail, Loader2, LayoutDashboard, Users } from 'lucide-react';
 
 export default function LoginPage() {
     const [email, setEmail] = useState('');
@@ -104,6 +104,16 @@ export default function LoginPage() {
                         ) : (
                             'Sign In'
                         )}
+                    </button>
+
+                    {/* Guest Login Button */}
+                    <button
+                        type="button"
+                        onClick={() => router.push('/guest')}
+                        className="w-full py-3.5 bg-white hover:bg-slate-50 text-indigo-600 font-bold rounded-xl border-2 border-indigo-600 hover:border-indigo-700 transition-all flex items-center justify-center gap-2"
+                    >
+                        <Users size={20} />
+                        Login as Guest
                     </button>
 
                     <div className="text-center">
