@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getValidAccessToken } from '@/lib/hubstaff-auth';
+import { determineUserTeam } from '@/lib/hubstaff-team-mapping';
 
 const HUBSTAFF_API_BASE = 'https://api.hubstaff.com/v2';
 
@@ -125,12 +126,12 @@ export async function GET(request: NextRequest) {
         const membersData = await membersResponse.json();
         const members = membersData.organization_memberships || membersData.members || [];
 
-        // Map user IDs to team names (you may need to customize this based on your Hubstaff setup)
+        // Map user IDs to team names
         const userTeamMap: Record<number, string> = {};
+        const userNameMap: Record<number, string> = {};
 
         for (const member of members) {
             const userId = member.user_id || member.id;
-            // Fetch user details to get team information
             const userResponse = await fetch(
                 `${HUBSTAFF_API_BASE}/users/${userId}`,
                 {
@@ -144,11 +145,10 @@ export async function GET(request: NextRequest) {
             if (userResponse.ok) {
                 const userData = await userResponse.json();
                 const user = userData.user || userData;
+                const userName = user.name || `${user.first_name || ''} ${user.last_name || ''}`.trim();
 
-                // Determine team based on user role or custom field
-                // This is a placeholder - you'll need to customize based on your Hubstaff setup
-                const team = determineUserTeam(user);
-                userTeamMap[userId] = team;
+                userNameMap[userId] = userName;
+                userTeamMap[userId] = determineUserTeam(user);
             }
         }
 
@@ -171,6 +171,7 @@ export async function GET(request: NextRequest) {
 
             const userId = activity.user_id;
             const team = userTeamMap[userId] || 'Unknown';
+            const userName = userNameMap[userId] || activity.user_name || `User ${userId}`;
 
             totalTime += timeWorked;
             totalActivityWeighted += activityPct * timeWorked;
@@ -191,7 +192,7 @@ export async function GET(request: NextRequest) {
             } else {
                 memberActivities.push({
                     user_id: userId,
-                    user_name: activity.user_name || `User ${userId}`,
+                    user_name: userName,
                     team,
                     hours,
                     activity_percentage: activityPct
@@ -226,25 +227,4 @@ export async function GET(request: NextRequest) {
             { status: 500 }
         );
     }
-}
-
-// Helper function to determine user team
-// Customize this based on your Hubstaff organization structure
-function determineUserTeam(user: any): string {
-    // Example: Check user role, custom fields, or team membership
-    // This is a placeholder implementation
-    const role = user.role?.toLowerCase() || '';
-    const name = user.name?.toLowerCase() || '';
-
-    if (role.includes('design') || name.includes('design')) {
-        return 'Design';
-    } else if (role.includes('frontend') || role.includes('fe') || name.includes('frontend')) {
-        return 'FE Dev';
-    } else if (role.includes('backend') || role.includes('be') || name.includes('backend')) {
-        return 'BE Dev';
-    } else if (role.includes('qa') || role.includes('test') || name.includes('qa')) {
-        return 'Testing';
-    }
-
-    return 'Unknown';
 }
