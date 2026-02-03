@@ -270,13 +270,21 @@ export async function GET(request: NextRequest) {
                             totalTime += timeWorked;
                             totalActivityWeighted += activityPct * timeWorked;
 
-                            if (activity.project_id && projectNamesMap[activity.project_id]) {
-                                projectSet.add(projectNamesMap[activity.project_id]);
+                            // Instead of using Hubstaff project names, use project names from the tasks
+                            // This ensures we show the correct project names from our database
+                            // We'll populate this from the relevant tasks instead
+                        });
+
+                        // Get unique project names from the relevant tasks instead of Hubstaff
+                        relevantTasks.forEach(task => {
+                            if (task.projectName) {
+                                projectSet.add(task.projectName);
                             }
                         });
 
                         console.log(`[API] Total time: ${totalTime}s (${Math.floor(totalTime / 3600)}h ${Math.floor((totalTime % 3600) / 60)}m)`);
                         console.log(`[API] Weighted activity: ${totalActivityWeighted}, Average: ${totalTime > 0 ? Math.round(totalActivityWeighted / totalTime) : 0}%`);
+                        console.log(`[API] Projects from tasks: ${Array.from(projectSet).join(', ')}`);
 
                         hubstaffActivity = {
                             timeWorked: totalTime,
