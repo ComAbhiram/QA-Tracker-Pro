@@ -25,7 +25,9 @@ import {
     Shield,
     LogOut,
     TrendingUp,
-    Eye
+    Eye,
+    Folder,
+    FolderKanban
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useGuestMode } from '@/contexts/GuestContext';
