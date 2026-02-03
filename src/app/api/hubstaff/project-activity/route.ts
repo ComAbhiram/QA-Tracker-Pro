@@ -43,32 +43,50 @@ export async function GET(request: NextRequest) {
             );
         }
 
-        // Fetch all projects to find matching project
-        const projectsResponse = await fetch(
-            `${HUBSTAFF_API_BASE}/organizations/${orgId}/projects`,
-            {
-                headers: {
-                    'Authorization': `Bearer ${accessToken}`,
-                    'Content-Type': 'application/json',
-                },
-            }
-        );
+        // Fetch all projects (handle pagination)
+        let allProjects: any[] = [];
+        let pageId: string | null = null;
 
-        if (!projectsResponse.ok) {
-            console.error('Error fetching Hubstaff projects:', await projectsResponse.text());
-            return NextResponse.json(
-                { error: 'Failed to fetch Hubstaff projects' },
-                { status: 500 }
+        do {
+            const pageParam: string = pageId ? `&page_start_id=${pageId}` : '';
+            const projectsResponse = await fetch(
+                `${HUBSTAFF_API_BASE}/organizations/${orgId}/projects?status=active${pageParam}`,
+                {
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`,
+                        'Content-Type': 'application/json',
+                    },
+                }
             );
-        }
 
-        const projectsData = await projectsResponse.json();
-        const projects = projectsData.projects || [];
+            if (!projectsResponse.ok) {
+                console.error('Error fetching Hubstaff projects:', await projectsResponse.text());
+                break;
+            }
 
-        // Find project by name (case-insensitive)
-        const project = projects.find((p: any) =>
-            p.name.toLowerCase() === projectName.toLowerCase()
+            const projectsData = await projectsResponse.json();
+            const projects = projectsData.projects || [];
+            allProjects = [...allProjects, ...projects];
+
+            // specific to Hubstaff v2 pagination
+            pageId = projectsData.pagination?.next_page_start_id || null;
+        } while (pageId);
+
+        const projects = allProjects;
+
+        // Find project by name (case-insensitive and smarter matching)
+        const normalizedInputName = projectName.toLowerCase().trim();
+        let project = projects.find((p: any) =>
+            p.name.toLowerCase().trim() === normalizedInputName
         );
+
+        // If no exact match, try to find a project that contains the input name or vice versa
+        if (!project) {
+            project = projects.find((p: any) => {
+                const pName = p.name.toLowerCase().trim();
+                return pName.includes(normalizedInputName) || normalizedInputName.includes(pName);
+            });
+        }
 
         if (!project) {
             return NextResponse.json({
@@ -86,54 +104,18 @@ export async function GET(request: NextRequest) {
             });
         }
 
-        // Fetch time entries for this project
+        // Fetch time entries for this project (handle pagination)
         const dateParams = startDate && endDate
             ? `&date[start]=${startDate}&date[stop]=${endDate}`
             : '';
 
-        const activitiesResponse = await fetch(
-            `${HUBSTAFF_API_BASE}/organizations/${orgId}/activities/daily?project_ids=${project.id}${dateParams}`,
-            {
-                headers: {
-                    'Authorization': `Bearer ${accessToken}`,
-                    'Content-Type': 'application/json',
-                },
-            }
-        );
+        let allDailyActivities: any[] = [];
+        let activitiesPageId: string | null = null;
 
-        if (!activitiesResponse.ok) {
-            console.error('Error fetching Hubstaff activities:', await activitiesResponse.text());
-            return NextResponse.json(
-                { error: 'Failed to fetch Hubstaff activities' },
-                { status: 500 }
-            );
-        }
-
-        const activitiesData = await activitiesResponse.json();
-        const dailyActivities = activitiesData.daily_activities || [];
-
-        // Fetch user details to determine teams
-        const membersResponse = await fetch(
-            `${HUBSTAFF_API_BASE}/organizations/${orgId}/members`,
-            {
-                headers: {
-                    'Authorization': `Bearer ${accessToken}`,
-                    'Content-Type': 'application/json',
-                },
-            }
-        );
-
-        const membersData = await membersResponse.json();
-        const members = membersData.organization_memberships || membersData.members || [];
-
-        // Map user IDs to team names
-        const userTeamMap: Record<number, string> = {};
-        const userNameMap: Record<number, string> = {};
-
-        for (const member of members) {
-            const userId = member.user_id || member.id;
-            const userResponse = await fetch(
-                `${HUBSTAFF_API_BASE}/users/${userId}`,
+        do {
+            const pageParam: string = activitiesPageId ? `&page_start_id=${activitiesPageId}` : '';
+            const activitiesResponse = await fetch(
+                `${HUBSTAFF_API_BASE}/organizations/${orgId}/activities/daily?project_ids=${project.id}${dateParams}${pageParam}`,
                 {
                     headers: {
                         'Authorization': `Bearer ${accessToken}`,
@@ -142,11 +124,68 @@ export async function GET(request: NextRequest) {
                 }
             );
 
-            if (userResponse.ok) {
-                const userData = await userResponse.json();
-                const user = userData.user || userData;
-                const userName = user.name || `${user.first_name || ''} ${user.last_name || ''}`.trim();
+            if (!activitiesResponse.ok) {
+                console.error('Error fetching Hubstaff activities:', await activitiesResponse.text());
+                break;
+            }
 
+            const activitiesData = await activitiesResponse.json();
+            const dailyActivities = activitiesData.daily_activities || [];
+            allDailyActivities = [...allDailyActivities, ...dailyActivities];
+
+            activitiesPageId = activitiesData.pagination?.next_page_start_id || null;
+        } while (activitiesPageId);
+
+        const dailyActivities = allDailyActivities;
+
+        // Fetch organization members with users included (handle pagination)
+        let allMembers: any[] = [];
+        let allUsers: any[] = []; // Users from the include
+        let membersPageId: string | null = null;
+
+        do {
+            const pageParam: string = membersPageId ? `&page_start_id=${membersPageId}` : '';
+            const membersResponse = await fetch(
+                `${HUBSTAFF_API_BASE}/organizations/${orgId}/members?include=users${pageParam}`,
+                {
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`,
+                        'Content-Type': 'application/json',
+                    },
+                }
+            );
+
+            if (membersResponse.ok) {
+                const membersData = await membersResponse.json();
+                const members = membersData.organization_memberships || membersData.members || [];
+                const users = membersData.users || [];
+
+                allMembers = [...allMembers, ...members];
+                allUsers = [...allUsers, ...users];
+
+                membersPageId = membersData.pagination?.next_page_start_id || null;
+            } else {
+                console.error('Error fetching Hubstaff members:', await membersResponse.text());
+                break;
+            }
+        } while (membersPageId);
+
+        // Map user IDs to team names and User Names using the bulk fetched data
+        const userTeamMap: Record<number, string> = {};
+        const userNameMap: Record<number, string> = {};
+
+        // Create a lookup for users by ID
+        const usersById = allUsers.reduce((acc: any, user: any) => {
+            acc[user.id] = user;
+            return acc;
+        }, {});
+
+        for (const member of allMembers) {
+            const userId = member.user_id || member.id;
+            const user = usersById[userId];
+
+            if (user) {
+                const userName = user.name || `${user.first_name || ''} ${user.last_name || ''}`.trim();
                 userNameMap[userId] = userName;
                 userTeamMap[userId] = determineUserTeam(user);
             }
