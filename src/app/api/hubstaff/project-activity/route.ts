@@ -105,12 +105,11 @@ export async function GET(request: NextRequest) {
         }
 
         // Fetch time entries for this project (handle pagination)
-        // Default to past 1 year if no dates provided to ensure we get "total" time
+        // Default to year 2000 if no dates provided to ensure we get "total" time (all history)
         const today = new Date();
-        const pastYear = new Date();
-        pastYear.setDate(today.getDate() - 365);
+        const pastDate = new Date('2000-01-01');
 
-        const startParam = startDate || pastYear.toISOString().split('T')[0];
+        const startParam = startDate || pastDate.toISOString().split('T')[0];
         const endParam = endDate || today.toISOString().split('T')[0];
 
         const dateParams = `&date[start]=${startParam}&date[stop]=${endParam}`;
@@ -144,56 +143,94 @@ export async function GET(request: NextRequest) {
 
         const dailyActivities = allDailyActivities;
 
-        // Fetch organization members with users included (handle pagination)
-        let allMembers: any[] = [];
-        let allUsers: any[] = []; // Users from the include
-        let membersPageId: string | null = null;
-
-        do {
-            const pageParam: string = membersPageId ? `&page_start_id=${membersPageId}` : '';
-            const membersResponse = await fetch(
-                `${HUBSTAFF_API_BASE}/organizations/${orgId}/members?include=users${pageParam}`,
-                {
-                    headers: {
-                        'Authorization': `Bearer ${accessToken}`,
-                        'Content-Type': 'application/json',
-                    },
-                }
-            );
-
-            if (membersResponse.ok) {
-                const membersData = await membersResponse.json();
-                const members = membersData.organization_memberships || membersData.members || [];
-                const users = membersData.users || [];
-
-                allMembers = [...allMembers, ...members];
-                allUsers = [...allUsers, ...users];
-
-                membersPageId = membersData.pagination?.next_page_start_id || null;
-            } else {
-                console.error('Error fetching Hubstaff members:', await membersResponse.text());
-                break;
+        // Fetch Hubstaff Teams to map users accurately
+        const teamsResponse = await fetch(
+            `${HUBSTAFF_API_BASE}/organizations/${orgId}/teams`,
+            {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json',
+                },
             }
-        } while (membersPageId);
+        );
 
-        // Map user IDs to team names and User Names using the bulk fetched data
+        const teamsData = await teamsResponse.json();
+        const teams = teamsData.teams || [];
+
+        // Define mapping from Hubstaff Team Name to App Team Name
+        const HUBSTAFF_TEAM_MAPPING: Record<string, string> = {
+            'UI/UX Designers': 'Design',
+            'Frontend Developers': 'FE Dev',
+            'Backend Developers': 'BE Dev',
+            'QA Developers': 'Testing',
+            'WordPress Developers': 'FE Dev', // Mapping WP to FE for now
+            'Mobile App Developers': 'FE Dev'  // Mapping Mobile to FE for now
+        };
+
         const userTeamMap: Record<number, string> = {};
         const userNameMap: Record<number, string> = {};
 
-        // Create a lookup for users by ID
-        const usersById = allUsers.reduce((acc: any, user: any) => {
-            acc[user.id] = user;
-            return acc;
-        }, {});
+        // Fetch members for each relevant team
+        for (const team of teams) {
+            const appTeamName = HUBSTAFF_TEAM_MAPPING[team.name];
+            if (appTeamName) {
+                // Fetch members for this specific team
+                const teamMembersResponse = await fetch(
+                    `${HUBSTAFF_API_BASE}/teams/${team.id}/members?include=users`,
+                    {
+                        headers: {
+                            'Authorization': `Bearer ${accessToken}`,
+                            'Content-Type': 'application/json',
+                        },
+                    }
+                );
 
-        for (const member of allMembers) {
-            const userId = member.user_id || member.id;
-            const user = usersById[userId];
+                if (teamMembersResponse.ok) {
+                    const tmData = await teamMembersResponse.json();
+                    const teamMembers = tmData.team_members || [];
+                    const users = tmData.users || [];
 
-            if (user) {
-                const userName = user.name || `${user.first_name || ''} ${user.last_name || ''}`.trim();
-                userNameMap[userId] = userName;
-                userTeamMap[userId] = determineUserTeam(user);
+                    // Create lookup for user details
+                    const usersSdk = users.reduce((acc: any, u: any) => {
+                        acc[u.id] = u;
+                        return acc;
+                    }, {});
+
+                    for (const member of teamMembers) {
+                        userTeamMap[member.user_id] = appTeamName;
+                        const user = usersSdk[member.user_id];
+                        if (user) {
+                            userNameMap[member.user_id] = user.name || `${user.first_name || ''} ${user.last_name || ''}`.trim();
+                        }
+                    }
+                }
+            }
+        }
+
+        // Fallback: Fetch ALL organization members to get names for anyone NOT in a team
+        // and to handle "Unknown" team assignment if they aren't in the mapped teams
+        const allMembersResponse = await fetch(
+            `${HUBSTAFF_API_BASE}/organizations/${orgId}/members?include=users`,
+            {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json',
+                },
+            }
+        );
+
+        if (allMembersResponse.ok) {
+            const amData = await allMembersResponse.json();
+            const allUsers = amData.users || [];
+
+            for (const user of allUsers) {
+                if (!userNameMap[user.id]) {
+                    userNameMap[user.id] = user.name || `${user.first_name || ''} ${user.last_name || ''}`.trim();
+                }
+                if (!userTeamMap[user.id]) {
+                    // Try to guess if not in a specific team, or leave as Unknown
+                    userTeamMap[user.id] = determineUserTeam(user);
+                }
             }
         }
 
