@@ -95,7 +95,7 @@ export function Sidebar() {
                 { label: 'Dashboard', icon: <LayoutDashboard size={18} />, href: '/' },
                 { label: 'Task Tracker', icon: <ClipboardList size={18} />, href: '/tracker' },
                 { label: 'Schedule', icon: <CalendarDays size={18} />, href: '/schedule' },
-                ...(userRole === 'super_admin' ? [{ label: 'Super Admin', icon: <Shield size={18} />, href: '/admin' }] : []),
+                ...(userRole === 'super_admin' ? [{ label: 'Super Admin', icon: <Shield size={18} />, href: '/super-admin' }] : []),
             ]
         },
         analytics: {
