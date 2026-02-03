@@ -109,6 +109,7 @@ export function Sidebar() {
         projects: {
             title: 'PROJECTS',
             items: [
+                { label: 'Project Overview', icon: <FolderKanban size={18} />, href: '/project-overview' },
                 { label: 'Manage Projects', icon: <Database size={18} />, href: '/projects' },
                 { label: 'Completed', icon: <CheckSquare size={18} />, href: '/projects/completed' },
                 { label: 'Rejected', icon: <XSquare size={18} />, href: '/projects/rejected' },
