@@ -137,17 +137,17 @@ export default function ProjectTable({ projects, hubstaffDataCache, onEdit, onDe
                                     </td>
                                     <td className="px-4 py-3 text-sm text-center">
                                         <span className="inline-flex items-center justify-center px-3 py-1 bg-green-100 text-green-700 rounded-full font-semibold">
-                                            {hubstaffData ? `${hubstaffData.activity_percentage}%` : '-'}
+                                            {hubstaffData?.activity_percentage != null ? `${hubstaffData.activity_percentage}%` : '-'}
                                         </span>
                                     </td>
                                     <td className="px-4 py-3 text-sm text-slate-600">
                                         {project.pc || '-'}
                                     </td>
                                     <td className="px-4 py-3 text-sm text-center font-semibold text-slate-700">
-                                        {hubstaffData ? hubstaffData.hs_time_taken_days.toFixed(2) : '-'}
+                                        {hubstaffData?.hs_time_taken_days != null ? hubstaffData.hs_time_taken_days.toFixed(2) : '-'}
                                     </td>
                                     <td className="px-4 py-3 text-sm text-center font-semibold text-slate-700">
-                                        {project.allotted_time_days?.toFixed(1) || '-'}
+                                        {project.allotted_time_days != null ? project.allotted_time_days.toFixed(1) : '-'}
                                     </td>
                                     <td className="px-4 py-3 text-sm text-center font-bold">
                                         <span className={
@@ -160,7 +160,7 @@ export default function ProjectTable({ projects, hubstaffDataCache, onEdit, onDe
                                         </span>
                                     </td>
                                     <td className="px-4 py-3 text-sm text-center font-semibold text-slate-700">
-                                        {project.tl_confirmed_effort_days?.toFixed(1) || '-'}
+                                        {project.tl_confirmed_effort_days != null ? project.tl_confirmed_effort_days.toFixed(1) : '-'}
                                     </td>
                                     <td className="px-4 py-3 text-sm text-slate-600">
                                         <div className="max-w-[150px] truncate" title={project.blockers || ''}>

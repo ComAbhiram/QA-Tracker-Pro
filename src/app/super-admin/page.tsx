@@ -161,8 +161,8 @@ export default function SuperAdminPage() {
                         <button
                             onClick={() => setActiveTab('All')}
                             className={`flex items-center gap-2 px-6 py-3 rounded-md transition-colors font-medium ${activeTab === 'All'
-                                    ? 'bg-indigo-600 text-white'
-                                    : 'text-slate-600 hover:bg-slate-50'
+                                ? 'bg-indigo-600 text-white'
+                                : 'text-slate-600 hover:bg-slate-50'
                                 }`}
                         >
                             All Projects
@@ -170,8 +170,8 @@ export default function SuperAdminPage() {
                         <button
                             onClick={() => setActiveTab('Dubai')}
                             className={`flex items-center gap-2 px-6 py-3 rounded-md transition-colors font-medium ${activeTab === 'Dubai'
-                                    ? 'bg-indigo-600 text-white'
-                                    : 'text-slate-600 hover:bg-slate-50'
+                                ? 'bg-indigo-600 text-white'
+                                : 'text-slate-600 hover:bg-slate-50'
                                 }`}
                         >
                             <MapPin size={18} />
@@ -180,8 +180,8 @@ export default function SuperAdminPage() {
                         <button
                             onClick={() => setActiveTab('Cochin')}
                             className={`flex items-center gap-2 px-6 py-3 rounded-md transition-colors font-medium ${activeTab === 'Cochin'
-                                    ? 'bg-indigo-600 text-white'
-                                    : 'text-slate-600 hover:bg-slate-50'
+                                ? 'bg-indigo-600 text-white'
+                                : 'text-slate-600 hover:bg-slate-50'
                                 }`}
                         >
                             <MapPin size={18} />
@@ -207,8 +207,8 @@ export default function SuperAdminPage() {
                     <div className="bg-white rounded-xl p-6 border border-slate-200">
                         <p className="text-sm text-slate-500 mb-1">Total Deviation</p>
                         <p className={`text-3xl font-bold ${totals.totalDeviation > 0 ? 'text-green-600' :
-                                totals.totalDeviation < 0 ? 'text-red-600' :
-                                    'text-slate-600'
+                            totals.totalDeviation < 0 ? 'text-red-600' :
+                                'text-slate-600'
                             }`}>
                             {totals.totalDeviation.toFixed(1)}
                         </p>
@@ -282,8 +282,8 @@ export default function SuperAdminPage() {
                                                 </td>
                                                 <td className="px-4 py-3 text-center">
                                                     <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold ${project.location === 'Dubai' ? 'bg-blue-100 text-blue-700' :
-                                                            project.location === 'Cochin' ? 'bg-green-100 text-green-700' :
-                                                                'bg-slate-100 text-slate-700'
+                                                        project.location === 'Cochin' ? 'bg-green-100 text-green-700' :
+                                                            'bg-slate-100 text-slate-700'
                                                         }`}>
                                                         <MapPin size={12} />
                                                         {project.location || 'N/A'}
@@ -294,22 +294,22 @@ export default function SuperAdminPage() {
                                                     {project.task_count || 0}
                                                 </td>
                                                 <td className="px-4 py-3 text-sm text-center font-semibold text-purple-700">
-                                                    {hsData ? hsData.team_breakdown.design_days.toFixed(2) : '-'}
+                                                    {hsData?.team_breakdown?.design_days != null ? hsData.team_breakdown.design_days.toFixed(2) : '-'}
                                                 </td>
                                                 <td className="px-4 py-3 text-sm text-center font-semibold text-blue-700">
-                                                    {hsData ? hsData.team_breakdown.fe_dev_days.toFixed(2) : '-'}
+                                                    {hsData?.team_breakdown?.fe_dev_days != null ? hsData.team_breakdown.fe_dev_days.toFixed(2) : '-'}
                                                 </td>
                                                 <td className="px-4 py-3 text-sm text-center font-semibold text-green-700">
-                                                    {hsData ? hsData.team_breakdown.be_dev_days.toFixed(2) : '-'}
+                                                    {hsData?.team_breakdown?.be_dev_days != null ? hsData.team_breakdown.be_dev_days.toFixed(2) : '-'}
                                                 </td>
                                                 <td className="px-4 py-3 text-sm text-center font-semibold text-orange-700">
-                                                    {hsData ? hsData.team_breakdown.testing_days.toFixed(2) : '-'}
+                                                    {hsData?.team_breakdown?.testing_days != null ? hsData.team_breakdown.testing_days.toFixed(2) : '-'}
                                                 </td>
                                                 <td className="px-4 py-3 text-sm text-center font-bold text-slate-700">
-                                                    {hsData ? hsData.hs_time_taken_days.toFixed(2) : '-'}
+                                                    {hsData?.hs_time_taken_days != null ? hsData.hs_time_taken_days.toFixed(2) : '-'}
                                                 </td>
                                                 <td className="px-4 py-3 text-sm text-center font-semibold text-slate-700">
-                                                    {project.allotted_time_days?.toFixed(1) || '-'}
+                                                    {project.allotted_time_days != null ? project.allotted_time_days.toFixed(1) : '-'}
                                                 </td>
                                                 <td className="px-4 py-3 text-sm text-center font-bold">
                                                     <span className={
@@ -322,7 +322,7 @@ export default function SuperAdminPage() {
                                                     </span>
                                                 </td>
                                                 <td className="px-4 py-3 text-sm text-center font-semibold text-slate-700">
-                                                    {project.tl_confirmed_effort_days?.toFixed(1) || '-'}
+                                                    {project.tl_confirmed_effort_days != null ? project.tl_confirmed_effort_days.toFixed(1) : '-'}
                                                 </td>
                                                 <td className="px-4 py-3">
                                                     <div className="flex items-center justify-center gap-2">

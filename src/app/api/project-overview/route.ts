@@ -29,10 +29,10 @@ export async function GET(request: NextRequest) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        // Get user's team
+        // Get user's team and role
         const { data: profile } = await supabase
             .from('user_profiles')
-            .select('team_id')
+            .select('team_id, role')
             .eq('id', user.id)
             .single();
 
@@ -41,11 +41,16 @@ export async function GET(request: NextRequest) {
         }
 
         // Fetch project overviews with stats
-        const { data: projects, error } = await supabase
+        // Super admins see all projects, regular users see only their team's projects
+        let query = supabase
             .from('project_overview_with_stats')
-            .select('*')
-            .eq('team_id', profile.team_id)
-            .order('created_at', { ascending: false });
+            .select('*');
+
+        if (profile.role !== 'super_admin') {
+            query = query.eq('team_id', profile.team_id);
+        }
+
+        const { data: projects, error } = await query.order('created_at', { ascending: false });
 
         if (error) {
             console.error('Error fetching project overviews:', error);
