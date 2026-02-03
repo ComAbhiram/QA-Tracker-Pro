@@ -98,11 +98,11 @@ export default function ProjectCard({ project, hubstaffData, onEdit, onDelete }:
                         Activity %
                     </div>
                     <p className="text-sm font-semibold text-slate-700">
-                        {hubstaffData ? `${hubstaffData.activity_percentage}%` : 'Loading...'}
+                        {hubstaffData?.activity_percentage != null ? `${hubstaffData.activity_percentage}%` : '-'}
                     </p>
 
                     {/* Activity Breakdown Tooltip */}
-                    {showActivityBreakdown && hubstaffData && hubstaffData.member_activities.length > 0 && (
+                    {showActivityBreakdown && hubstaffData && hubstaffData.member_activities && hubstaffData.member_activities.length > 0 && (
                         <div className="absolute z-10 top-full left-0 mt-2 bg-white border border-slate-200 rounded-lg shadow-xl p-3 min-w-[200px]">
                             <p className="text-xs font-semibold text-slate-700 mb-2">Team Members</p>
                             {hubstaffData.member_activities.map((member, idx) => (
@@ -134,11 +134,11 @@ export default function ProjectCard({ project, hubstaffData, onEdit, onDelete }:
                         HS Time (Days)
                     </div>
                     <p className="text-sm font-semibold text-slate-700">
-                        {hubstaffData ? hubstaffData.hs_time_taken_days.toFixed(2) : 'Loading...'}
+                        {hubstaffData?.hs_time_taken_days != null ? hubstaffData.hs_time_taken_days.toFixed(2) : '-'}
                     </p>
 
                     {/* Team Breakdown Tooltip */}
-                    {showTeamBreakdown && hubstaffData && (
+                    {showTeamBreakdown && hubstaffData?.team_breakdown && (
                         <div className="absolute z-10 top-full left-0 mt-2 bg-white border border-slate-200 rounded-lg shadow-xl p-3 min-w-[200px]">
                             <p className="text-xs font-semibold text-slate-700 mb-2">Team Breakdown</p>
                             <div className="space-y-1">
@@ -175,9 +175,9 @@ export default function ProjectCard({ project, hubstaffData, onEdit, onDelete }:
                 <div className="text-center">
                     <p className="text-xs text-slate-500 mb-1">Deviation</p>
                     <p className={`text-lg font-bold flex items-center justify-center gap-1 ${deviation === null ? 'text-slate-400' :
-                            deviation > 0 ? 'text-green-600' :
-                                deviation < 0 ? 'text-red-600' :
-                                    'text-slate-700'
+                        deviation > 0 ? 'text-green-600' :
+                            deviation < 0 ? 'text-red-600' :
+                                'text-slate-700'
                         }`}>
                         {deviation !== null && deviation !== 0 && (
                             <TrendingUp
