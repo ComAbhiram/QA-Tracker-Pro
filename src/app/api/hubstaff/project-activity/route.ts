@@ -105,9 +105,15 @@ export async function GET(request: NextRequest) {
         }
 
         // Fetch time entries for this project (handle pagination)
-        const dateParams = startDate && endDate
-            ? `&date[start]=${startDate}&date[stop]=${endDate}`
-            : '';
+        // Default to past 1 year if no dates provided to ensure we get "total" time
+        const today = new Date();
+        const pastYear = new Date();
+        pastYear.setDate(today.getDate() - 365);
+
+        const startParam = startDate || pastYear.toISOString().split('T')[0];
+        const endParam = endDate || today.toISOString().split('T')[0];
+
+        const dateParams = `&date[start]=${startParam}&date[stop]=${endParam}`;
 
         let allDailyActivities: any[] = [];
         let activitiesPageId: string | null = null;
