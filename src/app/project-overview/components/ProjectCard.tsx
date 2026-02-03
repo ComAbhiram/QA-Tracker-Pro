@@ -169,7 +169,7 @@ export default function ProjectCard({ project, hubstaffData, onEdit, onDelete }:
                 <div className="text-center">
                     <p className="text-xs text-slate-500 mb-1">Allotted</p>
                     <p className="text-lg font-bold text-slate-700">
-                        {project.allotted_time_days?.toFixed(1) || '-'}
+                        {project.allotted_time_days != null ? project.allotted_time_days.toFixed(1) : '-'}
                     </p>
                 </div>
                 <div className="text-center">
@@ -191,7 +191,7 @@ export default function ProjectCard({ project, hubstaffData, onEdit, onDelete }:
                 <div className="text-center">
                     <p className="text-xs text-slate-500 mb-1">TL Effort</p>
                     <p className="text-lg font-bold text-slate-700">
-                        {project.tl_confirmed_effort_days?.toFixed(1) || '-'}
+                        {project.tl_confirmed_effort_days != null ? project.tl_confirmed_effort_days.toFixed(1) : '-'}
                     </p>
                 </div>
             </div>
