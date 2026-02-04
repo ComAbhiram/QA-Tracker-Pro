@@ -72,7 +72,7 @@ export default function TaskDetailsModal({ isOpen, onClose, task, onEdit }: Task
                     {/* Title Block */}
                     <div className="bg-white rounded-xl shadow-lg border border-slate-100 p-5 mb-6">
                         <div className="flex flex-wrap gap-2 mb-3">
-                            <span className="px-2.5 py-1 rounded-md bg-indigo-50 text-indigo-700 text-xs font-bold border border-indigo-100 uppercase tracking-wide">
+                            <span className="px-2.5 py-1 rounded-md bg-indigo-600 text-white text-xs font-bold border border-indigo-600 uppercase tracking-wide">
                                 {task.projectType || 'No Type'}
                             </span>
                             <span className={`px-2.5 py-1 rounded-md text-xs font-bold border uppercase tracking-wide flex items-center gap-1.5 ${getStatusColor(task.status)}`}>
