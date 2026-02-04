@@ -16,13 +16,15 @@ export default function TaskDetailsModal({ isOpen, onClose, task, onEdit }: Task
 
     // Helper for Status Color - Matching the rest of the app
     const getStatusColor = (status: string) => {
-        switch (status) {
-            case 'In Progress': return 'bg-blue-100 text-blue-800 border-blue-200';
-            case 'Completed': return 'bg-emerald-100 text-emerald-800 border-emerald-200';
-            case 'Overdue': return 'bg-rose-100 text-rose-800 border-rose-200';
-            case 'On Hold': return 'bg-amber-100 text-amber-800 border-amber-200';
-            default: return 'bg-slate-100 text-slate-700 border-slate-200';
-        }
+        const s = status?.toLowerCase() || '';
+        if (s === 'completed') return 'bg-emerald-100 text-emerald-800 border-emerald-200';
+        if (s === 'in progress' || s === 'being developed') return 'bg-blue-100 text-blue-800 border-blue-200';
+        if (s === 'overdue') return 'bg-rose-100 text-rose-800 border-rose-200';
+        if (s === 'on hold') return 'bg-slate-100 text-slate-800 border-slate-200';
+        if (s === 'rejected') return 'bg-red-100 text-red-800 border-red-200';
+        if (s === 'yet to start' || s === 'forecast' || s === 'urgent') return 'bg-amber-100 text-amber-800 border-amber-200';
+        if (s.includes('qa') || s === 'ready for qa') return 'bg-purple-100 text-purple-800 border-purple-200';
+        return 'bg-sky-100 text-sky-800 border-sky-200';
     };
 
     // Helper for Priority Color
@@ -31,7 +33,7 @@ export default function TaskDetailsModal({ isOpen, onClose, task, onEdit }: Task
             case 'high': return 'bg-rose-50 text-rose-700 border-rose-200';
             case 'medium': return 'bg-amber-50 text-amber-700 border-amber-200';
             case 'low': return 'bg-slate-50 text-slate-600 border-slate-200';
-            default: return 'bg-slate-50 text-slate-400 border-slate-200';
+            default: return 'bg-slate-50 text-slate-500 border-slate-200';
         }
     };
 
@@ -41,7 +43,13 @@ export default function TaskDetailsModal({ isOpen, onClose, task, onEdit }: Task
 
                 {/* Header */}
                 <div className="relative h-24 bg-gradient-to-r from-indigo-500 to-purple-600 p-6 flex items-start justify-between flex-shrink-0">
-                    <div className="absolute top-4 right-4 flex gap-2">
+                    <div className="text-white/90">
+                        <h3 className="text-lg font-bold flex items-center gap-2">
+                            <Activity size={18} /> Task Details
+                        </h3>
+                        <p className="text-xs text-white/70">View full project information</p>
+                    </div>
+                    <div className="flex gap-2">
                         <button
                             onClick={() => onEdit(task)}
                             className="p-2 bg-white/20 hover:bg-white/30 text-white rounded-lg backdrop-blur-sm transition-all shadow-sm group"
