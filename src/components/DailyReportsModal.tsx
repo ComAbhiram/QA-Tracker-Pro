@@ -316,14 +316,21 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
 
             // Fetch Hubstaff activity for today
             let hubstaffData: any = null;
+            let hubstaffError: string | null = null;
             try {
                 const hubstaffResponse = await fetch(`/api/hubstaff?date=${today}`, { cache: 'no-store' });
                 if (hubstaffResponse.ok) {
                     hubstaffData = await hubstaffResponse.json();
                     console.log('Today Work Status - Hubstaff Data:', hubstaffData);
+                } else {
+                    const errText = await hubstaffResponse.text();
+                    if (hubstaffResponse.status === 429) hubstaffError = "Rate limit reached. Please try again later.";
+                    else hubstaffError = `Failed to fetch data (${hubstaffResponse.status})`;
+                    console.error('Hubstaff fetch failed:', hubstaffResponse.status, errText);
                 }
             } catch (err) {
                 console.error('Failed to fetch Hubstaff data:', err);
+                hubstaffError = "Network error occurred while fetching Hubstaff data.";
             }
 
             // TEMPORARY MOCK DATA FOR VERIFICATION
@@ -448,6 +455,11 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                                     </div>
                                 `}).join('');
                     })()}
+                    </div>
+                    ` : hubstaffError ? `
+                    <div style="background: #fff1f2; border-left: 4px solid #be123c; padding: 16px; margin-bottom: 24px; border-radius: 8px;">
+                        <h3 style="color: #881337; font-size: 16px; margin-bottom: 4px; font-weight: 600;">Hubstaff Activity Unavailable</h3>
+                        <p style="color: #be123c; font-size: 14px; margin: 0;">${hubstaffError}</p>
                     </div>
                     ` : ''}
                     
