@@ -61,33 +61,63 @@ export default function TaskModal({ isOpen, onClose, task, onSave }: TaskModalPr
         }
     }, [isOpen]);
 
-    // Fetch Hubstaff users on mount
+    // Fetch Hubstaff users OR Team Members on open
     useEffect(() => {
-        const fetchHubstaffUsers = async () => {
+        const fetchUsers = async () => {
             setLoadingHubstaffUsers(true);
             try {
-                const response = await fetch('/api/hubstaff/users');
+                // If isQATeam (Super Admin) -> Fetch Hubstaff
+                // If NOT isQATeam (Team Account) -> Fetch Team Members
+
+                // We need to know isQATeam result first, but useEffects run in parallel or sequence based on deps.
+                // Let's rely on checking the role directly here or wait for isQATeam to be set? 
+                // Better: fetch logic inside one effect that depends on isQATeam being "settled"? 
+                // But isQATeam is state. Let's try to fetch both or toggle based on a check.
+
+                // Actually, let's just make this effect depend on isOpen. 
+                // Inside, we check the user role again or wait? 
+                // Let's fetch the role first via userUtils if needed, or better:
+                // Modify this effect to run when `isOpen` AND `isQATeam` logic is done? 
+                // The `checkRole` effect runs on open too.
+
+                const { getCurrentUserTeam } = await import('@/utils/userUtils');
+                const userTeam = await getCurrentUserTeam();
+                const isSuperAdmin = userTeam?.role === 'super_admin';
+
+                let url = '/api/hubstaff/users';
+                if (!isSuperAdmin) {
+                    url = '/api/team-members';
+                }
+
+                const response = await fetch(url);
                 if (response.ok) {
                     const data = await response.json();
-                    if (data.members) {
-                        // Use ALL members, do not deduplicate.
-                        // Use u.name (Full Name) as the ID to differentiate aliases.
+
+                    if (isSuperAdmin && data.members) {
+                        // Hubstaff Response
                         const formattedUsers = data.members.map((u: any) => ({
-                            id: u.name, // Use Full Name as ID
+                            id: u.name,
+                            label: u.name
+                        }));
+                        setHubstaffUsers(formattedUsers);
+                    } else if (!isSuperAdmin && data.members) {
+                        // Team Members Response
+                        const formattedUsers = data.members.map((u: any) => ({
+                            id: u.name,
                             label: u.name
                         }));
                         setHubstaffUsers(formattedUsers);
                     }
                 }
             } catch (error) {
-                console.error('Error fetching Hubstaff users:', error);
+                console.error('Error fetching users:', error);
             } finally {
                 setLoadingHubstaffUsers(false);
             }
         };
 
-        if (isOpen && hubstaffUsers.length === 0) {
-            fetchHubstaffUsers();
+        if (isOpen) {
+            fetchUsers();
         }
     }, [isOpen]);
 

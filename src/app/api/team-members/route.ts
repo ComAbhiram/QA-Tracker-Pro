@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabaseServer } from '@/lib/supabase-server';
 
 export async function GET(req: NextRequest) {
-    const supabase = await supabaseServer();
+    const supabase = supabaseServer;
 
     // Get current user to determine team_id
     const { data: { user } } = await supabase.auth.getUser();
@@ -24,7 +24,7 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-    const supabase = await supabaseServer();
+    const supabase = supabaseServer;
     const { name } = await req.json();
 
     if (!name || !name.trim()) {
@@ -65,7 +65,7 @@ export async function POST(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
-    const supabase = await supabaseServer();
+    const supabase = supabaseServer;
     const { searchParams } = new URL(req.url);
     const id = searchParams.get('id');
 
