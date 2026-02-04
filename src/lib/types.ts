@@ -8,6 +8,7 @@ export interface DBTask {
     pc: string | null;
     assigned_to: string | null;
     assigned_to2: string | null;
+    additional_assignees: string[] | null;
     status: string;
     start_date: string | null;
     end_date: string | null;
@@ -47,6 +48,7 @@ export interface Task {
     pc: string | null;
     assignedTo: string | null;
     assignedTo2: string | null;
+    additionalAssignees?: string[];
     status: string;
     startDate: string | null;
     endDate: string | null;
@@ -88,6 +90,7 @@ export const mapTaskFromDB = (task: DBTask): Task => ({
     pc: task.pc,
     assignedTo: task.assigned_to,
     assignedTo2: task.assigned_to2,
+    additionalAssignees: task.additional_assignees || [],
     status: task.status || 'In Progress',
     startDate: task.start_date,
     endDate: task.end_date,
