@@ -3,8 +3,8 @@ import { Task } from '@/lib/types';
 export function getEffectiveStatus(task: Task): string {
     if (!task) return 'Unknown';
 
-    // Ensure status is a string
-    const status = task.status || 'Unknown';
+    // Ensure status is a string and trimmed
+    const status = (task.status || 'Unknown').trim();
 
     // If the status is already a terminal or paused state, return it as is.
     const terminalStatuses = ['Completed', 'Rejected', 'On Hold', 'Forecast'];
