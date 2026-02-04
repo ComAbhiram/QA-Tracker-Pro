@@ -331,7 +331,10 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
 
             const formatDate = (dateStr: string) => {
                 const d = new Date(dateStr);
-                return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
+                const day = String(d.getDate()).padStart(2, '0');
+                const month = d.toLocaleString('en-US', { month: 'short' });
+                const year = d.getFullYear();
+                return `${day} ${month} ${year}`;
             };
 
             const formatTime = (seconds: number) => {
@@ -468,7 +471,7 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                                         <td style="padding: 16px; color: #1e293b; font-weight: 600; font-size: 14px; vertical-align: middle; border-right: 1px solid #f1f5f9;">${task.projectName}</td>
                                         <td style="padding: 16px; color: #475569; font-size: 14px; vertical-align: middle; border-right: 1px solid #f1f5f9;">${task.subPhase || 'N/A'}</td>
                                     <td style="padding: 16px; text-align: center; vertical-align: middle; border-right: 1px solid #f1f5f9;">
-                                        <span style="display: inline-flex; align-items: center; justify-content: center; padding: 6px 12px; border-radius: 9999px; font-size: 12px; font-weight: 600; white-space: nowrap; width: 100%; max-width: 140px;
+                                        <span style="display: inline-flex; align-items: center; justify-content: center; padding: 6px 12px; border-radius: 9999px; font-size: 12px; font-weight: 600; white-space: nowrap; width: 140px; margin: 0 auto;
                                             ${task.status === 'Completed' ? 'background: #dcfce7; color: #166534; border: 1px solid #bbf7d0;' :
                             task.status === 'In Progress' ? 'background: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe;' :
                                 task.status === 'Yet to Start' ? 'background: #fef3c7; color: #92400e; border: 1px solid #fde68a;' :
@@ -571,7 +574,10 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
 
             const formatDate = (dateStr: string) => {
                 const d = new Date(dateStr);
-                return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
+                const day = String(d.getDate()).padStart(2, '0');
+                const month = d.toLocaleString('en-US', { month: 'short' });
+                const year = d.getFullYear();
+                return `${day} ${month} ${year}`;
             };
 
             // Create container
@@ -609,7 +615,7 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                                         <td style="padding: 16px; color: #1e293b; font-weight: 600; font-size: 14px; vertical-align: middle; border-right: 1px solid #f1f5f9;">${task.projectName}</td>
                                         <td style="padding: 16px; color: #475569; font-size: 14px; vertical-align: middle; border-right: 1px solid #f1f5f9;">${task.subPhase || '-'}</td>
                                         <td style="padding: 16px; text-align: center; vertical-align: middle; border-right: 1px solid #f1f5f9;">
-                                             <span style="display: inline-flex; align-items: center; justify-content: center; padding: 6px 12px; border-radius: 9999px; font-size: 12px; font-weight: 600; white-space: nowrap; width: 100%; max-width: 140px;
+                                             <span style="display: inline-flex; align-items: center; justify-content: center; padding: 6px 12px; border-radius: 9999px; font-size: 12px; font-weight: 600; white-space: nowrap; width: 140px; margin: 0 auto;
                                                 ${getEffectiveStatus(task) === 'In Progress' ? 'background: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe;' :
                             getEffectiveStatus(task) === 'Yet to Start' ? 'background: #fef3c7; color: #92400e; border: 1px solid #fde68a;' :
                                 getEffectiveStatus(task) === 'On Hold' ? 'background: #fee2e2; color: #991b1b; border: 1px solid #fecaca;' :
