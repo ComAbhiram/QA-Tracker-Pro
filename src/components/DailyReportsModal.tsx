@@ -243,7 +243,7 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
             const html2canvas = (await import('html2canvas')).default;
             const canvas = await html2canvas(container, {
                 backgroundColor: '#ffffff',
-                scale: 2,
+                scale: 4,
                 logging: false,
             });
 
@@ -281,7 +281,7 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
             if (element) {
                 const canvas = await html2canvas(element, {
                     backgroundColor: '#ffffff',
-                    scale: 2,
+                    scale: 4,
                 });
 
                 canvas.toBlob((blob) => {
@@ -525,7 +525,7 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
             const html2canvas = (await import('html2canvas')).default;
             const canvas = await html2canvas(container, {
                 backgroundColor: '#ffffff',
-                scale: 2,
+                scale: 4,
                 logging: false,
             });
 
@@ -672,7 +672,7 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
             const html2canvas = (await import('html2canvas')).default;
             const canvas = await html2canvas(container, {
                 backgroundColor: '#ffffff',
-                scale: 2,
+                scale: 4,
                 logging: false,
             });
 
