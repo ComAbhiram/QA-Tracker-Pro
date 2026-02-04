@@ -24,7 +24,7 @@ export default function TaskModal({ isOpen, onClose, task, onSave }: TaskModalPr
 
     // Initial state ...
     const initialState: Partial<Task> = {
-        // ...
+        status: 'Yet to Start'
     };
 
     const [formData, setFormData] = useState<Partial<Task>>(initialState);
@@ -464,7 +464,7 @@ export default function TaskModal({ isOpen, onClose, task, onSave }: TaskModalPr
                             <label className="text-sm font-semibold text-slate-700">Status</label>
                             <select
                                 name="status"
-                                value={formData.status || 'In Progress'}
+                                value={formData.status || 'Yet to Start'}
                                 onChange={handleChange}
                                 className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all font-medium text-slate-700 appearance-none cursor-pointer"
                             >
