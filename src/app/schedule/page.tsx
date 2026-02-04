@@ -370,6 +370,9 @@ export default function Schedule() {
 
                                     // Check status on this specific day (allow up to Tomorrow)
                                     if (day > end && day <= tomorrow) {
+                                        // ONLY show projected overdue on future days if currently overdue
+                                        if (!isTaskOverdue(task)) return false;
+
                                         const statusInfo = getStatusOnDate(task, day);
                                         if (statusInfo.baseStatus === 'Overdue') return true;
                                         // Also show if completed ON this day (late)
