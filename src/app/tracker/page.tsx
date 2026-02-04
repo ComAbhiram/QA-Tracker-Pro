@@ -120,6 +120,28 @@ export default function Tracker() {
         setIsTaskModalOpen(false);
     };
 
+    const handleDeleteTask = async (taskId: number) => {
+        const { error } = await supabase
+            .from('tasks')
+            .delete()
+            .eq('id', taskId);
+
+        if (error) {
+            console.error('Error deleting task:', error);
+            alert('Failed to delete task');
+        } else {
+            // Refresh tasks
+            const { data } = await supabase
+                .from('tasks')
+                .select('*')
+                .neq('status', 'Completed')
+                .order('start_date', { ascending: false });
+
+            if (data) setTasks((data || []).map(mapTaskFromDB));
+            setIsTaskModalOpen(false);
+        }
+    };
+
     // Pagination logic
     const totalItems = tasks.length;
     const startIndex = (currentPage - 1) * itemsPerPage;
@@ -225,9 +247,9 @@ export default function Tracker() {
                                                 <td className="px-4 py-4 text-slate-600 border-r border-slate-50">
                                                     {task.priority && (
                                                         <span className={`px-2 py-1 rounded text-xs font-bold ${task.priority === 'Urgent' ? 'bg-red-100 text-red-700' :
-                                                                task.priority === 'High' ? 'bg-orange-100 text-orange-700' :
-                                                                    task.priority === 'Medium' ? 'bg-yellow-100 text-yellow-700' :
-                                                                        'bg-green-100 text-green-700'
+                                                            task.priority === 'High' ? 'bg-orange-100 text-orange-700' :
+                                                                task.priority === 'Medium' ? 'bg-yellow-100 text-yellow-700' :
+                                                                    'bg-green-100 text-green-700'
                                                             }`}>
                                                             {task.priority}
                                                         </span>
@@ -333,6 +355,7 @@ export default function Tracker() {
                 onClose={() => setIsTaskModalOpen(false)}
                 task={editingTask}
                 onSave={saveTask}
+                onDelete={handleDeleteTask}
             />
         </div>
     );

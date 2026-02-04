@@ -12,9 +12,10 @@ interface TaskModalProps {
     onClose: () => void;
     task?: Task | null;
     onSave: (task: Partial<Task>) => Promise<void>;
+    onDelete?: (taskId: number) => Promise<void>;
 }
 
-export default function TaskModal({ isOpen, onClose, task, onSave }: TaskModalProps) {
+export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: TaskModalProps) {
     const [loading, setLoading] = useState(false);
     const [projects, setProjects] = useState<{ id: string | number; label: string }[]>([]);
     const [isFetchingProjects, setIsFetchingProjects] = useState(false);
@@ -639,6 +640,21 @@ export default function TaskModal({ isOpen, onClose, task, onSave }: TaskModalPr
                         >
                             Cancel
                         </button>
+                        {task && onDelete && (
+                            <button
+                                type="button"
+                                onClick={async () => {
+                                    if (confirm('Are you sure you want to delete this task? This action cannot be undone.')) {
+                                        setLoading(true);
+                                        await onDelete(task.id);
+                                        setLoading(false);
+                                    }
+                                }}
+                                className="px-6 py-3 text-red-600 font-bold hover:bg-red-50 rounded-xl transition-colors text-sm"
+                            >
+                                Delete
+                            </button>
+                        )}
                         <button
                             type="submit"
                             disabled={loading}

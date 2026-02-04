@@ -166,6 +166,21 @@ export default function Schedule() {
         setIsTaskModalOpen(false);
     };
 
+    const handleDeleteTask = async (taskId: number) => {
+        const { error } = await supabase
+            .from('tasks')
+            .delete()
+            .eq('id', taskId);
+
+        if (error) {
+            console.error('Error deleting task:', error);
+            alert('Failed to delete task');
+        } else {
+            await fetchTasks();
+            setIsTaskModalOpen(false);
+        }
+    };
+
     return (
         <div className="max-w-[1600px] mx-auto space-y-6">
 
@@ -343,6 +358,7 @@ export default function Schedule() {
                 onClose={() => setIsTaskModalOpen(false)}
                 task={editingTask}
                 onSave={saveTask}
+                onDelete={handleDeleteTask}
             />
         </div>
     );
