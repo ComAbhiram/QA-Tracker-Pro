@@ -329,7 +329,7 @@ function generateWorkStatusText(
 ): string {
     const formattedDate = formatDateDDMMYYYY(date);
 
-    let text = `📋 *Work Status - ${formattedDate}*\n`;
+    let text = `📋 *Work Status (v2 Checks) - ${formattedDate}*\n`;
     text += `👤 *Name:* ${qaName}\n\n`;
 
     // Categorize tasks
