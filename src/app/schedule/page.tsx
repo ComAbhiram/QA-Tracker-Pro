@@ -127,7 +127,7 @@ export default function Schedule() {
 
         // Define "Today" for comparison
         const now = new Date();
-        now.setHours(0, 0, 0, 0);
+        now.setHours(23, 59, 59, 999);
 
         // Normal range check
         if (target >= start && target <= end) return true;
@@ -332,7 +332,7 @@ export default function Schedule() {
 
                                     // Define "Today"
                                     const now = new Date();
-                                    now.setHours(0, 0, 0, 0);
+                                    now.setHours(23, 59, 59, 999);
 
                                     // Normal range check
                                     if (day >= start && day <= end) return true;
