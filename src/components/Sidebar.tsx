@@ -31,6 +31,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useGuestMode } from '@/contexts/GuestContext';
+import ManageTeamModal from './ManageTeamModal';
 
 interface NavItem {
     label: string;
@@ -66,6 +67,7 @@ export function Sidebar() {
 
     const [userRole, setUserRole] = useState<string | null>(null);
     const [sidebarTitle, setSidebarTitle] = useState('QA Tracker');
+    const [showManageTeam, setShowManageTeam] = useState(false);
 
     useEffect(() => {
         // Fetch user role for sidebar visibility
@@ -139,6 +141,7 @@ export function Sidebar() {
             </button>
 
             {/* Sidebar */}
+            <ManageTeamModal isOpen={showManageTeam} onClose={() => setShowManageTeam(false)} />
             <nav className={`sidebar ${collapsed ? '-translate-x-full' : 'translate-x-0'} lg:translate-x-0`}>
                 <div className="sidebar-header">
                     <div className="logo">
@@ -188,7 +191,16 @@ export function Sidebar() {
                     ))}
                 </div>
 
-                <div className="mt-auto border-t border-slate-100 p-4">
+                <div className="mt-auto border-t border-slate-100 p-4 space-y-2">
+                    {userRole !== 'super_admin' && !isGuest && (
+                        <button
+                            onClick={() => setShowManageTeam(true)}
+                            className={`flex items-center gap-3 w-full p-3 rounded-xl text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 transition-all ${collapsed ? 'justify-center' : ''}`}
+                        >
+                            <Users size={20} />
+                            {!collapsed && <span className="font-medium">Manage Team</span>}
+                        </button>
+                    )}
                     <button
                         onClick={async () => {
                             if (isGuest) {
