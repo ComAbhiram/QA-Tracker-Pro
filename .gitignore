@@ -44,3 +44,6 @@ node_modules/
 .env*.local
 .DS_Store
 .hubstaff_tokens.json
+
+# Logs
+*.log

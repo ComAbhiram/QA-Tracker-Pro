@@ -14,6 +14,15 @@ interface ProjectCardProps {
         blockers: string | null;
         task_count: number;
         resources: string | null;
+        expected_effort_days: number | null;
+        hubstaff_budget: string | null;
+        committed_days: number | null;
+        fixing_text: string | null;
+        live_text: string | null;
+        budget_text: string | null;
+        started_date: string | null;
+        project_type: string | null;
+        category: string | null;
     };
     hubstaffData?: {
         hs_time_taken_days: number;

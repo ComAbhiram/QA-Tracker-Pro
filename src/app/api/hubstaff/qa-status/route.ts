@@ -56,18 +56,17 @@ export async function GET(request: NextRequest) {
             const assigned2 = (task.assignedTo2 || '').trim().toLowerCase();
             const qName = qaName.trim().toLowerCase();
             const mName = mappedQaName.trim().toLowerCase();
+            const hName = (hubstaffName || '').trim().toLowerCase();
 
-            // Check if either assignee matches the full name or mapped name
-            const match1 = assigned1 === qName || assigned1 === mName;
-            const match2 = assigned2 === qName || assigned2 === mName;
+            // Strict matching only
+            // 1. Direct match with Input Name (qaName)
+            // 2. Match with Mapped Short Name (mappedQaName) - e.g. "Aswathi M Ashok" -> "Aswathi"
+            // 3. Match with Hubstaff Full Name (hubstaffName) - e.g. "Aswathi" -> "Aswathi M Ashok"
 
-            // Also try partial matching (e.g., "aswathi" in "aswathi m ashok")
-            const fuzzy1 = (assigned1 && qName.includes(assigned1)) || (assigned1 && assigned1.includes(qName)) ||
-                (assigned1 && mName.includes(assigned1)) || (assigned1 && assigned1.includes(mName));
-            const fuzzy2 = (assigned2 && qName.includes(assigned2)) || (assigned2 && assigned2.includes(qName)) ||
-                (assigned2 && mName.includes(assigned2)) || (assigned2 && assigned2.includes(mName));
+            const isMatch1 = assigned1 && (assigned1 === qName || assigned1 === mName || (hName && assigned1 === hName));
+            const isMatch2 = assigned2 && (assigned2 === qName || assigned2 === mName || (hName && assigned2 === hName));
 
-            const isMatch = match1 || match2 || fuzzy1 || fuzzy2;
+            const isMatch = isMatch1 || isMatch2;
 
             // Debug logging for first few tasks
             if (tasks.indexOf(task) < 3) {

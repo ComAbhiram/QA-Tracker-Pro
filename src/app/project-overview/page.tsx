@@ -17,6 +17,15 @@ interface ProjectOverview {
     blockers: string | null;
     task_count: number;
     resources: string | null;
+    expected_effort_days: number | null;
+    hubstaff_budget: string | null;
+    committed_days: number | null;
+    fixing_text: string | null;
+    live_text: string | null;
+    budget_text: string | null;
+    started_date: string | null;
+    project_type: string | null;
+    category: string | null;
     created_at: string;
     updated_at: string;
 }
@@ -182,8 +191,8 @@ export default function ProjectOverviewPage() {
                         <button
                             onClick={() => setView('card')}
                             className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors ${view === 'card'
-                                    ? 'bg-indigo-100 text-indigo-700'
-                                    : 'text-slate-600 hover:bg-slate-50'
+                                ? 'bg-indigo-100 text-indigo-700'
+                                : 'text-slate-600 hover:bg-slate-50'
                                 }`}
                         >
                             <LayoutGrid size={18} />
@@ -192,8 +201,8 @@ export default function ProjectOverviewPage() {
                         <button
                             onClick={() => setView('table')}
                             className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors ${view === 'table'
-                                    ? 'bg-indigo-100 text-indigo-700'
-                                    : 'text-slate-600 hover:bg-slate-50'
+                                ? 'bg-indigo-100 text-indigo-700'
+                                : 'text-slate-600 hover:bg-slate-50'
                                 }`}
                         >
                             <List size={18} />

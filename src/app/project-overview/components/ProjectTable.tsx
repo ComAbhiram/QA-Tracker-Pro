@@ -18,6 +18,12 @@ interface ProjectTableProps {
     hubstaffDataCache: Record<string, {
         hs_time_taken_days: number;
         activity_percentage: number;
+        team_breakdown: {
+            design_days: number;
+            fe_dev_days: number;
+            be_dev_days: number;
+            testing_days: number;
+        };
         member_activities: Array<{
             user_name: string;
             activity_percentage: number;
@@ -135,16 +141,46 @@ export default function ProjectTable({ projects, hubstaffDataCache, onEdit, onDe
                                             {project.resources || '-'}
                                         </div>
                                     </td>
-                                    <td className="px-4 py-3 text-sm text-center">
-                                        <span className="inline-flex items-center justify-center px-3 py-1 bg-green-100 text-green-700 rounded-full font-semibold">
+                                    <td className="px-4 py-3 text-sm text-center relative group">
+                                        <div className="inline-flex items-center justify-center px-3 py-1 bg-green-100 text-green-700 rounded-full font-semibold cursor-help">
                                             {hubstaffData?.activity_percentage != null ? `${hubstaffData.activity_percentage}%` : '-'}
-                                        </span>
+                                        </div>
+                                        {hubstaffData?.member_activities && hubstaffData.member_activities.length > 0 && (
+                                            <div className="absolute z-20 hidden group-hover:block bottom-full left-1/2 -translate-x-1/2 mb-2 bg-white border border-slate-200 rounded-lg shadow-xl p-3 min-w-[180px]">
+                                                <p className="text-[10px] font-bold text-slate-500 uppercase mb-2 border-b border-slate-100 pb-1">Member Activity</p>
+                                                {hubstaffData.member_activities.map((member, idx) => (
+                                                    <div key={idx} className="flex items-center justify-between text-[11px] mb-1">
+                                                        <span className="text-slate-600 truncate mr-2">{member.user_name}</span>
+                                                        <span className="font-bold text-indigo-600">{member.activity_percentage}%</span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
                                     </td>
                                     <td className="px-4 py-3 text-sm text-slate-600">
                                         {project.pc || '-'}
                                     </td>
-                                    <td className="px-4 py-3 text-sm text-center font-semibold text-slate-700">
-                                        {hubstaffData?.hs_time_taken_days != null ? hubstaffData.hs_time_taken_days.toFixed(2) : '-'}
+                                    <td className="px-4 py-3 text-sm text-center font-semibold text-slate-700 relative group">
+                                        <span className="cursor-help">{hubstaffData?.hs_time_taken_days != null ? hubstaffData.hs_time_taken_days.toFixed(2) : '-'}</span>
+                                        {hubstaffData?.team_breakdown && (
+                                            <div className="absolute z-20 hidden group-hover:block bottom-full left-1/2 -translate-x-1/2 mb-2 bg-white border border-slate-200 rounded-lg shadow-xl p-3 min-w-[150px]">
+                                                <p className="text-[10px] font-bold text-slate-500 uppercase mb-2 border-b border-slate-100 pb-1">Team Breakdown</p>
+                                                <div className="space-y-1">
+                                                    <div className="flex justify-between text-[11px] text-purple-600">
+                                                        <span>Design:</span> <span>{hubstaffData.team_breakdown.design_days.toFixed(2)}</span>
+                                                    </div>
+                                                    <div className="flex justify-between text-[11px] text-blue-600">
+                                                        <span>FE Dev:</span> <span>{hubstaffData.team_breakdown.fe_dev_days.toFixed(2)}</span>
+                                                    </div>
+                                                    <div className="flex justify-between text-[11px] text-green-600">
+                                                        <span>BE Dev:</span> <span>{hubstaffData.team_breakdown.be_dev_days.toFixed(2)}</span>
+                                                    </div>
+                                                    <div className="flex justify-between text-[11px] text-orange-600">
+                                                        <span>Testing:</span> <span>{hubstaffData.team_breakdown.testing_days.toFixed(2)}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
                                     </td>
                                     <td className="px-4 py-3 text-sm text-center font-semibold text-slate-700">
                                         {project.allotted_time_days != null ? project.allotted_time_days.toFixed(1) : '-'}

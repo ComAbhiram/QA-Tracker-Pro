@@ -1,13 +1,4 @@
-// Hubstaff Team Mapping Configuration
-// This file maps Hubstaff users to their respective teams
-
-export interface TeamMapping {
-    [userId: string]: 'Design' | 'FE Dev' | 'BE Dev' | 'Testing';
-}
-
-// Map Hubstaff user names to teams
-// Explicit list provided by the user
-export const userNameToTeam: Record<string, 'Design' | 'FE Dev' | 'BE Dev' | 'Testing'> = {
+const userNameToTeam = {
     // BE Dev
     'akhila mohanan': 'BE Dev',
     'manu k o': 'BE Dev',
@@ -48,8 +39,7 @@ export const userNameToTeam: Record<string, 'Design' | 'FE Dev' | 'BE Dev' | 'Te
     'aswathi m ashok': 'Testing'
 };
 
-// Determine team based on user information
-export function determineUserTeam(user: any): 'Design' | 'FE Dev' | 'BE Dev' | 'Testing' | 'Unknown' {
+function determineUserTeam(user) {
     const userName = (user.name || '').toLowerCase().trim();
 
     // Check exact matches in the provided list
@@ -58,7 +48,7 @@ export function determineUserTeam(user: any): 'Design' | 'FE Dev' | 'BE Dev' | '
     }
 
     // Keyword fallback for others
-    const keywords: Record<string, 'Design' | 'FE Dev' | 'BE Dev' | 'Testing'> = {
+    const keywords = {
         'design': 'Design',
         'frontend': 'FE Dev',
         'backend': 'BE Dev',
@@ -75,14 +65,17 @@ export function determineUserTeam(user: any): 'Design' | 'FE Dev' | 'BE Dev' | '
     return 'Unknown';
 }
 
-// Map team to display name
-export function getTeamDisplayName(team: string): string {
-    const teamNames: Record<string, string> = {
-        'Design': 'Design',
-        'FE Dev': 'Frontend Development',
-        'BE Dev': 'Backend Development',
-        'Testing': 'QA & Testing',
-        'Unknown': 'Unassigned'
-    };
-    return teamNames[team] || team;
-}
+const testUsers = [
+    { name: 'akhila mohanan' },
+    { name: 'Akhila Mohanan' },
+    { name: 'Manu K O' },
+    { name: 'Unknown User' },
+    { name: 'Frontend Dev' },
+    { name: 'QA Tester' }
+];
+
+console.log('Testing determineUserTeam:');
+testUsers.forEach(user => {
+    const team = determineUserTeam(user);
+    console.log(`User: "${user.name}" -> Team: ${team}`);
+});

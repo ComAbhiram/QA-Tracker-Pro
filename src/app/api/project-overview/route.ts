@@ -112,7 +112,16 @@ export async function POST(request: NextRequest) {
             pc,
             allotted_time_days,
             tl_confirmed_effort_days,
-            blockers
+            blockers,
+            expected_effort_days,
+            hubstaff_budget,
+            committed_days,
+            fixing_text,
+            live_text,
+            budget_text,
+            started_date,
+            project_type,
+            category
         } = body;
 
         if (!project_name) {
@@ -133,6 +142,15 @@ export async function POST(request: NextRequest) {
                 allotted_time_days: allotted_time_days || null,
                 tl_confirmed_effort_days: tl_confirmed_effort_days || null,
                 blockers: blockers || null,
+                expected_effort_days: expected_effort_days || null,
+                hubstaff_budget: hubstaff_budget || null,
+                committed_days: committed_days || null,
+                fixing_text: fixing_text || null,
+                live_text: live_text || null,
+                budget_text: budget_text || null,
+                started_date: started_date || null,
+                project_type: project_type || null,
+                category: category || null,
                 created_by: user.id
             })
             .select()
@@ -184,14 +202,7 @@ export async function PUT(request: NextRequest) {
         }
 
         const body = await request.json();
-        const {
-            id,
-            location,
-            pc,
-            allotted_time_days,
-            tl_confirmed_effort_days,
-            blockers
-        } = body;
+        const { id, ...updateFields } = body;
 
         if (!id) {
             return NextResponse.json(
@@ -200,16 +211,32 @@ export async function PUT(request: NextRequest) {
             );
         }
 
+        // Only include fields that are actually present in the request body
+        // and filter out any fields that shouldn't be updated directly via this endpoint
+        const allowedFields = [
+            'location', 'pc', 'allotted_time_days', 'tl_confirmed_effort_days',
+            'blockers', 'expected_effort_days', 'hubstaff_budget', 'committed_days',
+            'fixing_text', 'live_text', 'budget_text', 'started_date',
+            'project_type', 'category'
+        ];
+
+        const cleanUpdateData: Record<string, any> = {};
+        Object.keys(updateFields).forEach(key => {
+            if (allowedFields.includes(key)) {
+                cleanUpdateData[key] = updateFields[key];
+            }
+        });
+
+        if (Object.keys(cleanUpdateData).length === 0) {
+            return NextResponse.json({ error: 'No valid fields to update' }, { status: 400 });
+        }
+
+        console.log(`[ProjectOverview] Updating project ${id} with:`, cleanUpdateData);
+
         // Update project overview
         const { data: updatedProject, error } = await supabase
             .from('project_overview')
-            .update({
-                location,
-                pc,
-                allotted_time_days,
-                tl_confirmed_effort_days,
-                blockers
-            })
+            .update(cleanUpdateData)
             .eq('id', id)
             .select()
             .single();
@@ -223,10 +250,10 @@ export async function PUT(request: NextRequest) {
         }
 
         return NextResponse.json({ project: updatedProject });
-    } catch (error) {
+    } catch (error: any) {
         console.error('Error in PUT /api/project-overview:', error);
         return NextResponse.json(
-            { error: 'Internal server error' },
+            { error: 'Internal server error', details: error.message },
             { status: 500 }
         );
     }
