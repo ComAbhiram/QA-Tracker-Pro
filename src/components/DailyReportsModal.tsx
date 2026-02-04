@@ -459,7 +459,6 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                                 <th style="padding: 12px; text-align: center; color: white; font-weight: 600; font-size: 12px; width: 10%; border-right: 1px solid rgba(255,255,255,0.2);">Status</th>
                                 <th style="padding: 12px; text-align: left; color: white; font-weight: 600; font-size: 12px; width: 15%; border-right: 1px solid rgba(255,255,255,0.2);">Assignees</th>
                                 <th style="padding: 12px; text-align: left; color: white; font-weight: 600; font-size: 12px; border-right: 1px solid rgba(255,255,255,0.2);">Dates (S/E/A)</th>
-                                <th style="padding: 12px; text-align: left; color: white; font-weight: 600; font-size: 12px; border-right: 1px solid rgba(255,255,255,0.2);">Bugs</th>
                                 <th style="padding: 12px; text-align: left; color: white; font-weight: 600; font-size: 12px;">Comments/Dev.</th>
                             </tr>
                         </thead>
@@ -491,14 +490,9 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                                         <td style="padding: 12px; color: #475569; font-size: 12px; vertical-align: middle; border-right: 1px solid #f1f5f9;">
                                             ${[task.assignedTo, task.assignedTo2, ...(task.additionalAssignees || [])].filter(Boolean).join(', ') || 'Unassigned'}
                                         </td>
-                                        <td style="padding: 12px; color: #475569; font-size: 12px; vertical-align: middle; border-right: 1px solid #f1f5f9;">
                                             <div>S: ${task.startDate ? formatDate(task.startDate) : '-'}</div>
                                             <div>E: ${task.endDate ? formatDate(task.endDate) : '-'}</div>
                                             ${task.actualCompletionDate ? `<div style="color:#059669;">A: ${formatDate(task.actualCompletionDate)}</div>` : ''}
-                                        </td>
-                                        <td style="padding: 12px; color: #475569; font-size: 12px; vertical-align: middle; border-right: 1px solid #f1f5f9;">
-                                            <div>T: ${task.bugCount}</div>
-                                            <div style="font-size:10px; color:#94a3b8;">H: ${task.htmlBugs}, F: ${task.functionalBugs}</div>
                                         </td>
                                         <td style="padding: 12px; color: #64748b; font-size: 11px; vertical-align: middle;">
                                             <div style="margin-bottom:4px;">${task.comments || '-'}</div>
