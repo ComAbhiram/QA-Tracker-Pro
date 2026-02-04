@@ -85,14 +85,18 @@ export default function Schedule() {
         const target = new Date(currentDate);
         target.setHours(12, 0, 0, 0); // Use noon to avoid timezone edge cases
 
+        // Define "Today" for comparison
+        const now = new Date();
+        now.setHours(0, 0, 0, 0);
+
         // Normal range check
         if (target >= start && target <= end) return true;
 
-        // Overdue check: If task is overdue and target date is after end date, show it
+        // Overdue check: If task is overdue and target date is after end date
         const effectiveStatus = getEffectiveStatus(task);
         if (effectiveStatus === 'Overdue') {
-            // Show on days AFTER the end date
-            return target > end;
+            // Show on days AFTER the end date, BUT ONLY up to "Today"
+            return target > end && target <= now;
         }
 
         return false;
@@ -288,14 +292,18 @@ export default function Schedule() {
                                     start.setHours(0, 0, 0, 0);
                                     end.setHours(23, 59, 59, 999);
 
+                                    // Define "Today"
+                                    const now = new Date();
+                                    now.setHours(0, 0, 0, 0);
+
                                     // Normal range check
                                     if (day >= start && day <= end) return true;
 
                                     // Overdue check
                                     const effectiveStatus = getEffectiveStatus(task);
                                     if (effectiveStatus === 'Overdue') {
-                                        // Show on days AFTER the end date
-                                        return day > end;
+                                        // Show on days AFTER the end date, BUT ONLY up to "Today"
+                                        return day > end && day <= now;
                                     }
                                     return false;
                                 });
@@ -362,7 +370,7 @@ export default function Schedule() {
                                             <div className="flex justify-between items-start mb-4">
                                                 <div className="flex items-center gap-2">
                                                     <span className={`text-[11px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-lg bg-black/20 text-white ${isLateCompletion ? 'ring-2 ring-rose-400' : ''}`}>
-                                                        {isLateCompletion ? 'Compl. (Late)' : getEffectiveStatus(task)}
+                                                        {isLateCompletion ? 'Completed (Overdue)' : getEffectiveStatus(task)}
                                                     </span>
                                                     {isTaskOverdue(task) && (
                                                         <span className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold bg-red-100 text-red-700 border border-red-200">

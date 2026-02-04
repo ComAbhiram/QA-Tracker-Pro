@@ -500,7 +500,7 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                                         effectiveStatus === 'Overdue' ? 'background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5;' :
                                             'background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0;'}
                                                 ${isLateCompletion ? 'border: 2px solid #f87171;' : ''}">
-                                                ${isLateCompletion ? 'Compl. (Late)' : effectiveStatus}
+                                                ${isLateCompletion ? 'Completed (Overdue)' : effectiveStatus}
                                             </span>
                                         </div>
                                     </td>
