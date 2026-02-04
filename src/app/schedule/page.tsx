@@ -374,7 +374,7 @@ export default function Schedule() {
 
                                                 return (
                                                     <div key={task.id} className={`text-[11px] px-2 py-1.5 rounded-md border text-slate-700 truncate font-semibold mb-1 transition-all hover:scale-[1.02] ${borderClass}`}>
-                                                        {task.projectName}
+                                                        {task.projectName} {statusInfo.overdueDays > 0 ? `(+${statusInfo.overdueDays}d)` : ''}
                                                     </div>
                                                 );
                                             })}
