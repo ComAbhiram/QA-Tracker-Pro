@@ -13,6 +13,9 @@ interface HubstaffActivity {
     projects: string[];
 }
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export async function GET(request: NextRequest) {
     try {
         const searchParams = request.nextUrl.searchParams;
@@ -102,8 +105,9 @@ export async function GET(request: NextRequest) {
         const relevantTasks = memberTasks.filter(task => {
             // Check for Completed Today
             if (task.status === 'Completed') {
-                if (task.actualEndDate) {
-                    const actualEnd = new Date(task.actualEndDate).toISOString().split('T')[0];
+                const completionDate = task.actualCompletionDate || task.actualEndDate;
+                if (completionDate) {
+                    const actualEnd = new Date(completionDate).toISOString().split('T')[0];
                     return actualEnd === date;
                 }
                 return false; // Completed but no date (or assume not today)
@@ -356,7 +360,10 @@ function generateWorkStatusText(
             text += `📁 *Project:* ${task.projectName} [ID: ${task.id}]\n`;
             text += `📅 *Start Date:* ${task.startDate ? formatDateDDMMYYYY(task.startDate) : 'Not set'}\n`;
             text += `⏰ *Expected End Date:* ${task.endDate ? formatDateDDMMYYYY(task.endDate) : 'Not set'}\n`;
-            text += `✅ *Actual End Date:* ${task.actualEndDate ? formatDateDDMMYYYY(task.actualEndDate) : 'Not completed'}\n`;
+
+            const actualDate = task.actualCompletionDate || task.actualEndDate;
+            text += `✅ *Actual End Date:* ${actualDate ? formatDateDDMMYYYY(actualDate) : 'Not completed'}\n`;
+
             text += `📊 *Status:* ${task.status}\n`;
             const isDeviated = task.deviationReason && task.deviationReason.trim() !== '';
             text += `✅ *Deviated:* ${isDeviated ? 'Yes' : 'No'}\n`;
@@ -372,7 +379,10 @@ function generateWorkStatusText(
             text += `📁 *Project:* ${task.projectName}\n`;
             text += `📅 *Start Date:* ${task.startDate ? formatDateDDMMYYYY(task.startDate) : 'Not set'}\n`;
             text += `⏰ *Expected End Date:* ${task.endDate ? formatDateDDMMYYYY(task.endDate) : 'Not set'}\n`;
-            text += `✅ *Actual End Date:* ${task.actualEndDate ? formatDateDDMMYYYY(task.actualEndDate) : 'N/A'}\n`;
+
+            const actualDate = task.actualCompletionDate || task.actualEndDate;
+            text += `✅ *Actual End Date:* ${actualDate ? formatDateDDMMYYYY(actualDate) : 'N/A'}\n`;
+
             text += `📊 *Status:* ${task.status}\n`;
             const isDeviated = task.deviationReason && task.deviationReason.trim() !== '';
             text += `✅ *Deviated:* ${isDeviated ? 'Yes' : 'No'}\n`;
