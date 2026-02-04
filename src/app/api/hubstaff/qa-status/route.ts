@@ -341,7 +341,7 @@ function generateWorkStatusText(
         text += `🔄 *=== ACTIVE TASKS ===*\n\n`;
         activeTasks.forEach((task, index) => {
             text += `*${index + 1}. ${task.subPhase || task.projectName}*\n`;
-            text += `📁 *Project:* ${task.projectName}\n`;
+            text += `📁 *Project:* ${task.projectName} [ID: ${task.id}]\n`;
             text += `📅 *Start Date:* ${task.startDate ? formatDateDDMMYYYY(task.startDate) : 'Not set'}\n`;
             text += `⏰ *Expected End Date:* ${task.endDate ? formatDateDDMMYYYY(task.endDate) : 'Not set'}\n`;
             text += `✅ *Actual End Date:* ${task.actualEndDate ? formatDateDDMMYYYY(task.actualEndDate) : 'Not completed'}\n`;
