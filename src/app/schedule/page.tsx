@@ -219,6 +219,11 @@ export default function Schedule() {
     const saveTask = async (taskData: Partial<Task>) => {
         if (!editingTask) return;
 
+        const payloadACD = taskData.actualCompletionDate ? new Date(taskData.actualCompletionDate).toISOString() : null;
+
+        // DEBUG: Alert the payload to verify date format
+        // alert(`DEBUG: Saving Task\nACD Input: ${taskData.actualCompletionDate}\nPayload: ${payloadACD}`);
+
         const dbPayload: any = {
             project_name: taskData.projectName,
             project_type: taskData.projectType,
@@ -230,7 +235,7 @@ export default function Schedule() {
             assigned_to2: taskData.assignedTo2,
             start_date: taskData.startDate || null,
             end_date: taskData.endDate || null,
-            actual_completion_date: taskData.actualCompletionDate ? new Date(taskData.actualCompletionDate).toISOString() : null,
+            actual_completion_date: payloadACD,
             comments: taskData.comments,
             current_updates: taskData.currentUpdates,
             bug_count: taskData.bugCount,
@@ -240,15 +245,26 @@ export default function Schedule() {
             sprint_link: taskData.sprintLink
         };
 
-        const { error } = await supabase
+        const { data, error } = await supabase
             .from('tasks')
             .update(dbPayload)
-            .eq('id', editingTask.id);
+            .eq('id', editingTask.id)
+            .select();
 
         if (error) {
             console.error('Error updating task:', error);
             alert(`Failed to save task: ${error.message}`);
             return;
+        }
+
+        if (!data || data.length === 0) {
+            alert(`Save successful but NO rows updated. \nLikely permission issue or Task ID ${editingTask.id} not found.`);
+        } else {
+            // Verify if the date was actually saved in the returned data
+            const savedDate = data[0].actual_completion_date;
+            if (payloadACD && !savedDate) {
+                alert(`WARNING: Date sent but not saved!\nSent: ${payloadACD}\nSaved: ${savedDate}`);
+            }
         }
 
         await fetchTasks();
