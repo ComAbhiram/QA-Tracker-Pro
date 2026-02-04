@@ -17,23 +17,23 @@ export default function TaskDetailsModal({ isOpen, onClose, task, onEdit }: Task
     // Helper for Status Color - Matching the rest of the app
     const getStatusColor = (status: string) => {
         const s = status?.toLowerCase() || '';
-        if (s === 'completed') return 'bg-emerald-100 text-emerald-800 border-emerald-200';
-        if (s === 'in progress' || s === 'being developed') return 'bg-blue-100 text-blue-800 border-blue-200';
-        if (s === 'overdue') return 'bg-rose-100 text-rose-800 border-rose-200';
-        if (s === 'on hold') return 'bg-slate-100 text-slate-800 border-slate-200';
-        if (s === 'rejected') return 'bg-red-100 text-red-800 border-red-200';
-        if (s === 'yet to start' || s === 'forecast' || s === 'urgent') return 'bg-amber-100 text-amber-800 border-amber-200';
-        if (s.includes('qa') || s === 'ready for qa') return 'bg-purple-100 text-purple-800 border-purple-200';
-        return 'bg-sky-100 text-sky-800 border-sky-200';
+        if (s === 'completed') return 'bg-emerald-600 text-white border-emerald-600';
+        if (s === 'in progress' || s === 'being developed') return 'bg-blue-600 text-white border-blue-600';
+        if (s === 'overdue') return 'bg-rose-600 text-white border-rose-600';
+        if (s === 'on hold') return 'bg-slate-500 text-white border-slate-500';
+        if (s === 'rejected') return 'bg-red-600 text-white border-red-600';
+        if (s === 'yet to start' || s === 'forecast' || s === 'urgent') return 'bg-amber-500 text-white border-amber-500';
+        if (s.includes('qa') || s === 'ready for qa') return 'bg-purple-600 text-white border-purple-600';
+        return 'bg-sky-600 text-white border-sky-600';
     };
 
     // Helper for Priority Color
     const getPriorityColor = (priority: string | null) => {
         switch (priority?.toLowerCase()) {
-            case 'high': return 'bg-rose-50 text-rose-700 border-rose-200';
-            case 'medium': return 'bg-amber-50 text-amber-700 border-amber-200';
-            case 'low': return 'bg-slate-50 text-slate-600 border-slate-200';
-            default: return 'bg-slate-50 text-slate-500 border-slate-200';
+            case 'high': return 'bg-rose-600 text-white border-rose-600';
+            case 'medium': return 'bg-amber-500 text-white border-amber-500';
+            case 'low': return 'bg-slate-500 text-white border-slate-500';
+            default: return 'bg-slate-400 text-white border-slate-400';
         }
     };
 
