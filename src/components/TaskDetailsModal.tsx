@@ -144,31 +144,47 @@ export default function TaskDetailsModal({ isOpen, onClose, task, onEdit }: Task
                                 </div>
                                 <div className="flex justify-between text-xs pt-2 mt-2 border-t border-slate-200">
                                     <span className="text-slate-400">Status:</span>
-                                    {(() => {
-                                        const end = task.endDate ? new Date(task.endDate) : null;
-                                        const completed = task.actualCompletionDate ? new Date(task.actualCompletionDate) : null;
-                                        const today = new Date();
-                                        today.setHours(0, 0, 0, 0);
+                                        // Status Display Logic
+                                    if (task.status === 'Rejected') {
+                                            return <span className="text-red-600 font-bold">Rejected</span>;
+                                        }
 
-                                        if (completed) {
+                                    const end = task.endDate ? new Date(task.endDate) : null;
+                                    const completed = task.actualCompletionDate ? new Date(task.actualCompletionDate) : null;
+
+                                    if (completed) {
                                             if (end && completed > end) {
                                                 const diffTime = completed.getTime() - end.getTime();
-                                                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                                                return <span className="text-rose-600 font-bold">Completed (Late by {diffDays}d)</span>;
+                                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                                    return <span className="text-rose-600 font-bold">Completed (Late by {diffDays}d)</span>;
                                             }
-                                            const start = task.startDate ? new Date(task.startDate) : completed;
-                                            const diffTime = Math.abs(completed.getTime() - start.getTime());
-                                            const tookDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
-                                            return <span className="text-emerald-600 font-bold">Completed in {tookDays} days</span>;
+                                    const start = task.startDate ? new Date(task.startDate) : completed;
+                                    const diffTime = Math.abs(completed.getTime() - start.getTime());
+                                    const tookDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+                                    return <span className="text-emerald-600 font-bold">Completed in {tookDays} days</span>;
                                         }
 
-                                        if (end && today > end) {
-                                            const diffTime = today.getTime() - end.getTime();
-                                            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                                            return <span className="text-rose-600 font-bold">Overdue by {diffDays} days</span>;
+                                    // Use unified isTaskOverdue logic (checks 6:30 PM IST and excludes Rejected)
+                                    // We need to import it or replicate the logic to be safe. 
+                                    // Replicating simple check here to avoid hook complexity if not imported:
+
+                                    if (end) {
+                                            const now = new Date();
+                                    // Manual IST check match: End Date 18:30 vs Now
+                                    const endOfWorkDay = new Date(end);
+                                    endOfWorkDay.setHours(18, 30, 0, 0);
+
+                                            // Handle Timezone if needed, but assuming browser local is IST for user or close enough
+                                            // Ideally imports isTaskOverdue from types.
+                                            
+                                            if (now > endOfWorkDay) {
+                                                const diffTime = now.getTime() - endOfWorkDay.getTime();
+                                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                                    return <span className="text-rose-600 font-bold">Overdue by {diffDays} days</span>;
+                                            }
                                         }
 
-                                        return <span className="text-blue-600 font-bold">{task.status}</span>;
+                                    return <span className="text-blue-600 font-bold">{task.status}</span>;
                                     })()}
                                 </div>
                             </div>
