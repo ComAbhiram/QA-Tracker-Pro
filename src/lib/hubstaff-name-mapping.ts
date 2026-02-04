@@ -12,17 +12,8 @@ export const HUBSTAFF_TO_QA_NAME_MAP: Record<string, string> = {
     'Vishnu shaji': 'Vishnu',
     'Sreegith VA': 'Sreegith',
     'Samir Mulashiya': 'Samir',
-    'amrutha ms': 'Amrutha',
-    'Vaishnav Vijayan': 'Vaishnav',
-    'Mohammed Afsal': 'M Afsal',
-    'Joshua Johnson': 'Joshua',
-    'Bijith P N': 'Bijith',
-    'Nikhil Govind': 'Nikhil',
-    'Sejal Sebastian': 'Sejal',
-    'Deepu Nr': 'Deepu',
-    'Sonu Sivaraman': 'Sonu',
-    'Jishnu V Gopal': 'Jishnu',
     'Amrutha lakshmi': 'Amrutha',
+    'amrutha ms': 'Amrutha',
 };
 
 /**
