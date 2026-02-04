@@ -27,7 +27,8 @@ import {
     TrendingUp,
     Eye,
     Folder,
-    FolderKanban
+    FolderKanban,
+    Users
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useGuestMode } from '@/contexts/GuestContext';
