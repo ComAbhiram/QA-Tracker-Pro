@@ -39,7 +39,7 @@ export default function TaskDetailsModal({ isOpen, onClose, task, onEdit }: Task
 
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200 p-4">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden animate-in zoom-in-95 duration-200 max-h-[90vh] flex flex-col">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl overflow-hidden animate-in zoom-in-95 duration-200 max-h-[90vh] flex flex-col">
 
                 {/* Header */}
                 <div className="relative h-24 bg-gradient-to-r from-indigo-500 to-purple-600 p-6 flex items-start justify-between flex-shrink-0">
@@ -67,7 +67,7 @@ export default function TaskDetailsModal({ isOpen, onClose, task, onEdit }: Task
                 </div>
 
                 {/* Content */}
-                <div className="px-6 pb-6 -mt-10 flex-1 overflow-y-auto custom-scrollbar">
+                <div className="px-8 pb-8 -mt-8 flex-1 overflow-y-auto custom-scrollbar">
 
                     {/* Title Block */}
                     <div className="bg-white rounded-xl shadow-lg border border-slate-100 p-5 mb-6">
