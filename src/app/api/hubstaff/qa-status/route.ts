@@ -87,12 +87,6 @@ export async function GET(request: NextRequest) {
 
         console.log(`[API] Fetched ${tasks.length} total tasks from database`);
 
-        // DEBUG: Inspcet specific ghost task
-        const ghostTask = tasks.find(t => t.id === 1769579340370);
-        if (ghostTask) {
-            console.log('[DEBUG GHOST TASK]', JSON.stringify(ghostTask, null, 2));
-        }
-
         if (tasks.length > 0) {
             console.log(`[API] Sample assignees from first 3 tasks:`, tasks.slice(0, 3).map(t => ({ project: t.projectName, assigned: t.assignedTo })));
         }
