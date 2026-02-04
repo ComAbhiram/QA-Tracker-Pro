@@ -133,8 +133,8 @@ export function getISTDate(): Date {
 }
 
 export function isTaskOverdue(task: Task): boolean {
-    // Completed tasks are never overdue
-    if (task.status === 'Completed') return false;
+    // Completed and Rejected tasks are never overdue
+    if (task.status === 'Completed' || task.status === 'Rejected') return false;
     if (!task.endDate) return false;
 
     const istNow = getISTDate();
