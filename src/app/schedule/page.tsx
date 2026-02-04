@@ -330,15 +330,18 @@ export default function Schedule() {
                                     start.setHours(0, 0, 0, 0);
                                     end.setHours(23, 59, 59, 999);
 
-                                    // Define "Today"
+                                    // Define "Today" and "Tomorrow" for visibility window
                                     const now = new Date();
                                     now.setHours(23, 59, 59, 999);
+
+                                    const tomorrow = new Date(now);
+                                    tomorrow.setDate(tomorrow.getDate() + 1);
 
                                     // Normal range check
                                     if (day >= start && day <= end) return true;
 
-                                    // Check status on this specific day
-                                    if (day > end && day <= now) {
+                                    // Check status on this specific day (allow up to Tomorrow)
+                                    if (day > end && day <= tomorrow) {
                                         const statusInfo = getStatusOnDate(task, day);
                                         if (statusInfo.baseStatus === 'Overdue') return true;
                                         // Also show if completed ON this day (late)
