@@ -80,6 +80,7 @@ export default function Tracker() {
             pc: taskData.pc,
             start_date: taskData.startDate || null,
             end_date: taskData.endDate || null,
+            actual_completion_date: taskData.actualCompletionDate ? new Date(taskData.actualCompletionDate).toISOString() : null,
             start_time: taskData.startTime || null,
             end_time: taskData.endTime || null,
             bug_count: taskData.bugCount,
@@ -100,13 +101,21 @@ export default function Tracker() {
                 .update(updatePayload)
                 .eq('id', editingTask.id);
 
-            if (error) console.error('Error updating task:', error);
+            if (error) {
+                console.error('Error updating task:', error);
+                alert(`Failed to save task: ${error.message}`);
+                return;
+            }
         } else {
             const { error } = await supabase
                 .from('tasks')
                 .insert([dbPayload]);
 
-            if (error) console.error('Error creating task:', error);
+            if (error) {
+                console.error('Error creating task:', error);
+                alert(`Failed to create task: ${error.message}`);
+                return;
+            }
         }
 
         // Refresh tasks
