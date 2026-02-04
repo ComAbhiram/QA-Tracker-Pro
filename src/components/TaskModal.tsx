@@ -127,6 +127,7 @@ export default function TaskModal({ isOpen, onClose, task, onSave }: TaskModalPr
                 endTime: task.endTime,
                 assignedTo: task.assignedTo,
                 assignedTo2: task.assignedTo2,
+                additionalAssignees: task.additionalAssignees || [],
                 bugCount: task.bugCount,
                 htmlBugs: task.htmlBugs,
                 functionalBugs: task.functionalBugs,
@@ -134,10 +135,34 @@ export default function TaskModal({ isOpen, onClose, task, onSave }: TaskModalPr
                 comments: task.comments,
                 currentUpdates: task.currentUpdates
             });
+
+            // Initialize dynamic assignees list
+            const initialAssignees = [task.assignedTo, task.assignedTo2, ...(task.additionalAssignees || [])].filter(Boolean) as string[];
+            if (initialAssignees.length === 0) setAssignees([null]);
+            else setAssignees(initialAssignees);
+
         } else if (isOpen && !task) {
             setFormData(initialState);
+            setAssignees([null]); // Start with one empty slot
         }
     }, [isOpen, task]);
+
+    const [assignees, setAssignees] = useState<(string | null)[]>([]);
+
+    const handleDynamicAssigneeChange = (index: number, value: string | number | null) => {
+        const newAssignees = [...assignees];
+        newAssignees[index] = value ? String(value) : null;
+        setAssignees(newAssignees);
+    };
+
+    const addAssignee = () => {
+        setAssignees([...assignees, null]);
+    };
+
+    const removeAssignee = (index: number) => {
+        const newAssignees = assignees.filter((_, i) => i !== index);
+        setAssignees(newAssignees.length ? newAssignees : [null]);
+    };
 
     // ... existing handlers
 
@@ -198,8 +223,21 @@ export default function TaskModal({ isOpen, onClose, task, onSave }: TaskModalPr
                 return;
             }
 
-            await onSave({ ...formData, teamId });
-            if (!task) setFormData(initialState);
+            // Map assignees array back to individual fields
+            const validAssignees = assignees.filter(Boolean) as string[];
+            const finalData = {
+                ...formData,
+                assignedTo: validAssignees[0] || null,
+                assignedTo2: validAssignees[1] || null,
+                additionalAssignees: validAssignees.slice(2),
+                teamId
+            };
+
+            await onSave(finalData);
+            if (!task) {
+                setFormData(initialState);
+                setAssignees([null]);
+            }
         } catch (error) {
             console.error('Error saving task:', error);
             alert('Failed to save task. Please try again.');
@@ -330,38 +368,46 @@ export default function TaskModal({ isOpen, onClose, task, onSave }: TaskModalPr
                         />
                     </div>
 
-                    {/* 5. Assignee 1 & 6. Assignee 2 */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    {/* Dynamic Assignees */}
+                    <div className="space-y-4">
+                        <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                            <User size={16} className="text-indigo-500" /> Assignees
+                        </label>
                         <div className="space-y-3">
-                            <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-                                <User size={16} className="text-indigo-500" /> Assignee 1
-                            </label>
-                            <Combobox
-                                options={hubstaffUsers}
-                                value={formData.assignedTo || ''}
-                                onChange={(val) => handleAssigneeChange('assignedTo', val)}
-                                placeholder="Select or type name..."
-                                searchPlaceholder="Search developers..."
-                                emptyMessage="No users found."
-                                allowCustomValue={true}
-                                isLoading={loadingHubstaffUsers}
-                            />
+                            {assignees.map((assignee, index) => (
+                                <div key={index} className="flex items-center gap-3 animate-in fade-in slide-in-from-top-2 duration-200">
+                                    <div className="flex-1">
+                                        <Combobox
+                                            options={hubstaffUsers}
+                                            value={assignee || ''}
+                                            onChange={(val) => handleDynamicAssigneeChange(index, val)}
+                                            placeholder={`Assignee ${index + 1}...`}
+                                            searchPlaceholder="Search developers..."
+                                            emptyMessage="No users found."
+                                            allowCustomValue={true}
+                                            isLoading={loadingHubstaffUsers}
+                                        />
+                                    </div>
+                                    {assignees.length > 1 && (
+                                        <button
+                                            type="button"
+                                            onClick={() => removeAssignee(index)}
+                                            className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                                            title="Remove Assignee"
+                                        >
+                                            <X size={18} />
+                                        </button>
+                                    )}
+                                </div>
+                            ))}
                         </div>
-                        <div className="space-y-3">
-                            <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-                                <User size={16} className="text-indigo-500" /> Assignee 2
-                            </label>
-                            <Combobox
-                                options={hubstaffUsers}
-                                value={formData.assignedTo2 || ''}
-                                onChange={(val) => handleAssigneeChange('assignedTo2', val)}
-                                placeholder="Select or type name..."
-                                searchPlaceholder="Search developers..."
-                                emptyMessage="No users found."
-                                allowCustomValue={true}
-                                isLoading={loadingHubstaffUsers}
-                            />
-                        </div>
+                        <button
+                            type="button"
+                            onClick={addAssignee}
+                            className="text-sm font-semibold text-indigo-600 hover:text-indigo-700 flex items-center gap-2 px-2 py-1 hover:bg-indigo-50 rounded-lg transition-colors"
+                        >
+                            <Plus size={16} /> Add Assignee
+                        </button>
                     </div>
 
                     {/* 7. Status */}
