@@ -361,7 +361,9 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
 
             container.innerHTML = `
                 <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 1000px;">
-                    <h1 style="color: #0ea5e9; font-size: 28px; margin-bottom: 8px; font-weight: 700;">Today's&nbsp;Work&nbsp;Status</h1>
+                    <h1 style="color: #0ea5e9; font-size: 28px; margin-bottom: 8px; font-weight: 700;">
+                        <span>Today's</span><span style="display:inline-block; width:8px;"></span><span>Work</span><span style="display:inline-block; width:8px;"></span><span>Status</span>
+                    </h1>
                     <p style="color: #64748b; font-size: 16px; margin-bottom: 24px;">${new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
                     
                     ${hubstaffData ? `
@@ -508,7 +510,7 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                                         </td>
                                     <td style="padding: 12px; text-align: center; vertical-align: middle; border-right: 1px solid #f1f5f9;">
                                         <div style="display: flex; align-items: center; justify-content: center; width: 100%; height: 100%;">
-                                            <span style="display: inline-flex; align-items: center; justify-content: center; min-width: 100px; height: 26px; border-radius: 9999px; font-size: 10px; font-weight: 600; text-align: center; white-space: nowrap; padding: 0 8px; line-height: 1;
+                                            <span style="display: inline-flex; align-items: center; justify-content: center; min-width: 100px; height: 26px; border-radius: 9999px; font-size: 10px; font-weight: 600; text-align: center; white-space: nowrap; padding: 0 8px; line-height: 1.2;
                                                 ${effectiveStatus === 'Completed' ? 'background: #dcfce7; color: #166534; border: 1px solid #bbf7d0;' :
                                 effectiveStatus === 'In Progress' ? 'background: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe;' :
                                     effectiveStatus === 'Yet to Start' ? 'background: #fef3c7; color: #92400e; border: 1px solid #fde68a;' :
