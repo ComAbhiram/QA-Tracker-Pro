@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { X, Save, Calendar, User, Briefcase, Activity, Layers } from 'lucide-react';
+import { X, Save, Calendar, User, Briefcase, Activity, Layers, Plus } from 'lucide-react';
 import { Task } from '@/lib/types';
 import { supabase } from '@/lib/supabase';
 import Combobox from './ui/Combobox';
