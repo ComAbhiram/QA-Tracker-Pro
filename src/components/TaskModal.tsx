@@ -570,12 +570,12 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div className="space-y-3">
                             <label className="text-sm font-semibold text-slate-700">Deviation Reason</label>
-                            <input
-                                type="text"
+                            <textarea
                                 name="deviationReason"
+                                // task.deviationReason hidden for image as requested
                                 value={formData.deviationReason || ''}
                                 onChange={handleChange}
-                                className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all placeholder:text-slate-400 font-medium text-slate-700"
+                                className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all placeholder:text-slate-400 font-medium text-slate-700 min-h-[100px]"
                                 placeholder="Reason for any deviations..."
                             />
                         </div>

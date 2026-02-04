@@ -502,7 +502,7 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                                         </td>
                                         <td style="padding: 12px; color: #64748b; font-size: 11px; vertical-align: middle;">
                                             <div style="margin-bottom:4px;">${task.comments || '-'}</div>
-                                            ${task.deviationReason ? `<div style="color:#ef4444;">Dev: ${task.deviationReason}</div>` : ''}
+                                            ${'' /* Deviation reason hidden as requested */}
                                             ${task.sprintLink ? `<div style="color:#3b82f6;">Sprint Link Available</div>` : ''}
                                         </td>
                                     </tr>
