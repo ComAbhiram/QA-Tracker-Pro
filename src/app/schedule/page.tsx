@@ -133,7 +133,7 @@ export default function Schedule() {
         if (target >= start && target <= end) return true;
 
         // Historical/Persistent Overdue Check
-        if (target > end && target <= now) {
+        if (target > end) {
             const statusInfo = getStatusOnDate(task, target);
             if (statusInfo.baseStatus === 'Overdue') return true;
             // Also show if completed ON this target date (late)
@@ -338,7 +338,7 @@ export default function Schedule() {
                                     if (day >= start && day <= end) return true;
 
                                     // Check status on this specific day
-                                    if (day > end && day <= now) {
+                                    if (day > end) {
                                         const statusInfo = getStatusOnDate(task, day);
                                         if (statusInfo.baseStatus === 'Overdue') return true;
                                         // Also show if completed ON this day (late)
