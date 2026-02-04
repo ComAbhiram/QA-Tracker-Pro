@@ -508,7 +508,7 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                                         </td>
                                     <td style="padding: 12px; text-align: center; vertical-align: middle; border-right: 1px solid #f1f5f9;">
                                         <div style="display: flex; align-items: center; justify-content: center; width: 100%; height: 100%;">
-                                            <span style="display: inline-flex; align-items: center; justify-content: center; min-width: 100px; height: 26px; border-radius: 9999px; font-size: 10px; font-weight: 600; text-align: center; white-space: nowrap; padding-bottom: 1px; padding-left: 8px; padding-right: 8px;
+                                            <span style="display: inline-flex; align-items: center; justify-content: center; min-width: 100px; height: 26px; border-radius: 9999px; font-size: 10px; font-weight: 600; text-align: center; white-space: nowrap; padding: 0 8px; line-height: 1;
                                                 ${effectiveStatus === 'Completed' ? 'background: #dcfce7; color: #166534; border: 1px solid #bbf7d0;' :
                                 effectiveStatus === 'In Progress' ? 'background: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe;' :
                                     effectiveStatus === 'Yet to Start' ? 'background: #fef3c7; color: #92400e; border: 1px solid #fde68a;' :
