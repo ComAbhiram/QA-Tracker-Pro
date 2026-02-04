@@ -172,7 +172,8 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
                 functionalBugs: task.functionalBugs,
                 deviationReason: task.deviationReason,
                 comments: task.comments,
-                currentUpdates: task.currentUpdates
+                currentUpdates: task.currentUpdates,
+                sprintLink: task.sprintLink
             });
 
             // Initialize dynamic assignees list
