@@ -273,8 +273,7 @@ export default function TaskModal({ isOpen, onClose, task, onSave }: TaskModalPr
             // Map assignees array back to individual fields
             // Convert Full Names (UI) -> Short Names (DB)
             const validAssignees = assignees
-                .filter(Boolean)
-                .map(fullName => mapHubstaffNameToQA(fullName as string));
+                .filter(Boolean);
 
             const finalData = {
                 ...formData,
