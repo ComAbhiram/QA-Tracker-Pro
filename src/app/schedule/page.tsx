@@ -16,7 +16,7 @@ export default function Schedule() {
     const [currentDate, setCurrentDate] = useState(new Date());
     const [viewMode, setViewMode] = useState<'calendar' | 'day'>('calendar');
     const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
-    const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);    const [editingTask, setEditingTask] = useState<Task | null>(null);
+    const [isDetailModalOpen, setIsDetailModalOpen] = useState(false); const [editingTask, setEditingTask] = useState<Task | null>(null);
 
     useEffect(() => {
         fetchTasks();
@@ -165,8 +165,8 @@ export default function Schedule() {
         return 'bg-sky-600 text-white border-sky-700 shadow-sm';
     };
 
-    const getTaskBorderColor = (task: Task) => {
-        const statusInfo = getStatusOnDate(task, currentDate);
+    const getTaskBorderColor = (task: Task, date: Date = currentDate) => {
+        const statusInfo = getStatusOnDate(task, date);
         const s = (statusInfo.baseStatus || '').toLowerCase();
 
         if (statusInfo.status.includes('Completed (Overdue)')) {
@@ -377,11 +377,7 @@ export default function Schedule() {
                                         <div className="flex-1 overflow-y-auto space-y-1 custom-scrollbar">
                                             {dayTasks.slice(0, 3).map(task => {
                                                 const statusInfo = getStatusOnDate(task, day);
-                                                // Simplify border for calendar view
-                                                let borderClass = 'border-sky-600 bg-sky-600 text-white';
-                                                if (statusInfo.baseStatus === 'Overdue') borderClass = 'border-rose-600 bg-rose-600 text-white';
-                                                else if (statusInfo.status.includes('Completed (Overdue)')) borderClass = 'border-emerald-600 bg-emerald-600 text-white ring-1 ring-rose-400';
-                                                else if (statusInfo.baseStatus === 'Completed') borderClass = 'border-emerald-600 bg-emerald-600 text-white';
+                                                const borderClass = getTaskBorderColor(task, day);
 
                                                 return (
                                                     <div key={task.id} className={`text-[11px] px-2 py-1.5 rounded-md border text-slate-700 truncate font-semibold mb-1 transition-all hover:scale-[1.02] ${borderClass}`}>
