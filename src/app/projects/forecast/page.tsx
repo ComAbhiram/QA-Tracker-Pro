@@ -52,16 +52,18 @@ export default function ForecastProjects() {
                     pc: updatedTask.pc,
                     assigned_to: updatedTask.assignedTo,
                     assigned_to2: updatedTask.assignedTo2,
+                    additional_assignees: updatedTask.additionalAssignees || [],
                     status: updatedTask.status,
-                    start_date: updatedTask.startDate,
-                    end_date: updatedTask.endDate,
-                    actual_completion_date: updatedTask.actualCompletionDate,
+                    start_date: updatedTask.startDate || null,
+                    end_date: updatedTask.endDate || null,
+                    actual_completion_date: updatedTask.actualCompletionDate || null,
                     comments: updatedTask.comments,
                     current_updates: updatedTask.currentUpdates,
                     bug_count: updatedTask.bugCount,
                     html_bugs: updatedTask.htmlBugs,
                     functional_bugs: updatedTask.functionalBugs,
                     deviation_reason: updatedTask.deviationReason,
+                    sprint_link: updatedTask.sprintLink
                 })
                 .eq('id', selectedTask?.id);
 
