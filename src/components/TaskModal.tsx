@@ -70,11 +70,23 @@ export default function TaskModal({ isOpen, onClose, task, onSave }: TaskModalPr
                 if (response.ok) {
                     const data = await response.json();
                     if (data.members) {
-                        const formattedUsers = data.members.map((u: any) => ({
-                            id: mapHubstaffNameToQA(u.name), // Map full name to short QA name (e.g. Aswathi M Ashok -> Aswathi)
-                            label: u.name
-                        }));
-                        setHubstaffUsers(formattedUsers);
+                        const uniqueMap = new Map();
+
+                        data.members.forEach((u: any) => {
+                            const mappedId = mapHubstaffNameToQA(u.name);
+                            // Only add if not already present (deduplication by ID)
+                            // Prefer "Amrutha lakshmi" over "amrutha ms" if both exist? 
+                            // Current logic: First one wins or we can update if current label looks "better".
+                            // For now, simpler: First one wins.
+                            if (!uniqueMap.has(mappedId)) {
+                                uniqueMap.set(mappedId, {
+                                    id: mappedId,
+                                    label: u.name // Keep original name for display, or mappedId? User likely knows them by Hubstaff name.
+                                });
+                            }
+                        });
+
+                        setHubstaffUsers(Array.from(uniqueMap.values()));
                     }
                 }
             } catch (error) {
