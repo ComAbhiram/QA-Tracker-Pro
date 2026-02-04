@@ -5,7 +5,7 @@ import { X, Save, Calendar, User, Briefcase, Activity, Layers, Plus } from 'luci
 import { Task } from '@/lib/types';
 import { supabase } from '@/lib/supabase';
 import Combobox from './ui/Combobox';
-import { mapHubstaffNameToQA, getHubstaffNameFromQA } from '@/lib/hubstaff-name-mapping';
+import { getHubstaffNameFromQA } from '@/lib/hubstaff-name-mapping';
 
 interface TaskModalProps {
     isOpen: boolean;
@@ -271,9 +271,7 @@ export default function TaskModal({ isOpen, onClose, task, onSave }: TaskModalPr
             }
 
             // Map assignees array back to individual fields
-            // Convert Full Names (UI) -> Short Names (DB)
-            const validAssignees = assignees
-                .filter(Boolean);
+            const validAssignees = assignees.filter((a): a is string => !!a);
 
             const finalData = {
                 ...formData,
