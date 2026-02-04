@@ -27,6 +27,16 @@ export default function ManageTeamModal({ isOpen, onClose }: ManageTeamModalProp
     const [selectedHubstaffUser, setSelectedHubstaffUser] = useState<string | number | null>(null);
     const [customName, setCustomName] = useState('');
     const [activeTab, setActiveTab] = useState<'hubstaff' | 'manual'>('hubstaff');
+    const [teamId, setTeamId] = useState<string | null>(null);
+
+    useEffect(() => {
+        const init = async () => {
+            const { getCurrentUserTeam } = await import('@/utils/userUtils');
+            const team = await getCurrentUserTeam();
+            if (team) setTeamId(team.team_id);
+        };
+        init();
+    }, []);
 
     // Fetch team members
     const fetchMembers = async () => {
@@ -80,18 +90,21 @@ export default function ManageTeamModal({ isOpen, onClose }: ManageTeamModalProp
             return;
         }
 
+        if (!teamId) {
+            alert('Team ID not found. Please refresh.');
+            return;
+        }
+
         setAdding(true);
         try {
-            const response = await fetch('/api/team-members', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name: nameToAdd })
-            });
+            const { error } = await supabase
+                .from('team_members')
+                .insert({
+                    team_id: teamId,
+                    name: nameToAdd.trim()
+                });
 
-            if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.error || 'Failed to add member');
-            }
+            if (error) throw error;
 
             // Refresh list
             await fetchMembers();
@@ -101,7 +114,7 @@ export default function ManageTeamModal({ isOpen, onClose }: ManageTeamModalProp
             setCustomName('');
 
         } catch (error: any) {
-            alert(error.message);
+            alert(error.message || 'Failed to add member');
         } finally {
             setAdding(false);
         }
@@ -111,11 +124,12 @@ export default function ManageTeamModal({ isOpen, onClose }: ManageTeamModalProp
         if (!confirm('Are you sure you want to remove this member?')) return;
 
         try {
-            const response = await fetch(`/api/team-members?id=${id}`, {
-                method: 'DELETE'
-            });
+            const { error } = await supabase
+                .from('team_members')
+                .delete()
+                .eq('id', id);
 
-            if (!response.ok) throw new Error('Failed to delete');
+            if (error) throw error;
 
             setMembers(prev => prev.filter(m => m.id !== id));
         } catch (error) {

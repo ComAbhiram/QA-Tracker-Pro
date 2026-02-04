@@ -84,25 +84,31 @@ export default function TaskModal({ isOpen, onClose, task, onSave }: TaskModalPr
                 const userTeam = await getCurrentUserTeam();
                 const isSuperAdmin = userTeam?.role === 'super_admin';
 
-                let url = '/api/hubstaff/users';
-                if (!isSuperAdmin) {
-                    url = '/api/team-members';
-                }
+                if (isSuperAdmin) {
+                    // Fetch Hubstaff Users via API
+                    const response = await fetch('/api/hubstaff/users');
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.members) {
+                            const formattedUsers = data.members.map((u: any) => ({
+                                id: u.name,
+                                label: u.name
+                            }));
+                            setHubstaffUsers(formattedUsers);
+                        }
+                    }
+                } else {
+                    // Fetch Team Members via Supabase Client
+                    // Requires 'team_id' or just RLS? 
+                    // RLS policies allow "Users can view their own team members" (based on auth.uid -> team_id)
+                    // So selecting * should return only their team's members.
+                    const { data, error } = await supabase
+                        .from('team_members')
+                        .select('name')
+                        .order('name');
 
-                const response = await fetch(url);
-                if (response.ok) {
-                    const data = await response.json();
-
-                    if (isSuperAdmin && data.members) {
-                        // Hubstaff Response
-                        const formattedUsers = data.members.map((u: any) => ({
-                            id: u.name,
-                            label: u.name
-                        }));
-                        setHubstaffUsers(formattedUsers);
-                    } else if (!isSuperAdmin && data.members) {
-                        // Team Members Response
-                        const formattedUsers = data.members.map((u: any) => ({
+                    if (!error && data) {
+                        const formattedUsers = data.map((u: any) => ({
                             id: u.name,
                             label: u.name
                         }));
