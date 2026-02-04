@@ -245,7 +245,11 @@ export default function Schedule() {
             .update(dbPayload)
             .eq('id', editingTask.id);
 
-        if (error) console.error('Error updating task:', error);
+        if (error) {
+            console.error('Error updating task:', error);
+            alert(`Failed to save task: ${error.message}`);
+            return;
+        }
 
         await fetchTasks();
         setIsTaskModalOpen(false);
