@@ -362,7 +362,7 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
             container.innerHTML = `
                 <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 1000px;">
                     <h1 style="color: #0ea5e9; font-size: 28px; margin-bottom: 8px; font-weight: 700;">
-                        <span style="display: inline-block; margin-right: 12px;">Today's</span><span style="display: inline-block; margin-right: 12px;">Work</span><span style="display: inline-block;">Status</span>
+                        <span>Today's</span><span style="visibility: hidden;">ii</span><span>Work</span><span style="visibility: hidden;">ii</span><span>Status</span>
                     </h1>
                     <p style="color: #64748b; font-size: 16px; margin-bottom: 24px;">${new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
                     
@@ -498,13 +498,13 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                                         </td>
                                     <td style="padding: 12px; text-align: center; vertical-align: middle; border-right: 1px solid #f1f5f9;">
                                         <div style="display: flex; align-items: center; justify-content: center; width: 100%; height: 100%;">
-                                            <span style="display: flex; align-items: center; justify-content: center; min-width: 100px; height: 26px; border-radius: 9999px; font-size: 11px; font-weight: 600; line-height: 1; padding: 0 8px;
-                                                ${effectiveStatus === 'Completed' ? 'background: #dcfce7; color: #166534; border: 1px solid #bbf7d0;' :
-                                effectiveStatus === 'In Progress' ? 'background: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe;' :
-                                    effectiveStatus === 'Yet to Start' ? 'background: #fef3c7; color: #92400e; border: 1px solid #fde68a;' :
-                                        effectiveStatus === 'Overdue' ? 'background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5;' :
-                                            'background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0;'}
-                                                ${isLateCompletion ? 'border: 2px solid #f87171;' : ''}">
+                                            <span style="font-size: 12px; font-weight: 700;
+                                                ${effectiveStatus === 'Completed' ? 'color: #15803d;' :
+                                effectiveStatus === 'In Progress' ? 'color: #1d4ed8;' :
+                                    effectiveStatus === 'Yet to Start' ? 'color: #b45309;' :
+                                        effectiveStatus === 'Overdue' ? 'color: #b91c1c;' :
+                                            'color: #475569;'}
+                                                ${isLateCompletion ? 'color: #b91c1c;' : ''}">
                                                 ${isLateCompletion ? lateLabel : effectiveStatus}
                                             </span>
                                         </div>
