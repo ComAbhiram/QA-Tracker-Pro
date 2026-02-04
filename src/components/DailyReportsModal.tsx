@@ -490,6 +490,7 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                                         <td style="padding: 12px; color: #475569; font-size: 12px; vertical-align: middle; border-right: 1px solid #f1f5f9;">
                                             ${[task.assignedTo, task.assignedTo2, ...(task.additionalAssignees || [])].filter(Boolean).join(', ') || 'Unassigned'}
                                         </td>
+                                        <td style="padding: 12px; color: #475569; font-size: 12px; vertical-align: middle; border-right: 1px solid #f1f5f9;">
                                             <div>S: ${task.startDate ? formatDate(task.startDate) : '-'}</div>
                                             <div>E: ${task.endDate ? formatDate(task.endDate) : '-'}</div>
                                             ${task.actualCompletionDate ? `<div style="color:#059669;">A: ${formatDate(task.actualCompletionDate)}</div>` : ''}
