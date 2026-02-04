@@ -91,7 +91,7 @@ export const mapTaskFromDB = (task: DBTask): Task => ({
     assignedTo: task.assigned_to,
     assignedTo2: task.assigned_to2,
     additionalAssignees: task.additional_assignees || [],
-    status: task.status || 'In Progress',
+    status: (task.status || 'In Progress').trim(),
     startDate: task.start_date,
     endDate: task.end_date,
     actualCompletionDate: task.actual_completion_date,

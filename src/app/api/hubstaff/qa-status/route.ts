@@ -54,6 +54,8 @@ export async function GET(request: NextRequest) {
         const memberTasks = tasks.filter(task => {
             const assigned1 = (task.assignedTo || '').trim().toLowerCase();
             const assigned2 = (task.assignedTo2 || '').trim().toLowerCase();
+            const additional = (task.additionalAssignees || []).map(a => a.trim().toLowerCase());
+
             const qName = qaName.trim().toLowerCase();
             const mName = mappedQaName.trim().toLowerCase();
             const hName = (hubstaffName || '').trim().toLowerCase();
@@ -63,10 +65,13 @@ export async function GET(request: NextRequest) {
             // 2. Match with Mapped Short Name (mappedQaName) - e.g. "Aswathi M Ashok" -> "Aswathi"
             // 3. Match with Hubstaff Full Name (hubstaffName) - e.g. "Aswathi" -> "Aswathi M Ashok"
 
-            const isMatch1 = assigned1 && (assigned1 === qName || assigned1 === mName || (hName && assigned1 === hName));
-            const isMatch2 = assigned2 && (assigned2 === qName || assigned2 === mName || (hName && assigned2 === hName));
+            const matchesName = (name: string) => name && (name === qName || name === mName || (hName && name === hName));
 
-            const isMatch = isMatch1 || isMatch2;
+            const isMatch1 = matchesName(assigned1);
+            const isMatch2 = matchesName(assigned2);
+            const isMatch3 = additional.some(a => matchesName(a));
+
+            const isMatch = isMatch1 || isMatch2 || isMatch3;
 
             // Debug logging for first few tasks
             if (tasks.indexOf(task) < 3) {
@@ -78,6 +83,13 @@ export async function GET(request: NextRequest) {
         });
 
         console.log(`[API] Fetched ${tasks.length} total tasks from database`);
+
+        // DEBUG: Inspcet specific ghost task
+        const ghostTask = tasks.find(t => t.id === 1769579340370);
+        if (ghostTask) {
+            console.log('[DEBUG GHOST TASK]', JSON.stringify(ghostTask, null, 2));
+        }
+
         if (tasks.length > 0) {
             console.log(`[API] Sample assignees from first 3 tasks:`, tasks.slice(0, 3).map(t => ({ project: t.projectName, assigned: t.assignedTo })));
         }
