@@ -374,6 +374,10 @@ export default function Schedule() {
                                         if (!isTaskOverdue(task)) return false;
 
                                         const statusInfo = getStatusOnDate(task, day);
+
+                                        // User Request: Don't show +2d, +3d etc on future days. Only show the immediate +1d warning.
+                                        if (statusInfo.overdueDays > 1) return false;
+
                                         if (statusInfo.baseStatus === 'Overdue') return true;
                                         // Also show if completed ON this day (late)
                                         if (statusInfo.status.includes('Completed (Overdue)') && task.actualCompletionDate) {
