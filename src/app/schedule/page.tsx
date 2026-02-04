@@ -75,6 +75,46 @@ export default function Schedule() {
     });
     const startPadding = Array.from({ length: startOfMonth(currentDate).getDay() });
 
+    // Helper to calculate status on a specific date
+    const getStatusOnDate = (task: Task, date: Date) => {
+        const start = task.startDate ? new Date(task.startDate) : null;
+        const end = task.endDate ? new Date(task.endDate) : null;
+
+        if (start) start.setHours(0, 0, 0, 0);
+        if (end) end.setHours(23, 59, 59, 999);
+
+        const checkDate = new Date(date);
+        checkDate.setHours(12, 0, 0, 0);
+
+        // Check if completed by this date
+        if (task.actualCompletionDate) {
+            const completion = new Date(task.actualCompletionDate);
+            completion.setHours(0, 0, 0, 0); // normalize completion to start of day
+
+            // If completed ON or BEFORE this date
+            if (completion <= checkDate) {
+                // Check if it was late (completion > end)
+                if (end && completion > end) {
+                    const diffTime = completion.getTime() - end.getTime();
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                    return { status: 'Completed (Overdue)', overdueDays: diffDays, baseStatus: 'Completed' };
+                }
+                return { status: 'Completed', overdueDays: 0, baseStatus: 'Completed' };
+            }
+        }
+
+        // Not completed yet (or completed in future relative to this date)
+        // Check if Overdue relative to this date
+        if (end && checkDate > end) {
+            const diffTime = checkDate.getTime() - end.getTime();
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            return { status: 'Overdue', overdueDays: diffDays, baseStatus: 'Overdue' };
+        }
+
+        // Otherwise return current status or 'In Progress' if within range
+        return { status: getEffectiveStatus(task), overdueDays: 0, baseStatus: getEffectiveStatus(task) };
+    };
+
     // Day View Tasks
     const dayViewTasks = tasks.filter(task => {
         if (!task.startDate || !task.endDate) return false;
@@ -92,25 +132,26 @@ export default function Schedule() {
         // Normal range check
         if (target >= start && target <= end) return true;
 
-        // Overdue check: If task is overdue and target date is after end date
-        const effectiveStatus = getEffectiveStatus(task);
-        if (effectiveStatus === 'Overdue') {
-            // Show on days AFTER the end date, BUT ONLY up to "Today"
-            return target > end && target <= now;
+        // Historical/Persistent Overdue Check
+        if (target > end && target <= now) {
+            const statusInfo = getStatusOnDate(task, target);
+            if (statusInfo.baseStatus === 'Overdue') return true;
+            // Also show if completed ON this target date (late)
+            if (statusInfo.status.includes('Completed (Overdue)') && task.actualCompletionDate) {
+                const completion = new Date(task.actualCompletionDate);
+                if (isSameDay(completion, target)) return true;
+            }
         }
 
         return false;
     });
 
     const getStatusColor = (task: Task) => {
-        const status = getEffectiveStatus(task);
-        const s = (status || '').toLowerCase();
+        const statusInfo = getStatusOnDate(task, currentDate);
+        const s = (statusInfo.baseStatus || '').toLowerCase();
 
-        // Check for Late Completion
-        if (s === 'completed' && task.endDate && task.actualCompletionDate) {
-            if (new Date(task.actualCompletionDate) > new Date(task.endDate)) {
-                return 'bg-emerald-600 text-white border-emerald-700 shadow-sm ring-2 ring-rose-500/50';
-            }
+        if (statusInfo.status.includes('Completed (Overdue)')) {
+            return 'bg-emerald-600 text-white border-emerald-700 shadow-sm ring-2 ring-rose-500/50';
         }
 
         if (s === 'completed') return 'bg-emerald-600 text-white border-emerald-700 shadow-sm';
@@ -124,14 +165,11 @@ export default function Schedule() {
     };
 
     const getTaskBorderColor = (task: Task) => {
-        const status = getEffectiveStatus(task);
-        const s = (status || '').toLowerCase();
+        const statusInfo = getStatusOnDate(task, currentDate);
+        const s = (statusInfo.baseStatus || '').toLowerCase();
 
-        // Check for Late Completion
-        if (s === 'completed' && task.endDate && task.actualCompletionDate) {
-            if (new Date(task.actualCompletionDate) > new Date(task.endDate)) {
-                return 'border-emerald-600 bg-emerald-600 text-white ring-2 ring-rose-400';
-            }
+        if (statusInfo.status.includes('Completed (Overdue)')) {
+            return 'border-emerald-600 bg-emerald-600 text-white ring-2 ring-rose-400';
         }
 
         if (s === 'completed') return 'border-emerald-600 bg-emerald-600 text-white';
@@ -299,11 +337,14 @@ export default function Schedule() {
                                     // Normal range check
                                     if (day >= start && day <= end) return true;
 
-                                    // Overdue check
-                                    const effectiveStatus = getEffectiveStatus(task);
-                                    if (effectiveStatus === 'Overdue') {
-                                        // Show on days AFTER the end date, BUT ONLY up to "Today"
-                                        return day > end && day <= now;
+                                    // Check status on this specific day
+                                    if (day > end && day <= now) {
+                                        const statusInfo = getStatusOnDate(task, day);
+                                        if (statusInfo.baseStatus === 'Overdue') return true;
+                                        // Also show if completed ON this day (late)
+                                        if (statusInfo.status.includes('Completed (Overdue)') && task.actualCompletionDate) {
+                                            if (isSameDay(new Date(task.actualCompletionDate), day)) return true;
+                                        }
                                     }
                                     return false;
                                 });
@@ -323,11 +364,20 @@ export default function Schedule() {
                                             </span>
                                         </div>
                                         <div className="flex-1 overflow-y-auto space-y-1 custom-scrollbar">
-                                            {dayTasks.slice(0, 3).map(task => (
-                                                <div key={task.id} className={`text-[11px] px-2 py-1.5 rounded-md border text-slate-700 truncate font-semibold mb-1 transition-all hover:scale-[1.02] ${getTaskBorderColor(task)}`}>
-                                                    {task.projectName}
-                                                </div>
-                                            ))}
+                                            {dayTasks.slice(0, 3).map(task => {
+                                                const statusInfo = getStatusOnDate(task, day);
+                                                // Simplify border for calendar view
+                                                let borderClass = 'border-sky-600 bg-sky-600 text-white';
+                                                if (statusInfo.baseStatus === 'Overdue') borderClass = 'border-rose-600 bg-rose-600 text-white';
+                                                else if (statusInfo.status.includes('Completed (Overdue)')) borderClass = 'border-emerald-600 bg-emerald-600 text-white ring-1 ring-rose-400';
+                                                else if (statusInfo.baseStatus === 'Completed') borderClass = 'border-emerald-600 bg-emerald-600 text-white';
+
+                                                return (
+                                                    <div key={task.id} className={`text-[11px] px-2 py-1.5 rounded-md border text-slate-700 truncate font-semibold mb-1 transition-all hover:scale-[1.02] ${borderClass}`}>
+                                                        {task.projectName}
+                                                    </div>
+                                                );
+                                            })}
                                             {dayTasks.length > 3 && (
                                                 <div className="text-[10px] text-slate-400 font-medium pl-1">+{dayTasks.length - 3} more</div>
                                             )}
@@ -358,8 +408,9 @@ export default function Schedule() {
                         ) : (
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                 {dayViewTasks.map(task => {
-                                    // Check for late completion
-                                    const isLateCompletion = task.status === 'Completed' && task.endDate && task.actualCompletionDate && new Date(task.actualCompletionDate) > new Date(task.endDate);
+                                    const statusInfo = getStatusOnDate(task, currentDate);
+                                    const isLateCompletion = statusInfo.status.includes('Completed (Overdue)');
+                                    const isOverdue = statusInfo.baseStatus === 'Overdue';
 
                                     return (
                                         <div
@@ -370,12 +421,12 @@ export default function Schedule() {
                                             <div className="flex justify-between items-start mb-4">
                                                 <div className="flex items-center gap-2">
                                                     <span className={`text-[11px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-lg bg-black/20 text-white ${isLateCompletion ? 'ring-2 ring-rose-400' : ''}`}>
-                                                        {isLateCompletion ? 'Completed (Overdue)' : getEffectiveStatus(task)}
+                                                        {isLateCompletion ? `Completed (Overdue ${statusInfo.overdueDays}d)` : statusInfo.status}
                                                     </span>
-                                                    {isTaskOverdue(task) && (
+                                                    {isOverdue && (
                                                         <span className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold bg-red-100 text-red-700 border border-red-200">
                                                             <AlertCircle size={12} />
-                                                            {getOverdueDays(task)}d
+                                                            {statusInfo.overdueDays}d
                                                         </span>
                                                     )}
                                                 </div>
