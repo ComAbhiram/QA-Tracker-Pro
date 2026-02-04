@@ -76,6 +76,7 @@ export default function Tracker() {
             status: taskData.status,
             assigned_to: taskData.assignedTo,
             assigned_to2: taskData.assignedTo2,
+            additional_assignees: taskData.additionalAssignees || [],
             pc: taskData.pc,
             start_date: taskData.startDate || null,
             end_date: taskData.endDate || null,
@@ -200,23 +201,38 @@ export default function Tracker() {
                                     <thead className="bg-slate-50 border-b-2 border-slate-200">
                                         <tr>
                                             <th className="px-5 py-4 font-semibold text-slate-600 text-left border-r border-slate-100">Project</th>
+                                            <th className="px-4 py-4 font-semibold text-slate-600 text-left border-r border-slate-100">Type</th>
+                                            <th className="px-4 py-4 font-semibold text-slate-600 text-left border-r border-slate-100">Priority</th>
                                             <th className="px-4 py-4 font-semibold text-slate-600 text-left border-r border-slate-100">Edit</th>
                                             <th className="px-5 py-4 font-semibold text-slate-600 text-left border-r border-slate-100">Phase</th>
                                             <th className="px-4 py-4 font-semibold text-slate-600 text-left border-r border-slate-100">PC</th>
-                                            <th className="px-4 py-4 font-semibold text-slate-600 text-left border-r border-slate-100">Assignee 2</th>
+                                            <th className="px-4 py-4 font-semibold text-slate-600 text-left border-r border-slate-100">Assignees</th>
                                             <th className="px-4 py-4 font-semibold text-slate-600 text-left border-r border-slate-100">Status</th>
                                             <th className="px-4 py-4 font-semibold text-slate-600 text-left border-r border-slate-100">Start</th>
                                             <th className="px-4 py-4 font-semibold text-slate-600 text-left border-r border-slate-100">End</th>
-                                            <th className="px-4 py-4 font-semibold text-slate-600 text-left border-r border-slate-100">Bugs</th>
+                                            <th className="px-4 py-4 font-semibold text-slate-600 text-left border-r border-slate-100">Actual End</th>
+                                            <th className="px-4 py-4 font-semibold text-slate-600 text-left border-r border-slate-100">Bugs (H/F/T)</th>
                                             <th className="px-5 py-4 font-semibold text-slate-600 text-left border-r border-slate-100">Comments</th>
-                                            <th className="px-4 py-4 font-semibold text-slate-600 text-left border-r border-slate-100">Deviation Reason</th>
-                                            <th className="px-4 py-4 font-semibold text-slate-600 text-left">Sprint Link</th>
+                                            <th className="px-4 py-4 font-semibold text-slate-600 text-left border-r border-slate-100">Deviation</th>
+                                            <th className="px-4 py-4 font-semibold text-slate-600 text-left">Sprint</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {assigneeTasks.map(task => (
                                             <tr key={task.id} className="border-b border-slate-100 hover:bg-slate-50/50 transition-all group">
                                                 <td className="px-5 py-4 font-semibold text-slate-800 border-r border-slate-50">{task.projectName}</td>
+                                                <td className="px-4 py-4 text-slate-600 border-r border-slate-50">{task.projectType || '-'}</td>
+                                                <td className="px-4 py-4 text-slate-600 border-r border-slate-50">
+                                                    {task.priority && (
+                                                        <span className={`px-2 py-1 rounded text-xs font-bold ${task.priority === 'Urgent' ? 'bg-red-100 text-red-700' :
+                                                                task.priority === 'High' ? 'bg-orange-100 text-orange-700' :
+                                                                    task.priority === 'Medium' ? 'bg-yellow-100 text-yellow-700' :
+                                                                        'bg-green-100 text-green-700'
+                                                            }`}>
+                                                            {task.priority}
+                                                        </span>
+                                                    )}
+                                                </td>
                                                 <td className="px-4 py-4 border-r border-slate-50">
                                                     <button
                                                         onClick={() => handleEditTask(task)}
@@ -229,11 +245,26 @@ export default function Tracker() {
                                                 <td className="px-5 py-4 font-medium text-slate-600 border-r border-slate-50">{task.subPhase || '-'}</td>
                                                 <td className="px-4 py-4 border-r border-slate-50">{task.pc || '-'}</td>
                                                 <td className="px-4 py-4 border-r border-slate-50">
-                                                    {task.assignedTo2 ? (
-                                                        <div className="w-8 h-8 rounded-full bg-purple-100 border border-purple-200 flex items-center justify-center text-xs font-bold text-purple-600 shadow-sm">
-                                                            {task.assignedTo2.charAt(0)}
-                                                        </div>
-                                                    ) : '-'}
+                                                    <div className="flex -space-x-2 overflow-hidden">
+                                                        {/* Primary Assignee */}
+                                                        {task.assignedTo && (
+                                                            <div className="w-8 h-8 rounded-full bg-indigo-100 border-2 border-white flex items-center justify-center text-xs font-bold text-indigo-600" title={task.assignedTo}>
+                                                                {task.assignedTo.charAt(0)}
+                                                            </div>
+                                                        )}
+                                                        {/* Secondary Assignee */}
+                                                        {task.assignedTo2 && (
+                                                            <div className="w-8 h-8 rounded-full bg-purple-100 border-2 border-white flex items-center justify-center text-xs font-bold text-purple-600" title={task.assignedTo2}>
+                                                                {task.assignedTo2.charAt(0)}
+                                                            </div>
+                                                        )}
+                                                        {/* Additional Assignees */}
+                                                        {task.additionalAssignees?.map((assignee, i) => (
+                                                            <div key={i} className="w-8 h-8 rounded-full bg-emerald-100 border-2 border-white flex items-center justify-center text-xs font-bold text-emerald-600" title={assignee}>
+                                                                {assignee.charAt(0)}
+                                                            </div>
+                                                        ))}
+                                                    </div>
                                                 </td>
                                                 <td className="px-4 py-4 border-r border-slate-50">
                                                     <div className="flex items-center gap-2">
@@ -254,7 +285,14 @@ export default function Tracker() {
                                                 </td>
                                                 <td className="px-4 py-4 text-slate-500 font-medium border-r border-slate-50">{task.startDate ? format(new Date(task.startDate), 'MMM d') : '-'}</td>
                                                 <td className="px-4 py-4 text-slate-500 font-medium border-r border-slate-50">{task.endDate ? format(new Date(task.endDate), 'MMM d') : '-'}</td>
-                                                <td className="px-4 py-4 text-center font-mono text-slate-600 border-r border-slate-50">{task.bugCount}</td>
+                                                <td className="px-4 py-4 text-slate-500 font-medium border-r border-slate-50">{task.actualCompletionDate ? format(new Date(task.actualCompletionDate), 'MMM d') : '-'}</td>
+                                                <td className="px-4 py-4 text-center border-r border-slate-50">
+                                                    <div className="flex flex-col text-xs">
+                                                        <span className="font-bold text-slate-700">T: {task.bugCount}</span>
+                                                        <span className="text-slate-500">H: {task.htmlBugs}</span>
+                                                        <span className="text-slate-500">F: {task.functionalBugs}</span>
+                                                    </div>
+                                                </td>
                                                 <td className="px-5 py-4 text-sm text-slate-500 max-w-sm truncate border-r border-slate-50" title={task.comments || ''}>
                                                     {task.comments || '-'}
                                                 </td>
