@@ -24,12 +24,34 @@ export default function Reports() {
     }, []);
 
     async function fetchFilters() {
-        // Fetch users
+        // Fetch users based on role
         try {
-            const res = await fetch('/api/hubstaff/users');
-            if (res.ok) {
-                const data = await res.json();
-                setTeamMembers(data.members || []);
+            const { getCurrentUserTeam } = await import('@/utils/userUtils');
+            const userTeam = await getCurrentUserTeam();
+            const isSuperAdmin = userTeam?.role === 'super_admin';
+
+            if (isSuperAdmin) {
+                const res = await fetch('/api/hubstaff/users');
+                if (res.ok) {
+                    const data = await res.json();
+                    setTeamMembers(data.members || []);
+                }
+            } else {
+                // Team Account: Fetch from team_members table
+                // Note: We need the team_id. The RLS policy allows selecting own team members.
+                // But we should filter by team_id explicitly if possible, or just select all and RLS handles it.
+                // However, to be safe and explicit:
+                if (userTeam?.team_id) {
+                    const { data, error } = await supabase
+                        .from('team_members')
+                        .select('id, name')
+                        .eq('team_id', userTeam.team_id)
+                        .order('name');
+
+                    if (!error && data) {
+                        setTeamMembers(data as any[]);
+                    }
+                }
             }
         } catch (e) {
             console.error('Error fetching users', e);
