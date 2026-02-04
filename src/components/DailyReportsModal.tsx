@@ -696,13 +696,13 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                                         </td>
                                         <td style="padding: 12px; text-align: center; vertical-align: middle; border-right: 1px solid #f1f5f9;">
                                             <div style="display: flex; align-items: center; justify-content: center; width: 100%; height: 100%;">
-                                                <span style="display: inline-flex; align-items: center; justify-content: center; width: 100px; height: 26px; border-radius: 9999px; font-size: 10px; font-weight: 600; text-align: center; white-space: nowrap; padding-bottom: 1px;
-                                                    ${getEffectiveStatus(task) === 'In Progress' ? 'background: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe;' :
-                                getEffectiveStatus(task) === 'Yet to Start' ? 'background: #fef3c7; color: #92400e; border: 1px solid #fde68a;' :
-                                    getEffectiveStatus(task) === 'On Hold' ? 'background: #fee2e2; color: #991b1b; border: 1px solid #fecaca;' :
-                                        getEffectiveStatus(task) === 'Overdue' ? 'background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5;' :
-                                            'background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0;'}">
-                                                    ${getEffectiveStatus(task)}
+                                                <span style="font-size: 12px; font-weight: 700;
+                                                    ${effectiveStatus === 'In Progress' ? 'color: #1d4ed8;' :
+                                                    effectiveStatus === 'Yet to Start' ? 'color: #b45309;' :
+                                                    effectiveStatus === 'On Hold' ? 'color: #991b1b;' :
+                                                    effectiveStatus === 'Overdue' ? 'color: #b91c1c;' :
+                                                    'color: #475569;'}">
+                                                    ${displayStatus}
                                                 </span>
                                             </div>
                                         </td>
