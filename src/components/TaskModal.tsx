@@ -70,29 +70,13 @@ export default function TaskModal({ isOpen, onClose, task, onSave }: TaskModalPr
                 if (response.ok) {
                     const data = await response.json();
                     if (data.members) {
-                        const uniqueMap = new Map();
-
-                        data.members.forEach((u: any) => {
-                            const mappedId = mapHubstaffNameToQA(u.name);
-                            const canonicalName = getHubstaffNameFromQA(mappedId);
-
-                            // Deduplication logic:
-                            // 1. If ID not present, add it.
-                            // 2. If ID present, but current name is the "Canonical" (preferred) name, overwrite existing.
-                            // This ensures "amrutha ms" replaces "Amrutha lakshmi" if "amrutha ms" is defined first in our map.
-
-                            const isCanonical = canonicalName && u.name === canonicalName;
-                            const existing = uniqueMap.get(mappedId);
-
-                            if (!existing || (isCanonical && existing.label !== canonicalName)) {
-                                uniqueMap.set(mappedId, {
-                                    id: mappedId,
-                                    label: u.name
-                                });
-                            }
-                        });
-
-                        setHubstaffUsers(Array.from(uniqueMap.values()));
+                        // Use ALL members, do not deduplicate.
+                        // Use u.name (Full Name) as the ID to differentiate aliases.
+                        const formattedUsers = data.members.map((u: any) => ({
+                            id: u.name, // Use Full Name as ID
+                            label: u.name
+                        }));
+                        setHubstaffUsers(formattedUsers);
                     }
                 }
             } catch (error) {
@@ -155,7 +139,16 @@ export default function TaskModal({ isOpen, onClose, task, onSave }: TaskModalPr
             });
 
             // Initialize dynamic assignees list
-            const initialAssignees = [task.assignedTo, task.assignedTo2, ...(task.additionalAssignees || [])].filter(Boolean) as string[];
+            // Map Short Names (from DB) back to Canonical Full Names for display
+            // If getHubstaffNameFromQA returns null (no mapping), use the value as is
+            const initialAssignees = [
+                task.assignedTo,
+                task.assignedTo2,
+                ...(task.additionalAssignees || [])
+            ]
+                .filter(Boolean)
+                .map(shortName => getHubstaffNameFromQA(shortName!) || shortName) as string[];
+
             if (initialAssignees.length === 0) setAssignees([null]);
             else setAssignees(initialAssignees);
 
@@ -242,7 +235,11 @@ export default function TaskModal({ isOpen, onClose, task, onSave }: TaskModalPr
             }
 
             // Map assignees array back to individual fields
-            const validAssignees = assignees.filter(Boolean) as string[];
+            // Convert Full Names (UI) -> Short Names (DB)
+            const validAssignees = assignees
+                .filter(Boolean)
+                .map(fullName => mapHubstaffNameToQA(fullName as string));
+
             const finalData = {
                 ...formData,
                 assignedTo: validAssignees[0] || null,
