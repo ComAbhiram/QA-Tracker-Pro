@@ -345,7 +345,7 @@ function generateWorkStatusText(
 ): string {
     const formattedDate = formatDateDDMMYYYY(date);
 
-    let text = `📋 *Work Status (v2 Checks) - ${formattedDate}*\n`;
+    let text = `📋 *Work Status - ${formattedDate}*\n`;
     text += `👤 *Name:* ${qaName}\n\n`;
 
     // Categorize tasks
@@ -357,7 +357,7 @@ function generateWorkStatusText(
         text += `🔄 *=== ACTIVE TASKS ===*\n\n`;
         activeTasks.forEach((task, index) => {
             text += `*${index + 1}. ${task.subPhase || task.projectName}*\n`;
-            text += `📁 *Project:* ${task.projectName} [ID: ${task.id}]\n`;
+            text += `📁 *Project:* ${task.projectName}\n`;
             text += `📅 *Start Date:* ${task.startDate ? formatDateDDMMYYYY(task.startDate) : 'Not set'}\n`;
             text += `⏰ *Expected End Date:* ${task.endDate ? formatDateDDMMYYYY(task.endDate) : 'Not set'}\n`;
 
