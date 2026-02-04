@@ -67,7 +67,7 @@ export default function TaskDetailsModal({ isOpen, onClose, task, onEdit }: Task
                 </div>
 
                 {/* Content */}
-                <div className="px-8 pb-8 -mt-8 flex-1 overflow-y-auto custom-scrollbar">
+                <div className="px-8 pb-8 pt-6 flex-1 overflow-y-auto custom-scrollbar">
 
                     {/* Title Block */}
                     <div className="bg-white rounded-xl shadow-lg border border-slate-100 p-5 mb-6">
@@ -90,10 +90,10 @@ export default function TaskDetailsModal({ isOpen, onClose, task, onEdit }: Task
                         </p>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
 
                         {/* Assignees */}
-                        <div className="bg-slate-50 rounded-xl p-4 border border-slate-100">
+                        <div className="bg-slate-50 rounded-xl p-5 border border-slate-100">
                             <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
                                 <User size={12} /> Assigned To
                             </label>
@@ -123,7 +123,7 @@ export default function TaskDetailsModal({ isOpen, onClose, task, onEdit }: Task
                         </div>
 
                         {/* Timeline */}
-                        <div className="bg-slate-50 rounded-xl p-4 border border-slate-100">
+                        <div className="bg-slate-50 rounded-xl p-5 border border-slate-100">
                             <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
                                 <Calendar size={12} /> Timeline
                             </label>
@@ -143,14 +143,39 @@ export default function TaskDetailsModal({ isOpen, onClose, task, onEdit }: Task
                                     </span>
                                 </div>
                                 <div className="flex justify-between text-xs pt-2 mt-2 border-t border-slate-200">
-                                    <span className="text-slate-400">Created:</span>
-                                    <span className="text-slate-500 font-medium">{task.createdAt ? format(new Date(task.createdAt), 'MMM d, yyyy') : '-'}</span>
+                                    <span className="text-slate-400">Status:</span>
+                                    {(() => {
+                                        const end = task.endDate ? new Date(task.endDate) : null;
+                                        const completed = task.actualCompletionDate ? new Date(task.actualCompletionDate) : null;
+                                        const today = new Date();
+                                        today.setHours(0, 0, 0, 0);
+
+                                        if (completed) {
+                                            if (end && completed > end) {
+                                                const diffTime = completed.getTime() - end.getTime();
+                                                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                                                return <span className="text-rose-600 font-bold">Completed (Late by {diffDays}d)</span>;
+                                            }
+                                            const start = task.startDate ? new Date(task.startDate) : completed;
+                                            const diffTime = Math.abs(completed.getTime() - start.getTime());
+                                            const tookDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+                                            return <span className="text-emerald-600 font-bold">Completed in {tookDays} days</span>;
+                                        }
+
+                                        if (end && today > end) {
+                                            const diffTime = today.getTime() - end.getTime();
+                                            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                                            return <span className="text-rose-600 font-bold">Overdue by {diffDays} days</span>;
+                                        }
+
+                                        return <span className="text-blue-600 font-bold">{task.status}</span>;
+                                    })()}
                                 </div>
                             </div>
                         </div>
 
                         {/* Bugs & Quality */}
-                        <div className="bg-slate-50 rounded-xl p-4 border border-slate-100">
+                        <div className="bg-slate-50 rounded-xl p-5 border border-slate-100">
                             <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
                                 <Bug size={12} /> Quality Assurance
                             </label>
@@ -171,8 +196,8 @@ export default function TaskDetailsModal({ isOpen, onClose, task, onEdit }: Task
                         </div>
 
                         {/* Sprint & PC */}
-                        <div className="bg-slate-50 rounded-xl p-4 border border-slate-100 text-sm">
-                            <div className="mb-3">
+                        <div className="bg-slate-50 rounded-xl p-5 border border-slate-100 text-sm md:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
                                 <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1.5">
                                     <Briefcase size={12} /> Project Coordinator
                                 </label>
@@ -198,7 +223,7 @@ export default function TaskDetailsModal({ isOpen, onClose, task, onEdit }: Task
 
                     {/* Updates & Comments */}
                     <div className="space-y-4">
-                        <div className="bg-slate-50 rounded-xl p-4 border border-slate-100">
+                        <div className="bg-slate-50 rounded-xl p-5 border border-slate-100">
                             <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
                                 <FileText size={12} /> Current Updates
                             </label>
@@ -207,7 +232,7 @@ export default function TaskDetailsModal({ isOpen, onClose, task, onEdit }: Task
                             </p>
                         </div>
 
-                        <div className="bg-slate-50 rounded-xl p-4 border border-slate-100">
+                        <div className="bg-slate-50 rounded-xl p-5 border border-slate-100">
                             <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
                                 <AlertCircle size={12} /> Deviation & Comments
                             </label>
