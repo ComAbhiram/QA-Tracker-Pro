@@ -485,6 +485,21 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                         }
 
                         const effectiveStatus = getEffectiveStatus(task);
+
+                        let displayStatus = effectiveStatus;
+                        if (effectiveStatus === 'Overdue' && task.endDate) {
+                            const end = new Date(task.endDate);
+                            const now = new Date();
+                            end.setHours(0, 0, 0, 0);
+                            now.setHours(0, 0, 0, 0);
+
+                            const diffTime = now.getTime() - end.getTime();
+                            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                            if (diffDays > 0) {
+                                displayStatus = `Overdue (+${diffDays}d)`;
+                            }
+                        }
+
                         return `
                                     <tr style="border-bottom: 1px solid #e2e8f0; ${index % 2 === 0 ? 'background: #f8fafc;' : 'background: white;'}">
                                         <td style="padding: 12px; color: #1e293b; font-weight: 600; font-size: 12px; vertical-align: middle; border-right: 1px solid #f1f5f9;">
@@ -505,7 +520,7 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                                         effectiveStatus === 'Overdue' ? 'color: #b91c1c;' :
                                             'color: #475569;'}
                                                 ${isLateCompletion ? 'color: #b91c1c;' : ''}">
-                                                ${isLateCompletion ? lateLabel : effectiveStatus}
+                                                ${isLateCompletion ? lateLabel : displayStatus}
                                             </span>
                                         </div>
                                     </td>
