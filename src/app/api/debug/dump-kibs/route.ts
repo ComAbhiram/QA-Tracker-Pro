@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic';
 
 export async function GET() {
     try {
-        const { data: tasks, error } = await supabaseServer()
+        const { data: tasks, error } = await supabaseServer
             .from('tasks')
             .select('*')
             .ilike('project_name', '%KIBS%');
