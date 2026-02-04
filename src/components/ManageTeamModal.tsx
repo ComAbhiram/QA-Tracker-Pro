@@ -24,6 +24,7 @@ export default function ManageTeamModal({ isOpen, onClose }: ManageTeamModalProp
 
     // Add Member State
     const [hubstaffUsers, setHubstaffUsers] = useState<{ id: string; label: string }[]>([]);
+    const [hubstaffError, setHubstaffError] = useState<string | null>(null);
     const [selectedHubstaffUser, setSelectedHubstaffUser] = useState<string | number | null>(null);
     const [customName, setCustomName] = useState('');
     const [activeTab, setActiveTab] = useState<'hubstaff' | 'manual'>('hubstaff');
@@ -56,9 +57,9 @@ export default function ManageTeamModal({ isOpen, onClose }: ManageTeamModalProp
         }
     };
 
-    // Fetch Hubstaff users for selection
     const fetchHubstaffUsers = async () => {
         try {
+            setHubstaffError(null);
             const response = await fetch('/api/hubstaff/users');
             if (response.ok) {
                 const data = await response.json();
@@ -69,9 +70,17 @@ export default function ManageTeamModal({ isOpen, onClose }: ManageTeamModalProp
                     }));
                     setHubstaffUsers(formattedUsers);
                 }
+            } else {
+                if (response.status === 429) {
+                    setHubstaffError("Rate limit reached (Hubstaff). Try again later.");
+                } else {
+                    setHubstaffError("Failed to fetch Hubstaff users.");
+                }
+                console.error("Hubstaff fetch error:", response.status);
             }
         } catch (error) {
             console.error('Error fetching Hubstaff users:', error);
+            setHubstaffError("Network error fetching Hubstaff users.");
         }
     };
 
@@ -185,6 +194,7 @@ export default function ManageTeamModal({ isOpen, onClose }: ManageTeamModalProp
                                         onChange={setSelectedHubstaffUser}
                                         placeholder="Select Hubstaff User..."
                                         searchPlaceholder="Search Hubstaff..."
+                                        emptyMessage={hubstaffError || "No option found."}
                                     />
                                 ) : (
                                     <input
