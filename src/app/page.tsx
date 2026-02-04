@@ -149,6 +149,23 @@ export default function Home() {
 
     await fetchTasks();
     setIsTaskModalOpen(false);
+    await fetchTasks();
+    setIsTaskModalOpen(false);
+  };
+
+  const handleDeleteTask = async (taskId: number) => {
+    const { error } = await supabase
+      .from('tasks')
+      .delete()
+      .eq('id', taskId);
+
+    if (error) {
+      console.error('Error deleting task:', error);
+      alert('Failed to delete task: ' + error.message);
+    } else {
+      await fetchTasks();
+      setIsTaskModalOpen(false);
+    }
   };
 
   return (
@@ -276,6 +293,7 @@ export default function Home() {
         onClose={() => setIsTaskModalOpen(false)}
         task={editingTask}
         onSave={saveTask}
+        onDelete={handleDeleteTask}
       />
 
     </div>
