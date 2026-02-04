@@ -451,10 +451,10 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                     <table style="width: 100%; border-collapse: collapse; background: white; border: 2px solid #e2e8f0; border-radius: 12px; overflow: hidden;">
                         <thead>
                             <tr style="background: linear-gradient(to right, #0ea5e9, #6366f1);">
-                                <th style="padding: 12px 16px; text-align: left; color: white; font-weight: 600; font-size: 13px; border-right: 1px solid rgba(255,255,255,0.2);">Project</th>
+                                <th style="padding: 16px; text-align: left; color: white; font-weight: 600; font-size: 14px; width: 20%; border-right: 1px solid rgba(255,255,255,0.2);">Project</th>
                                 <th style="padding: 12px 16px; text-align: left; color: white; font-weight: 600; font-size: 13px; border-right: 1px solid rgba(255,255,255,0.2);">Phase</th>
-                                <th style="padding: 12px 16px; text-align: center; color: white; font-weight: 600; font-size: 13px; border-right: 1px solid rgba(255,255,255,0.2);">Status</th>
-                                <th style="padding: 12px 16px; text-align: left; color: white; font-weight: 600; font-size: 13px; border-right: 1px solid rgba(255,255,255,0.2);">Assignee</th>
+                                <th style="padding: 16px; text-align: center; color: white; font-weight: 600; font-size: 14px; width: 15%; border-right: 1px solid rgba(255,255,255,0.2);">Status</th>
+                                <th style="padding: 16px; text-align: left; color: white; font-weight: 600; font-size: 14px; width: 15%; border-right: 1px solid rgba(255,255,255,0.2);">Assignee</th>
                                 <th style="padding: 12px 16px; text-align: left; color: white; font-weight: 600; font-size: 13px; border-right: 1px solid rgba(255,255,255,0.2);">From Date</th>
                                 <th style="padding: 12px 16px; text-align: left; color: white; font-weight: 600; font-size: 13px; border-right: 1px solid rgba(255,255,255,0.2);">End Date</th>
                                 <th style="padding: 12px 16px; text-align: left; color: white; font-weight: 600; font-size: 13px;">Comments</th>
@@ -465,10 +465,10 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                     '<tr><td colspan="7" style="padding: 40px; text-align: center; color: #94a3b8; font-size: 16px;">No tasks scheduled for today</td></tr>' :
                     todayTasks.map((task, index) => `
                                     <tr style="border-bottom: 1px solid #e2e8f0; ${index % 2 === 0 ? 'background: #f8fafc;' : 'background: white;'}">
-                                        <td style="padding: 12px 16px; color: #1e293b; font-weight: 600; font-size: 13px; border-right: 1px solid #f1f5f9;">${task.projectName}</td>
-                                        <td style="padding: 12px 16px; color: #475569; font-size: 13px; border-right: 1px solid #f1f5f9;">${task.subPhase || 'N/A'}</td>
-                                    <td style="padding: 12px 16px; text-align: center; vertical-align: middle; border-right: 1px solid #f1f5f9;">
-                                        <span style="display: inline-flex; align-items: center; justify-content: center; margin: 0 auto; padding: 0 16px; border-radius: 20px; font-size: 12px; font-weight: 600; white-space: nowrap; min-width: 120px; height: 32px; line-height: 32px;
+                                        <td style="padding: 16px; color: #1e293b; font-weight: 600; font-size: 14px; vertical-align: middle; border-right: 1px solid #f1f5f9;">${task.projectName}</td>
+                                        <td style="padding: 16px; color: #475569; font-size: 14px; vertical-align: middle; border-right: 1px solid #f1f5f9;">${task.subPhase || 'N/A'}</td>
+                                    <td style="padding: 16px; text-align: center; vertical-align: middle; border-right: 1px solid #f1f5f9;">
+                                        <span style="display: inline-flex; align-items: center; justify-content: center; padding: 6px 12px; border-radius: 9999px; font-size: 12px; font-weight: 600; white-space: nowrap; width: 100%; max-width: 140px;
                                             ${task.status === 'Completed' ? 'background: #dcfce7; color: #166534; border: 1px solid #bbf7d0;' :
                             task.status === 'In Progress' ? 'background: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe;' :
                                 task.status === 'Yet to Start' ? 'background: #fef3c7; color: #92400e; border: 1px solid #fde68a;' :
@@ -476,10 +476,10 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                                             ${task.status}
                                         </span>
                                     </td>
-                                        <td style="padding: 12px 16px; color: #475569; font-size: 13px; border-right: 1px solid #f1f5f9;">${task.assignedTo || 'Unassigned'}${task.assignedTo2 ? `, ${task.assignedTo2}` : ''}</td>
-                                        <td style="padding: 12px 16px; color: #475569; font-size: 13px; border-right: 1px solid #f1f5f9;">${task.startDate ? formatDate(task.startDate) : 'TBD'}</td>
-                                        <td style="padding: 12px 16px; color: #475569; font-size: 13px; border-right: 1px solid #f1f5f9;">${task.endDate ? formatDate(task.endDate) : 'TBD'}</td>
-                                        <td style="padding: 12px 16px; color: #475569; font-size: 12px;">${task.comments || '-'}</td>
+                                        <td style="padding: 16px; color: #475569; font-size: 14px; vertical-align: middle; border-right: 1px solid #f1f5f9;">${task.assignedTo || 'Unassigned'}${task.assignedTo2 ? `, ${task.assignedTo2}` : ''}</td>
+                                        <td style="padding: 16px; color: #475569; font-size: 14px; vertical-align: middle; border-right: 1px solid #f1f5f9;">${task.startDate ? formatDate(task.startDate) : 'TBD'}</td>
+                                        <td style="padding: 16px; color: #475569; font-size: 14px; vertical-align: middle; border-right: 1px solid #f1f5f9;">${task.endDate ? formatDate(task.endDate) : 'TBD'}</td>
+                                        <td style="padding: 16px; color: #64748b; font-size: 13px; vertical-align: middle;">${task.comments || 'No comments'}</td>
                                     </tr>
         `).join('')
                 }
@@ -594,11 +594,11 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                     <table style="width: 100%; border-collapse: collapse; background: white; border: 2px solid #e2e8f0; border-radius: 12px; overflow: hidden;">
                         <thead>
                             <tr style="background: linear-gradient(to right, #0ea5e9, #6366f1);">
-                                <th style="padding: 14px 16px; text-align: left; color: white; font-weight: 600; font-size: 13px; border-right: 1px solid rgba(255,255,255,0.2);">Project Name</th>
-                                <th style="padding: 14px 16px; text-align: left; color: white; font-weight: 600; font-size: 13px; border-right: 1px solid rgba(255,255,255,0.2);">Phase</th>
-                                <th style="padding: 14px 16px; text-align: center; color: white; font-weight: 600; font-size: 13px; border-right: 1px solid rgba(255,255,255,0.2);">Status</th>
-                                <th style="padding: 14px 16px; text-align: left; color: white; font-weight: 600; font-size: 13px; border-right: 1px solid rgba(255,255,255,0.2);">Assignee</th>
-                                <th style="padding: 14px 16px; text-align: left; color: white; font-weight: 600; font-size: 13px; border-right: 1px solid rgba(255,255,255,0.2);">Timeline</th>
+                                <th style="padding: 16px; text-align: left; color: white; font-weight: 600; font-size: 14px; width: 20%; border-right: 1px solid rgba(255,255,255,0.2);">Project Name</th>
+                                <th style="padding: 16px; text-align: left; color: white; font-weight: 600; font-size: 14px; border-right: 1px solid rgba(255,255,255,0.2);">Phase</th>
+                                <th style="padding: 16px; text-align: center; color: white; font-weight: 600; font-size: 14px; width: 15%; border-right: 1px solid rgba(255,255,255,0.2);">Status</th>
+                                <th style="padding: 16px; text-align: left; color: white; font-weight: 600; font-size: 14px; width: 15%; border-right: 1px solid rgba(255,255,255,0.2);">Assignee</th>
+                                <th style="padding: 16px; text-align: left; color: white; font-weight: 600; font-size: 14px; vertical-align: middle; border-right: 1px solid rgba(255,255,255,0.2);">Timeline</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -606,10 +606,10 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                     '<tr><td colspan="5" style="padding: 40px; text-align: center; color: #94a3b8; font-size: 16px;">No active tasks found in schedule</td></tr>' :
                     scheduleTasks.map((task, index) => `
                                     <tr style="border-bottom: 1px solid #e2e8f0; ${index % 2 === 0 ? 'background: #f8fafc;' : 'background: white;'}">
-                                        <td style="padding: 14px 16px; color: #1e293b; font-weight: 600; font-size: 14px; border-right: 1px solid #f1f5f9;">${task.projectName}</td>
-                                        <td style="padding: 14px 16px; color: #475569; font-size: 13px; border-right: 1px solid #f1f5f9;">${task.subPhase || '-'}</td>
-                                        <td style="padding: 14px 16px; text-align: center; border-right: 1px solid #f1f5f9;">
-                                             <span style="display: inline-flex; align-items: center; justify-content: center; padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: 600; white-space: nowrap; min-width: 120px; height: 32px;
+                                        <td style="padding: 16px; color: #1e293b; font-weight: 600; font-size: 14px; vertical-align: middle; border-right: 1px solid #f1f5f9;">${task.projectName}</td>
+                                        <td style="padding: 16px; color: #475569; font-size: 14px; vertical-align: middle; border-right: 1px solid #f1f5f9;">${task.subPhase || '-'}</td>
+                                        <td style="padding: 16px; text-align: center; vertical-align: middle; border-right: 1px solid #f1f5f9;">
+                                             <span style="display: inline-flex; align-items: center; justify-content: center; padding: 6px 12px; border-radius: 9999px; font-size: 12px; font-weight: 600; white-space: nowrap; width: 100%; max-width: 140px;
                                                 ${getEffectiveStatus(task) === 'In Progress' ? 'background: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe;' :
                             getEffectiveStatus(task) === 'Yet to Start' ? 'background: #fef3c7; color: #92400e; border: 1px solid #fde68a;' :
                                 getEffectiveStatus(task) === 'On Hold' ? 'background: #fee2e2; color: #991b1b; border: 1px solid #fecaca;' :
@@ -618,8 +618,8 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                                                 ${getEffectiveStatus(task)}
                                             </span>
                                         </td>
-                                        <td style="padding: 14px 16px; color: #475569; font-size: 13px; border-right: 1px solid #f1f5f9;">${task.assignedTo || 'Unassigned'}${task.assignedTo2 ? `, ${task.assignedTo2}` : ''}</td>
-                                        <td style="padding: 14px 16px; color: #475569; font-size: 13px;">${task.startDate ? formatDate(task.startDate) : 'TBD'} - ${task.endDate ? formatDate(task.endDate) : 'TBD'}</td>
+                                        <td style="padding: 16px; color: #475569; font-size: 14px; vertical-align: middle; border-right: 1px solid #f1f5f9;">${task.assignedTo || 'Unassigned'}${task.assignedTo2 ? `, ${task.assignedTo2}` : ''}</td>
+                                        <td style="padding: 16px; color: #475569; font-size: 14px; vertical-align: middle;">${task.startDate ? formatDate(task.startDate) : 'TBD'} - ${task.endDate ? formatDate(task.endDate) : 'TBD'}</td>
                                     </tr>
                                 `).join('')
                 }
@@ -732,6 +732,7 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                             <p className="text-sm text-slate-500">Generate a screenshot of the current tracker table with all active projects</p>
                         </div>
                         <ChevronRight className="text-slate-400 group-hover:text-sky-500 transition-colors" size={20} />
+                        {loading && <div className="absolute right-4 top-1/2 -translate-y-1/2"><div className="w-5 h-5 border-2 border-sky-500 border-t-transparent rounded-full animate-spin"></div></div>}
                     </button>
 
                     {/* Today's Work Status - Expandable */}
@@ -757,8 +758,12 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                                     disabled={loading}
                                     className="w-full flex items-center gap-3 p-3 bg-white hover:bg-sky-50 border border-slate-200 hover:border-sky-300 rounded-lg transition-all text-left"
                                 >
-                                    <Camera className="text-sky-600" size={18} />
-                                    <span className="text-sm font-medium text-slate-700">Download as Image</span>
+                                    {loading ? (
+                                        <div className="w-4 h-4 border-2 border-sky-600 border-t-transparent rounded-full animate-spin"></div>
+                                    ) : (
+                                        <Camera className="text-sky-600" size={18} />
+                                    )}
+                                    <span className="text-sm font-medium text-slate-700">{loading ? 'Generating...' : 'Download as Image'}</span>
                                 </button>
                                 <button
                                     onClick={generateTodayWorkStatusText}
@@ -808,8 +813,12 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                                         disabled={loading}
                                         className="w-full flex items-center gap-3 p-3 bg-white hover:bg-sky-50 border border-slate-200 hover:border-sky-300 rounded-lg transition-all text-left"
                                     >
-                                        <Camera className="text-sky-600" size={18} />
-                                        <span className="text-sm font-medium text-slate-700">Download as Image</span>
+                                        {loading ? (
+                                            <div className="w-4 h-4 border-2 border-sky-600 border-t-transparent rounded-full animate-spin"></div>
+                                        ) : (
+                                            <Camera className="text-sky-600" size={18} />
+                                        )}
+                                        <span className="text-sm font-medium text-slate-700">{loading ? 'Generating...' : 'Download as Image'}</span>
                                     </button>
                                     <button
                                         onClick={generateWorkScheduleText}
