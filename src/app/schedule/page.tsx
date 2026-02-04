@@ -338,7 +338,7 @@ export default function Schedule() {
                                     if (day >= start && day <= end) return true;
 
                                     // Check status on this specific day
-                                    if (day > end) {
+                                    if (day > end && day <= now) {
                                         const statusInfo = getStatusOnDate(task, day);
                                         if (statusInfo.baseStatus === 'Overdue') return true;
                                         // Also show if completed ON this day (late)
