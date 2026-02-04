@@ -221,9 +221,6 @@ export default function Schedule() {
 
         const payloadACD = taskData.actualCompletionDate ? new Date(taskData.actualCompletionDate).toISOString() : null;
 
-        // DEBUG: Alert the payload to verify date format
-        // alert(`DEBUG: Saving Task\nACD Input: ${taskData.actualCompletionDate}\nPayload: ${payloadACD}`);
-
         const dbPayload: any = {
             project_name: taskData.projectName,
             project_type: taskData.projectType,
@@ -245,26 +242,15 @@ export default function Schedule() {
             sprint_link: taskData.sprintLink
         };
 
-        const { data, error } = await supabase
+        const { error } = await supabase
             .from('tasks')
             .update(dbPayload)
-            .eq('id', editingTask.id)
-            .select();
+            .eq('id', editingTask.id);
 
         if (error) {
             console.error('Error updating task:', error);
             alert(`Failed to save task: ${error.message}`);
             return;
-        }
-
-        if (!data || data.length === 0) {
-            alert(`Save successful but NO rows updated. \nLikely permission issue or Task ID ${editingTask.id} not found.`);
-        } else {
-            // Verify if the date was actually saved in the returned data
-            const savedDate = data[0].actual_completion_date;
-            if (payloadACD && !savedDate) {
-                alert(`WARNING: Date sent but not saved!\nSent: ${payloadACD}\nSaved: ${savedDate}`);
-            }
         }
 
         await fetchTasks();
