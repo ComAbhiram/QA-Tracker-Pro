@@ -1,6 +1,7 @@
 
 'use client';
 
+import TaskDetailsModal from "@/components/TaskDetailsModal";
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { mapTaskFromDB, Task, isTaskOverdue, getOverdueDays } from '@/lib/types';
@@ -15,7 +16,7 @@ export default function Schedule() {
     const [currentDate, setCurrentDate] = useState(new Date());
     const [viewMode, setViewMode] = useState<'calendar' | 'day'>('calendar');
     const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
-    const [editingTask, setEditingTask] = useState<Task | null>(null);
+    const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);    const [editingTask, setEditingTask] = useState<Task | null>(null);
 
     useEffect(() => {
         fetchTasks();
@@ -203,7 +204,14 @@ export default function Schedule() {
         return 'bg-sky-600 text-white';
     };
 
+
     const handleTaskClick = (task: Task) => {
+        setEditingTask(task);
+        setIsDetailModalOpen(true);
+    };
+
+    const handleEditTask = (task: Task) => {
+        setIsDetailModalOpen(false);
         setEditingTask(task);
         setIsTaskModalOpen(true);
     };
@@ -465,6 +473,13 @@ export default function Schedule() {
                 )}
 
             </div>
+
+            <TaskDetailsModal
+                isOpen={isDetailModalOpen}
+                onClose={() => setIsDetailModalOpen(false)}
+                task={editingTask}
+                onEdit={handleEditTask}
+            />
 
             <TaskModal
                 isOpen={isTaskModalOpen}
