@@ -83,13 +83,32 @@ export default function Schedule() {
         start.setHours(0, 0, 0, 0);
         end.setHours(23, 59, 59, 999);
         const target = new Date(currentDate);
-        target.setHours(12, 0, 0, 0);
-        return target >= start && target <= end;
+        target.setHours(12, 0, 0, 0); // Use noon to avoid timezone edge cases
+
+        // Normal range check
+        if (target >= start && target <= end) return true;
+
+        // Overdue check: If task is overdue and target date is after end date, show it
+        const effectiveStatus = getEffectiveStatus(task);
+        if (effectiveStatus === 'Overdue') {
+            // Show on days AFTER the end date
+            return target > end;
+        }
+
+        return false;
     });
 
     const getStatusColor = (task: Task) => {
         const status = getEffectiveStatus(task);
         const s = (status || '').toLowerCase();
+
+        // Check for Late Completion
+        if (s === 'completed' && task.endDate && task.actualCompletionDate) {
+            if (new Date(task.actualCompletionDate) > new Date(task.endDate)) {
+                return 'bg-emerald-600 text-white border-emerald-700 shadow-sm ring-2 ring-rose-500/50';
+            }
+        }
+
         if (s === 'completed') return 'bg-emerald-600 text-white border-emerald-700 shadow-sm';
         if (s === 'in progress' || s === 'being developed') return 'bg-blue-600 text-white border-blue-700 shadow-sm';
         if (s === 'rejected') return 'bg-red-600 text-white border-red-700 shadow-sm';
@@ -103,6 +122,14 @@ export default function Schedule() {
     const getTaskBorderColor = (task: Task) => {
         const status = getEffectiveStatus(task);
         const s = (status || '').toLowerCase();
+
+        // Check for Late Completion
+        if (s === 'completed' && task.endDate && task.actualCompletionDate) {
+            if (new Date(task.actualCompletionDate) > new Date(task.endDate)) {
+                return 'border-emerald-600 bg-emerald-600 text-white ring-2 ring-rose-400';
+            }
+        }
+
         if (s === 'completed') return 'border-emerald-600 bg-emerald-600 text-white';
         if (s === 'in progress' || s === 'being developed') return 'border-blue-600 bg-blue-600 text-white';
         if (s === 'rejected') return 'border-red-600 bg-red-600 text-white';
@@ -116,6 +143,14 @@ export default function Schedule() {
     const getStatusBadgeColor = (task: Task) => {
         const status = getEffectiveStatus(task);
         const s = (status || '').toLowerCase();
+
+        // Check for Late Completion
+        if (s === 'completed' && task.endDate && task.actualCompletionDate) {
+            if (new Date(task.actualCompletionDate) > new Date(task.endDate)) {
+                return 'bg-emerald-600 text-white ring-2 ring-rose-400';
+            }
+        }
+
         if (s === 'completed') return 'bg-emerald-600 text-white';
         if (s === 'in progress' || s === 'being developed') return 'bg-blue-600 text-white';
         if (s === 'rejected') return 'bg-red-600 text-white';
@@ -252,7 +287,17 @@ export default function Schedule() {
                                     const end = new Date(task.endDate);
                                     start.setHours(0, 0, 0, 0);
                                     end.setHours(23, 59, 59, 999);
-                                    return day >= start && day <= end;
+
+                                    // Normal range check
+                                    if (day >= start && day <= end) return true;
+
+                                    // Overdue check
+                                    const effectiveStatus = getEffectiveStatus(task);
+                                    if (effectiveStatus === 'Overdue') {
+                                        // Show on days AFTER the end date
+                                        return day > end;
+                                    }
+                                    return false;
                                 });
 
                                 return (
@@ -304,48 +349,54 @@ export default function Schedule() {
                             </div>
                         ) : (
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                {dayViewTasks.map(task => (
-                                    <div
-                                        key={task.id}
-                                        onClick={() => handleTaskClick(task)}
-                                        className={`rounded-2xl p-6 shadow-sm hover:shadow-md transition-all cursor-pointer group relative border ${getTaskBorderColor(task)}`}
-                                    >
-                                        <div className="flex justify-between items-start mb-4">
-                                            <div className="flex items-center gap-2">
-                                                <span className={`text-[11px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-lg bg-black/20 text-white`}>
-                                                    {getEffectiveStatus(task)}
-                                                </span>
-                                                {isTaskOverdue(task) && (
-                                                    <span className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold bg-red-100 text-red-700 border border-red-200">
-                                                        <AlertCircle size={12} />
-                                                        {getOverdueDays(task)}d
+                                {dayViewTasks.map(task => {
+                                    // Check for late completion
+                                    const isLateCompletion = task.status === 'Completed' && task.endDate && task.actualCompletionDate && new Date(task.actualCompletionDate) > new Date(task.endDate);
+
+                                    return (
+                                        <div
+                                            key={task.id}
+                                            onClick={() => handleTaskClick(task)}
+                                            className={`rounded-2xl p-6 shadow-sm hover:shadow-md transition-all cursor-pointer group relative border ${getTaskBorderColor(task)}`}
+                                        >
+                                            <div className="flex justify-between items-start mb-4">
+                                                <div className="flex items-center gap-2">
+                                                    <span className={`text-[11px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-lg bg-black/20 text-white ${isLateCompletion ? 'ring-2 ring-rose-400' : ''}`}>
+                                                        {isLateCompletion ? 'Compl. (Late)' : getEffectiveStatus(task)}
                                                     </span>
-                                                )}
+                                                    {isTaskOverdue(task) && (
+                                                        <span className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold bg-red-100 text-red-700 border border-red-200">
+                                                            <AlertCircle size={12} />
+                                                            {getOverdueDays(task)}d
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </div>
+
+                                            <h3 className="font-bold text-xl text-white mb-1">{task.projectName}</h3>
+
+                                            <p className="text-sm text-white/80 mb-6 font-medium">{task.subPhase || 'No phase'}</p>
+
+                                            <div className="space-y-3 pt-4 border-t border-white/20">
+                                                <div className="flex items-center gap-3 text-sm text-white/90">
+                                                    <div className="p-1.5 bg-white/20 rounded-full text-white shadow-sm">
+                                                        <User size={14} />
+                                                    </div>
+                                                    <span className="font-medium">{task.assignedTo || 'Unassigned'}{task.assignedTo2 ? `, ${task.assignedTo2}` : ''}</span>
+                                                </div>
+
+                                                <div className="flex items-center gap-3 text-sm text-white/90">
+                                                    <div className="p-1.5 bg-white/20 rounded-full text-white shadow-sm">
+                                                        <Clock size={14} />
+                                                    </div>
+                                                    <span className="font-medium">
+                                                        {task.startDate ? format(new Date(task.startDate), 'MMM d') : '?'} - {task.endDate ? format(new Date(task.endDate), 'MMM d') : '?'}
+                                                    </span>
+                                                </div>
                                             </div>
                                         </div>
-
-                                        <h3 className="font-bold text-xl text-white mb-1">{task.projectName}</h3>
-                                        <p className="text-sm text-white/80 mb-6 font-medium">{task.subPhase || 'No phase'}</p>
-
-                                        <div className="space-y-3 pt-4 border-t border-white/20">
-                                            <div className="flex items-center gap-3 text-sm text-white/90">
-                                                <div className="p-1.5 bg-white/20 rounded-full text-white shadow-sm">
-                                                    <User size={14} />
-                                                </div>
-                                                <span className="font-medium">{task.assignedTo || 'Unassigned'}{task.assignedTo2 ? `, ${task.assignedTo2}` : ''}</span>
-                                            </div>
-
-                                            <div className="flex items-center gap-3 text-sm text-white/90">
-                                                <div className="p-1.5 bg-white/20 rounded-full text-white shadow-sm">
-                                                    <Clock size={14} />
-                                                </div>
-                                                <span className="font-medium">
-                                                    {task.startDate ? format(new Date(task.startDate), 'MMM d') : '?'} - {task.endDate ? format(new Date(task.endDate), 'MMM d') : '?'}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
+                                    );
+                                })}
                             </div>
                         )}
                     </div>

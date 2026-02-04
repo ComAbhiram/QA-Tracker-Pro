@@ -308,6 +308,11 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
         try {
             const today = new Date().toISOString().split('T')[0];
             const todayTasks = tasks.filter(t => {
+                const effectiveStatus = getEffectiveStatus(t);
+
+                // Always include if Overdue, even if outside date range
+                if (effectiveStatus === 'Overdue') return true;
+
                 if (!t.startDate || !t.endDate) return false;
                 const start = new Date(t.startDate).toISOString().split('T')[0];
                 const end = new Date(t.endDate).toISOString().split('T')[0];
@@ -472,7 +477,10 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                         <tbody>
                             ${todayTasks.length === 0 ?
                     '<tr><td colspan="7" style="padding: 40px; text-align: center; color: #94a3b8; font-size: 16px;">No tasks scheduled for today</td></tr>' :
-                    todayTasks.map((task, index) => `
+                    todayTasks.map((task, index) => {
+                        const isLateCompletion = task.status === 'Completed' && task.endDate && task.actualCompletionDate && new Date(task.actualCompletionDate) > new Date(task.endDate);
+                        const effectiveStatus = getEffectiveStatus(task);
+                        return `
                                     <tr style="border-bottom: 1px solid #e2e8f0; ${index % 2 === 0 ? 'background: #f8fafc;' : 'background: white;'}">
                                         <td style="padding: 12px; color: #1e293b; font-weight: 600; font-size: 12px; vertical-align: middle; border-right: 1px solid #f1f5f9;">
                                             <div>${task.projectName}</div>
@@ -486,11 +494,13 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                                     <td style="padding: 12px; text-align: center; vertical-align: middle; border-right: 1px solid #f1f5f9;">
                                         <div style="display: flex; align-items: center; justify-content: center; width: 100%; height: 100%;">
                                             <span style="display: inline-flex; align-items: center; justify-content: center; width: 100px; height: 26px; border-radius: 9999px; font-size: 10px; font-weight: 600; text-align: center; white-space: nowrap; padding-bottom: 1px;
-                                                ${task.status === 'Completed' ? 'background: #dcfce7; color: #166534; border: 1px solid #bbf7d0;' :
-                            task.status === 'In Progress' ? 'background: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe;' :
-                                task.status === 'Yet to Start' ? 'background: #fef3c7; color: #92400e; border: 1px solid #fde68a;' :
-                                    'background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0;'}">
-                                                ${task.status}
+                                                ${effectiveStatus === 'Completed' ? 'background: #dcfce7; color: #166534; border: 1px solid #bbf7d0;' :
+                                effectiveStatus === 'In Progress' ? 'background: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe;' :
+                                    effectiveStatus === 'Yet to Start' ? 'background: #fef3c7; color: #92400e; border: 1px solid #fde68a;' :
+                                        effectiveStatus === 'Overdue' ? 'background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5;' :
+                                            'background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0;'}
+                                                ${isLateCompletion ? 'border: 2px solid #f87171;' : ''}">
+                                                ${isLateCompletion ? 'Compl. (Late)' : effectiveStatus}
                                             </span>
                                         </div>
                                     </td>
@@ -508,7 +518,8 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                                             ${task.sprintLink ? `<div style="color:#3b82f6;">Sprint Link Available</div>` : ''}
                                         </td>
                                     </tr>
-        `).join('')
+        `;
+                    }).join('')
                 }
                         </tbody>
                     </table>
