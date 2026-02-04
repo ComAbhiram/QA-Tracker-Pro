@@ -230,7 +230,7 @@ export default function Schedule() {
             assigned_to2: taskData.assignedTo2,
             start_date: taskData.startDate || null,
             end_date: taskData.endDate || null,
-            actual_completion_date: taskData.actualCompletionDate || null,
+            actual_completion_date: taskData.actualCompletionDate ? new Date(taskData.actualCompletionDate).toISOString() : null,
             comments: taskData.comments,
             current_updates: taskData.currentUpdates,
             bug_count: taskData.bugCount,
