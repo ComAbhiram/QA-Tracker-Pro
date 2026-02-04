@@ -5,7 +5,7 @@ import { X, Save, Calendar, User, Briefcase, Activity, Layers, Plus } from 'luci
 import { Task } from '@/lib/types';
 import { supabase } from '@/lib/supabase';
 import Combobox from './ui/Combobox';
-import { mapHubstaffNameToQA } from '@/lib/hubstaff-name-mapping';
+import { mapHubstaffNameToQA, getHubstaffNameFromQA } from '@/lib/hubstaff-name-mapping';
 
 interface TaskModalProps {
     isOpen: boolean;
@@ -74,14 +74,20 @@ export default function TaskModal({ isOpen, onClose, task, onSave }: TaskModalPr
 
                         data.members.forEach((u: any) => {
                             const mappedId = mapHubstaffNameToQA(u.name);
-                            // Only add if not already present (deduplication by ID)
-                            // Prefer "Amrutha lakshmi" over "amrutha ms" if both exist? 
-                            // Current logic: First one wins or we can update if current label looks "better".
-                            // For now, simpler: First one wins.
-                            if (!uniqueMap.has(mappedId)) {
+                            const canonicalName = getHubstaffNameFromQA(mappedId);
+
+                            // Deduplication logic:
+                            // 1. If ID not present, add it.
+                            // 2. If ID present, but current name is the "Canonical" (preferred) name, overwrite existing.
+                            // This ensures "amrutha ms" replaces "Amrutha lakshmi" if "amrutha ms" is defined first in our map.
+
+                            const isCanonical = canonicalName && u.name === canonicalName;
+                            const existing = uniqueMap.get(mappedId);
+
+                            if (!existing || (isCanonical && existing.label !== canonicalName)) {
                                 uniqueMap.set(mappedId, {
                                     id: mappedId,
-                                    label: u.name // Keep original name for display, or mappedId? User likely knows them by Hubstaff name.
+                                    label: u.name
                                 });
                             }
                         });
