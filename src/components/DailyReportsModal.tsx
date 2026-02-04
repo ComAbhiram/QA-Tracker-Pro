@@ -644,7 +644,7 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                     <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px;">
                         <div>
                             <h1 style="color: #0ea5e9; font-size: 28px; margin-bottom: 8px; font-weight: 700;">Work Schedule</h1>
-                            <p style="color: #64748b; font-size: 16px; margin: 0;">Report Date: ${dateStr}</p>
+                            <p style="color: #64748b; font-size: 16px; margin: 0;">Schedule For: ${dateStr}</p>
                         </div>
                         <div style="text-align: right;">
                              <p style="color: #64748b; font-size: 14px; margin: 0;">Total Active Tasks</p>
