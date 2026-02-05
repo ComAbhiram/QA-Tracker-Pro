@@ -104,6 +104,21 @@ export default function Schedule() {
             }
         }
 
+        // --- FIXED LOGIC START ---
+        // If checking a FUTURE DATE relative to TODAY, and the task is NOT YET OVERDUE (today), 
+        // do NOT show it as overdue in the future view.
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        // If the checked date is in the future relative to today
+        if (checkDate > today) {
+            // If task is NOT overdue RIGHT NOW, report its normal status (or projected status)
+            if (!isTaskOverdue(task)) {
+                return { status: getEffectiveStatus(task), overdueDays: 0, baseStatus: getEffectiveStatus(task) };
+            }
+        }
+        // --- FIXED LOGIC END ---
+
         // Not completed yet (or completed in future relative to this date)
         // Check if Overdue relative to this date
         if (end && checkDate > end) {
