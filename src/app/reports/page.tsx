@@ -8,6 +8,7 @@ import { getTeamMemberByHubstaffName } from '@/lib/team-members-config';
 import { BarChart3, TrendingUp, Users, Calendar, Download, Filter, X } from 'lucide-react';
 import Combobox from '@/components/ui/Combobox';
 import TaskOverviewTable from '../project-overview/components/TaskOverviewTable';
+import TaskModal from '@/components/TaskModal';
 
 export default function Reports() {
     const [tasks, setTasks] = useState<Task[]>([]);
@@ -26,6 +27,10 @@ export default function Reports() {
         title: string;
         tasks: Task[];
     }>({ isOpen: false, title: '', tasks: [] });
+
+    // Task Edit State
+    const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
+    const [editingTask, setEditingTask] = useState<Task | null>(null);
 
     // MOVED: handleMetricClick was here at top, which is correct.
     const handleMetricClick = (type: 'total' | 'completed' | 'inProgress' | 'overdue' | 'assignee', assignee?: string, status?: string) => {
@@ -129,6 +134,73 @@ export default function Reports() {
         }
         setLoading(false);
     }
+
+    const handleEditTask = (task: Task) => {
+        setEditingTask(task);
+        setIsTaskModalOpen(true);
+    };
+
+    const saveTask = async (taskData: Partial<Task>) => {
+        if (!editingTask) return;
+
+        try {
+            const dbPayload: any = {
+                project_name: taskData.projectName,
+                sub_phase: taskData.subPhase,
+                status: taskData.status,
+                assigned_to: taskData.assignedTo,
+                assigned_to2: taskData.assignedTo2,
+                additional_assignees: taskData.additionalAssignees || [],
+                pc: taskData.pc,
+                start_date: taskData.startDate || null,
+                end_date: taskData.endDate || null,
+                actual_completion_date: taskData.actualCompletionDate ? new Date(taskData.actualCompletionDate).toISOString() : null,
+                start_time: taskData.startTime || null,
+                end_time: taskData.endTime || null,
+                bug_count: taskData.bugCount,
+                html_bugs: taskData.htmlBugs,
+                functional_bugs: taskData.functionalBugs,
+                deviation_reason: taskData.deviationReason,
+                sprint_link: taskData.sprintLink,
+                days_allotted: Number(taskData.daysAllotted) || 0,
+                time_taken: taskData.timeTaken || '00:00:00',
+                days_taken: Number(taskData.daysTaken) || 0,
+                deviation: Number(taskData.deviation) || 0,
+                activity_percentage: Number(taskData.activityPercentage) || 0,
+                comments: taskData.comments,
+                team_id: taskData.teamId,
+            };
+
+            const { data, error } = await supabase
+                .from('tasks')
+                .update(dbPayload)
+                .eq('id', editingTask.id)
+                .select()
+                .single();
+
+            if (error) throw error;
+
+            // Update local state
+            const updatedTask = mapTaskFromDB(data);
+
+            // Update main tasks list
+            setTasks(prev => prev.map(t => t.id === updatedTask.id ? updatedTask : t));
+
+            // Update filtered modal tasks if open
+            setFilteredModal(prev => ({
+                ...prev,
+                isOpen: prev.isOpen, // Keep open
+                tasks: prev.tasks.map(t => t.id === updatedTask.id ? updatedTask : t)
+            }));
+
+            setIsTaskModalOpen(false);
+            setEditingTask(null);
+            alert('Task updated successfully');
+        } catch (error) {
+            console.error('Error updating task:', error);
+            alert('Failed to update task');
+        }
+    };
 
 
 
@@ -463,14 +535,20 @@ export default function Reports() {
                         <div className="flex-1 overflow-y-auto p-6 bg-slate-50/50">
                             <TaskOverviewTable
                                 tasks={filteredModal.tasks}
-                                onEdit={(task) => {
-                                    // Optional: Implement edit handling if needed, currently read-only view mainly
-                                    console.log('Edit filtered task', task);
-                                }}
+                                onEdit={handleEditTask}
                             />
                         </div>
                     </div>
                 </div>
+            )}
+
+            {isTaskModalOpen && editingTask && (
+                <TaskModal
+                    isOpen={isTaskModalOpen}
+                    onClose={() => setIsTaskModalOpen(false)}
+                    task={editingTask}
+                    onSave={saveTask}
+                />
             )}
         </div>
     );

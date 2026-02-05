@@ -19,6 +19,7 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
     const [selectedQA, setSelectedQA] = useState<string>('');
     const [selectedQADate, setSelectedQADate] = useState(new Date().toISOString().split('T')[0]);
     const [teamName, setTeamName] = useState<string>('Team');
+    const [showHubstaffConfirm, setShowHubstaffConfirm] = useState(false);
     const [scheduleDate, setScheduleDate] = useState(() => {
         const d = new Date();
         d.setDate(d.getDate() + 1);
@@ -303,7 +304,14 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
         }
     };
 
-    const generateTodayWorkStatus = async () => {
+    const handleGenerateTodayWorkStatusClick = () => {
+        setShowHubstaffConfirm(true);
+    };
+
+    const generateTodayWorkStatus = async (includeHubstaff: boolean) => {
+        // Close confirmation modal
+        setShowHubstaffConfirm(false);
+
         setLoading(true);
         try {
             const today = new Date().toISOString().split('T')[0];
@@ -319,23 +327,26 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                 return today >= start && today <= end;
             });
 
-            // Fetch Hubstaff activity for today
+            // Fetch Hubstaff activity for today only if requested
             let hubstaffData: any = null;
             let hubstaffError: string | null = null;
-            try {
-                const hubstaffResponse = await fetch(`/api/hubstaff?date=${today}`, { cache: 'no-store' });
-                if (hubstaffResponse.ok) {
-                    hubstaffData = await hubstaffResponse.json();
-                    console.log('Today Work Status - Hubstaff Data:', hubstaffData);
-                } else {
-                    const errText = await hubstaffResponse.text();
-                    if (hubstaffResponse.status === 429) hubstaffError = "Rate limit reached. Please try again later.";
-                    else hubstaffError = `Failed to fetch data (${hubstaffResponse.status})`;
-                    console.error('Hubstaff fetch failed:', hubstaffResponse.status, errText);
+
+            if (includeHubstaff) {
+                try {
+                    const hubstaffResponse = await fetch(`/api/hubstaff?date=${today}`, { cache: 'no-store' });
+                    if (hubstaffResponse.ok) {
+                        hubstaffData = await hubstaffResponse.json();
+                        console.log('Today Work Status - Hubstaff Data:', hubstaffData);
+                    } else {
+                        const errText = await hubstaffResponse.text();
+                        if (hubstaffResponse.status === 429) hubstaffError = "Rate limit reached. Please try again later.";
+                        else hubstaffError = `Failed to fetch data (${hubstaffResponse.status})`;
+                        console.error('Hubstaff fetch failed:', hubstaffResponse.status, errText);
+                    }
+                } catch (err) {
+                    console.error('Failed to fetch Hubstaff data:', err);
+                    hubstaffError = "Network error occurred while fetching Hubstaff data.";
                 }
-            } catch (err) {
-                console.error('Failed to fetch Hubstaff data:', err);
-                hubstaffError = "Network error occurred while fetching Hubstaff data.";
             }
 
             // TEMPORARY MOCK DATA FOR VERIFICATION
@@ -698,10 +709,10 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                                             <div style="display: flex; align-items: center; justify-content: center; width: 100%; height: 100%;">
                                                 <span style="font-size: 12px; font-weight: 700;
                                                     ${effectiveStatus === 'In Progress' ? 'color: #1d4ed8;' :
-                                                    effectiveStatus === 'Yet to Start' ? 'color: #b45309;' :
-                                                    effectiveStatus === 'On Hold' ? 'color: #991b1b;' :
-                                                    effectiveStatus === 'Overdue' ? 'color: #b91c1c;' :
-                                                    'color: #475569;'}">
+                                effectiveStatus === 'Yet to Start' ? 'color: #b45309;' :
+                                    effectiveStatus === 'On Hold' ? 'color: #991b1b;' :
+                                        effectiveStatus === 'Overdue' ? 'color: #b91c1c;' :
+                                            'color: #475569;'}">
                                                     ${displayStatus}
                                                 </span>
                                             </div>
@@ -845,7 +856,7 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                         {expandedSection === 'today' && (
                             <div className="border-t border-slate-200 bg-slate-50 p-3 space-y-2">
                                 <button
-                                    onClick={generateTodayWorkStatus}
+                                    onClick={handleGenerateTodayWorkStatusClick}
                                     disabled={loading}
                                     className="w-full flex items-center gap-3 p-3 bg-white hover:bg-sky-50 border border-slate-200 hover:border-sky-300 rounded-lg transition-all text-left"
                                 >
@@ -1014,6 +1025,39 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                 </div>
 
             </div>
+
+            {/* Hubstaff Confirmation Modal */}
+            {
+                showHubstaffConfirm && (
+                    <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+                        <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-sm animate-in zoom-in-95 duration-200">
+                            <div className="text-center mb-6">
+                                <div className="mx-auto w-12 h-12 bg-sky-100 rounded-full flex items-center justify-center mb-4">
+                                    <FileText className="text-sky-600" size={24} />
+                                </div>
+                                <h3 className="text-lg font-bold text-slate-800 mb-2">Include Hubstaff Activity?</h3>
+                                <p className="text-sm text-slate-500">
+                                    Would you like to display the Hubstaff activity section in the generated image?
+                                </p>
+                            </div>
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={() => generateTodayWorkStatus(false)}
+                                    className="flex-1 px-4 py-2 bg-slate-100 text-slate-700 font-medium rounded-lg hover:bg-slate-200 transition-colors"
+                                >
+                                    No, Hide It
+                                </button>
+                                <button
+                                    onClick={() => generateTodayWorkStatus(true)}
+                                    className="flex-1 px-4 py-2 bg-sky-500 text-white font-medium rounded-lg hover:bg-sky-600 transition-colors shadow-sm"
+                                >
+                                    Yes, Show
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )
+            }
         </div >
     );
 }
