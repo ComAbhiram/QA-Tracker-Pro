@@ -70,12 +70,7 @@ export default function ProjectTable({ projects, onEdit, onDelete }: ProjectTabl
                                     <ArrowUpDown size={12} />
                                 </div>
                             </th>
-                            <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider cursor-pointer hover:bg-slate-100" onClick={() => handleSort('location')}>
-                                <div className="flex items-center gap-2">
-                                    Location
-                                    <ArrowUpDown size={12} />
-                                </div>
-                            </th>
+                            {/* Location column removed */}
                             <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider">Resources</th>
                             <th className="px-4 py-3 text-center text-xs font-bold uppercase tracking-wider cursor-pointer hover:bg-slate-100" onClick={() => handleSort('activity_percentage')}>
                                 <div className="flex items-center justify-center gap-2">
@@ -120,9 +115,7 @@ export default function ProjectTable({ projects, onEdit, onDelete }: ProjectTabl
                                     <td className="px-4 py-3 text-sm font-semibold text-slate-800">
                                         {project.project_name}
                                     </td>
-                                    <td className="px-4 py-3 text-sm text-slate-600">
-                                        {project.location || '-'}
-                                    </td>
+                                    {/* Location cell removed */}
                                     <td className="px-4 py-3 text-sm text-slate-600">
                                         <div className="max-w-[200px] truncate" title={project.resources || ''}>
                                             {project.resources || '-'}
