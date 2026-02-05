@@ -230,6 +230,38 @@ export default function TaskDetailsModal({ isOpen, onClose, task, onEdit }: Task
                             </div>
                         </div>
 
+
+                    </div>
+
+                    {/* Performance Metrics */}
+                    <div className="bg-slate-50 rounded-xl p-5 border border-slate-100 mb-6">
+                        <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                            <Activity size={12} /> Performance Metrics
+                        </label>
+                        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                            <div className="bg-white p-3 rounded-lg border border-slate-100 text-center">
+                                <div className="text-lg font-bold text-slate-700">{task.daysAllotted || 0}</div>
+                                <div className="text-[10px] text-slate-400 font-bold uppercase">Days Allotted</div>
+                            </div>
+                            <div className="bg-white p-3 rounded-lg border border-slate-100 text-center">
+                                <div className="text-lg font-bold text-slate-700">{task.timeTaken || '00:00:00'}</div>
+                                <div className="text-[10px] text-slate-400 font-bold uppercase">Time Taken</div>
+                            </div>
+                            <div className="bg-white p-3 rounded-lg border border-slate-100 text-center">
+                                <div className="text-lg font-bold text-slate-700">{task.daysTaken || 0}</div>
+                                <div className="text-[10px] text-slate-400 font-bold uppercase">Days Taken</div>
+                            </div>
+                            <div className="bg-white p-3 rounded-lg border border-slate-100 text-center">
+                                <div className={`text-lg font-bold ${(task.deviation || 0) > 0 ? 'text-red-600' : 'text-emerald-600'}`}>
+                                    {task.deviation || 0}
+                                </div>
+                                <div className="text-[10px] text-slate-400 font-bold uppercase">Deviation</div>
+                            </div>
+                            <div className="bg-white p-3 rounded-lg border border-slate-100 text-center">
+                                <div className="text-lg font-bold text-slate-700">{task.activityPercentage || 0}%</div>
+                                <div className="text-[10px] text-slate-400 font-bold uppercase">Activity</div>
+                            </div>
+                        </div>
                     </div>
 
                     {/* Updates & Comments */}

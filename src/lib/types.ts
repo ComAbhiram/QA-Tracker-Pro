@@ -27,6 +27,11 @@ export interface DBTask {
     deviation_reason: string | null;
     sprint: string | null;
     sprint_link: string | null;
+    days_allotted: number | null;
+    time_taken: string | null;
+    days_taken: number | null;
+    deviation: number | null;
+    activity_percentage: number | null;
     created_at: string;
 }
 
@@ -67,6 +72,11 @@ export interface Task {
     deviationReason: string | null;
     sprint: string | null;
     sprintLink: string | null;
+    daysAllotted: number | null;
+    timeTaken: string | null; // format 00:00:00
+    daysTaken: number | null;
+    deviation: number | null;
+    activityPercentage: number | null;
     createdAt: string;
     teamId?: string; // Multi-tenancy support
 }
@@ -109,6 +119,11 @@ export const mapTaskFromDB = (task: DBTask): Task => ({
     deviationReason: task.deviation_reason,
     sprint: task.sprint,
     sprintLink: task.sprint_link,
+    daysAllotted: task.days_allotted || 0,
+    timeTaken: task.time_taken || '00:00:00',
+    daysTaken: task.days_taken || 0,
+    deviation: task.deviation || 0,
+    activityPercentage: task.activity_percentage || 0,
     createdAt: task.created_at,
     teamId: (task as any).team_id
 });

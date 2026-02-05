@@ -173,7 +173,13 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
                 deviationReason: task.deviationReason,
                 comments: task.comments,
                 currentUpdates: task.currentUpdates,
-                sprintLink: task.sprintLink
+                currentUpdates: task.currentUpdates,
+                sprintLink: task.sprintLink,
+                daysAllotted: task.daysAllotted || 0,
+                timeTaken: task.timeTaken || '00:00:00',
+                daysTaken: task.daysTaken || 0,
+                deviation: task.deviation || 0,
+                activityPercentage: task.activityPercentage || 0
             });
 
             // Initialize dynamic assignees list
@@ -224,6 +230,27 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
                 ...prev,
                 [name]: ['bugCount', 'htmlBugs', 'functionalBugs'].includes(name) ? parseInt(value) || 0 : value
             };
+
+
+
+            // Auto-calculation logic for Time/Days/Deviation
+            if (name === 'timeTaken' || name === 'daysAllotted') {
+                const timeStr = name === 'timeTaken' ? value : (newData.timeTaken || '00:00:00');
+                const daysAllottedStr = name === 'daysAllotted' ? value : (newData.daysAllotted || 0);
+
+                // Parse time string "HH:MM:SS"
+                const [hours, minutes, seconds] = (timeStr as string).split(':').map(Number);
+                const totalHours = (hours || 0) + (minutes || 0) / 60 + (seconds || 0) / 3600;
+
+                // Calculate Days Taken (8 hours per day)
+                const daysTakenVal = parseFloat((totalHours / 8).toFixed(2));
+
+                // Calculate Deviation
+                const deviationVal = parseFloat((daysTakenVal - Number(daysAllottedStr)).toFixed(2));
+
+                newData.daysTaken = daysTakenVal;
+                newData.deviation = deviationVal;
+            }
 
             // Auto-fill actualCompletionDate when status changes to "Completed"
             if (name === 'status' && value === 'Completed' && !prev.actualCompletionDate) {
@@ -592,6 +619,70 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
                             />
                         </div>
                     </div>
+
+                    {/* EDIT MODE ONLY FIELDS: Days Allotted, Time Taken, etc. */}
+                    {task && (
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-6 border-t border-slate-100">
+                            <div className="space-y-3">
+                                <label className="text-sm font-semibold text-slate-700">Days Allotted</label>
+                                <input
+                                    type="number"
+                                    name="daysAllotted"
+                                    step="0.01"
+                                    min="0"
+                                    value={formData.daysAllotted || 0}
+                                    onChange={handleChange}
+                                    className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all font-mono text-slate-700 font-medium"
+                                />
+                            </div>
+                            <div className="space-y-3">
+                                <label className="text-sm font-semibold text-slate-700">Time Taken (HH:MM:SS)</label>
+                                <input
+                                    type="text"
+                                    name="timeTaken"
+                                    value={formData.timeTaken || '00:00:00'}
+                                    onChange={handleChange}
+                                    placeholder="00:00:00"
+                                    pattern="[0-9]{2}:[0-9]{2}:[0-9]{2}"
+                                    className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all font-mono text-slate-700 font-medium"
+                                />
+                            </div>
+
+                            <div className="space-y-3">
+                                <label className="text-sm font-semibold text-slate-700">Days Taken (Auto)</label>
+                                <input
+                                    type="number"
+                                    name="daysTaken"
+                                    readOnly
+                                    value={formData.daysTaken || 0}
+                                    className="w-full px-5 py-3 bg-slate-100 border border-slate-200 rounded-xl outline-none font-mono text-slate-600 font-medium cursor-not-allowed"
+                                />
+                            </div>
+                            <div className="space-y-3">
+                                <label className="text-sm font-semibold text-slate-700">Deviation (Auto)</label>
+                                <input
+                                    type="number"
+                                    name="deviation"
+                                    readOnly
+                                    value={formData.deviation || 0}
+                                    className={`w-full px-5 py-3 bg-slate-100 border border-slate-200 rounded-xl outline-none font-mono font-medium cursor-not-allowed ${(formData.deviation || 0) > 0 ? 'text-red-600' : 'text-emerald-600'
+                                        }`}
+                                />
+                            </div>
+                            <div className="space-y-3">
+                                <label className="text-sm font-semibold text-slate-700">Activity %</label>
+                                <input
+                                    type="number"
+                                    name="activityPercentage"
+                                    min="0"
+                                    max="100"
+                                    value={formData.activityPercentage || 0}
+                                    onChange={handleChange}
+                                    className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all font-mono text-slate-700 font-medium"
+                                />
+                            </div>
+                        </div>
+                    )}
 
                     {/* Bug Fields - QA Team Only */}
                     {isQATeam && (

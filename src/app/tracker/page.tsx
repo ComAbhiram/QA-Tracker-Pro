@@ -88,8 +88,13 @@ export default function Tracker() {
             functional_bugs: taskData.functionalBugs,
             deviation_reason: taskData.deviationReason,
             sprint_link: taskData.sprintLink,
+            days_allotted: taskData.daysAllotted || 0,
+            time_taken: taskData.timeTaken || '00:00:00',
+            days_taken: taskData.daysTaken || 0,
+            deviation: taskData.deviation || 0,
+            activity_percentage: taskData.activityPercentage || 0,
             comments: taskData.comments,
-            team_id: taskData.teamId
+            team_id: taskData.teamId,
         };
 
         if (editingTask) {
