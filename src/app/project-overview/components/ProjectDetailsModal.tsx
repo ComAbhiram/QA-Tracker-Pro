@@ -53,7 +53,8 @@ export default function ProjectDetailsModal({ isOpen, onClose, project, onSave }
                 project_name: project.project_name || '',
                 // location removed
                 pc: project.pc || '',
-                allotted_time_days: project.allotted_time_days?.toString() || '',
+                // Use calculated allotted time if manual entry is missing
+                allotted_time_days: (project.allotted_time_days ?? project.allotted_time_days_calc)?.toString() || '',
                 tl_confirmed_effort_days: project.tl_confirmed_effort_days?.toString() || '',
                 blockers: project.blockers || '',
                 expected_effort_days: project.expected_effort_days?.toString() || '',
