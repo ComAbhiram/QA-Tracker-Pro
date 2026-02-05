@@ -1,6 +1,7 @@
 import { Task, isTaskOverdue, getOverdueDays } from '@/lib/types';
 import { format } from 'date-fns';
-import { Edit2, AlertCircle } from 'lucide-react';
+import { Edit2, AlertCircle, ArrowUpDown } from 'lucide-react';
+import { useState } from 'react';
 
 interface TaskOverviewTableProps {
     tasks: Task[];
@@ -8,21 +9,59 @@ interface TaskOverviewTableProps {
 }
 
 export default function TaskOverviewTable({ tasks, onEdit }: TaskOverviewTableProps) {
+    const [sortField, setSortField] = useState<string>('projectName');
+    const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+
+    const handleSort = (field: string) => {
+        if (sortField === field) {
+            setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+        } else {
+            setSortField(field);
+            setSortDirection('asc');
+        }
+    };
+
+    const sortedTasks = [...tasks].sort((a, b) => {
+        const aVal: any = a[sortField as keyof Task];
+        const bVal: any = b[sortField as keyof Task];
+
+        if (aVal === null || aVal === undefined) return 1;
+        if (bVal === null || bVal === undefined) return -1;
+
+        if (typeof aVal === 'string') {
+            return sortDirection === 'asc'
+                ? aVal.localeCompare(bVal)
+                : bVal.localeCompare(aVal);
+        }
+
+        return sortDirection === 'asc' ? aVal - bVal : bVal - aVal;
+    });
+
     return (
         <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
             <div className="overflow-x-auto">
                 <table className="w-full text-sm text-slate-600">
                     <thead className="bg-slate-50 border-b-2 border-slate-200 sticky top-0 z-10">
                         <tr>
-                            <th className="px-5 py-4 font-semibold text-slate-600 text-left border-r border-slate-100 min-w-[150px]">Project</th>
+                            <th className="px-5 py-4 font-semibold text-slate-600 text-left border-r border-slate-100 min-w-[150px] cursor-pointer hover:bg-slate-100" onClick={() => handleSort('projectName')}>
+                                <div className="flex items-center gap-2">Project <ArrowUpDown size={14} /></div>
+                            </th>
                             <th className="px-4 py-4 font-semibold text-slate-600 text-left border-r border-slate-100 min-w-[100px]">Type</th>
-                            <th className="px-4 py-4 font-semibold text-slate-600 text-left border-r border-slate-100">Priority</th>
+                            <th className="px-4 py-4 font-semibold text-slate-600 text-left border-r border-slate-100 cursor-pointer hover:bg-slate-100" onClick={() => handleSort('priority')}>
+                                <div className="flex items-center gap-2">Priority <ArrowUpDown size={14} /></div>
+                            </th>
                             <th className="px-5 py-4 font-semibold text-slate-600 text-left border-r border-slate-100">Phase</th>
                             <th className="px-4 py-4 font-semibold text-slate-600 text-left border-r border-slate-100">PC</th>
                             <th className="px-4 py-4 font-semibold text-slate-600 text-left border-r border-slate-100 min-w-[120px]">Assignees</th>
-                            <th className="px-4 py-4 font-semibold text-slate-600 text-left border-r border-slate-100">Status</th>
-                            <th className="px-4 py-4 font-semibold text-slate-600 text-left border-r border-slate-100">Start</th>
-                            <th className="px-4 py-4 font-semibold text-slate-600 text-left border-r border-slate-100">End</th>
+                            <th className="px-4 py-4 font-semibold text-slate-600 text-left border-r border-slate-100 cursor-pointer hover:bg-slate-100" onClick={() => handleSort('status')}>
+                                <div className="flex items-center gap-2">Status <ArrowUpDown size={14} /></div>
+                            </th>
+                            <th className="px-4 py-4 font-semibold text-slate-600 text-left border-r border-slate-100 cursor-pointer hover:bg-slate-100" onClick={() => handleSort('startDate')}>
+                                <div className="flex items-center gap-2">Start <ArrowUpDown size={14} /></div>
+                            </th>
+                            <th className="px-4 py-4 font-semibold text-slate-600 text-left border-r border-slate-100 cursor-pointer hover:bg-slate-100" onClick={() => handleSort('endDate')}>
+                                <div className="flex items-center gap-2">End <ArrowUpDown size={14} /></div>
+                            </th>
                             <th className="px-4 py-4 font-semibold text-slate-600 text-left border-r border-slate-100">Actual End</th>
                             <th className="px-4 py-4 font-semibold text-slate-600 text-left border-r border-slate-100">Time Taken</th>
                             <th className="px-4 py-4 font-semibold text-slate-600 text-left border-r border-slate-100">Activity %</th>
@@ -33,7 +72,7 @@ export default function TaskOverviewTable({ tasks, onEdit }: TaskOverviewTablePr
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
-                        {tasks.map((task, index) => (
+                        {sortedTasks.map((task, index) => (
                             <tr key={task.id} className={`hover:bg-slate-50/50 transition-all ${index % 2 === 0 ? 'bg-white' : 'bg-slate-50/30'}`}>
                                 <td className="px-5 py-4 font-semibold text-slate-800 border-r border-slate-50">
                                     <div className="truncate max-w-[200px]" title={task.projectName}>{task.projectName}</div>
@@ -42,9 +81,9 @@ export default function TaskOverviewTable({ tasks, onEdit }: TaskOverviewTablePr
                                 <td className="px-4 py-4 text-slate-600 border-r border-slate-50">
                                     {task.priority && (
                                         <span className={`px-2 py-1 rounded text-xs font-bold ${task.priority === 'Urgent' ? 'bg-red-100 text-red-700' :
-                                                task.priority === 'High' ? 'bg-orange-100 text-orange-700' :
-                                                    task.priority === 'Medium' ? 'bg-yellow-100 text-yellow-700' :
-                                                        'bg-green-100 text-green-700'
+                                            task.priority === 'High' ? 'bg-orange-100 text-orange-700' :
+                                                task.priority === 'Medium' ? 'bg-yellow-100 text-yellow-700' :
+                                                    'bg-green-100 text-green-700'
                                             }`}>
                                             {task.priority}
                                         </span>
@@ -74,9 +113,9 @@ export default function TaskOverviewTable({ tasks, onEdit }: TaskOverviewTablePr
                                 <td className="px-4 py-4 border-r border-slate-50">
                                     <div className="flex flex-col gap-1">
                                         <span className={`inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold w-fit border ${task.status === 'Completed' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' :
-                                                task.status === 'In Progress' ? 'bg-blue-50 text-blue-700 border-blue-100' :
-                                                    task.status === 'Overdue' ? 'bg-red-50 text-red-700 border-red-100' :
-                                                        'bg-slate-50 text-slate-600 border-slate-100'
+                                            task.status === 'In Progress' ? 'bg-blue-50 text-blue-700 border-blue-100' :
+                                                task.status === 'Overdue' ? 'bg-red-50 text-red-700 border-red-100' :
+                                                    'bg-slate-50 text-slate-600 border-slate-100'
                                             }`}>
                                             {task.status}
                                         </span>

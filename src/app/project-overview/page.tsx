@@ -62,6 +62,72 @@ export default function ProjectOverviewPage() {
     const [selectedTask, setSelectedTask] = useState<Task | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
 
+    // Filter State
+    const [filterStartDate, setFilterStartDate] = useState('');
+    const [filterEndDate, setFilterEndDate] = useState('');
+    const [filterQA, setFilterQA] = useState('');
+
+    // Derived State: Unique QAs for Filter Dropdown
+    const uniqueQAs = Array.from(new Set(
+        tasks.flatMap(t => [t.assignedTo, t.assignedTo2, ...(t.additionalAssignees || [])].filter(Boolean) as string[])
+    )).sort();
+
+    // Filtering Logic
+    const filteredProjects = projects.filter(p => {
+        // Search
+        const matchesSearch = p.project_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (p.resources && p.resources.toLowerCase().includes(searchTerm.toLowerCase()));
+
+        // Date Range (using started_date or created_at)
+        let matchesDate = true;
+        const projectDate = p.started_date || p.created_at;
+        if (filterStartDate) matchesDate = matchesDate && projectDate >= filterStartDate;
+        if (filterEndDate) matchesDate = matchesDate && projectDate <= filterEndDate;
+
+        // QA Filter (using resources string)
+        let matchesQA = true;
+        if (filterQA) {
+            matchesQA = (p.resources || '').includes(filterQA);
+        }
+
+        return matchesSearch && matchesDate && matchesQA;
+    });
+
+    const filteredTasks = tasks.filter(t => {
+        // Search
+        const matchesSearch = t.projectName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (t.assignedTo && t.assignedTo.toLowerCase().includes(searchTerm.toLowerCase()));
+
+        // Date Range (using startDate and endDate overlap)
+        let matchesDate = true;
+        if (filterStartDate && filterEndDate) {
+            // Check for overlap: (StartA <= EndB) and (EndA >= StartB)
+            const filterStart = new Date(filterStartDate);
+            const filterEnd = new Date(filterEndDate);
+            const taskStart = t.startDate ? new Date(t.startDate) : null;
+            const taskEnd = t.endDate ? new Date(t.endDate) : null;
+
+            if (taskStart && taskEnd) {
+                matchesDate = taskStart <= filterEnd && taskEnd >= filterStart;
+            }
+        } else if (filterStartDate) {
+            const taskEnd = t.endDate ? new Date(t.endDate) : null;
+            matchesDate = taskEnd ? taskEnd >= new Date(filterStartDate) : true;
+        } else if (filterEndDate) {
+            const taskStart = t.startDate ? new Date(t.startDate) : null;
+            matchesDate = taskStart ? taskStart <= new Date(filterEndDate) : true;
+        }
+
+        // QA Filter
+        let matchesQA = true;
+        if (filterQA) {
+            const assignees = [t.assignedTo, t.assignedTo2, ...(t.additionalAssignees || [])];
+            matchesQA = assignees.includes(filterQA);
+        }
+
+        return matchesSearch && matchesDate && matchesQA;
+    });
+
     useEffect(() => {
         fetchData();
     }, []);
@@ -199,7 +265,7 @@ export default function ProjectOverviewPage() {
             <div className="max-w-[1920px] mx-auto">
                 {/* Header */}
                 <div className="mb-8">
-                    <div className="flex items-center justify-between mb-6">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
                         <div>
                             <h1 className="text-4xl font-bold text-slate-800 mb-2">
                                 Project Overview
@@ -210,7 +276,7 @@ export default function ProjectOverviewPage() {
                         </div>
                         <div className="flex items-center gap-3">
                             <button
-                                onClick={fetchData} // This matches the 'fetchData' I'll define below properly
+                                onClick={fetchData}
                                 className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
                             >
                                 <RefreshCw size={18} />
@@ -226,6 +292,50 @@ export default function ProjectOverviewPage() {
                                 </button>
                             )}
                         </div>
+                    </div>
+
+                    {/* Filters Bar */}
+                    <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-6 flex flex-wrap items-center gap-4">
+                        <div className="flex items-center gap-2">
+                            <label className="text-sm font-semibold text-slate-700">From:</label>
+                            <input
+                                type="date"
+                                value={filterStartDate}
+                                onChange={(e) => setFilterStartDate(e.target.value)}
+                                className="px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                            />
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <label className="text-sm font-semibold text-slate-700">To:</label>
+                            <input
+                                type="date"
+                                value={filterEndDate}
+                                onChange={(e) => setFilterEndDate(e.target.value)}
+                                className="px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                            />
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <label className="text-sm font-semibold text-slate-700">QA:</label>
+                            <select
+                                value={filterQA}
+                                onChange={(e) => setFilterQA(e.target.value)}
+                                className="px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white min-w-[150px]"
+                            >
+                                <option value="">All QAs</option>
+                                {uniqueQAs.map(qa => (
+                                    <option key={qa} value={qa}>{qa}</option>
+                                ))}
+                            </select>
+                        </div>
+
+                        {(filterStartDate || filterEndDate || filterQA) && (
+                            <button
+                                onClick={() => { setFilterStartDate(''); setFilterEndDate(''); setFilterQA(''); }}
+                                className="text-sm text-red-600 hover:text-red-700 font-medium ml-auto"
+                            >
+                                Clear Filters
+                            </button>
+                        )}
                     </div>
 
                     {/* Tabs */}
@@ -281,19 +391,13 @@ export default function ProjectOverviewPage() {
                     </div>
                 ) : activeTab === 'project' ? (
                     <ProjectTable
-                        projects={projects.filter(p =>
-                            p.project_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                            (p.resources && p.resources.toLowerCase().includes(searchTerm.toLowerCase()))
-                        )}
+                        projects={filteredProjects}
                         onEdit={(p) => { setSelectedProject(p); setIsModalOpen(true); }}
                         onDelete={handleDeleteProject}
                     />
                 ) : (
                     <TaskOverviewTable
-                        tasks={tasks.filter(t =>
-                            t.projectName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                            (t.assignedTo && t.assignedTo.toLowerCase().includes(searchTerm.toLowerCase()))
-                        )}
+                        tasks={filteredTasks}
                         onEdit={(t) => { setSelectedTask(t); setIsTaskModalOpen(true); }}
                     />
                 )}
