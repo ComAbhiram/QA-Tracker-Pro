@@ -64,7 +64,8 @@ export default function ProjectDetailsModal({ isOpen, onClose, project, onSave }
                 fixing_text: project.fixing_text || '',
                 live_text: project.live_text || '',
                 budget_text: project.budget_text || '',
-                started_date: project.started_date || '',
+                // Use created_at as fallback for started_date
+                started_date: project.started_date || (project as any).created_at?.split('T')[0] || '',
                 project_type: project.project_type || '',
                 category: project.category || ''
             });
@@ -154,7 +155,6 @@ export default function ProjectDetailsModal({ isOpen, onClose, project, onSave }
                                 value={formData.project_name}
                                 onChange={(e) => setFormData({ ...formData, project_name: e.target.value })}
                                 required
-                                disabled={!!project}
                                 className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500"
                                 placeholder="Enter project name"
                             />
