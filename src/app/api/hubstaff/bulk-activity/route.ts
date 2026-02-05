@@ -171,8 +171,9 @@ export async function GET(request: NextRequest) {
         const chunksOf30Days: { start: string, stop: string }[] = [];
         let currentEnd = new Date();
         const TOTAL_HISTORY_DAYS = 730; // 2 years as requested
-        const DAYS_PER_CHUNK = 30;
+        const DAYS_PER_CHUNK = 7; // API limit is 7 days for activities, 31 for daily. Using 7 to be safe and uniform.
 
+        // Generate chunks ensuring we don't exceed the limit
         for (let i = 0; i < Math.ceil(TOTAL_HISTORY_DAYS / DAYS_PER_CHUNK); i++) {
             const start = new Date(currentEnd.getTime());
             start.setDate(start.getDate() - (DAYS_PER_CHUNK - 1));
@@ -185,6 +186,7 @@ export async function GET(request: NextRequest) {
             // Move to the day before this chunk's start
             currentEnd = new Date(start.getTime() - 24 * 60 * 60 * 1000);
         }
+        addLog(`Generated ${chunksOf30Days.length} date chunks of ${DAYS_PER_CHUNK} days.`);
 
         const PROJECT_CHUNK_SIZE = 40;
         for (const dateChunk of chunksOf30Days) {

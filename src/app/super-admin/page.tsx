@@ -7,7 +7,7 @@ import { Building2, MapPin, RefreshCw, ArrowRightLeft, Users } from 'lucide-reac
 interface ProjectWithLocation {
     id: string;
     project_name: string;
-    location: string | null;
+    team_id: string | null;
     pc: string | null;
     allotted_time_days: number | null;
     tl_confirmed_effort_days: number | null;
@@ -46,10 +46,30 @@ export default function SuperAdminPage() {
     const [hubstaffDataCache, setHubstaffDataCache] = useState<Record<string, HubstaffData>>({});
     const [loading, setLoading] = useState(true);
     const [hsFetchProgress, setHsFetchProgress] = useState({ loaded: 0, total: 0 });
+    const [teams, setTeams] = useState<any[]>([]);
 
     useEffect(() => {
         fetchAllProjects();
+        fetchTeams();
     }, []);
+
+    const fetchTeams = async () => {
+        try {
+            const res = await fetch('/api/teams');
+            const data = await res.json();
+            if (data.teams) setTeams(data.teams);
+        } catch (e) {
+            console.error("Failed to fetch teams", e);
+        }
+    };
+
+    const getTeamId = (name: string) => teams.find(t => t.name.toLowerCase() === name.toLowerCase())?.id;
+    const getTeamName = (id: string | null) => {
+        if (!id) return '';
+        const t = teams.find(t => t.id === id);
+        // Map any legacy names if needed, but primarily relying on Dubai/Cochin being created
+        return t ? t.name : '';
+    };
 
     const fetchAllProjects = async () => {
         setLoading(true);
@@ -141,9 +161,19 @@ export default function SuperAdminPage() {
         }
     };
 
+    const handleMoveProject = async (projectId: string, targetLocation: 'Dubai' | 'Cochin') => {
+        const targetId = getTeamId(targetLocation);
+        if (!targetId) {
+            alert(`Team '${targetLocation}' not found. Please ensure it exists in Manage Teams.`);
+            return;
+        }
+        await handleUpdateField(projectId, 'team_id', targetId);
+    };
+
     const filteredProjects = projects.filter(project => {
         if (activeTab === 'All') return true;
-        return project.location === activeTab;
+        const tId = getTeamId(activeTab);
+        return project.team_id === tId;
     });
 
     const calculateTotals = (projectsList: ProjectWithLocation[]) => {
@@ -496,11 +526,26 @@ export default function SuperAdminPage() {
                                                 <td className="px-2 py-3">
                                                     <div className="flex items-center justify-center gap-2">
                                                         <button
-                                                            onClick={() => handleUpdateField(project.id, 'location', project.location === 'Dubai' ? 'Cochin' : 'Dubai')}
-                                                            className="p-1 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded transition-all"
-                                                            title={`Move to ${project.location === 'Dubai' ? 'Cochin' : 'Dubai'}`}
+                                                            onClick={() => handleMoveProject(project.id, 'Cochin')}
+                                                            className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold transition-all border ${getTeamName(project.team_id) === 'Cochin'
+                                                                ? 'bg-indigo-600 text-white border-indigo-600 cursor-default'
+                                                                : 'bg-white text-slate-500 border-slate-300 hover:border-indigo-500 hover:text-indigo-600 shadow-sm'
+                                                                }`}
+                                                            title="Move to Cochin"
+                                                            disabled={getTeamName(project.team_id) === 'Cochin'}
                                                         >
-                                                            <ArrowRightLeft size={14} />
+                                                            C
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleMoveProject(project.id, 'Dubai')}
+                                                            className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold transition-all border ${getTeamName(project.team_id) === 'Dubai'
+                                                                ? 'bg-indigo-600 text-white border-indigo-600 cursor-default'
+                                                                : 'bg-white text-slate-500 border-slate-300 hover:border-indigo-500 hover:text-indigo-600 shadow-sm'
+                                                                }`}
+                                                            title="Move to Dubai"
+                                                            disabled={getTeamName(project.team_id) === 'Dubai'}
+                                                        >
+                                                            D
                                                         </button>
                                                     </div>
                                                 </td>
