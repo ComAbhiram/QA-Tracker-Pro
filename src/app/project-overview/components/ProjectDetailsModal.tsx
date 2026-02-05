@@ -23,6 +23,7 @@ interface ProjectDetailsModalProps {
         started_date: string | null;
         project_type: string | null;
         category: string | null;
+        allotted_time_days_calc?: number;
     } | null;
     onSave: (projectData: any) => Promise<void>;
 }
