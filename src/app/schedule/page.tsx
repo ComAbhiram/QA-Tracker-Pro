@@ -7,7 +7,7 @@ import { supabase } from '@/lib/supabase';
 import { mapTaskFromDB, Task, isTaskOverdue, getOverdueDays } from '@/lib/types';
 import { getEffectiveStatus } from '@/utils/taskUtils';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, isToday, isWeekend, addMonths, subMonths, addDays, subDays } from 'date-fns';
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, List, Clock, User, AlertCircle } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, List, Clock, User, AlertCircle, Plus } from 'lucide-react';
 import TaskModal from '@/components/TaskModal';
 
 export default function Schedule() {
@@ -231,8 +231,13 @@ export default function Schedule() {
         setIsTaskModalOpen(true);
     };
 
+    const handleAddTask = () => {
+        setEditingTask(null);
+        setIsTaskModalOpen(true);
+    };
+
     const saveTask = async (taskData: Partial<Task>) => {
-        if (!editingTask) return;
+        // if (!editingTask) return; // Removed to allow creation
 
         const payloadACD = taskData.actualCompletionDate ? new Date(taskData.actualCompletionDate).toISOString() : null;
 
@@ -262,16 +267,32 @@ export default function Schedule() {
             activity_percentage: Number(taskData.activityPercentage) || 0
         };
 
-        const { error } = await supabase
-            .from('tasks')
-            .update(dbPayload)
-            .eq('id', editingTask.id);
+        if (editingTask) {
+            // UPDATE existing task
+            const { error } = await supabase
+                .from('tasks')
+                .update(dbPayload)
+                .eq('id', editingTask.id);
 
-        if (error) {
-            console.error('Error updating task:', error);
-            alert(`Failed to save task: ${error.message}`);
-            return;
+            if (error) {
+                console.error('Error updating task:', error);
+                alert(`Failed to save task: ${error.message}`);
+                return;
+            }
+        } else {
+            // CREATE new task
+            const { error } = await supabase
+                .from('tasks')
+                .insert([dbPayload]);
+
+            if (error) {
+                console.error('Error creating task:', error);
+                alert(`Failed to create task: ${error.message}`);
+                return;
+            }
         }
+
+
 
         await fetchTasks();
         setIsTaskModalOpen(false);
@@ -301,6 +322,13 @@ export default function Schedule() {
                     <h1 className="text-3xl font-bold text-slate-800">Work Schedule</h1>
                     <p className="text-slate-500">Manage project timelines and daily tasks</p>
                 </div>
+
+                <button
+                    onClick={handleAddTask}
+                    className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-colors shadow-sm cursor-pointer"
+                >
+                    <Plus size={18} /> Add Task
+                </button>
 
                 <div className="flex flex-wrap items-center gap-4">
                     {/* View Toggle */}
