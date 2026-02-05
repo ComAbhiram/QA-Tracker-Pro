@@ -200,7 +200,21 @@ export default function ProjectOverviewPage() {
             const data = await response.json();
 
             if (data.projects) {
-                setProjects(data.projects);
+                // Client-side deduplication
+                const uniqueProjects: ProjectOverview[] = [];
+                const seen = new Set<string>();
+
+                data.projects.forEach((p: ProjectOverview) => {
+                    // Use a composite key of trimmed name + team_id (or just name if team_id is same for all)
+                    // Since this is the Overview page, team_id might vary if Super Admin.
+                    const key = `${p.project_name.trim().toLowerCase()}-${p.team_id}`;
+                    if (!seen.has(key)) {
+                        seen.add(key);
+                        uniqueProjects.push(p);
+                    }
+                });
+
+                setProjects(uniqueProjects);
             }
             if (data.tasks) {
                 setTasks(data.tasks.map(mapTaskFromDB));
