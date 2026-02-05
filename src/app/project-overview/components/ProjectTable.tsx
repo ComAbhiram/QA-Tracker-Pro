@@ -120,7 +120,7 @@ export default function ProjectTable({ projects, onEdit, onDelete }: ProjectTabl
 
                             return (
                                 <tr
-                                    key={project.id}
+                                    key={`${project.id}-${index}`}
                                     className={`hover:bg-slate-50 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-slate-50/30'}`}
                                 >
                                     <td className="px-4 py-3 text-sm font-semibold text-slate-800 border border-slate-400">

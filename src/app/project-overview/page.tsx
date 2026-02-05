@@ -81,9 +81,12 @@ export default function ProjectOverviewPage() {
 
     // Filtering Logic
     const filteredProjects = projects.filter(p => {
+        if (!p) return false;
         // Search
-        const matchesSearch = p.project_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            (p.resources && p.resources.toLowerCase().includes(searchTerm.toLowerCase()));
+        const name = p.project_name || '';
+        const resources = p.resources || '';
+        const matchesSearch = name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            resources.toLowerCase().includes(searchTerm.toLowerCase());
 
         // Date Range (using started_date or created_at)
         let matchesDate = true;
@@ -94,7 +97,7 @@ export default function ProjectOverviewPage() {
         // QA Filter (using resources string)
         let matchesQA = true;
         if (filterQA) {
-            matchesQA = (p.resources || '').includes(filterQA);
+            matchesQA = resources.includes(filterQA);
         }
 
         return matchesSearch && matchesDate && matchesQA;

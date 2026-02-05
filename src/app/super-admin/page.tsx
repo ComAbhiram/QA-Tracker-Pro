@@ -438,7 +438,7 @@ export default function SuperAdminPage() {
 
                                         return (
                                             <tr
-                                                key={project.id}
+                                                key={`${project.id}-${index}`}
                                                 className={`border-b border-slate-100 hover:bg-slate-50 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-slate-50/30'}`}
                                             >
                                                 <td className="px-2 py-3 font-semibold text-slate-800 border-r border-slate-100">

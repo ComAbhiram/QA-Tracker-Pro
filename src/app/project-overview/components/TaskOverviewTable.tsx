@@ -88,7 +88,7 @@ export default function TaskOverviewTable({ tasks, onEdit }: TaskOverviewTablePr
                     </thead>
                     <tbody className="divide-y divide-slate-100">
                         {currentTasks.map((task, index) => (
-                            <tr key={task.id} className={`hover:bg-slate-50/50 transition-all ${index % 2 === 0 ? 'bg-white' : 'bg-slate-50/30'}`}>
+                            <tr key={`${task.id}-${index}`} className={`hover:bg-slate-50/50 transition-all ${index % 2 === 0 ? 'bg-white' : 'bg-slate-50/30'}`}>
                                 <td className="px-5 py-4 font-semibold text-slate-800 border border-slate-400">
                                     <div className="truncate max-w-[200px]" title={task.projectName}>{task.projectName}</div>
                                 </td>
