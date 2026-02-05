@@ -20,6 +20,57 @@ export default function Reports() {
     const [selectedQA, setSelectedQA] = useState('');
     const [selectedProject, setSelectedProject] = useState('');
 
+    // Modal State
+    const [filteredModal, setFilteredModal] = useState<{
+        isOpen: boolean;
+        title: string;
+        tasks: Task[];
+    }>({ isOpen: false, title: '', tasks: [] });
+
+    const handleMetricClick = (type: 'total' | 'completed' | 'inProgress' | 'overdue' | 'assignee', assignee?: string, status?: string) => {
+        let tasksToShow = [...filteredTasks];
+        let title = '';
+
+        if (type === 'total') {
+            title = 'All Tasks';
+        } else if (type === 'completed') {
+            tasksToShow = tasksToShow.filter(t => t.status === 'Completed');
+            title = 'Completed Tasks';
+        } else if (type === 'inProgress') {
+            tasksToShow = tasksToShow.filter(t => getEffectiveStatus(t) === 'In Progress');
+            title = 'In Progress Tasks';
+        } else if (type === 'overdue') {
+            tasksToShow = tasksToShow.filter(t => getEffectiveStatus(t) === 'Overdue');
+            title = 'Overdue Tasks';
+        } else if (type === 'assignee' && assignee) {
+            const assigneeName = assignee === 'Unassigned' ? null : assignee;
+
+            // Filter by assignee name (handling primary and secondary)
+            tasksToShow = tasksToShow.filter(t =>
+                (t.assignedTo === assigneeName) ||
+                (t.assignedTo2 === assigneeName) ||
+                (t.additionalAssignees && t.additionalAssignees.includes(assigneeName!)) ||
+                (assignee === 'Unassigned' && !t.assignedTo)
+            );
+
+            if (status === 'Completed') {
+                tasksToShow = tasksToShow.filter(t => t.status === 'Completed');
+                title = `${assignee} - Completed Tasks`;
+            } else if (status === 'In Progress') {
+                tasksToShow = tasksToShow.filter(t => getEffectiveStatus(t) === 'In Progress');
+                title = `${assignee} - In Progress Tasks`;
+            } else {
+                title = `${assignee} - All Tasks`;
+            }
+        }
+
+        setFilteredModal({
+            isOpen: true,
+            title: title + ` (${tasksToShow.length})`,
+            tasks: tasksToShow
+        });
+    };
+
     useEffect(() => {
         fetchTasks();
         fetchFilters();
@@ -191,11 +242,7 @@ export default function Reports() {
         );
     }
 
-    const [filteredModal, setFilteredModal] = useState<{
-        isOpen: boolean;
-        title: string;
-        tasks: Task[];
-    }>({ isOpen: false, title: '', tasks: [] });
+
 
     const handleMetricClick = (type: 'total' | 'completed' | 'inProgress' | 'overdue' | 'assignee', assignee?: string, status?: string) => {
         let tasksToShow = [...filteredTasks];

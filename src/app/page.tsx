@@ -217,13 +217,13 @@ export default function Home() {
 
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm text-slate-600">
-              <thead className="bg-slate-50 border-b-2 border-slate-200">
+              <thead className="bg-slate-50 border-b-2 border-slate-400">
                 <tr>
-                  <th className="px-6 py-4 font-semibold text-slate-600 border-r border-slate-100">Project</th>
-                  <th className="px-6 py-4 font-semibold text-slate-600 border-r border-slate-100">Phase</th>
-                  <th className="px-6 py-4 font-semibold text-slate-600 border-r border-slate-100">Status</th>
-                  <th className="px-6 py-4 font-semibold text-slate-600 border-r border-slate-100">Assignees</th>
-                  <th className="px-6 py-4 font-semibold text-slate-600 border-r border-slate-100">Due Date</th>
+                  <th className="px-6 py-4 font-semibold text-slate-600 border border-slate-400">Project</th>
+                  <th className="px-6 py-4 font-semibold text-slate-600 border-r border-slate-400">Phase</th>
+                  <th className="px-6 py-4 font-semibold text-slate-600 border-r border-slate-400">Status</th>
+                  <th className="px-6 py-4 font-semibold text-slate-600 border-r border-slate-400">Assignees</th>
+                  <th className="px-6 py-4 font-semibold text-slate-600 border-r border-slate-400">Due Date</th>
                   <th className="px-6 py-4 font-semibold text-slate-600 text-right">Action</th>
                 </tr>
               </thead>
@@ -234,25 +234,25 @@ export default function Home() {
                   <tr><td colSpan={6} className="p-8 text-center text-slate-400">No tasks found</td></tr>
                 ) : (
                   paginatedTasks.map(task => (
-                    <tr key={task.id} className="border-b border-slate-100 hover:bg-slate-50/50 transition-colors group">
-                      <td className="px-6 py-4 font-medium text-slate-800 border-r border-slate-50">{task.projectName}</td>
-                      <td className="px-6 py-4 border-r border-slate-50">{task.subPhase || '-'}</td>
-                      <td className="px-6 py-4 border-r border-slate-50">
+                    <tr key={task.id} className="border-b border-slate-400 hover:bg-slate-50/50 transition-colors group">
+                      <td className="px-6 py-4 font-medium text-slate-800 border-r border-slate-400">{task.projectName}</td>
+                      <td className="px-6 py-4 border-r border-slate-400">{task.subPhase || '-'}</td>
+                      <td className="px-6 py-4 border-r border-slate-400">
                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${task.status === 'Completed' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' :
                           task.status === 'In Progress' ? 'bg-sky-50 text-sky-700 border-sky-100' :
                             task.status === 'Overdue' ? 'bg-red-50 text-red-700 border-red-100' :
-                              'bg-slate-50 text-slate-600 border-slate-100'
+                              'bg-slate-50 text-slate-600 border-slate-400'
                           }`}>
                           {task.status}
                         </span>
                       </td>
-                      <td className="px-6 py-4 border-r border-slate-50">
+                      <td className="px-6 py-4 border-r border-slate-400">
                         <div className="flex -space-x-2">
                           {task.assignedTo && <div className="w-8 h-8 rounded-full bg-sky-100 border-2 border-white flex items-center justify-center text-xs font-bold text-sky-600 shadow-sm" title={task.assignedTo}>{task.assignedTo.charAt(0)}</div>}
                           {task.assignedTo2 && <div className="w-8 h-8 rounded-full bg-indigo-100 border-2 border-white flex items-center justify-center text-xs font-bold text-indigo-600 shadow-sm" title={task.assignedTo2}>{task.assignedTo2.charAt(0)}</div>}
                         </div>
                       </td>
-                      <td className="px-6 py-4 border-r border-slate-50">
+                      <td className="px-6 py-4 border-r border-slate-400">
                         {task.endDate ? new Date(task.endDate).toLocaleDateString() : '-'}
                       </td>
                       <td className="px-6 py-4 text-right">
