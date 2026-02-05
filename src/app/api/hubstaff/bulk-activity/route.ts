@@ -171,7 +171,7 @@ export async function GET(request: NextRequest) {
         const chunksOf30Days: { start: string, stop: string }[] = [];
         let currentEnd = new Date();
         const TOTAL_HISTORY_DAYS = 730; // 2 years as requested
-        const DAYS_PER_CHUNK = 7; // API limit is 7 days for activities, 31 for daily. Using 7 to be safe and uniform.
+        const DAYS_PER_CHUNK = 30; // Increased to 30 as /activities/daily supports up to 31 days
 
         // Generate chunks ensuring we don't exceed the limit
         for (let i = 0; i < Math.ceil(TOTAL_HISTORY_DAYS / DAYS_PER_CHUNK); i++) {
@@ -188,30 +188,73 @@ export async function GET(request: NextRequest) {
         }
         addLog(`Generated ${chunksOf30Days.length} date chunks of ${DAYS_PER_CHUNK} days.`);
 
-        const PROJECT_CHUNK_SIZE = 40;
+        const PROJECT_CHUNK_SIZE = 80; // Increased to 80 to reduce total requests
+
+        // Helper for concurrency limiting
+        const pLimit = (concurrency: number) => {
+            const queue: (() => Promise<void>)[] = [];
+            let active = 0;
+            const next = (): void => {
+                if (active < concurrency && queue.length) {
+                    active++;
+                    const fn = queue.shift()!;
+                    fn().then(() => {
+                        active--;
+                        next();
+                    });
+                }
+            };
+            return (fn: () => Promise<void>) => {
+                return new Promise<void>((resolve, reject) => {
+                    const run = async () => {
+                        try {
+                            await fn();
+                            resolve();
+                        } catch (err) {
+                            reject(err);
+                        }
+                    };
+                    queue.push(run);
+                    next();
+                });
+            };
+        };
+
+        const limit = pLimit(5); // 5 concurrent requests
+
+        const fetchTasks: Promise<void>[] = [];
+
         for (const dateChunk of chunksOf30Days) {
-            addLog(`Fetching activities for date range: ${dateChunk.start} to ${dateChunk.stop}`);
             for (let i = 0; i < matchedProjectIds.length; i += PROJECT_CHUNK_SIZE) {
                 const pChunk = matchedProjectIds.slice(i, i + PROJECT_CHUNK_SIZE);
-                let pageId: string | null = null;
-                do {
-                    const pageParam: string = pageId ? `&page_start_id=${pageId}` : '';
-                    const url: string = `${HUBSTAFF_API_BASE}/organizations/${orgId}/activities/daily?project_ids=${pChunk.join(',')}&date[start]=${dateChunk.start}&date[stop]=${dateChunk.stop}${pageParam}`;
-                    const resp: Response = await fetch(url, { headers: { 'Authorization': `Bearer ${accessToken}` } });
-                    if (!resp.ok) {
-                        const errText = await resp.text();
-                        addLog(`Error fetch (${resp.status}): ${errText}`);
-                        break;
-                    }
-                    const data: any = await resp.json();
-                    const dActivities: any[] = data.daily_activities || [];
-                    allActivities.push(...dActivities);
-                    pageId = data.pagination?.next_page_start_id || null;
-                } while (pageId);
+
+                fetchTasks.push(limit(async () => {
+                    addLog(`Fetching: ${dateChunk.start} to ${dateChunk.stop} (Projects: ${pChunk.length})`);
+                    let pageId: string | null = null;
+                    do {
+                        const pageParam: string = pageId ? `&page_start_id=${pageId}` : '';
+                        const url: string = `${HUBSTAFF_API_BASE}/organizations/${orgId}/activities/daily?project_ids=${pChunk.join(',')}&date[start]=${dateChunk.start}&date[stop]=${dateChunk.stop}${pageParam}`;
+
+                        try {
+                            const resp = await fetch(url, { headers: { 'Authorization': `Bearer ${accessToken}` } });
+                            if (!resp.ok) {
+                                const errText = await resp.text();
+                                addLog(`Error fetch (${resp.status}): ${errText.substring(0, 100)}...`);
+                                break;
+                            }
+                            const data: any = await resp.json();
+                            const dActivities: any[] = data.daily_activities || [];
+                            allActivities.push(...dActivities);
+                            pageId = data.pagination?.next_page_start_id || null;
+                        } catch (err: any) {
+                            addLog(`Fetch Ex: ${err.message}`);
+                        }
+                    } while (pageId);
+                }));
             }
-            // Small delay between date chunks to avoid rate limit bursts with the larger range
-            await new Promise(r => setTimeout(r, 100));
         }
+
+        await Promise.all(fetchTasks);
         addLog(`Total daily activities fetched: ${allActivities.length}`);
 
         // 3. Aggregate
