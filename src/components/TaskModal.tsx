@@ -173,7 +173,7 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
                 deviationReason: task.deviationReason,
                 comments: task.comments,
                 currentUpdates: task.currentUpdates,
-                currentUpdates: task.currentUpdates,
+
                 sprintLink: task.sprintLink,
                 daysAllotted: task.daysAllotted || 0,
                 timeTaken: task.timeTaken || '00:00:00',
