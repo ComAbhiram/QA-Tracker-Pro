@@ -315,7 +315,7 @@ export default function ProjectOverviewPage() {
                             />
                         </div>
                         <div className="flex items-center gap-2">
-                            <label className="text-sm font-semibold text-slate-700">QA:</label>
+                            <label className="text-sm font-semibold text-slate-700">Members:</label>
                             <select
                                 value={filterQA}
                                 onChange={(e) => setFilterQA(e.target.value)}
