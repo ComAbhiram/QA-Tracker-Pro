@@ -205,9 +205,10 @@ export default function ProjectOverviewPage() {
                 const seen = new Set<string>();
 
                 data.projects.forEach((p: ProjectOverview) => {
-                    // Use a composite key of trimmed name + team_id (or just name if team_id is same for all)
-                    // Since this is the Overview page, team_id might vary if Super Admin.
-                    const key = `${p.project_name.trim().toLowerCase()}-${p.team_id}`;
+                    // Aggressive deduplication: Ignore team_id, just ensure unique project names.
+                    // This resolves issues where the same project exists in multiple teams (or null and valid team)
+                    // and causes confusion.
+                    const key = p.project_name.trim().toLowerCase();
                     if (!seen.has(key)) {
                         seen.add(key);
                         uniqueProjects.push(p);
