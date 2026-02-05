@@ -239,7 +239,12 @@ export default function Schedule() {
             html_bugs: taskData.htmlBugs,
             functional_bugs: taskData.functionalBugs,
             deviation_reason: taskData.deviationReason,
-            sprint_link: taskData.sprintLink
+            sprint_link: taskData.sprintLink,
+            days_allotted: Number(taskData.daysAllotted) || 0,
+            time_taken: taskData.timeTaken || '00:00:00',
+            days_taken: Number(taskData.daysTaken) || 0,
+            deviation: Number(taskData.deviation) || 0,
+            activity_percentage: Number(taskData.activityPercentage) || 0
         };
 
         const { error } = await supabase
