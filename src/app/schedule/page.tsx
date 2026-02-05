@@ -323,48 +323,52 @@ export default function Schedule() {
                     <p className="text-slate-500">Manage project timelines and daily tasks</p>
                 </div>
 
-                <button
-                    onClick={handleAddTask}
-                    className="btn btn-primary flex items-center gap-2"
-                >
-                    <Plus size={18} /> New Task
-                </button>
-
-                <div className="flex flex-wrap items-center gap-4">
-                    {/* View Toggle */}
-                    <div className="flex bg-slate-100 p-1 rounded-xl">
-                        <button
-                            onClick={() => setViewMode('calendar')}
-                            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${viewMode === 'calendar' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
-                        >
-                            <CalendarIcon size={16} /> Calendar
-                        </button>
-                        <button
-                            onClick={() => setViewMode('day')}
-                            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${viewMode === 'day' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
-                        >
-                            <List size={16} /> Day View
-                        </button>
-                    </div>
+                <div className="flex flex-col md:flex-row items-center gap-4">
+                    <button
+                        onClick={handleAddTask}
+                        className="btn btn-primary flex items-center gap-2"
+                    >
+                        <Plus size={18} /> New Task
+                    </button>
 
                     <div className="h-8 w-px bg-slate-200 hidden md:block"></div>
 
-                    {/* Navigation */}
-                    <div className="flex items-center gap-2">
-                        <button onClick={prevPeriod} className="p-2 hover:bg-slate-50 rounded-lg text-slate-600 border border-slate-200 hover:border-indigo-300 transition-all">
-                            <ChevronLeft size={20} />
-                        </button>
-                        <div className="min-w-[180px] text-center font-bold text-lg text-slate-800">
-                            {viewMode === 'calendar' ? format(currentDate, 'MMMM yyyy') : format(currentDate, 'EEEE, MMM d, yyyy')}
+                    <div className="flex flex-wrap items-center gap-4">
+                        {/* View Toggle */}
+                        <div className="flex bg-slate-100 p-1 rounded-xl">
+                            <button
+                                onClick={() => setViewMode('calendar')}
+                                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${viewMode === 'calendar' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                            >
+                                <CalendarIcon size={16} /> Calendar
+                            </button>
+                            <button
+                                onClick={() => setViewMode('day')}
+                                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${viewMode === 'day' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                            >
+                                <List size={16} /> Day View
+                            </button>
                         </div>
-                        <button onClick={nextPeriod} className="p-2 hover:bg-slate-50 rounded-lg text-slate-600 border border-slate-200 hover:border-indigo-300 transition-all">
-                            <ChevronRight size={20} />
+
+                        <div className="h-8 w-px bg-slate-200 hidden md:block"></div>
+
+                        {/* Navigation */}
+                        <div className="flex items-center gap-2">
+                            <button onClick={prevPeriod} className="p-2 hover:bg-slate-50 rounded-lg text-slate-600 border border-slate-200 hover:border-indigo-300 transition-all">
+                                <ChevronLeft size={20} />
+                            </button>
+                            <div className="min-w-[180px] text-center font-bold text-lg text-slate-800">
+                                {viewMode === 'calendar' ? format(currentDate, 'MMMM yyyy') : format(currentDate, 'EEEE, MMM d, yyyy')}
+                            </div>
+                            <button onClick={nextPeriod} className="p-2 hover:bg-slate-50 rounded-lg text-slate-600 border border-slate-200 hover:border-indigo-300 transition-all">
+                                <ChevronRight size={20} />
+                            </button>
+                        </div>
+
+                        <button onClick={goToToday} className="text-sm font-medium text-indigo-600 hover:bg-indigo-50 px-3 py-1.5 rounded-lg transition-colors">
+                            Today
                         </button>
                     </div>
-
-                    <button onClick={goToToday} className="text-sm font-medium text-indigo-600 hover:bg-indigo-50 px-3 py-1.5 rounded-lg transition-colors">
-                        Today
-                    </button>
                 </div>
             </header>
 
