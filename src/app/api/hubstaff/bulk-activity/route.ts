@@ -222,6 +222,33 @@ export async function GET(request: NextRequest) {
 
         const limit = pLimit(5); // 5 concurrent requests
 
+        // Helper: Sleep
+        const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+        // Helper: Fetch with Retry on 429
+        const fetchWithRetry = async (url: string, options: any, retries = 3): Promise<Response> => {
+            try {
+                const resp = await fetch(url, options);
+                if (resp.status === 429) {
+                    if (retries > 0) {
+                        const retryAfter = resp.headers.get('Retry-After');
+                        const waitTime = retryAfter ? parseInt(retryAfter, 10) * 1000 : 60000; // Default 60s
+                        addLog(`Rate Limit 429 Hit. Waiting ${waitTime / 1000}s before retry...`);
+                        await sleep(waitTime + 1000); // Add extra 1s buffer
+                        return fetchWithRetry(url, options, retries - 1);
+                    }
+                }
+                return resp;
+            } catch (err: any) {
+                if (retries > 0) {
+                    addLog(`Fetch error: ${err.message}. Retrying...`);
+                    await sleep(2000); // 2s wait on network error
+                    return fetchWithRetry(url, options, retries - 1);
+                }
+                throw err;
+            }
+        };
+
         const fetchTasks: Promise<void>[] = [];
 
         for (const dateChunk of chunksOf30Days) {
@@ -229,6 +256,8 @@ export async function GET(request: NextRequest) {
                 const pChunk = matchedProjectIds.slice(i, i + PROJECT_CHUNK_SIZE);
 
                 fetchTasks.push(limit(async () => {
+                    await sleep(Math.random() * 2000); // Random jitter delay 0-2s to avoid Thundering Herd
+
                     addLog(`Fetching: ${dateChunk.start} to ${dateChunk.stop} (Projects: ${pChunk.length})`);
                     let pageId: string | null = null;
                     do {
@@ -236,7 +265,7 @@ export async function GET(request: NextRequest) {
                         const url: string = `${HUBSTAFF_API_BASE}/organizations/${orgId}/activities/daily?project_ids=${pChunk.join(',')}&date[start]=${dateChunk.start}&date[stop]=${dateChunk.stop}${pageParam}`;
 
                         try {
-                            const resp = await fetch(url, { headers: { 'Authorization': `Bearer ${accessToken}` } });
+                            const resp = await fetchWithRetry(url, { headers: { 'Authorization': `Bearer ${accessToken}` } });
                             if (!resp.ok) {
                                 const errText = await resp.text();
                                 addLog(`Error fetch (${resp.status}): ${errText.substring(0, 100)}...`);

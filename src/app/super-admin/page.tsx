@@ -125,6 +125,8 @@ export default function SuperAdminPage() {
                     } finally {
                         setHsFetchProgress(prev => ({ ...prev, loaded: i + 1 }));
                     }
+                    // Throttle client-side requests to avoid hitting rate limits
+                    await new Promise(r => setTimeout(r, 2000));
                 }
             }
         } catch (error) {
