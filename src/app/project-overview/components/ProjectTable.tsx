@@ -20,20 +20,6 @@ interface ProjectTableProps {
         activity_percentage?: number;
         deviation_calc?: number;
     }>;
-    hubstaffDataCache: Record<string, {
-        hs_time_taken_days: number;
-        activity_percentage: number;
-        team_breakdown: {
-            design_days: number;
-            fe_dev_days: number;
-            be_dev_days: number;
-            testing_days: number;
-        };
-        member_activities: Array<{
-            user_name: string;
-            activity_percentage: number;
-        }>;
-    }>;
     onEdit: (project: any) => void;
     onDelete: (projectId: string) => void;
 }
