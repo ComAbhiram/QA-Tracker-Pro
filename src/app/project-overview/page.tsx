@@ -32,6 +32,12 @@ interface ProjectOverview {
     category: string | null;
     created_at: string;
     updated_at: string;
+    // Calculated/Optional fields
+    activity_percentage?: number;
+    hs_time_taken_days?: number;
+    allotted_time_days_calc?: number;
+    deviation_calc?: number;
+    status?: string;
 }
 
 interface HubstaffData {
