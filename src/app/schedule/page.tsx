@@ -325,9 +325,9 @@ export default function Schedule() {
 
                 <button
                     onClick={handleAddTask}
-                    className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-colors shadow-sm cursor-pointer"
+                    className="btn btn-primary flex items-center gap-2"
                 >
-                    <Plus size={18} /> Add Task
+                    <Plus size={18} /> New Task
                 </button>
 
                 <div className="flex flex-wrap items-center gap-4">
