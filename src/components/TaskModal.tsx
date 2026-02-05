@@ -228,7 +228,11 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
         setFormData(prev => {
             const newData = {
                 ...prev,
-                [name]: ['bugCount', 'htmlBugs', 'functionalBugs'].includes(name) ? parseInt(value) || 0 : value
+                [name]: ['bugCount', 'htmlBugs', 'functionalBugs', 'activityPercentage'].includes(name)
+                    ? parseInt(value) || 0
+                    : ['daysAllotted'].includes(name)
+                        ? parseFloat(value) || 0
+                        : value
             };
 
 
