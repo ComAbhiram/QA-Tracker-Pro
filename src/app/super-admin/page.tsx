@@ -96,8 +96,8 @@ export default function SuperAdminPage() {
                 // Note: We use the unique list now to avoid fetching for hidden duplicates
                 const projectNames = uniqueProjects.map((p) => p.project_name);
 
-                // Chunk project names into groups of 50 to avoid URL length limits
-                const CHUNK_SIZE = 50;
+                // Chunk project names into groups of 10 to avoid Vercel timeouts (10s limit)
+                const CHUNK_SIZE = 10;
                 const chunks = [];
                 for (let i = 0; i < projectNames.length; i += CHUNK_SIZE) {
                     chunks.push(projectNames.slice(i, i + CHUNK_SIZE));

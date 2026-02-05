@@ -170,7 +170,7 @@ export async function GET(request: NextRequest) {
         const allActivities: any[] = [];
         const chunksOf30Days: { start: string, stop: string }[] = [];
         let currentEnd = new Date();
-        const TOTAL_HISTORY_DAYS = 730; // 2 years as requested
+        const TOTAL_HISTORY_DAYS = 365; // Reduced to 1 year to prevent Vercel 10s timeouts (was 730)
         const DAYS_PER_CHUNK = 30; // Increased to 30 as /activities/daily supports up to 31 days
 
         // Generate chunks ensuring we don't exceed the limit
