@@ -168,7 +168,7 @@ export default function ProjectDetailsModal({ isOpen, onClose, project, onSave }
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div>
                             <label className="block text-sm font-semibold text-slate-700 mb-2">Project Type</label>
                             <input
@@ -187,10 +187,6 @@ export default function ProjectDetailsModal({ isOpen, onClose, project, onSave }
                                 className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500"
                             />
                         </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {/* Location field removed */}
                         <div>
                             <label className="block text-sm font-semibold text-slate-700 mb-2">PC</label>
                             <input
