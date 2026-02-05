@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { LayoutGrid, List, Plus, RefreshCw } from 'lucide-react';
+import { LayoutGrid, List, Plus, RefreshCw, Download } from 'lucide-react';
+import * as XLSX from 'xlsx';
 import ProjectTable from './components/ProjectTable';
 import TaskOverviewTable from './components/TaskOverviewTable'; // Import new table
 import ProjectDetailsModal from './components/ProjectDetailsModal';
@@ -131,6 +132,57 @@ export default function ProjectOverviewPage() {
     useEffect(() => {
         fetchData();
     }, []);
+
+    const handleExport = () => {
+        const timestamp = new Date().toISOString().split('T')[0];
+
+        if (activeTab === 'project') {
+            const dataToExport = filteredProjects.map(p => ({
+                'Project Name': p.project_name,
+                'Resources': p.resources,
+                'Activity %': `${p.activity_percentage || 0}%`,
+                'PC': p.pc,
+                'HS Time (Days)': p.hs_time_taken_days?.toFixed(2) || '0.00',
+                'Allotted Days': p.allotted_time_days_calc?.toFixed(2) || '0.00',
+                'Deviation': p.deviation_calc?.toFixed(2) || '0.00',
+                'TL Effort': p.tl_confirmed_effort_days || '',
+                'Blockers': p.blockers || '',
+                'Status': p.status || ''
+            }));
+
+            const ws = XLSX.utils.json_to_sheet(dataToExport);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Projects");
+            XLSX.writeFile(wb, `projects_overview_${timestamp}.xlsx`);
+        } else {
+            const dataToExport = filteredTasks.map(t => ({
+                'ID': t.id,
+                'Project': t.projectName,
+                'Type': t.projectType,
+                'Priority': t.priority,
+                'Phase': t.subPhase,
+                'PC': t.pc,
+                'Assignee': t.assignedTo,
+                'Secondary Assignee': t.assignedTo2,
+                'Status': t.status,
+                'Start Date': t.startDate,
+                'End Date': t.endDate,
+                'Actual End': t.actualCompletionDate,
+                'Time Taken': t.timeTaken,
+                'Activity %': t.activityPercentage,
+                'Allotted Days': t.daysAllotted,
+                'Total Bugs': t.bugCount,
+                'HTML Bugs': t.htmlBugs,
+                'Func Bugs': t.functionalBugs,
+                'Comments': t.comments
+            }));
+
+            const ws = XLSX.utils.json_to_sheet(dataToExport);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Tasks");
+            XLSX.writeFile(wb, `tasks_overview_${timestamp}.xlsx`);
+        }
+    };
 
     const fetchData = async () => {
         setLoading(true);
@@ -275,6 +327,13 @@ export default function ProjectOverviewPage() {
                             </p>
                         </div>
                         <div className="flex items-center gap-3">
+                            <button
+                                onClick={handleExport}
+                                className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors shadow-sm"
+                            >
+                                <Download size={18} />
+                                Export CSV
+                            </button>
                             <button
                                 onClick={fetchData}
                                 className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
