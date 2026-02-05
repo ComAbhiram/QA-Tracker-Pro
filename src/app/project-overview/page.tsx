@@ -321,7 +321,7 @@ export default function ProjectOverviewPage() {
                                 onChange={(e) => setFilterQA(e.target.value)}
                                 className="px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white min-w-[150px]"
                             >
-                                <option value="">All QAs</option>
+                                <option value="">All Members</option>
                                 {uniqueQAs.map(qa => (
                                     <option key={qa} value={qa}>{qa}</option>
                                 ))}
