@@ -77,55 +77,53 @@ export default function SuperAdminPage() {
             const response = await fetch('/api/project-overview');
             const data = await response.json();
             if (data.projects) {
-                if (data.projects) {
-                    // Aggressive deduplication for Super Admin view
-                    const uniqueProjects: ProjectWithLocation[] = [];
-                    const seen = new Set<string>();
+                // Aggressive deduplication for Super Admin view
+                const uniqueProjects: ProjectWithLocation[] = [];
+                const seen = new Set<string>();
 
-                    data.projects.forEach((p: ProjectWithLocation) => {
-                        // Normalize name to deduplicate across different teams
-                        const key = p.project_name.trim().toLowerCase();
-                        if (!seen.has(key)) {
-                            seen.add(key);
-                            uniqueProjects.push(p);
-                        }
-                    });
-
-                    setProjects(uniqueProjects);
-
-                    // Fetch Hubstaff data for ALL projects in one bulk call
-                    // to avoid 429 Rate Limit errors
-                    const projectNames = data.projects.map((p: ProjectWithLocation) => p.project_name);
-
-                    // Chunk project names into groups of 50 to avoid URL length limits
-                    const CHUNK_SIZE = 50;
-                    const chunks = [];
-                    for (let i = 0; i < projectNames.length; i += CHUNK_SIZE) {
-                        chunks.push(projectNames.slice(i, i + CHUNK_SIZE));
+                data.projects.forEach((p: ProjectWithLocation) => {
+                    // Normalize name: lowercase, trim, AND collapse multiple spaces
+                    const key = p.project_name.toLowerCase().replace(/\s+/g, ' ').trim();
+                    if (!seen.has(key)) {
+                        seen.add(key);
+                        uniqueProjects.push(p);
                     }
+                });
 
-                    setHsFetchProgress({ loaded: 0, total: chunks.length });
+                setProjects(uniqueProjects);
 
-                    for (let i = 0; i < chunks.length; i++) {
-                        const chunk = chunks[i];
-                        try {
-                            const bulkResponse = await fetch(
-                                `/api/hubstaff/bulk-activity?project_names=${encodeURIComponent(chunk.join(','))}`
-                            );
-                            if (bulkResponse.ok) {
-                                const bulkData = await bulkResponse.json();
-                                if (bulkData.results) {
-                                    setHubstaffDataCache(prev => ({
-                                        ...prev,
-                                        ...bulkData.results
-                                    }));
-                                }
+                // Fetch Hubstaff data for Deduplicated projects
+                // Note: We use the unique list now to avoid fetching for hidden duplicates
+                const projectNames = uniqueProjects.map((p) => p.project_name);
+
+                // Chunk project names into groups of 50 to avoid URL length limits
+                const CHUNK_SIZE = 50;
+                const chunks = [];
+                for (let i = 0; i < projectNames.length; i += CHUNK_SIZE) {
+                    chunks.push(projectNames.slice(i, i + CHUNK_SIZE));
+                }
+
+                setHsFetchProgress({ loaded: 0, total: chunks.length });
+
+                for (let i = 0; i < chunks.length; i++) {
+                    const chunk = chunks[i];
+                    try {
+                        const bulkResponse = await fetch(
+                            `/api/hubstaff/bulk-activity?project_names=${encodeURIComponent(chunk.join(','))}`
+                        );
+                        if (bulkResponse.ok) {
+                            const bulkData = await bulkResponse.json();
+                            if (bulkData.results) {
+                                setHubstaffDataCache(prev => ({
+                                    ...prev,
+                                    ...bulkData.results
+                                }));
                             }
-                        } catch (err) {
-                            console.error('Error fetching bulk Hubstaff data:', err);
-                        } finally {
-                            setHsFetchProgress(prev => ({ ...prev, loaded: i + 1 }));
                         }
+                    } catch (err) {
+                        console.error('Error fetching bulk Hubstaff data:', err);
+                    } finally {
+                        setHsFetchProgress(prev => ({ ...prev, loaded: i + 1 }));
                     }
                 }
             } catch (error) {
