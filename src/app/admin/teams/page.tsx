@@ -186,7 +186,7 @@ export default function TeamsManagement() {
                                     type="text"
                                     value={formData.teamName}
                                     onChange={e => setFormData({ ...formData, teamName: e.target.value })}
-                                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent"
+                                    className="w-full px-3 py-2 border border-slate-400 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent"
                                     placeholder="e.g., Frontend Developer"
                                     required
                                 />
@@ -199,7 +199,7 @@ export default function TeamsManagement() {
                                     type="email"
                                     value={formData.adminEmail}
                                     onChange={e => setFormData({ ...formData, adminEmail: e.target.value })}
-                                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent"
+                                    className="w-full px-3 py-2 border border-slate-400 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent"
                                     placeholder="admin@example.com"
                                     required
                                 />
@@ -212,7 +212,7 @@ export default function TeamsManagement() {
                                     type="password"
                                     value={formData.adminPassword}
                                     onChange={e => setFormData({ ...formData, adminPassword: e.target.value })}
-                                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent"
+                                    className="w-full px-3 py-2 border border-slate-400 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent"
                                     placeholder="Minimum 6 characters"
                                     minLength={6}
                                     required
@@ -226,7 +226,7 @@ export default function TeamsManagement() {
                                         setFormData({ teamName: '', adminEmail: '', adminPassword: '' });
                                         setError('');
                                     }}
-                                    className="flex-1 px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors"
+                                    className="flex-1 px-4 py-2 border border-slate-400 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors"
                                 >
                                     Cancel
                                 </button>

@@ -155,7 +155,7 @@ export default function ProjectDetailsModal({ isOpen, onClose, project, onSave }
                                 value={formData.project_name}
                                 onChange={(e) => setFormData({ ...formData, project_name: e.target.value })}
                                 required
-                                className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500"
+                                className="w-full px-4 py-3 border border-slate-400 rounded-xl focus:ring-2 focus:ring-indigo-500"
                                 placeholder="Enter project name"
                             />
                         </div>
@@ -165,7 +165,7 @@ export default function ProjectDetailsModal({ isOpen, onClose, project, onSave }
                                 type="date"
                                 value={formData.started_date}
                                 onChange={(e) => setFormData({ ...formData, started_date: e.target.value })}
-                                className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500"
+                                className="w-full px-4 py-3 border border-slate-400 rounded-xl focus:ring-2 focus:ring-indigo-500"
                             />
                         </div>
                     </div>
@@ -177,7 +177,7 @@ export default function ProjectDetailsModal({ isOpen, onClose, project, onSave }
                                 type="text"
                                 value={formData.project_type}
                                 onChange={(e) => setFormData({ ...formData, project_type: e.target.value })}
-                                className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500"
+                                className="w-full px-4 py-3 border border-slate-400 rounded-xl focus:ring-2 focus:ring-indigo-500"
                             />
                         </div>
                         <div>
@@ -186,7 +186,7 @@ export default function ProjectDetailsModal({ isOpen, onClose, project, onSave }
                                 type="text"
                                 value={formData.category}
                                 onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                                className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500"
+                                className="w-full px-4 py-3 border border-slate-400 rounded-xl focus:ring-2 focus:ring-indigo-500"
                             />
                         </div>
                         <div>
@@ -195,7 +195,7 @@ export default function ProjectDetailsModal({ isOpen, onClose, project, onSave }
                                 type="text"
                                 value={formData.pc}
                                 onChange={(e) => setFormData({ ...formData, pc: e.target.value })}
-                                className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500"
+                                className="w-full px-4 py-3 border border-slate-400 rounded-xl focus:ring-2 focus:ring-indigo-500"
                             />
                         </div>
                     </div>
@@ -209,7 +209,7 @@ export default function ProjectDetailsModal({ isOpen, onClose, project, onSave }
                                 step="0.1"
                                 value={formData.expected_effort_days}
                                 onChange={(e) => setFormData({ ...formData, expected_effort_days: e.target.value })}
-                                className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500"
+                                className="w-full px-4 py-3 border border-slate-400 rounded-xl focus:ring-2 focus:ring-indigo-500"
                             />
                         </div>
                         <div>
@@ -219,7 +219,7 @@ export default function ProjectDetailsModal({ isOpen, onClose, project, onSave }
                                 step="0.1"
                                 value={formData.allotted_time_days}
                                 onChange={(e) => setFormData({ ...formData, allotted_time_days: e.target.value })}
-                                className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500"
+                                className="w-full px-4 py-3 border border-slate-400 rounded-xl focus:ring-2 focus:ring-indigo-500"
                             />
                         </div>
                     </div>
@@ -231,7 +231,7 @@ export default function ProjectDetailsModal({ isOpen, onClose, project, onSave }
                                 type="text"
                                 value={formData.hubstaff_budget}
                                 onChange={(e) => setFormData({ ...formData, hubstaff_budget: e.target.value })}
-                                className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500"
+                                className="w-full px-4 py-3 border border-slate-400 rounded-xl focus:ring-2 focus:ring-indigo-500"
                             />
                         </div>
                         <div>
@@ -240,7 +240,7 @@ export default function ProjectDetailsModal({ isOpen, onClose, project, onSave }
                                 type="text"
                                 value={formData.budget_text}
                                 onChange={(e) => setFormData({ ...formData, budget_text: e.target.value })}
-                                className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500"
+                                className="w-full px-4 py-3 border border-slate-400 rounded-xl focus:ring-2 focus:ring-indigo-500"
                             />
                         </div>
                     </div>
@@ -252,7 +252,7 @@ export default function ProjectDetailsModal({ isOpen, onClose, project, onSave }
                                 type="number"
                                 value={formData.committed_days}
                                 onChange={(e) => setFormData({ ...formData, committed_days: e.target.value })}
-                                className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500"
+                                className="w-full px-4 py-3 border border-slate-400 rounded-xl focus:ring-2 focus:ring-indigo-500"
                             />
                         </div>
                         <div>
@@ -261,7 +261,7 @@ export default function ProjectDetailsModal({ isOpen, onClose, project, onSave }
                                 type="text"
                                 value={formData.fixing_text}
                                 onChange={(e) => setFormData({ ...formData, fixing_text: e.target.value })}
-                                className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500"
+                                className="w-full px-4 py-3 border border-slate-400 rounded-xl focus:ring-2 focus:ring-indigo-500"
                             />
                         </div>
                         <div>
@@ -270,7 +270,7 @@ export default function ProjectDetailsModal({ isOpen, onClose, project, onSave }
                                 type="text"
                                 value={formData.live_text}
                                 onChange={(e) => setFormData({ ...formData, live_text: e.target.value })}
-                                className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500"
+                                className="w-full px-4 py-3 border border-slate-400 rounded-xl focus:ring-2 focus:ring-indigo-500"
                             />
                         </div>
                     </div>
@@ -281,7 +281,7 @@ export default function ProjectDetailsModal({ isOpen, onClose, project, onSave }
                             value={formData.blockers}
                             onChange={(e) => setFormData({ ...formData, blockers: e.target.value })}
                             rows={3}
-                            className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 resize-none"
+                            className="w-full px-4 py-3 border border-slate-400 rounded-xl focus:ring-2 focus:ring-indigo-500 resize-none"
                             placeholder="Describe any blockers..."
                         />
                     </div>
@@ -292,7 +292,7 @@ export default function ProjectDetailsModal({ isOpen, onClose, project, onSave }
                     <button
                         type="button"
                         onClick={onClose}
-                        className="px-6 py-3 border border-slate-300 text-slate-700 rounded-xl hover:bg-slate-100 transition-colors font-medium"
+                        className="px-6 py-3 border border-slate-400 text-slate-700 rounded-xl hover:bg-slate-100 transition-colors font-medium"
                     >
                         Cancel
                     </button>

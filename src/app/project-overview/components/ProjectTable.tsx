@@ -77,41 +77,41 @@ export default function ProjectTable({ projects, onEdit, onDelete }: ProjectTabl
                 <table className="w-full border-collapse">
                     <thead className="bg-slate-50 text-slate-700">
                         <tr>
-                            <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider cursor-pointer hover:bg-slate-100 border border-slate-300" onClick={() => handleSort('project_name')}>
+                            <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider cursor-pointer hover:bg-slate-100 border border-slate-400" onClick={() => handleSort('project_name')}>
                                 <div className="flex items-center gap-2">
                                     Project Name
                                     <ArrowUpDown size={12} />
                                 </div>
                             </th>
-                            <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider border border-slate-300">Resources</th>
-                            <th className="px-4 py-3 text-center text-xs font-bold uppercase tracking-wider cursor-pointer hover:bg-slate-100 border border-slate-300" onClick={() => handleSort('activity_percentage')}>
+                            <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider border border-slate-400">Resources</th>
+                            <th className="px-4 py-3 text-center text-xs font-bold uppercase tracking-wider cursor-pointer hover:bg-slate-100 border border-slate-400" onClick={() => handleSort('activity_percentage')}>
                                 <div className="flex items-center justify-center gap-2">
                                     Activity %
                                     <ArrowUpDown size={12} />
                                 </div>
                             </th>
-                            <th className="px-4 py-3 text-center text-xs font-bold uppercase tracking-wider border border-slate-300">PC</th>
-                            <th className="px-4 py-3 text-center text-xs font-bold uppercase tracking-wider cursor-pointer hover:bg-slate-100 border border-slate-300" onClick={() => handleSort('hs_time_taken_days')}>
+                            <th className="px-4 py-3 text-center text-xs font-bold uppercase tracking-wider border border-slate-400">PC</th>
+                            <th className="px-4 py-3 text-center text-xs font-bold uppercase tracking-wider cursor-pointer hover:bg-slate-100 border border-slate-400" onClick={() => handleSort('hs_time_taken_days')}>
                                 <div className="flex items-center justify-center gap-2">
                                     HS Time (Days)
                                     <ArrowUpDown size={12} />
                                 </div>
                             </th>
-                            <th className="px-4 py-3 text-center text-xs font-bold uppercase tracking-wider cursor-pointer hover:bg-slate-100 border border-slate-300" onClick={() => handleSort('allotted_time_days_calc')}>
+                            <th className="px-4 py-3 text-center text-xs font-bold uppercase tracking-wider cursor-pointer hover:bg-slate-100 border border-slate-400" onClick={() => handleSort('allotted_time_days_calc')}>
                                 <div className="flex items-center justify-center gap-2">
                                     Allotted
                                     <ArrowUpDown size={12} />
                                 </div>
                             </th>
-                            <th className="px-4 py-3 text-center text-xs font-bold uppercase tracking-wider border border-slate-300">Deviation</th>
-                            <th className="px-4 py-3 text-center text-xs font-bold uppercase tracking-wider cursor-pointer hover:bg-slate-100 border border-slate-300" onClick={() => handleSort('tl_confirmed_effort_days')}>
+                            <th className="px-4 py-3 text-center text-xs font-bold uppercase tracking-wider border border-slate-400">Deviation</th>
+                            <th className="px-4 py-3 text-center text-xs font-bold uppercase tracking-wider cursor-pointer hover:bg-slate-100 border border-slate-400" onClick={() => handleSort('tl_confirmed_effort_days')}>
                                 <div className="flex items-center justify-center gap-2">
                                     TL Effort
                                     <ArrowUpDown size={12} />
                                 </div>
                             </th>
-                            <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider border border-slate-300">Blockers</th>
-                            <th className="px-4 py-3 text-center text-xs font-bold uppercase tracking-wider border border-slate-300">Actions</th>
+                            <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider border border-slate-400">Blockers</th>
+                            <th className="px-4 py-3 text-center text-xs font-bold uppercase tracking-wider border border-slate-400">Actions</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
@@ -123,29 +123,29 @@ export default function ProjectTable({ projects, onEdit, onDelete }: ProjectTabl
                                     key={project.id}
                                     className={`hover:bg-slate-50 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-slate-50/30'}`}
                                 >
-                                    <td className="px-4 py-3 text-sm font-semibold text-slate-800 border border-slate-300">
+                                    <td className="px-4 py-3 text-sm font-semibold text-slate-800 border border-slate-400">
                                         {project.project_name}
                                     </td>
-                                    <td className="px-4 py-3 text-sm text-slate-600 border border-slate-300">
+                                    <td className="px-4 py-3 text-sm text-slate-600 border border-slate-400">
                                         <div className="max-w-[200px] truncate" title={project.resources || ''}>
                                             {project.resources || '-'}
                                         </div>
                                     </td>
-                                    <td className="px-4 py-3 text-sm text-center border border-slate-300">
+                                    <td className="px-4 py-3 text-sm text-center border border-slate-400">
                                         <span className="inline-flex items-center justify-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                             {project.activity_percentage != null ? `${project.activity_percentage}%` : '-'}
                                         </span>
                                     </td>
-                                    <td className="px-4 py-3 text-sm text-center text-slate-600 border border-slate-300">
+                                    <td className="px-4 py-3 text-sm text-center text-slate-600 border border-slate-400">
                                         {project.pc || '-'}
                                     </td>
-                                    <td className="px-4 py-3 text-sm text-center font-medium text-slate-700 border border-slate-300">
+                                    <td className="px-4 py-3 text-sm text-center font-medium text-slate-700 border border-slate-400">
                                         {project.hs_time_taken_days != null ? project.hs_time_taken_days.toFixed(2) : '0.00'}
                                     </td>
-                                    <td className="px-4 py-3 text-sm text-center font-medium text-slate-700 border border-slate-300">
+                                    <td className="px-4 py-3 text-sm text-center font-medium text-slate-700 border border-slate-400">
                                         {project.allotted_time_days_calc != null ? project.allotted_time_days_calc.toFixed(2) : '-'}
                                     </td>
-                                    <td className="px-4 py-3 text-sm text-center font-bold border border-slate-300">
+                                    <td className="px-4 py-3 text-sm text-center font-bold border border-slate-400">
                                         <span className={
                                             deviation === null || deviation === undefined ? 'text-slate-400' :
                                                 deviation > 0 ? 'text-red-600' :

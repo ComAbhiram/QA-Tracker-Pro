@@ -1,3 +1,5 @@
+'use client';
+
 import { Task, isTaskOverdue, getOverdueDays } from '@/lib/types';
 import { format } from 'date-fns';
 import { Edit2, AlertCircle, ArrowUpDown, ChevronLeft, ChevronRight } from 'lucide-react';
@@ -56,42 +58,42 @@ export default function TaskOverviewTable({ tasks, onEdit }: TaskOverviewTablePr
                 <table className="w-full text-sm text-slate-600 border-collapse">
                     <thead className="bg-slate-50 text-slate-700 sticky top-0 z-10">
                         <tr>
-                            <th className="px-5 py-4 font-semibold text-left border border-slate-300 min-w-[150px] cursor-pointer hover:bg-slate-100" onClick={() => handleSort('projectName')}>
+                            <th className="px-5 py-4 font-semibold text-left border border-slate-400 min-w-[150px] cursor-pointer hover:bg-slate-100" onClick={() => handleSort('projectName')}>
                                 <div className="flex items-center gap-2">Project <ArrowUpDown size={14} /></div>
                             </th>
-                            <th className="px-4 py-4 font-semibold text-left border border-slate-300 min-w-[100px]">Type</th>
-                            <th className="px-4 py-4 font-semibold text-left border border-slate-300 cursor-pointer hover:bg-slate-100" onClick={() => handleSort('priority')}>
+                            <th className="px-4 py-4 font-semibold text-left border border-slate-400 min-w-[100px]">Type</th>
+                            <th className="px-4 py-4 font-semibold text-left border border-slate-400 cursor-pointer hover:bg-slate-100" onClick={() => handleSort('priority')}>
                                 <div className="flex items-center gap-2">Priority <ArrowUpDown size={14} /></div>
                             </th>
-                            <th className="px-5 py-4 font-semibold text-left border border-slate-300">Phase</th>
-                            <th className="px-4 py-4 font-semibold text-left border border-slate-300">PC</th>
-                            <th className="px-4 py-4 font-semibold text-left border border-slate-300 min-w-[120px]">Assignees</th>
-                            <th className="px-4 py-4 font-semibold text-left border border-slate-300 cursor-pointer hover:bg-slate-100" onClick={() => handleSort('status')}>
+                            <th className="px-5 py-4 font-semibold text-left border border-slate-400">Phase</th>
+                            <th className="px-4 py-4 font-semibold text-left border border-slate-400">PC</th>
+                            <th className="px-4 py-4 font-semibold text-left border border-slate-400 min-w-[120px]">Assignees</th>
+                            <th className="px-4 py-4 font-semibold text-left border border-slate-400 cursor-pointer hover:bg-slate-100" onClick={() => handleSort('status')}>
                                 <div className="flex items-center gap-2">Status <ArrowUpDown size={14} /></div>
                             </th>
-                            <th className="px-4 py-4 font-semibold text-left border border-slate-300 cursor-pointer hover:bg-slate-100" onClick={() => handleSort('startDate')}>
+                            <th className="px-4 py-4 font-semibold text-left border border-slate-400 cursor-pointer hover:bg-slate-100" onClick={() => handleSort('startDate')}>
                                 <div className="flex items-center gap-2">Start <ArrowUpDown size={14} /></div>
                             </th>
-                            <th className="px-4 py-4 font-semibold text-left border border-slate-300 cursor-pointer hover:bg-slate-100" onClick={() => handleSort('endDate')}>
+                            <th className="px-4 py-4 font-semibold text-left border border-slate-400 cursor-pointer hover:bg-slate-100" onClick={() => handleSort('endDate')}>
                                 <div className="flex items-center gap-2">End <ArrowUpDown size={14} /></div>
                             </th>
-                            <th className="px-4 py-4 font-semibold text-left border border-slate-300">Actual End</th>
-                            <th className="px-4 py-4 font-semibold text-left border border-slate-300">Time Taken</th>
-                            <th className="px-4 py-4 font-semibold text-left border border-slate-300">Activity %</th>
-                            <th className="px-4 py-4 font-semibold text-center border border-slate-300">Bugs (T/H/F)</th>
-                            <th className="px-5 py-4 font-semibold text-left border border-slate-300 max-w-[200px]">Comments</th>
-                            <th className="px-4 py-4 font-semibold text-left border border-slate-300">Deviation</th>
-                            <th className="px-4 py-4 font-semibold text-left border border-slate-300">Action</th>
+                            <th className="px-4 py-4 font-semibold text-left border border-slate-400">Actual End</th>
+                            <th className="px-4 py-4 font-semibold text-left border border-slate-400">Time Taken</th>
+                            <th className="px-4 py-4 font-semibold text-left border border-slate-400">Activity %</th>
+                            <th className="px-4 py-4 font-semibold text-center border border-slate-400">Bugs (T/H/F)</th>
+                            <th className="px-5 py-4 font-semibold text-left border border-slate-400 max-w-[200px]">Comments</th>
+                            <th className="px-4 py-4 font-semibold text-left border border-slate-400">Deviation</th>
+                            <th className="px-4 py-4 font-semibold text-left border border-slate-400">Action</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
                         {currentTasks.map((task, index) => (
                             <tr key={task.id} className={`hover:bg-slate-50/50 transition-all ${index % 2 === 0 ? 'bg-white' : 'bg-slate-50/30'}`}>
-                                <td className="px-5 py-4 font-semibold text-slate-800 border border-slate-300">
+                                <td className="px-5 py-4 font-semibold text-slate-800 border border-slate-400">
                                     <div className="truncate max-w-[200px]" title={task.projectName}>{task.projectName}</div>
                                 </td>
-                                <td className="px-4 py-4 text-slate-600 border border-slate-300">{task.projectType || '-'}</td>
-                                <td className="px-4 py-4 text-slate-600 border border-slate-300">
+                                <td className="px-4 py-4 text-slate-600 border border-slate-400">{task.projectType || '-'}</td>
+                                <td className="px-4 py-4 text-slate-600 border border-slate-400">
                                     {task.priority && (
                                         <span className={`px-2 py-1 rounded text-xs font-bold ${task.priority === 'Urgent' ? 'bg-red-100 text-red-700' :
                                             task.priority === 'High' ? 'bg-orange-100 text-orange-700' :
@@ -102,9 +104,9 @@ export default function TaskOverviewTable({ tasks, onEdit }: TaskOverviewTablePr
                                         </span>
                                     )}
                                 </td>
-                                <td className="px-5 py-4 font-medium text-slate-600 border border-slate-300">{task.subPhase || '-'}</td>
-                                <td className="px-4 py-4 border border-slate-300">{task.pc || '-'}</td>
-                                <td className="px-4 py-4 border border-slate-300">
+                                <td className="px-5 py-4 font-medium text-slate-600 border border-slate-400">{task.subPhase || '-'}</td>
+                                <td className="px-4 py-4 border border-slate-400">{task.pc || '-'}</td>
+                                <td className="px-4 py-4 border border-slate-400">
                                     <div className="flex -space-x-2 overflow-hidden hover:space-x-1 transition-all">
                                         {task.assignedTo && (
                                             <div className="w-8 h-8 rounded-full bg-indigo-100 border-2 border-white flex items-center justify-center text-xs font-bold text-indigo-600 flex-shrink-0" title={`Primary: ${task.assignedTo}`}>
@@ -123,7 +125,7 @@ export default function TaskOverviewTable({ tasks, onEdit }: TaskOverviewTablePr
                                         ))}
                                     </div>
                                 </td>
-                                <td className="px-4 py-4 border border-slate-300">
+                                <td className="px-4 py-4 border border-slate-400">
                                     <div className="flex flex-col gap-1">
                                         <span className={`inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold w-fit border ${task.status === 'Completed' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' :
                                             task.status === 'In Progress' ? 'bg-blue-50 text-blue-700 border-blue-100' :
@@ -140,22 +142,22 @@ export default function TaskOverviewTable({ tasks, onEdit }: TaskOverviewTablePr
                                         )}
                                     </div>
                                 </td>
-                                <td className="px-4 py-4 text-slate-500 font-medium border border-slate-300 text-xs whitespace-nowrap">
+                                <td className="px-4 py-4 text-slate-500 font-medium border border-slate-400 text-xs whitespace-nowrap">
                                     {task.startDate ? format(new Date(task.startDate), 'MMM d') : '-'}
                                 </td>
-                                <td className="px-4 py-4 text-slate-500 font-medium border border-slate-300 text-xs whitespace-nowrap">
+                                <td className="px-4 py-4 text-slate-500 font-medium border border-slate-400 text-xs whitespace-nowrap">
                                     {task.endDate ? format(new Date(task.endDate), 'MMM d') : '-'}
                                 </td>
-                                <td className="px-4 py-4 text-slate-500 font-medium border border-slate-300 text-xs whitespace-nowrap">
+                                <td className="px-4 py-4 text-slate-500 font-medium border border-slate-400 text-xs whitespace-nowrap">
                                     {task.actualCompletionDate ? format(new Date(task.actualCompletionDate), 'MMM d') : '-'}
                                 </td>
-                                <td className="px-4 py-4 text-slate-600 font-mono text-xs border border-slate-300">
+                                <td className="px-4 py-4 text-slate-600 font-mono text-xs border border-slate-400">
                                     {task.timeTaken || '00:00:00'}
                                 </td>
-                                <td className="px-4 py-4 text-center border border-slate-300">
+                                <td className="px-4 py-4 text-center border border-slate-400">
                                     <span className="font-bold text-slate-700">{task.activityPercentage || 0}%</span>
                                 </td>
-                                <td className="px-4 py-4 text-center border border-slate-300">
+                                <td className="px-4 py-4 text-center border border-slate-400">
                                     <div className="text-xs font-mono">
                                         <span className="text-slate-900 font-bold" title="Total">{task.bugCount}</span>
                                         <span className="text-slate-400 mx-1">/</span>
@@ -164,13 +166,13 @@ export default function TaskOverviewTable({ tasks, onEdit }: TaskOverviewTablePr
                                         <span className="text-red-600" title="Functional">{task.functionalBugs}</span>
                                     </div>
                                 </td>
-                                <td className="px-5 py-4 text-sm text-slate-500 max-w-[200px] truncate border border-slate-300" title={task.comments || ''}>
+                                <td className="px-5 py-4 text-sm text-slate-500 max-w-[200px] truncate border border-slate-400" title={task.comments || ''}>
                                     {task.comments || '-'}
                                 </td>
-                                <td className="px-4 py-4 text-sm text-slate-500 max-w-xs truncate border border-slate-300" title={task.deviationReason || ''}>
+                                <td className="px-4 py-4 text-sm text-slate-500 max-w-xs truncate border border-slate-400" title={task.deviationReason || ''}>
                                     {task.deviationReason || '-'}
                                 </td>
-                                <td className="px-4 py-4 border border-slate-300">
+                                <td className="px-4 py-4 border border-slate-400">
                                     <button
                                         onClick={() => onEdit(task)}
                                         className="text-slate-400 hover:text-sky-600 hover:bg-sky-50 p-2 rounded-lg transition-all"
