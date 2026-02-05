@@ -6,12 +6,13 @@ import { Task, mapTaskFromDB } from '@/lib/types';
 import { getEffectiveStatus } from '@/utils/taskUtils';
 import { getTeamMemberByHubstaffName } from '@/lib/team-members-config';
 import { BarChart3, TrendingUp, Users, Calendar, Download, Filter } from 'lucide-react';
+import Combobox from '@/components/ui/Combobox';
 
 export default function Reports() {
     const [tasks, setTasks] = useState<Task[]>([]);
     const [loading, setLoading] = useState(true);
     const [teamMembers, setTeamMembers] = useState<{ id: number; name: string }[]>([]);
-    const [projects, setProjects] = useState<string[]>([]);
+    const [projects, setProjects] = useState<{ id: string; label: string }[]>([]);
 
     // Filters
     const [dateRange, setDateRange] = useState({ start: '', end: '' });
@@ -60,7 +61,7 @@ export default function Reports() {
         // Fetch projects
         const { data } = await supabase.from('projects').select('name').eq('status', 'active');
         if (data) {
-            setProjects(data.map(p => p.name));
+            setProjects(data.map(p => ({ id: p.name, label: p.name })));
         }
     }
 
@@ -242,16 +243,14 @@ export default function Reports() {
                     </div>
                     <div className="flex-1 w-full">
                         <label className="text-sm font-medium text-slate-600 mb-1 block">Project</label>
-                        <select
+                        <Combobox
+                            options={[{ id: '', label: 'All Projects' }, ...projects]}
                             value={selectedProject}
-                            onChange={e => setSelectedProject(e.target.value)}
-                            className="w-full px-3 py-2 border rounded-lg text-sm"
-                        >
-                            <option value="">All Projects</option>
-                            {projects.map(p => (
-                                <option key={p} value={p}>{p}</option>
-                            ))}
-                        </select>
+                            onChange={(val) => setSelectedProject(val ? String(val) : '')}
+                            placeholder="Select Project..."
+                            searchPlaceholder="Search projects..."
+                            emptyMessage="No projects found."
+                        />
                     </div>
                     <button
                         onClick={() => { setDateRange({ start: '', end: '' }); setSelectedQA(''); setSelectedProject(''); }}
