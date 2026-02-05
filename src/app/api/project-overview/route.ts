@@ -56,11 +56,11 @@ export async function GET(request: NextRequest) {
             return NextResponse.json({ error: 'Failed to fetch projects' }, { status: 500 });
         }
 
-        // 2. Fetch All Tasks for Aggregation
-        // We fetch minimal fields needed for calculation to optimize performance
+        // 2. Fetch All Tasks for Aggregation AND Grid View
+        // We fetch all fields because we return this list to the frontend for the Task Overview tab
         let tasksQuery = supabase
             .from('tasks')
-            .select('project_name, assigned_to, assigned_to2, additional_assignees, activity_percentage, time_taken, days_allotted, status');
+            .select('*');
 
         if (profile.role !== 'super_admin') {
             // Assuming tasks also have team_id. If not, we might be over-fetching, but usually they do or RLS handles it.
