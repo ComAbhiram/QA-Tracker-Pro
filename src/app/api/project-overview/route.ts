@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 
-// GET: Fetch all project overviews for the user's team
+// GET: Fetch all project overviews with aggregated task stats
 export async function GET(request: NextRequest) {
     try {
         const cookieStore = await cookies();
@@ -40,24 +40,111 @@ export async function GET(request: NextRequest) {
             return NextResponse.json({ error: 'User team not found' }, { status: 404 });
         }
 
-        // Fetch project overviews with stats
-        // Super admins see all projects, regular users see only their team's projects
-        let query = supabase
-            .from('project_overview_with_stats')
+        // 1. Fetch Project Manual Overviews
+        let projectsQuery = supabase
+            .from('project_overview')
             .select('*');
 
         if (profile.role !== 'super_admin') {
-            query = query.eq('team_id', profile.team_id);
+            projectsQuery = projectsQuery.eq('team_id', profile.team_id);
         }
 
-        const { data: projects, error } = await query.order('created_at', { ascending: false });
+        const { data: projects, error: projectsError } = await projectsQuery.order('created_at', { ascending: false });
 
-        if (error) {
-            console.error('Error fetching project overviews:', error);
+        if (projectsError) {
+            console.error('Error fetching project overviews:', projectsError);
             return NextResponse.json({ error: 'Failed to fetch projects' }, { status: 500 });
         }
 
-        return NextResponse.json({ projects: projects || [] });
+        // 2. Fetch All Tasks for Aggregation
+        // We fetch minimal fields needed for calculation to optimize performance
+        let tasksQuery = supabase
+            .from('tasks')
+            .select('project_name, assigned_to, assigned_to2, additional_assignees, activity_percentage, time_taken, days_allotted, status');
+
+        if (profile.role !== 'super_admin') {
+            // Assuming tasks also have team_id. If not, we might be over-fetching, but usually they do or RLS handles it.
+            // For now fetching all, filtering in memory by project name matching if needed, but better to trust RLS/team_id
+            tasksQuery = tasksQuery.eq('team_id', profile.team_id);
+        }
+
+        const { data: tasks, error: tasksError } = await tasksQuery;
+
+        if (tasksError) {
+            console.error('Error fetching tasks for stats:', tasksError);
+            // We continue with empty stats if tasks fail
+        }
+
+        // 3. Aggregate Stats by Project Name
+        const projectStats: Record<string, any> = {};
+
+        (tasks || []).forEach((task: any) => {
+            const pName = task.project_name;
+            if (!pName) return;
+
+            if (!projectStats[pName]) {
+                projectStats[pName] = {
+                    resources: new Set<string>(),
+                    totalActivityPercentage: 0,
+                    totalTimeTakenSeconds: 0,
+                    totalAllottedDays: 0,
+                    taskCount: 0
+                };
+            }
+
+            const stats = projectStats[pName];
+            stats.taskCount++;
+
+            // Resources
+            if (task.assigned_to) stats.resources.add(task.assigned_to);
+            if (task.assigned_to2) stats.resources.add(task.assigned_to2);
+            if (Array.isArray(task.additional_assignees)) {
+                task.additional_assignees.forEach((a: string) => stats.resources.add(a));
+            }
+
+            // Activity %
+            stats.totalActivityPercentage += (Number(task.activity_percentage) || 0);
+
+            // Allotted Days
+            stats.totalAllottedDays += (Number(task.days_allotted) || 0);
+
+            // Time Taken (convert HH:MM:SS to seconds)
+            if (task.time_taken) {
+                const parts = task.time_taken.split(':').map(Number);
+                if (parts.length === 3) {
+                    stats.totalTimeTakenSeconds += (parts[0] * 3600) + (parts[1] * 60) + parts[2];
+                }
+            }
+        });
+
+        // 4. Merge Stats into Projects
+        const projectsWithStats = (projects || []).map((project: any) => {
+            const stats = projectStats[project.project_name] || {
+                resources: new Set(),
+                totalActivityPercentage: 0,
+                totalTimeTakenSeconds: 0,
+                totalAllottedDays: 0,
+                taskCount: 0
+            };
+
+            const timeTakenDays = stats.totalTimeTakenSeconds / (3600 * 8); // 8 hours = 1 day
+            const deviation = stats.totalAllottedDays - timeTakenDays;
+
+            return {
+                ...project,
+                resources: Array.from(stats.resources).join(', '), // Comma separated list
+                activity_percentage: stats.totalActivityPercentage, // Sum as requested
+                hs_time_taken_days: timeTakenDays, // Calculated from tasks
+                allotted_time_days_calc: stats.totalAllottedDays, // Sum from tasks
+                deviation_calc: deviation,
+                task_count: stats.taskCount
+            };
+        });
+
+        return NextResponse.json({
+            projects: projectsWithStats || [],
+            tasks: tasks || []
+        });
     } catch (error) {
         console.error('Error in GET /api/project-overview:', error);
         return NextResponse.json(

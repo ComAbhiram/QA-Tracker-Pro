@@ -2,9 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import { LayoutGrid, List, Plus, RefreshCw } from 'lucide-react';
-import ProjectCard from './components/ProjectCard';
 import ProjectTable from './components/ProjectTable';
+import TaskOverviewTable from './components/TaskOverviewTable'; // Import new table
 import ProjectDetailsModal from './components/ProjectDetailsModal';
+import TaskModal from '@/components/TaskModal'; // Import TaskModal
+import { supabase } from '@/lib/supabase';
+import { mapTaskFromDB, Task } from '@/lib/types'; // Import types and mapper
 
 interface ProjectOverview {
     id: string;
@@ -49,91 +52,59 @@ interface HubstaffData {
 }
 
 export default function ProjectOverviewPage() {
-    const [view, setView] = useState<'card' | 'table'>('card');
+    const [activeTab, setActiveTab] = useState<'project' | 'task'>('project');
     const [projects, setProjects] = useState<ProjectOverview[]>([]);
+    const [tasks, setTasks] = useState<Task[]>([]);
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
     const [selectedProject, setSelectedProject] = useState<ProjectOverview | null>(null);
-    const [hubstaffDataCache, setHubstaffDataCache] = useState<Record<string, HubstaffData>>({});
+    const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+    const [searchTerm, setSearchTerm] = useState('');
 
     useEffect(() => {
-        fetchProjects();
+        fetchData();
     }, []);
 
-    const fetchProjects = async () => {
+    const fetchData = async () => {
         setLoading(true);
         try {
             const response = await fetch('/api/project-overview');
             const data = await response.json();
+
             if (data.projects) {
                 setProjects(data.projects);
-                // Fetch Hubstaff data for each project
-                data.projects.forEach((project: ProjectOverview) => {
-                    fetchHubstaffData(project.project_name);
-                });
+            }
+            if (data.tasks) {
+                setTasks(data.tasks.map(mapTaskFromDB));
             }
         } catch (error) {
-            console.error('Error fetching projects:', error);
+            console.error('Error fetching data:', error);
         } finally {
             setLoading(false);
         }
     };
 
-    const fetchHubstaffData = async (projectName: string) => {
-        try {
-            const response = await fetch(
-                `/api/hubstaff/project-activity?project_name=${encodeURIComponent(projectName)}`
-            );
-            const data = await response.json();
-            setHubstaffDataCache(prev => ({
-                ...prev,
-                [projectName]: data
-            }));
-        } catch (error) {
-            console.error(`Error fetching Hubstaff data for ${projectName}:`, error);
-        }
-    };
-
-    const handleCreateProject = () => {
-        setSelectedProject(null);
-        setIsModalOpen(true);
-    };
-
-    const handleEditProject = (project: ProjectOverview) => {
-        setSelectedProject(project);
-        setIsModalOpen(true);
-    };
-
     const handleSaveProject = async (projectData: Partial<ProjectOverview>) => {
         try {
-            if (selectedProject) {
-                // Update existing project
-                const response = await fetch('/api/project-overview', {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ ...projectData, id: selectedProject.id })
-                });
+            const method = selectedProject ? 'PUT' : 'POST';
+            const body = selectedProject ? { ...projectData, id: selectedProject.id } : projectData;
 
-                if (response.ok) {
-                    await fetchProjects();
-                    setIsModalOpen(false);
-                }
+            const response = await fetch('/api/project-overview', {
+                method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            });
+
+            if (response.ok) {
+                await fetchData();
+                setIsModalOpen(false);
             } else {
-                // Create new project
-                const response = await fetch('/api/project-overview', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(projectData)
-                });
-
-                if (response.ok) {
-                    await fetchProjects();
-                    setIsModalOpen(false);
-                }
+                alert('Failed to save project');
             }
         } catch (error) {
             console.error('Error saving project:', error);
-            alert('Failed to save project');
+            alert('Error saving project');
         }
     };
 
@@ -141,73 +112,165 @@ export default function ProjectOverviewPage() {
         if (!confirm('Are you sure you want to delete this project?')) return;
 
         try {
-            const response = await fetch(`/api/project-overview?id=${projectId}`, {
-                method: 'DELETE'
-            });
-
+            const response = await fetch(`/api/project-overview?id=${projectId}`, { method: 'DELETE' });
             if (response.ok) {
-                await fetchProjects();
+                await fetchData();
+            } else {
+                alert('Failed to delete project');
             }
         } catch (error) {
             console.error('Error deleting project:', error);
-            alert('Failed to delete project');
         }
     };
 
+    const handleSaveTask = async (taskData: Partial<Task>) => {
+        try {
+            const dbPayload: any = {
+                project_name: taskData.projectName,
+                sub_phase: taskData.subPhase,
+                status: taskData.status,
+                assigned_to: taskData.assignedTo,
+                assigned_to2: taskData.assignedTo2,
+                additional_assignees: taskData.additionalAssignees || [],
+                pc: taskData.pc,
+                start_date: taskData.startDate || null,
+                end_date: taskData.endDate || null,
+                actual_completion_date: taskData.actualCompletionDate ? new Date(taskData.actualCompletionDate).toISOString() : null,
+                bug_count: taskData.bugCount,
+                html_bugs: taskData.htmlBugs,
+                functional_bugs: taskData.functionalBugs,
+                deviation_reason: taskData.deviationReason,
+                sprint_link: taskData.sprintLink,
+                days_allotted: taskData.daysAllotted,
+                time_taken: taskData.timeTaken,
+                days_taken: taskData.daysTaken,
+                deviation: taskData.deviation,
+                activity_percentage: taskData.activityPercentage,
+                comments: taskData.comments,
+                team_id: taskData.teamId,
+                start_time: taskData.startTime || null,
+                end_time: taskData.endTime || null,
+            };
+
+            if (selectedTask) {
+                const { error } = await supabase
+                    .from('tasks')
+                    .update(dbPayload)
+                    .eq('id', selectedTask.id);
+
+                if (error) throw error;
+            } else {
+                const { error } = await supabase
+                    .from('tasks')
+                    .insert([dbPayload]);
+                if (error) throw error;
+            }
+
+            await fetchData();
+            setIsTaskModalOpen(false);
+
+        } catch (error: any) {
+            console.error('Error saving task:', error);
+            alert(`Failed to save task: ${error.message}`);
+        }
+    };
+
+    const handleDeleteTask = async (taskId: number) => {
+        if (!confirm('Are you sure you want to delete this task?')) return;
+        try {
+            const { error } = await supabase
+                .from('tasks')
+                .delete()
+                .eq('id', taskId);
+
+            if (error) throw error;
+            await fetchData();
+            setIsTaskModalOpen(false);
+        } catch (error: any) {
+            console.error('Error deleting task:', error);
+            alert('Failed to delete task');
+        }
+    };
+
+
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-6">
-            <div className="max-w-7xl mx-auto">
+            <div className="max-w-[1920px] mx-auto">
                 {/* Header */}
                 <div className="mb-8">
-                    <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center justify-between mb-6">
                         <div>
                             <h1 className="text-4xl font-bold text-slate-800 mb-2">
                                 Project Overview
                             </h1>
                             <p className="text-slate-600">
-                                Track project progress, resources, and Hubstaff metrics
+                                Manage projects and track detailed task progress
                             </p>
                         </div>
                         <div className="flex items-center gap-3">
                             <button
-                                onClick={fetchProjects}
+                                onClick={fetchData} // This matches the 'fetchData' I'll define below properly
                                 className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
                             >
                                 <RefreshCw size={18} />
                                 Refresh
                             </button>
-                            <button
-                                onClick={handleCreateProject}
-                                className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
-                            >
-                                <Plus size={18} />
-                                New Project
-                            </button>
+                            {activeTab === 'project' && (
+                                <button
+                                    onClick={() => { setSelectedProject(null); setIsModalOpen(true); }}
+                                    className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                                >
+                                    <Plus size={18} />
+                                    New Project
+                                </button>
+                            )}
                         </div>
                     </div>
 
-                    {/* View Toggle */}
-                    <div className="flex items-center gap-2 bg-white p-1 rounded-lg border border-slate-200 w-fit">
+                    {/* Tabs */}
+                    <div className="flex items-center gap-4 border-b border-slate-200 mb-6">
                         <button
-                            onClick={() => setView('card')}
-                            className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors ${view === 'card'
-                                ? 'bg-indigo-100 text-indigo-700'
-                                : 'text-slate-600 hover:bg-slate-50'
+                            onClick={() => setActiveTab('project')}
+                            className={`px-4 py-2 font-semibold text-sm transition-colors relative ${activeTab === 'project'
+                                ? 'text-indigo-600'
+                                : 'text-slate-500 hover:text-slate-700'
                                 }`}
                         >
-                            <LayoutGrid size={18} />
-                            Card View
+                            <div className="flex items-center gap-2">
+                                <LayoutGrid size={18} />
+                                Project Overview
+                            </div>
+                            {activeTab === 'project' && (
+                                <div className="absolute bottom-0 left-0 w-full h-0.5 bg-indigo-600 rounded-t-full" />
+                            )}
                         </button>
                         <button
-                            onClick={() => setView('table')}
-                            className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors ${view === 'table'
-                                ? 'bg-indigo-100 text-indigo-700'
-                                : 'text-slate-600 hover:bg-slate-50'
+                            onClick={() => setActiveTab('task')}
+                            className={`px-4 py-2 font-semibold text-sm transition-colors relative ${activeTab === 'task'
+                                ? 'text-indigo-600'
+                                : 'text-slate-500 hover:text-slate-700'
                                 }`}
                         >
-                            <List size={18} />
-                            Table View
+                            <div className="flex items-center gap-2">
+                                <List size={18} />
+                                Task Overview
+                            </div>
+                            {activeTab === 'task' && (
+                                <div className="absolute bottom-0 left-0 w-full h-0.5 bg-indigo-600 rounded-t-full" />
+                            )}
                         </button>
+                    </div>
+
+                    {/* Search (Optional, global) */}
+                    <div className="mb-6 max-w-md">
+                        <input
+                            type="text"
+                            placeholder={activeTab === 'project' ? "Search projects..." : "Search tasks..."}
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        />
                     </div>
                 </div>
 
@@ -216,45 +279,44 @@ export default function ProjectOverviewPage() {
                     <div className="flex items-center justify-center h-64">
                         <div className="animate-spin w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full" />
                     </div>
-                ) : projects.length === 0 ? (
-                    <div className="bg-white rounded-xl p-12 text-center border border-slate-200">
-                        <p className="text-slate-500 text-lg mb-4">No projects found</p>
-                        <button
-                            onClick={handleCreateProject}
-                            className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
-                        >
-                            Create Your First Project
-                        </button>
-                    </div>
-                ) : view === 'card' ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {projects.map(project => (
-                            <ProjectCard
-                                key={project.id}
-                                project={project}
-                                hubstaffData={hubstaffDataCache[project.project_name]}
-                                onEdit={() => handleEditProject(project)}
-                                onDelete={() => handleDeleteProject(project.id)}
-                            />
-                        ))}
-                    </div>
-                ) : (
+                ) : activeTab === 'project' ? (
                     <ProjectTable
-                        projects={projects}
-                        hubstaffDataCache={hubstaffDataCache}
-                        onEdit={handleEditProject}
+                        projects={projects.filter(p =>
+                            p.project_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                            (p.resources && p.resources.toLowerCase().includes(searchTerm.toLowerCase()))
+                        )}
+                        onEdit={(p) => { setSelectedProject(p); setIsModalOpen(true); }}
                         onDelete={handleDeleteProject}
+                    />
+                ) : (
+                    <TaskOverviewTable
+                        tasks={tasks.filter(t =>
+                            t.projectName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                            (t.assignedTo && t.assignedTo.toLowerCase().includes(searchTerm.toLowerCase()))
+                        )}
+                        onEdit={(t) => { setSelectedTask(t); setIsTaskModalOpen(true); }}
                     />
                 )}
             </div>
 
-            {/* Modal */}
+            {/* Project Modal */}
             <ProjectDetailsModal
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
                 project={selectedProject}
                 onSave={handleSaveProject}
             />
+
+            {/* Task Modal (Reuse existing TaskModal) */}
+            {isTaskModalOpen && (
+                <TaskModal
+                    isOpen={isTaskModalOpen}
+                    onClose={() => setIsTaskModalOpen(false)}
+                    task={selectedTask}
+                    onSave={handleSaveTask}
+                    onDelete={handleDeleteTask}
+                />
+            )}
         </div>
     );
 }

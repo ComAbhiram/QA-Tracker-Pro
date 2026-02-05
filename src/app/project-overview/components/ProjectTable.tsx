@@ -14,6 +14,11 @@ interface ProjectTableProps {
         blockers: string | null;
         task_count: number;
         resources: string | null;
+        // New calculated fields
+        allotted_time_days_calc?: number;
+        hs_time_taken_days?: number;
+        activity_percentage?: number;
+        deviation_calc?: number;
     }>;
     hubstaffDataCache: Record<string, {
         hs_time_taken_days: number;
@@ -33,7 +38,7 @@ interface ProjectTableProps {
     onDelete: (projectId: string) => void;
 }
 
-export default function ProjectTable({ projects, hubstaffDataCache, onEdit, onDelete }: ProjectTableProps) {
+export default function ProjectTable({ projects, onEdit, onDelete }: ProjectTableProps) {
     const [sortField, setSortField] = useState<string>('project_name');
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
@@ -50,11 +55,10 @@ export default function ProjectTable({ projects, hubstaffDataCache, onEdit, onDe
         let aVal: any = a[sortField as keyof typeof a];
         let bVal: any = b[sortField as keyof typeof b];
 
-        // Handle Hubstaff data sorting
-        if (sortField === 'hs_time_taken_days' || sortField === 'activity_percentage') {
-            aVal = hubstaffDataCache[a.project_name]?.[sortField as keyof typeof hubstaffDataCache[string]] || 0;
-            bVal = hubstaffDataCache[b.project_name]?.[sortField as keyof typeof hubstaffDataCache[string]] || 0;
-        }
+        // Specific handling for calculated fields if they are nested or named differently, 
+        // but here they are top - level on the project object now.
+        if (sortField === 'allotted_time_days') aVal = a.allotted_time_days_calc || 0;
+        if (sortField === 'allotted_time_days') bVal = b.allotted_time_days_calc || 0;
 
         if (aVal === null || aVal === undefined) return 1;
         if (bVal === null || bVal === undefined) return -1;
@@ -69,66 +73,63 @@ export default function ProjectTable({ projects, hubstaffDataCache, onEdit, onDe
     });
 
     return (
-        <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+        <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
             <div className="overflow-x-auto">
                 <table className="w-full">
-                    <thead className="bg-gradient-to-r from-indigo-500 to-blue-600 text-white">
+                    <thead className="bg-slate-50 border-b border-slate-200 text-slate-700">
                         <tr>
-                            <th className="px-4 py-3 text-left text-sm font-semibold cursor-pointer hover:bg-indigo-600" onClick={() => handleSort('project_name')}>
+                            <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider cursor-pointer hover:bg-slate-100" onClick={() => handleSort('project_name')}>
                                 <div className="flex items-center gap-2">
                                     Project Name
-                                    <ArrowUpDown size={14} />
+                                    <ArrowUpDown size={12} />
                                 </div>
                             </th>
-                            <th className="px-4 py-3 text-left text-sm font-semibold cursor-pointer hover:bg-indigo-600" onClick={() => handleSort('location')}>
+                            <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider cursor-pointer hover:bg-slate-100" onClick={() => handleSort('location')}>
                                 <div className="flex items-center gap-2">
                                     Location
-                                    <ArrowUpDown size={14} />
+                                    <ArrowUpDown size={12} />
                                 </div>
                             </th>
-                            <th className="px-4 py-3 text-left text-sm font-semibold">Resources</th>
-                            <th className="px-4 py-3 text-center text-sm font-semibold cursor-pointer hover:bg-indigo-600" onClick={() => handleSort('activity_percentage')}>
+                            <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider">Resources</th>
+                            <th className="px-4 py-3 text-center text-xs font-bold uppercase tracking-wider cursor-pointer hover:bg-slate-100" onClick={() => handleSort('activity_percentage')}>
                                 <div className="flex items-center justify-center gap-2">
                                     Activity %
-                                    <ArrowUpDown size={14} />
+                                    <ArrowUpDown size={12} />
                                 </div>
                             </th>
-                            <th className="px-4 py-3 text-left text-sm font-semibold">PC</th>
-                            <th className="px-4 py-3 text-center text-sm font-semibold cursor-pointer hover:bg-indigo-600" onClick={() => handleSort('hs_time_taken_days')}>
+                            <th className="px-4 py-3 text-center text-xs font-bold uppercase tracking-wider">PC</th>
+                            <th className="px-4 py-3 text-center text-xs font-bold uppercase tracking-wider cursor-pointer hover:bg-slate-100" onClick={() => handleSort('hs_time_taken_days')}>
                                 <div className="flex items-center justify-center gap-2">
-                                    HS Time
-                                    <ArrowUpDown size={14} />
+                                    HS Time (Days)
+                                    <ArrowUpDown size={12} />
                                 </div>
                             </th>
-                            <th className="px-4 py-3 text-center text-sm font-semibold cursor-pointer hover:bg-indigo-600" onClick={() => handleSort('allotted_time_days')}>
+                            <th className="px-4 py-3 text-center text-xs font-bold uppercase tracking-wider cursor-pointer hover:bg-slate-100" onClick={() => handleSort('allotted_time_days_calc')}>
                                 <div className="flex items-center justify-center gap-2">
                                     Allotted
-                                    <ArrowUpDown size={14} />
+                                    <ArrowUpDown size={12} />
                                 </div>
                             </th>
-                            <th className="px-4 py-3 text-center text-sm font-semibold">Deviation</th>
-                            <th className="px-4 py-3 text-center text-sm font-semibold cursor-pointer hover:bg-indigo-600" onClick={() => handleSort('tl_confirmed_effort_days')}>
+                            <th className="px-4 py-3 text-center text-xs font-bold uppercase tracking-wider">Deviation</th>
+                            <th className="px-4 py-3 text-center text-xs font-bold uppercase tracking-wider cursor-pointer hover:bg-slate-100" onClick={() => handleSort('tl_confirmed_effort_days')}>
                                 <div className="flex items-center justify-center gap-2">
                                     TL Effort
-                                    <ArrowUpDown size={14} />
+                                    <ArrowUpDown size={12} />
                                 </div>
                             </th>
-                            <th className="px-4 py-3 text-left text-sm font-semibold">Blockers</th>
-                            <th className="px-4 py-3 text-center text-sm font-semibold">Actions</th>
+                            <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider">Blockers</th>
+                            <th className="px-4 py-3 text-center text-xs font-bold uppercase tracking-wider">Actions</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody className="divide-y divide-slate-100">
                         {sortedProjects.map((project, index) => {
-                            const hubstaffData = hubstaffDataCache[project.project_name];
-                            const deviation = project.allotted_time_days && hubstaffData
-                                ? project.allotted_time_days - hubstaffData.hs_time_taken_days
-                                : null;
+                            // Use calculated deviation from API
+                            const deviation = project.deviation_calc;
 
                             return (
                                 <tr
                                     key={project.id}
-                                    className={`border-b border-slate-100 hover:bg-slate-50 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'
-                                        }`}
+                                    className={`hover:bg-slate-50 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-slate-50/30'}`}
                                 >
                                     <td className="px-4 py-3 text-sm font-semibold text-slate-800">
                                         {project.project_name}
@@ -137,65 +138,36 @@ export default function ProjectTable({ projects, hubstaffDataCache, onEdit, onDe
                                         {project.location || '-'}
                                     </td>
                                     <td className="px-4 py-3 text-sm text-slate-600">
-                                        <div className="max-w-[150px] truncate" title={project.resources || ''}>
+                                        <div className="max-w-[200px] truncate" title={project.resources || ''}>
                                             {project.resources || '-'}
                                         </div>
                                     </td>
-                                    <td className="px-4 py-3 text-sm text-center relative group">
-                                        <div className="inline-flex items-center justify-center px-3 py-1 bg-green-100 text-green-700 rounded-full font-semibold cursor-help">
-                                            {hubstaffData?.activity_percentage != null ? `${hubstaffData.activity_percentage}%` : '-'}
-                                        </div>
-                                        {hubstaffData?.member_activities && hubstaffData.member_activities.length > 0 && (
-                                            <div className="absolute z-20 hidden group-hover:block bottom-full left-1/2 -translate-x-1/2 mb-2 bg-white border border-slate-200 rounded-lg shadow-xl p-3 min-w-[180px]">
-                                                <p className="text-[10px] font-bold text-slate-500 uppercase mb-2 border-b border-slate-100 pb-1">Member Activity</p>
-                                                {hubstaffData.member_activities.map((member, idx) => (
-                                                    <div key={idx} className="flex items-center justify-between text-[11px] mb-1">
-                                                        <span className="text-slate-600 truncate mr-2">{member.user_name}</span>
-                                                        <span className="font-bold text-indigo-600">{member.activity_percentage}%</span>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        )}
+                                    <td className="px-4 py-3 text-sm text-center">
+                                        <span className="inline-flex items-center justify-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                            {project.activity_percentage != null ? `${project.activity_percentage}%` : '-'}
+                                        </span>
                                     </td>
-                                    <td className="px-4 py-3 text-sm text-slate-600">
+                                    <td className="px-4 py-3 text-sm text-center text-slate-600">
                                         {project.pc || '-'}
                                     </td>
-                                    <td className="px-4 py-3 text-sm text-center font-semibold text-slate-700 relative group">
-                                        <span className="cursor-help">{hubstaffData?.hs_time_taken_days != null ? hubstaffData.hs_time_taken_days.toFixed(2) : '-'}</span>
-                                        {hubstaffData?.team_breakdown && (
-                                            <div className="absolute z-20 hidden group-hover:block bottom-full left-1/2 -translate-x-1/2 mb-2 bg-white border border-slate-200 rounded-lg shadow-xl p-3 min-w-[150px]">
-                                                <p className="text-[10px] font-bold text-slate-500 uppercase mb-2 border-b border-slate-100 pb-1">Team Breakdown</p>
-                                                <div className="space-y-1">
-                                                    <div className="flex justify-between text-[11px] text-purple-600">
-                                                        <span>Design:</span> <span>{hubstaffData.team_breakdown.design_days.toFixed(2)}</span>
-                                                    </div>
-                                                    <div className="flex justify-between text-[11px] text-blue-600">
-                                                        <span>FE Dev:</span> <span>{hubstaffData.team_breakdown.fe_dev_days.toFixed(2)}</span>
-                                                    </div>
-                                                    <div className="flex justify-between text-[11px] text-green-600">
-                                                        <span>BE Dev:</span> <span>{hubstaffData.team_breakdown.be_dev_days.toFixed(2)}</span>
-                                                    </div>
-                                                    <div className="flex justify-between text-[11px] text-orange-600">
-                                                        <span>Testing:</span> <span>{hubstaffData.team_breakdown.testing_days.toFixed(2)}</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        )}
+                                    <td className="px-4 py-3 text-sm text-center font-medium text-slate-700">
+                                        {project.hs_time_taken_days != null ? project.hs_time_taken_days.toFixed(2) : '0.00'}
                                     </td>
-                                    <td className="px-4 py-3 text-sm text-center font-semibold text-slate-700">
-                                        {project.allotted_time_days != null ? project.allotted_time_days.toFixed(1) : '-'}
+                                    <td className="px-4 py-3 text-sm text-center font-medium text-slate-700">
+                                        {project.allotted_time_days_calc != null ? project.allotted_time_days_calc.toFixed(2) : '-'}
                                     </td>
                                     <td className="px-4 py-3 text-sm text-center font-bold">
                                         <span className={
-                                            deviation === null ? 'text-slate-400' :
-                                                deviation > 0 ? 'text-green-600' :
-                                                    deviation < 0 ? 'text-red-600' :
-                                                        'text-slate-700'
+                                            deviation === null || deviation === undefined ? 'text-slate-400' :
+                                                deviation > 0 ? 'text-red-600' : // Positive deviation means Allotted > Time Taken? Wait. Deviation = Allotted - HS Time. If Allotted (5) - Time (3) = 2 (Under budget). If Allotted (5) - Time (7) = -2 (Over budget).
+                                                    // Usually: Deviation = Time Taken - Allotted. But user asked: "Deviation : find automtically by Allotted -HS Time"
+                                                    // So: Allotted (5) - HS (3) = +2 (Good). Allotted (5) - HS (7) = -2 (Bad).
+                                                    deviation < 0 ? 'text-red-600' : 'text-green-600'
                                         }>
-                                            {deviation !== null ? deviation.toFixed(1) : '-'}
+                                            {deviation !== null && deviation !== undefined ? deviation.toFixed(2) : '-'}
                                         </span>
                                     </td>
-                                    <td className="px-4 py-3 text-sm text-center font-semibold text-slate-700">
+                                    <td className="px-4 py-3 text-sm text-center font-medium text-slate-700">
                                         {project.tl_confirmed_effort_days != null ? project.tl_confirmed_effort_days.toFixed(1) : '-'}
                                     </td>
                                     <td className="px-4 py-3 text-sm text-slate-600">
@@ -203,17 +175,19 @@ export default function ProjectTable({ projects, hubstaffDataCache, onEdit, onDe
                                             {project.blockers || '-'}
                                         </div>
                                     </td>
-                                    <td className="px-4 py-3">
+                                    <td className="px-4 py-3 text-center">
                                         <div className="flex items-center justify-center gap-2">
                                             <button
                                                 onClick={() => onEdit(project)}
                                                 className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded transition-colors"
+                                                title="Edit"
                                             >
                                                 <Edit size={16} />
                                             </button>
                                             <button
                                                 onClick={() => onDelete(project.id)}
                                                 className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
+                                                title="Delete"
                                             >
                                                 <Trash2 size={16} />
                                             </button>
