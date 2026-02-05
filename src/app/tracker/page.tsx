@@ -233,32 +233,32 @@ export default function Tracker() {
                                 </div>
                             </div>
                             <div className="overflow-x-auto">
-                                <table className="w-full text-sm text-slate-600">
-                                    <thead className="bg-slate-50 border-b-2 border-slate-200">
+                                <table className="w-full text-sm text-slate-600 border-collapse">
+                                    <thead className="bg-slate-50 border border-slate-400">
                                         <tr>
-                                            <th className="px-5 py-4 font-semibold text-slate-600 text-left border-r border-slate-100">Project</th>
-                                            <th className="px-4 py-4 font-semibold text-slate-600 text-left border-r border-slate-100">Type</th>
-                                            <th className="px-4 py-4 font-semibold text-slate-600 text-left border-r border-slate-100">Priority</th>
-                                            <th className="px-4 py-4 font-semibold text-slate-600 text-left border-r border-slate-100">Edit</th>
-                                            <th className="px-5 py-4 font-semibold text-slate-600 text-left border-r border-slate-100">Phase</th>
-                                            <th className="px-4 py-4 font-semibold text-slate-600 text-left border-r border-slate-100">PC</th>
-                                            <th className="px-4 py-4 font-semibold text-slate-600 text-left border-r border-slate-100">Assignees</th>
-                                            <th className="px-4 py-4 font-semibold text-slate-600 text-left border-r border-slate-100">Status</th>
-                                            <th className="px-4 py-4 font-semibold text-slate-600 text-left border-r border-slate-100">Start</th>
-                                            <th className="px-4 py-4 font-semibold text-slate-600 text-left border-r border-slate-100">End</th>
-                                            <th className="px-4 py-4 font-semibold text-slate-600 text-left border-r border-slate-100">Actual End</th>
-                                            <th className="px-4 py-4 font-semibold text-slate-600 text-left border-r border-slate-100">Bugs (H/F/T)</th>
-                                            <th className="px-5 py-4 font-semibold text-slate-600 text-left border-r border-slate-100">Comments</th>
-                                            <th className="px-4 py-4 font-semibold text-slate-600 text-left border-r border-slate-100">Deviation</th>
+                                            <th className="px-5 py-4 font-semibold text-slate-600 text-left border border-slate-400">Project</th>
+                                            <th className="px-4 py-4 font-semibold text-slate-600 text-left border border-slate-400">Type</th>
+                                            <th className="px-4 py-4 font-semibold text-slate-600 text-left border border-slate-400">Priority</th>
+                                            <th className="px-4 py-4 font-semibold text-slate-600 text-left border border-slate-400">Edit</th>
+                                            <th className="px-5 py-4 font-semibold text-slate-600 text-left border border-slate-400">Phase</th>
+                                            <th className="px-4 py-4 font-semibold text-slate-600 text-left border border-slate-400">PC</th>
+                                            <th className="px-4 py-4 font-semibold text-slate-600 text-left border border-slate-400">Assignees</th>
+                                            <th className="px-4 py-4 font-semibold text-slate-600 text-left border border-slate-400">Status</th>
+                                            <th className="px-4 py-4 font-semibold text-slate-600 text-left border border-slate-400">Start</th>
+                                            <th className="px-4 py-4 font-semibold text-slate-600 text-left border border-slate-400">End</th>
+                                            <th className="px-4 py-4 font-semibold text-slate-600 text-left border border-slate-400">Actual End</th>
+                                            <th className="px-4 py-4 font-semibold text-slate-600 text-left border border-slate-400">Bugs (H/F/T)</th>
+                                            <th className="px-5 py-4 font-semibold text-slate-600 text-left border border-slate-400">Comments</th>
+                                            <th className="px-4 py-4 font-semibold text-slate-600 text-left border border-slate-400">Deviation</th>
                                             <th className="px-4 py-4 font-semibold text-slate-600 text-left">Sprint</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {assigneeTasks.map(task => (
-                                            <tr key={task.id} className="border-b border-slate-100 hover:bg-slate-50/50 transition-all group">
-                                                <td className="px-5 py-4 font-semibold text-slate-800 border-r border-slate-50">{task.projectName}</td>
-                                                <td className="px-4 py-4 text-slate-600 border-r border-slate-50">{task.projectType || '-'}</td>
-                                                <td className="px-4 py-4 text-slate-600 border-r border-slate-50">
+                                            <tr key={task.id} className="border-b border-slate-400 hover:bg-slate-50/50 transition-all group">
+                                                <td className="px-5 py-4 font-semibold text-slate-800 border border-slate-400">{task.projectName}</td>
+                                                <td className="px-4 py-4 text-slate-600 border border-slate-400">{task.projectType || '-'}</td>
+                                                <td className="px-4 py-4 text-slate-600 border border-slate-400">
                                                     {task.priority && (
                                                         <span className={`px-2 py-1 rounded text-xs font-bold ${task.priority === 'Urgent' ? 'bg-red-100 text-red-700' :
                                                             task.priority === 'High' ? 'bg-orange-100 text-orange-700' :
@@ -269,7 +269,7 @@ export default function Tracker() {
                                                         </span>
                                                     )}
                                                 </td>
-                                                <td className="px-4 py-4 border-r border-slate-50">
+                                                <td className="px-4 py-4 border border-slate-400">
                                                     <button
                                                         onClick={() => handleEditTask(task)}
                                                         className="text-slate-400 hover:text-sky-600 hover:bg-sky-50 p-2 rounded-lg transition-all"
@@ -278,9 +278,9 @@ export default function Tracker() {
                                                         <Edit2 size={16} />
                                                     </button>
                                                 </td>
-                                                <td className="px-5 py-4 font-medium text-slate-600 border-r border-slate-50">{task.subPhase || '-'}</td>
-                                                <td className="px-4 py-4 border-r border-slate-50">{task.pc || '-'}</td>
-                                                <td className="px-4 py-4 border-r border-slate-50">
+                                                <td className="px-5 py-4 font-medium text-slate-600 border border-slate-400">{task.subPhase || '-'}</td>
+                                                <td className="px-4 py-4 border border-slate-400">{task.pc || '-'}</td>
+                                                <td className="px-4 py-4 border border-slate-400">
                                                     <div className="flex -space-x-2 overflow-hidden">
                                                         {/* Primary Assignee */}
                                                         {task.assignedTo && (
@@ -302,7 +302,7 @@ export default function Tracker() {
                                                         ))}
                                                     </div>
                                                 </td>
-                                                <td className="px-4 py-4 border-r border-slate-50">
+                                                <td className="px-4 py-4 border border-slate-400">
                                                     <div className="flex items-center gap-2">
                                                         <span className={`inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold border ${task.status === 'Completed' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' :
                                                             task.status === 'In Progress' ? 'bg-blue-50 text-blue-700 border-blue-100' :

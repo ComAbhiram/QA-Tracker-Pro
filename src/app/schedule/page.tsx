@@ -345,7 +345,7 @@ export default function Schedule() {
 
                 {viewMode === 'calendar' && (
                     <div className="min-h-full flex flex-col">
-                        <div className="grid grid-cols-7 border-b border-slate-200 bg-slate-50/80 sticky top-0 z-10 shadow-sm">
+                        <div className="grid grid-cols-7 border-b border-slate-400 bg-slate-50/80 sticky top-0 z-10 shadow-sm">
                             {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
                                 <div key={day} className="py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider backdrop-blur-md bg-slate-50/90">
                                     {day}
@@ -354,7 +354,7 @@ export default function Schedule() {
                         </div>
                         <div className="grid grid-cols-7 auto-rows-[minmax(160px,1fr)] flex-1">
                             {startPadding.map((_, i) => (
-                                <div key={`empty-${i}`} className="bg-slate-50/30 border-r border-b border-slate-100"></div>
+                                <div key={`empty-${i}`} className="bg-slate-50/30 border-r border-b border-slate-400"></div>
                             ))}
                             {days.map(day => {
                                 const dayTasks = tasks.filter(task => {
@@ -397,7 +397,7 @@ export default function Schedule() {
                                     <div
                                         key={day.toString()}
                                         onClick={() => { setCurrentDate(day); setViewMode('day'); }}
-                                        className={`border-r border-b border-slate-100 p-2 transition-all hover:bg-indigo-50/50 cursor-pointer group relative flex flex-col
+                                        className={`border-r border-b border-slate-400 p-2 transition-all hover:bg-indigo-50/50 cursor-pointer group relative flex flex-col
                                             ${!isSameMonth(day, currentDate) ? 'bg-slate-50/50 text-slate-400' : ''} 
                                             ${isToday(day) ? 'bg-blue-50/30' : ''}
                                         `}
