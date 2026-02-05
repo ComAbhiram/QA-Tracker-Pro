@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Building2, MapPin, RefreshCw, ArrowRightLeft, Users } from 'lucide-react';
+import { Building2, MapPin, RefreshCw, ArrowRightLeft, Users, Trash2 } from 'lucide-react';
 
 interface ProjectWithLocation {
     id: string;
@@ -170,6 +170,23 @@ export default function SuperAdminPage() {
                 }
             } catch (error) {
                 console.error('Error updating project field:', error);
+            }
+        };
+
+        const handleDeleteProject = async (projectId: string) => {
+            if (!confirm('Are you sure you want to delete this project? This action cannot be undone.')) return;
+
+            try {
+                const response = await fetch(`/api/project-overview?id=${projectId}`, { method: 'DELETE' });
+                if (response.ok) {
+                    // Optimistically remove from state
+                    setProjects(prev => prev.filter(p => p.id !== projectId));
+                } else {
+                    alert('Failed to delete project');
+                }
+            } catch (error) {
+                console.error('Error deleting project:', error);
+                alert('Error deleting project');
             }
         };
 
@@ -558,6 +575,14 @@ export default function SuperAdminPage() {
                                                                 disabled={getTeamName(project.team_id) === 'Dubai'}
                                                             >
                                                                 D
+                                                            </button>
+                                                            <div className="w-px h-4 bg-slate-200 mx-1"></div>
+                                                            <button
+                                                                onClick={() => handleDeleteProject(project.id)}
+                                                                className="text-slate-400 hover:text-red-600 transition-colors"
+                                                                title="Delete Project"
+                                                            >
+                                                                <Trash2 size={16} />
                                                             </button>
                                                         </div>
                                                     </td>
