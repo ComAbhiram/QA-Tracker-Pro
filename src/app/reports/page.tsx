@@ -5,8 +5,9 @@ import { supabase } from '@/lib/supabase';
 import { Task, mapTaskFromDB } from '@/lib/types';
 import { getEffectiveStatus } from '@/utils/taskUtils';
 import { getTeamMemberByHubstaffName } from '@/lib/team-members-config';
-import { BarChart3, TrendingUp, Users, Calendar, Download, Filter } from 'lucide-react';
+import { BarChart3, TrendingUp, Users, Calendar, Download, Filter, X } from 'lucide-react';
 import Combobox from '@/components/ui/Combobox';
+import TaskOverviewTable from '../project-overview/components/TaskOverviewTable';
 
 export default function Reports() {
     const [tasks, setTasks] = useState<Task[]>([]);
@@ -190,6 +191,56 @@ export default function Reports() {
         );
     }
 
+    const [filteredModal, setFilteredModal] = useState<{
+        isOpen: boolean;
+        title: string;
+        tasks: Task[];
+    }>({ isOpen: false, title: '', tasks: [] });
+
+    const handleMetricClick = (type: 'total' | 'completed' | 'inProgress' | 'overdue' | 'assignee', assignee?: string, status?: string) => {
+        let tasksToShow = [...filteredTasks];
+        let title = '';
+
+        if (type === 'total') {
+            title = 'All Tasks';
+        } else if (type === 'completed') {
+            tasksToShow = tasksToShow.filter(t => t.status === 'Completed');
+            title = 'Completed Tasks';
+        } else if (type === 'inProgress') {
+            tasksToShow = tasksToShow.filter(t => getEffectiveStatus(t) === 'In Progress');
+            title = 'In Progress Tasks';
+        } else if (type === 'overdue') {
+            tasksToShow = tasksToShow.filter(t => getEffectiveStatus(t) === 'Overdue');
+            title = 'Overdue Tasks';
+        } else if (type === 'assignee' && assignee) {
+            const assigneeName = assignee === 'Unassigned' ? null : assignee;
+
+            // Filter by assignee name (handling primary and secondary)
+            tasksToShow = tasksToShow.filter(t =>
+                (t.assignedTo === assigneeName) ||
+                (t.assignedTo2 === assigneeName) ||
+                (t.additionalAssignees && t.additionalAssignees.includes(assigneeName!)) ||
+                (assignee === 'Unassigned' && !t.assignedTo)
+            );
+
+            if (status === 'Completed') {
+                tasksToShow = tasksToShow.filter(t => t.status === 'Completed');
+                title = `${assignee} - Completed Tasks`;
+            } else if (status === 'In Progress') {
+                tasksToShow = tasksToShow.filter(t => getEffectiveStatus(t) === 'In Progress');
+                title = `${assignee} - In Progress Tasks`;
+            } else {
+                title = `${assignee} - All Tasks`;
+            }
+        }
+
+        setFilteredModal({
+            isOpen: true,
+            title: title + ` (${tasksToShow.length})`,
+            tasks: tasksToShow
+        });
+    };
+
     return (
         <div className="max-w-7xl mx-auto space-y-6">
             {/* Header */}
@@ -267,18 +318,25 @@ export default function Reports() {
                     </button>
                 </div>
             </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div className="bg-white rounded-xl p-6 border border-slate-100 shadow-sm">
+                <div
+                    onClick={() => handleMetricClick('total')}
+                    className="bg-white rounded-xl p-6 border border-slate-100 shadow-sm cursor-pointer hover:shadow-md transition-all hover:border-sky-200 group"
+                >
                     <div className="flex items-center justify-between mb-4">
-                        <div className="text-slate-500">Total Tasks</div>
+                        <div className="text-slate-500 group-hover:text-sky-600 transition-colors">Total Tasks</div>
                         <BarChart3 className="text-sky-500" size={24} />
                     </div>
                     <div className="text-3xl font-bold text-slate-800">{stats.total}</div>
                 </div>
 
-                <div className="bg-white rounded-xl p-6 border border-slate-100 shadow-sm">
+                <div
+                    onClick={() => handleMetricClick('completed')}
+                    className="bg-white rounded-xl p-6 border border-slate-100 shadow-sm cursor-pointer hover:shadow-md transition-all hover:border-emerald-200 group"
+                >
                     <div className="flex items-center justify-between mb-4">
-                        <div className="text-slate-500">Completed</div>
+                        <div className="text-slate-500 group-hover:text-emerald-600 transition-colors">Completed</div>
                         <TrendingUp className="text-emerald-500" size={24} />
                     </div>
                     <div className="text-3xl font-bold text-emerald-600">{stats.completed}</div>
@@ -287,17 +345,23 @@ export default function Reports() {
                     </div>
                 </div>
 
-                <div className="bg-white rounded-xl p-6 border border-slate-100 shadow-sm">
+                <div
+                    onClick={() => handleMetricClick('inProgress')}
+                    className="bg-white rounded-xl p-6 border border-slate-100 shadow-sm cursor-pointer hover:shadow-md transition-all hover:border-blue-200 group"
+                >
                     <div className="flex items-center justify-between mb-4">
-                        <div className="text-slate-500">In Progress</div>
+                        <div className="text-slate-500 group-hover:text-blue-600 transition-colors">In Progress</div>
                         <Calendar className="text-blue-500" size={24} />
                     </div>
                     <div className="text-3xl font-bold text-blue-600">{stats.inProgress}</div>
                 </div>
 
-                <div className="bg-white rounded-xl p-6 border border-slate-100 shadow-sm">
+                <div
+                    onClick={() => handleMetricClick('overdue')}
+                    className="bg-white rounded-xl p-6 border border-slate-100 shadow-sm cursor-pointer hover:shadow-md transition-all hover:border-red-200 group"
+                >
                     <div className="flex items-center justify-between mb-4">
-                        <div className="text-slate-500">Overdue</div>
+                        <div className="text-slate-500 group-hover:text-red-600 transition-colors">Overdue</div>
                         <Users className="text-red-500" size={24} />
                     </div>
                     <div className="text-3xl font-bold text-red-600">{stats.overdue}</div>
@@ -323,13 +387,33 @@ export default function Reports() {
                             {Object.entries(tasksByAssignee).map(([assignee, data]) => (
                                 <tr key={assignee} className="border-b border-slate-100 hover:bg-slate-50/50 transition-colors">
                                     <td className="px-6 py-4 font-medium text-slate-800 border-r border-slate-50">{assignee}</td>
-                                    <td className="px-6 py-4 border-r border-slate-50">{data.total}</td>
-                                    <td className="px-6 py-4 border-r border-slate-50">
+
+                                    {/* Total Column Clickable */}
+                                    <td
+                                        onClick={() => handleMetricClick('assignee', assignee)}
+                                        className="px-6 py-4 border-r border-slate-50 cursor-pointer hover:bg-sky-50 transition-colors text-sky-600 font-bold"
+                                        title="View All Tasks for Assignee"
+                                    >
+                                        {data.total}
+                                    </td>
+
+                                    {/* Completed Column Clickable */}
+                                    <td
+                                        onClick={() => handleMetricClick('assignee', assignee, 'Completed')}
+                                        className="px-6 py-4 border-r border-slate-50 cursor-pointer hover:bg-emerald-50 transition-colors"
+                                        title="View Completed Tasks"
+                                    >
                                         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-100">
                                             {data.completed}
                                         </span>
                                     </td>
-                                    <td className="px-6 py-4">
+
+                                    {/* In Progress Column Clickable */}
+                                    <td
+                                        onClick={() => handleMetricClick('assignee', assignee, 'In Progress')}
+                                        className="px-6 py-4 cursor-pointer hover:bg-blue-50 transition-colors"
+                                        title="View In Progress Tasks"
+                                    >
                                         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-100">
                                             {data.inProgress}
                                         </span>
@@ -357,6 +441,35 @@ export default function Reports() {
                     </div>
                 </div>
             </div>
+
+            {/* Drill-down Modal */}
+            {filteredModal.isOpen && (
+                <div className="fixed inset-0 z-[150] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+                    <div className="bg-white rounded-2xl shadow-2xl w-[95vw] max-w-7xl max-h-[90vh] flex flex-col animate-in zoom-in-95 duration-200">
+                        {/* Modal Header */}
+                        <div className="flex items-center justify-between p-6 border-b border-slate-100">
+                            <h2 className="text-2xl font-bold text-slate-800">{filteredModal.title}</h2>
+                            <button
+                                onClick={() => setFilteredModal(prev => ({ ...prev, isOpen: false }))}
+                                className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors"
+                            >
+                                <X size={24} />
+                            </button>
+                        </div>
+
+                        {/* Modal Content */}
+                        <div className="flex-1 overflow-y-auto p-6 bg-slate-50/50">
+                            <TaskOverviewTable
+                                tasks={filteredModal.tasks}
+                                onEdit={(task) => {
+                                    // Optional: Implement edit handling if needed, currently read-only view mainly
+                                    console.log('Edit filtered task', task);
+                                }}
+                            />
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
