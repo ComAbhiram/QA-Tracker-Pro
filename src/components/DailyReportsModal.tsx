@@ -204,7 +204,7 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                     </div>
 
                     <!-- Tasks Table -->
-                    <table style="width: 100%; border-collapse: collapse; background: white; border: 2px solid #e2e8f0; border-radius: 12px; overflow: hidden;">
+                    <table style="width: 100%; border-collapse: collapse; background: white; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden;">
                         <thead>
                             <tr style="background: linear-gradient(to right, #0ea5e9, #6366f1);">
                                 <th style="padding: 16px; text-align: left; color: white; font-weight: 600; font-size: 14px; border-right: 1px solid rgba(255,255,255,0.2);">Project</th>
@@ -464,7 +464,7 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                     </div>
                     ` : ''}
                     
-                    <table style="width: 100%; border-collapse: collapse; background: white; border: 2px solid #e2e8f0; border-radius: 12px; overflow: hidden;">
+                    <table style="width: 100%; border-collapse: collapse; background: white; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden;">
                         <thead>
                             <tr style="background: linear-gradient(to right, #0ea5e9, #6366f1);">
                                 <th style="padding: 12px; text-align: left; color: white; font-weight: 600; font-size: 12px; width: 15%; border-right: 1px solid rgba(255,255,255,0.2);">Project & Type</th>
@@ -663,7 +663,7 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                         </div>
                     </div>
 
-                    <table style="width: 100%; border-collapse: collapse; background: white; border: 2px solid #e2e8f0; border-radius: 12px; overflow: hidden;">
+                    <table style="width: 100%; border-collapse: collapse; background: white; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden;">
                         <thead>
                             <tr style="background: linear-gradient(to right, #0ea5e9, #6366f1);">
                                 <th style="padding: 12px; text-align: left; color: white; font-weight: 600; font-size: 12px; width: 20%; border-right: 1px solid rgba(255,255,255,0.2);">Project Details</th>
