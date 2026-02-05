@@ -9,7 +9,7 @@ interface ProjectDetailsModalProps {
     project: {
         id: string;
         project_name: string;
-        location: string | null;
+        // location removed
         pc: string | null;
         allotted_time_days: number | null;
         tl_confirmed_effort_days: number | null;
@@ -30,7 +30,7 @@ interface ProjectDetailsModalProps {
 export default function ProjectDetailsModal({ isOpen, onClose, project, onSave }: ProjectDetailsModalProps) {
     const [formData, setFormData] = useState({
         project_name: '',
-        location: '',
+        // location removed
         pc: '',
         allotted_time_days: '',
         tl_confirmed_effort_days: '',
@@ -51,7 +51,7 @@ export default function ProjectDetailsModal({ isOpen, onClose, project, onSave }
         if (project) {
             setFormData({
                 project_name: project.project_name || '',
-                location: project.location || '',
+                // location removed
                 pc: project.pc || '',
                 allotted_time_days: project.allotted_time_days?.toString() || '',
                 tl_confirmed_effort_days: project.tl_confirmed_effort_days?.toString() || '',
@@ -69,7 +69,7 @@ export default function ProjectDetailsModal({ isOpen, onClose, project, onSave }
         } else {
             setFormData({
                 project_name: '',
-                location: '',
+                // location removed
                 pc: '',
                 allotted_time_days: '',
                 tl_confirmed_effort_days: '',
@@ -94,7 +94,7 @@ export default function ProjectDetailsModal({ isOpen, onClose, project, onSave }
         try {
             await onSave({
                 project_name: formData.project_name,
-                location: formData.location || null,
+                // location removed
                 pc: formData.pc || null,
                 allotted_time_days: formData.allotted_time_days ? parseFloat(formData.allotted_time_days) : null,
                 tl_confirmed_effort_days: formData.tl_confirmed_effort_days ? parseFloat(formData.tl_confirmed_effort_days) : null,
@@ -190,18 +190,7 @@ export default function ProjectDetailsModal({ isOpen, onClose, project, onSave }
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label className="block text-sm font-semibold text-slate-700 mb-2">Location</label>
-                            <select
-                                value={formData.location}
-                                onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                                className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 bg-white"
-                            >
-                                <option value="">Select location</option>
-                                <option value="Dubai">Dubai</option>
-                                <option value="Cochin">Cochin</option>
-                            </select>
-                        </div>
+                        {/* Location field removed */}
                         <div>
                             <label className="block text-sm font-semibold text-slate-700 mb-2">PC</label>
                             <input
