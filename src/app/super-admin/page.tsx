@@ -440,23 +440,23 @@ export default function SuperAdminPage() {
                             <table className="w-full text-xs">
                                 <thead className="bg-slate-800 text-white">
                                     <tr>
-                                        <th className="px-2 py-3 text-left font-semibold uppercase tracking-wider">Project Name</th>
-                                        <th className="px-2 py-3 text-center font-semibold uppercase tracking-wider">Started Date</th>
-                                        <th className="px-2 py-3 text-center font-semibold uppercase tracking-wider">Type</th>
-                                        <th className="px-2 py-3 text-center font-semibold uppercase tracking-wider">Category</th>
-                                        <th className="px-2 py-3 text-center font-semibold uppercase tracking-wider">Design</th>
-                                        <th className="px-2 py-3 text-center font-semibold uppercase tracking-wider">FE Dev</th>
-                                        <th className="px-2 py-3 text-center font-semibold uppercase tracking-wider">BE Dev</th>
-                                        <th className="px-2 py-3 text-center font-semibold uppercase tracking-wider">Testing</th>
-                                        <th className="px-2 py-3 text-center font-semibold uppercase tracking-wider">Unassigned</th>
-                                        <th className="px-2 py-3 text-center font-semibold uppercase tracking-wider bg-slate-700">Total Work Days</th>
-                                        <th className="px-2 py-3 text-center font-semibold uppercase tracking-wider">Expected Effort</th>
-                                        <th className="px-2 py-3 text-center font-semibold uppercase tracking-wider">HS Budget</th>
-                                        <th className="px-2 py-3 text-center font-semibold uppercase tracking-wider">Budget</th>
-                                        <th className="px-2 py-3 text-center font-semibold uppercase tracking-wider">Committed</th>
-                                        <th className="px-2 py-3 text-center font-semibold uppercase tracking-wider">Fixing</th>
-                                        <th className="px-2 py-3 text-center font-semibold uppercase tracking-wider">Live</th>
-                                        <th className="px-2 py-3 text-center font-semibold uppercase tracking-wider bg-slate-700">Deviation</th>
+                                        <th className="px-2 py-3 text-left font-semibold uppercase tracking-wider border-r border-slate-300">Project Name</th>
+                                        <th className="px-2 py-3 text-center font-semibold uppercase tracking-wider border-r border-slate-300">Started Date</th>
+                                        <th className="px-2 py-3 text-center font-semibold uppercase tracking-wider border-r border-slate-300">Type</th>
+                                        <th className="px-2 py-3 text-center font-semibold uppercase tracking-wider border-r border-slate-300">Category</th>
+                                        <th className="px-2 py-3 text-center font-semibold uppercase tracking-wider border-r border-slate-300">Design</th>
+                                        <th className="px-2 py-3 text-center font-semibold uppercase tracking-wider border-r border-slate-300">FE Dev</th>
+                                        <th className="px-2 py-3 text-center font-semibold uppercase tracking-wider border-r border-slate-300">BE Dev</th>
+                                        <th className="px-2 py-3 text-center font-semibold uppercase tracking-wider border-r border-slate-300">Testing</th>
+                                        <th className="px-2 py-3 text-center font-semibold uppercase tracking-wider border-r border-slate-300">Unassigned</th>
+                                        <th className="px-2 py-3 text-center font-semibold uppercase tracking-wider bg-slate-700 border-r border-slate-300">Total Work Days</th>
+                                        <th className="px-2 py-3 text-center font-semibold uppercase tracking-wider border-r border-slate-300">Expected Effort</th>
+                                        <th className="px-2 py-3 text-center font-semibold uppercase tracking-wider border-r border-slate-300">HS Budget</th>
+                                        <th className="px-2 py-3 text-center font-semibold uppercase tracking-wider border-r border-slate-300">Budget</th>
+                                        <th className="px-2 py-3 text-center font-semibold uppercase tracking-wider border-r border-slate-300">Committed</th>
+                                        <th className="px-2 py-3 text-center font-semibold uppercase tracking-wider border-r border-slate-300">Fixing</th>
+                                        <th className="px-2 py-3 text-center font-semibold uppercase tracking-wider border-r border-slate-300">Live</th>
+                                        <th className="px-2 py-3 text-center font-semibold uppercase tracking-wider bg-slate-700 border-r border-slate-300">Deviation</th>
                                         <th className="px-2 py-3 text-center font-semibold uppercase tracking-wider">Actions</th>
                                     </tr>
                                 </thead>
@@ -471,49 +471,49 @@ export default function SuperAdminPage() {
                                         return (
                                             <tr
                                                 key={`${project.id}-${index}`}
-                                                className={`border-b border-slate-100 hover:bg-slate-50 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-slate-50/30'}`}
+                                                className={`border-b border-slate-300 hover:bg-slate-50 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-slate-50/30'}`}
                                             >
-                                                <td className="px-2 py-3 font-semibold text-slate-800 border-r border-slate-100">
+                                                <td className="px-2 py-3 font-semibold text-slate-800 border-r border-slate-300">
                                                     {project.project_name}
                                                 </td>
-                                                <td className="px-2 py-3 text-center border-r border-slate-100">
+                                                <td className="px-2 py-3 text-center border-r border-slate-300">
                                                     <EditableCell
                                                         type="date"
                                                         value={project.started_date}
                                                         onSave={(val) => handleUpdateField(project.id, 'started_date', val)}
                                                     />
                                                 </td>
-                                                <td className="px-2 py-3 text-center border-r border-slate-100">
+                                                <td className="px-2 py-3 text-center border-r border-slate-300">
                                                     <EditableCell
                                                         value={project.project_type}
                                                         onSave={(val) => handleUpdateField(project.id, 'project_type', val)}
                                                     />
                                                 </td>
-                                                <td className="px-2 py-3 text-center border-r border-slate-100">
+                                                <td className="px-2 py-3 text-center border-r border-slate-300">
                                                     <EditableCell
                                                         value={project.category}
                                                         onSave={(val) => handleUpdateField(project.id, 'category', val)}
                                                     />
                                                 </td>
-                                                <td className="px-2 py-3 text-center font-medium text-purple-700 border-r border-slate-100">
+                                                <td className="px-2 py-3 text-center font-medium text-purple-700 border-r border-slate-300">
                                                     {hsData?.team_breakdown?.design_days != null ? hsData.team_breakdown.design_days.toFixed(2) : '0.00'}
                                                 </td>
-                                                <td className="px-2 py-3 text-center font-medium text-blue-700 border-r border-slate-100">
+                                                <td className="px-2 py-3 text-center font-medium text-blue-700 border-r border-slate-300">
                                                     {hsData?.team_breakdown?.fe_dev_days != null ? hsData.team_breakdown.fe_dev_days.toFixed(2) : '0.00'}
                                                 </td>
-                                                <td className="px-2 py-3 text-center font-medium text-green-700 border-r border-slate-100">
+                                                <td className="px-2 py-3 text-center font-medium text-green-700 border-r border-slate-300">
                                                     {hsData?.team_breakdown?.be_dev_days != null ? hsData.team_breakdown.be_dev_days.toFixed(2) : '0.00'}
                                                 </td>
-                                                <td className="px-2 py-3 text-center font-medium text-orange-700 border-r border-slate-100">
+                                                <td className="px-2 py-3 text-center font-medium text-orange-700 border-r border-slate-300">
                                                     {hsData?.team_breakdown?.testing_days != null ? hsData.team_breakdown.testing_days.toFixed(2) : '0.00'}
                                                 </td>
-                                                <td className="px-2 py-3 text-center font-medium text-slate-500 border-r border-slate-100">
+                                                <td className="px-2 py-3 text-center font-medium text-slate-500 border-r border-slate-300">
                                                     {hsData?.team_breakdown?.other_days != null ? hsData.team_breakdown.other_days.toFixed(2) : '0.00'}
                                                 </td>
-                                                <td className="px-2 py-3 text-center font-bold text-slate-900 bg-slate-50 border-r border-slate-100">
+                                                <td className="px-2 py-3 text-center font-bold text-slate-900 bg-slate-50 border-r border-slate-300">
                                                     {totalWorkDays.toFixed(2)}
                                                 </td>
-                                                <td className="px-2 py-3 text-center border-r border-slate-100">
+                                                <td className="px-2 py-3 text-center border-r border-slate-300">
                                                     <EditableCell
                                                         type="number"
                                                         value={project.expected_effort_days}
@@ -521,38 +521,38 @@ export default function SuperAdminPage() {
                                                         className="font-bold text-blue-600"
                                                     />
                                                 </td>
-                                                <td className="px-2 py-3 text-center border-r border-slate-100">
+                                                <td className="px-2 py-3 text-center border-r border-slate-300">
                                                     <EditableCell
                                                         value={project.hubstaff_budget}
                                                         onSave={(val) => handleUpdateField(project.id, 'hubstaff_budget', val)}
                                                     />
                                                 </td>
-                                                <td className="px-2 py-3 text-center border-r border-slate-100">
+                                                <td className="px-2 py-3 text-center border-r border-slate-300">
                                                     <EditableCell
                                                         value={project.budget_text}
                                                         onSave={(val) => handleUpdateField(project.id, 'budget_text', val)}
                                                     />
                                                 </td>
-                                                <td className="px-2 py-3 text-center border-r border-slate-100">
+                                                <td className="px-2 py-3 text-center border-r border-slate-300">
                                                     <EditableCell
                                                         type="number"
                                                         value={project.committed_days}
                                                         onSave={(val) => handleUpdateField(project.id, 'committed_days', val)}
                                                     />
                                                 </td>
-                                                <td className="px-2 py-3 text-center border-r border-slate-100">
+                                                <td className="px-2 py-3 text-center border-r border-slate-300">
                                                     <EditableCell
                                                         value={project.fixing_text}
                                                         onSave={(val) => handleUpdateField(project.id, 'fixing_text', val)}
                                                     />
                                                 </td>
-                                                <td className="px-2 py-3 text-center border-r border-slate-100">
+                                                <td className="px-2 py-3 text-center border-r border-slate-300">
                                                     <EditableCell
                                                         value={project.live_text}
                                                         onSave={(val) => handleUpdateField(project.id, 'live_text', val)}
                                                     />
                                                 </td>
-                                                <td className={`px-2 py-3 text-center font-bold bg-slate-50 border-r border-slate-100 ${deviation >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                                <td className={`px-2 py-3 text-center font-bold bg-slate-50 border-r border-slate-300 ${deviation >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                                                     {deviation.toFixed(2)}
                                                 </td>
                                                 <td className="px-2 py-3">
