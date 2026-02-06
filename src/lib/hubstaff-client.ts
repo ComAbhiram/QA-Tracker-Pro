@@ -174,7 +174,7 @@ export class HubstaffClient {
      * Fetch daily activities for a specific date or date range.
      * Optimized to use page_limit=500 and cached user/project names.
      */
-    async getDailyActivities(startDate: string, endDate: string) {
+    async getDailyActivities(startDate: string, endDate: string, userIds?: number[]) {
         await this.ensureToken();
 
         // Ensure caches are populated
@@ -185,7 +185,7 @@ export class HubstaffClient {
         const userMap = userLookupCache.get(orgIdNum)?.data;
         const projectMap = projectLookupCache.get(orgIdNum)?.data;
 
-        console.log(`Fetching daily activities from ${startDate} to ${endDate}...`);
+        console.log(`Fetching daily activities from ${startDate} to ${endDate}${userIds ? ` for users ${userIds.join(',')}` : ''}...`);
 
         let allActivities: any[] = [];
         let hasMore = true;
@@ -193,6 +193,9 @@ export class HubstaffClient {
 
         while (hasMore) {
             let url = `${HUBSTAFF_API_BASE}/organizations/${this.orgId}/activities/daily?date[start]=${startDate}&date[stop]=${endDate}&page_limit=500`;
+            if (userIds && userIds.length > 0) {
+                url += `&user_ids=${userIds.join(',')}`;
+            }
             if (pageStartId) url += `&page_start_id=${pageStartId}`;
 
             const response = await this.fetchWithRetry(url);

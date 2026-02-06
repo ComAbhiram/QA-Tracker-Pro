@@ -3,7 +3,7 @@ import { supabaseServer as supabase } from '@/lib/supabase-server';
 import { mapTaskFromDB, type Task } from '@/lib/types';
 import { formatDateDDMMYYYY, formatTime } from '@/lib/hubstaff-utils';
 import { mapHubstaffNameToQA, getHubstaffNameFromQA } from '@/lib/hubstaff-name-mapping';
-import { getValidAccessToken } from '@/lib/hubstaff-auth';
+import { hubstaffClient } from '@/lib/hubstaff-client';
 
 const HUBSTAFF_API_BASE = 'https://api.hubstaff.com/v2';
 
@@ -140,167 +140,74 @@ export async function GET(request: NextRequest) {
 
         if (orgId && accessToken) {
             try {
-                // Fetch user ID for this QA (need to get from users API)
-                const usersResponse = await fetch(
-                    `${HUBSTAFF_API_BASE}/organizations/${orgId}/members`,
-                    {
-                        headers: {
-                            'Authorization': `Bearer ${accessToken}`,
-                            'Content-Type': 'application/json',
-                        },
+                // Get all members to find the correct user ID
+                const members = await hubstaffClient.getOrganizationMembers();
+
+                // Find user by matching Hubstaff name
+                let userId: number | null = null;
+
+                for (const member of members) {
+                    const memberId = member.id;
+                    const userName = member.name; // hubstaffClient returns enriched member objects with names
+
+                    // 1. Direct Name Match (e.g. "Aswathi M Ashok" === "Aswathi M Ashok")
+                    if (userName === qaName) {
+                        userId = memberId;
+                        console.log(`[API] Matched user by direct name: "${userName}"`);
+                        break;
                     }
-                );
+                    // 2. Reverse Lookup Match (Input was Short Name, e.g. "Aswathi", matches "Aswathi M Ashok")
+                    else if (hubstaffName && userName === hubstaffName) {
+                        userId = memberId;
+                        console.log(`[API] Matched user by reverse lookup: "${userName}"`);
+                        break;
+                    }
+                    // 3. Mapped Match (Input was Short Name, mapped user name matches input)
+                    else if (mapHubstaffNameToQA(userName) === qaName) {
+                        userId = memberId;
+                        console.log(`[API] Matched user by mapped name: "${userName}" -> "${qaName}"`);
+                        break;
+                    }
+                }
 
-                if (usersResponse.ok) {
-                    const usersData = await usersResponse.json();
-                    const members = usersData.organization_memberships || usersData.members || [];
+                if (userId) {
+                    // Fetch activities for this user and date
+                    const dailyActivities = await hubstaffClient.getDailyActivities(date, date, [userId]);
 
-                    // Find user by matching Hubstaff name
-                    let userId: number | null = null;
-                    for (const member of members) {
-                        const memberId = member.user_id || member.id;
-                        const userResponse = await fetch(
-                            `${HUBSTAFF_API_BASE}/users/${memberId}`,
-                            {
-                                headers: {
-                                    'Authorization': `Bearer ${accessToken}`,
-                                    'Content-Type': 'application/json',
-                                },
-                            }
-                        );
+                    // Aggregate activity data
+                    let totalTime = 0;
+                    let totalActivityWeighted = 0;
+                    const projectSet = new Set<string>();
 
-                        if (userResponse.ok) {
-                            const userData = await userResponse.json();
-                            const user = userData.user || userData;
-                            const userName = user.name || `${user.first_name || ''} ${user.last_name || ''}`.trim();
+                    console.log(`[API] Processing ${dailyActivities.length} daily_activities for ${qaName}`);
 
-                            // 1. Direct Name Match (e.g. "Aswathi M Ashok" === "Aswathi M Ashok")
-                            if (userName === qaName) {
-                                userId = memberId;
-                                console.log(`[API] Matched user by direct name: "${userName}"`);
-                                break;
-                            }
-                            // 2. Reverse Lookup Match (Input was Short Name, e.g. "Aswathi", matches "Aswathi M Ashok")
-                            else if (hubstaffName && userName === hubstaffName) {
-                                userId = memberId;
-                                console.log(`[API] Matched user by reverse lookup: "${userName}"`);
-                                break;
-                            }
-                            // 3. Mapped Match (Input was Short Name, mapped user name matches input)
-                            else if (mapHubstaffNameToQA(userName) === qaName) {
-                                userId = memberId;
-                                console.log(`[API] Matched user by mapped name: "${userName}" -> "${qaName}"`);
-                                break;
-                            }
+                    dailyActivities.forEach((activity: any, index: number) => {
+                        const timeWorked = activity.timeWorked || 0; // Client returns 'timeWorked' (mapped from 'tracked')
+                        const activityPct = activity.activityPercentage || 0;
+                        // Note: client returns pre-calculated 'activityPercentage'
+
+                        console.log(`[API] Activity ${index + 1}: tracked=${timeWorked}s, activity%=${activityPct}%, project=${activity.projectName}`);
+
+                        totalTime += timeWorked;
+                        totalActivityWeighted += activityPct * timeWorked;
+                    });
+
+                    // Get unique project names from the relevant tasks instead of Hubstaff
+                    relevantTasks.forEach(task => {
+                        if (task.projectName) {
+                            projectSet.add(task.projectName);
                         }
-                    }
+                    });
 
-                    if (userId) {
-                        // Fetch activities for this user and date
-                        // Fetch activities for this user and date with pagination
-                        let dailyActivities: any[] = [];
-                        let nextPageStartId: any = undefined;
-                        let hasMore = true;
+                    console.log(`[API] Total time: ${totalTime}s (${Math.floor(totalTime / 3600)}h ${Math.floor((totalTime % 3600) / 60)}m)`);
+                    console.log(`[API] Weighted activity: ${totalActivityWeighted}, Average: ${totalTime > 0 ? Math.round(totalActivityWeighted / totalTime) : 0}%`);
+                    console.log(`[API] Projects from tasks: ${Array.from(projectSet).join(', ')}`);
 
-                        while (hasMore) {
-                            let pagedUrl = `${HUBSTAFF_API_BASE}/organizations/${orgId}/activities/daily?date[start]=${date}&date[stop]=${date}&user_ids=${userId}`;
-                            if (nextPageStartId) {
-                                pagedUrl += `&page_start_id=${nextPageStartId}`;
-                            }
-
-                            const activitiesResponse = await fetch(
-                                pagedUrl,
-                                {
-                                    headers: {
-                                        'Authorization': `Bearer ${accessToken}`,
-                                        'Content-Type': 'application/json',
-                                    },
-                                }
-                            );
-
-                            if (activitiesResponse.ok) {
-                                const activitiesData = await activitiesResponse.json();
-                                if (activitiesData.daily_activities) {
-                                    dailyActivities = [...dailyActivities, ...activitiesData.daily_activities];
-                                }
-
-                                if (activitiesData.pagination && activitiesData.pagination.next_page_start_id) {
-                                    nextPageStartId = activitiesData.pagination.next_page_start_id;
-                                } else {
-                                    hasMore = false;
-                                }
-                            } else {
-                                console.error('Error fetching Hubstaff activities page:', await activitiesResponse.text());
-                                hasMore = false;
-                            }
-                        }
-
-                        // Fetch project names
-                        const projectIds: number[] = [...new Set(dailyActivities.map((a: any) => a.project_id).filter(Boolean))] as number[];
-                        const projectNamesMap: Record<number, string> = {};
-
-                        await Promise.all(
-                            projectIds.map(async (pid: number) => {
-                                try {
-                                    const projectResponse = await fetch(
-                                        `${HUBSTAFF_API_BASE}/projects/${pid}`,
-                                        {
-                                            headers: {
-                                                'Authorization': `Bearer ${accessToken}`,
-                                                'Content-Type': 'application/json',
-                                            },
-                                        }
-                                    );
-
-                                    if (projectResponse.ok) {
-                                        const projectData = await projectResponse.json();
-                                        const project = projectData.project || projectData;
-                                        projectNamesMap[pid] = project.name || `Project ${pid}`;
-                                    }
-                                } catch (error) {
-                                    console.error(`Error fetching project ${pid}:`, error);
-                                }
-                            })
-                        );
-
-                        // Aggregate activity data
-                        let totalTime = 0;
-                        let totalActivityWeighted = 0;
-                        const projectSet = new Set<string>();
-
-                        console.log(`[API] Processing ${dailyActivities.length} daily_activities for ${qaName}`);
-
-                        dailyActivities.forEach((activity: any, index: number) => {
-                            const timeWorked = activity.tracked || 0;
-                            const activityPct = timeWorked > 0 ? Math.round((activity.overall / timeWorked) * 100) : 0;
-
-                            console.log(`[API] Activity ${index + 1}: tracked=${timeWorked}s, overall=${activity.overall}s, activity%=${activityPct}%, project_id=${activity.project_id}`);
-
-                            totalTime += timeWorked;
-                            totalActivityWeighted += activityPct * timeWorked;
-
-                            // Instead of using Hubstaff project names, use project names from the tasks
-                            // This ensures we show the correct project names from our database
-                            // We'll populate this from the relevant tasks instead
-                        });
-
-                        // Get unique project names from the relevant tasks instead of Hubstaff
-                        relevantTasks.forEach(task => {
-                            if (task.projectName) {
-                                projectSet.add(task.projectName);
-                            }
-                        });
-
-                        console.log(`[API] Total time: ${totalTime}s (${Math.floor(totalTime / 3600)}h ${Math.floor((totalTime % 3600) / 60)}m)`);
-                        console.log(`[API] Weighted activity: ${totalActivityWeighted}, Average: ${totalTime > 0 ? Math.round(totalActivityWeighted / totalTime) : 0}%`);
-                        console.log(`[API] Projects from tasks: ${Array.from(projectSet).join(', ')}`);
-
-                        hubstaffActivity = {
-                            timeWorked: totalTime,
-                            activityPercentage: totalTime > 0 ? Math.round(totalActivityWeighted / totalTime) : 0,
-                            projects: Array.from(projectSet),
-                        };
-                    }
+                    hubstaffActivity = {
+                        timeWorked: totalTime,
+                        activityPercentage: totalTime > 0 ? Math.round(totalActivityWeighted / totalTime) : 0,
+                        projects: Array.from(projectSet),
+                    };
                 }
             } catch (error) {
                 console.error('Error fetching Hubstaff activity:', error);
