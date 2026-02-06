@@ -321,6 +321,13 @@ export async function PUT(request: NextRequest) {
 
         console.log(`[ProjectOverview] Updating project ${id} with:`, cleanUpdateData);
 
+        // Fetch current project to check for name change
+        const { data: currentProject } = await supabase
+            .from('project_overview')
+            .select('project_name, team_id')
+            .eq('id', id)
+            .single();
+
         // Update project overview
         const { data: updatedProject, error } = await supabase
             .from('project_overview')
@@ -335,6 +342,22 @@ export async function PUT(request: NextRequest) {
                 { error: 'Failed to update project', details: error.message },
                 { status: 500 }
             );
+        }
+
+        // Cascade update to tasks if project name changed
+        if (currentProject && cleanUpdateData.project_name && currentProject.project_name !== cleanUpdateData.project_name) {
+            console.log(`[ProjectOverview] Cascading name change from "${currentProject.project_name}" to "${cleanUpdateData.project_name}"`);
+
+            const { error: taskUpdateError } = await supabase
+                .from('tasks')
+                .update({ project_name: cleanUpdateData.project_name })
+                .eq('project_name', currentProject.project_name)
+                .eq('team_id', currentProject.team_id); // Ensure we only update tasks for this team
+
+            if (taskUpdateError) {
+                console.error('Error cascading project name update to tasks:', taskUpdateError);
+                // We don't fail the request, but we log it. Could optionally return a warning.
+            }
         }
 
         return NextResponse.json({ project: updatedProject });
