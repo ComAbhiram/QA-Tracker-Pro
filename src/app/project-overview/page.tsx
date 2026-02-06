@@ -73,6 +73,7 @@ export default function ProjectOverviewPage() {
     const [filterStartDate, setFilterStartDate] = useState('');
     const [filterEndDate, setFilterEndDate] = useState('');
     const [filterQA, setFilterQA] = useState('');
+    const [filterAssignedOnly, setFilterAssignedOnly] = useState(false);
 
     // Derived State: Unique QAs for Filter Dropdown
     const uniqueQAs = Array.from(new Set(
@@ -100,7 +101,14 @@ export default function ProjectOverviewPage() {
             matchesQA = resources.includes(filterQA);
         }
 
-        return matchesSearch && matchesDate && matchesQA;
+        // Assigned Only Filter
+        let matchesAssigned = true;
+        if (filterAssignedOnly) {
+            // Check if resources string is present and not empty/just whitespace
+            matchesAssigned = !!(resources && resources.trim().length > 0 && resources !== '-');
+        }
+
+        return matchesSearch && matchesDate && matchesQA && matchesAssigned;
     });
 
     const filteredTasks = tasks.filter(t => {
@@ -411,9 +419,21 @@ export default function ProjectOverviewPage() {
                             </select>
                         </div>
 
-                        {(filterStartDate || filterEndDate || filterQA) && (
+                        <div className="flex items-center gap-2">
+                            <label className="flex items-center gap-2 text-sm font-semibold text-slate-700 cursor-pointer select-none">
+                                <input
+                                    type="checkbox"
+                                    checked={filterAssignedOnly}
+                                    onChange={(e) => setFilterAssignedOnly(e.target.checked)}
+                                    className="w-4 h-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500"
+                                />
+                                Assigned Only
+                            </label>
+                        </div>
+
+                        {(filterStartDate || filterEndDate || filterQA || filterAssignedOnly) && (
                             <button
-                                onClick={() => { setFilterStartDate(''); setFilterEndDate(''); setFilterQA(''); }}
+                                onClick={() => { setFilterStartDate(''); setFilterEndDate(''); setFilterQA(''); setFilterAssignedOnly(false); }}
                                 className="text-sm text-red-600 hover:text-red-700 font-medium ml-auto"
                             >
                                 Clear Filters
