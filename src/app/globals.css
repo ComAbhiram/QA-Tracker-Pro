@@ -13,6 +13,10 @@
     --secondary-foreground: #0f172a;
   }
 
+  html {
+    font-size: 90%; /* Scale entire UI down to mimic 90% zoom */
+  }
+
   body {
     @apply bg-slate-50 text-slate-700 min-h-screen font-sans overflow-x-hidden;
     /* Clean white/gray background, no gradients */
@@ -24,8 +28,9 @@
 
   /* Sidebar */
   .sidebar {
-    @apply fixed top-0 left-0 w-[260px] h-full flex flex-col z-50 transition-all duration-300 bg-white border-r border-slate-100;
+    @apply fixed top-0 left-0 w-[16.25rem] h-full flex flex-col z-50 transition-all duration-300 bg-white border-r border-slate-100;
     /* Removed gradient and heavy shadow */
+    /* 260px converted to 16.25rem to scale with font-size */
   }
 
   .sidebar-header {
@@ -75,7 +80,7 @@
 
   @screen lg {
     .main-content {
-      margin-left: 260px !important;
+      margin-left: 16.25rem !important; /* Matches sidebar width */
     }
   }
 
