@@ -131,7 +131,7 @@ export async function GET(request: NextRequest) {
             projects: [],
         };
 
-        if (orgId && accessToken) {
+        if (orgId) {
             try {
                 // Get all members to find the correct user ID
                 const members = await hubstaffClient.getOrganizationMembers();
