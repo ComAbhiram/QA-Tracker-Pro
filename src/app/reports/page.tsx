@@ -41,6 +41,8 @@ export default function Reports() {
         if (s === 'rejected' || s.includes('rejected')) return 'bg-rose-50 text-rose-700 border-rose-200 hover:border-rose-300';
         if (s === 'on hold') return 'bg-amber-50 text-amber-700 border-amber-200 hover:border-amber-300';
         if (s === 'forecast') return 'bg-slate-50 text-slate-700 border-slate-200 hover:border-slate-300';
+        if (s === 'yet to start') return 'bg-gray-50 text-gray-700 border-gray-200 hover:border-gray-300';
+        if (s === 'being developed') return 'bg-indigo-50 text-indigo-700 border-indigo-200 hover:border-indigo-300';
         return 'bg-slate-50 text-slate-700 border-slate-200 hover:border-slate-300';
     };
 
