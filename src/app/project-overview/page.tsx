@@ -249,9 +249,16 @@ export default function ProjectOverviewPage() {
             if (response.ok) {
                 await fetchData();
                 setIsModalOpen(false);
-            } else {
                 const errorData = await response.json().catch(() => ({}));
-                alert(`Failed to save project: ${errorData.error} \nDetails: ${errorData.details || 'No details provided'}`);
+                let errorMessage = `Failed to save project: ${errorData.error}`;
+
+                if (errorData.details && errorData.details.includes('project_overview_project_name_team_id_key')) {
+                    errorMessage = 'A project with this name already exists. Please choose a different name.';
+                } else if (errorData.details) {
+                    errorMessage += `\nDetails: ${errorData.details}`;
+                }
+
+                alert(errorMessage);
             }
         } catch (error) {
             console.error('Error saving project:', error);
