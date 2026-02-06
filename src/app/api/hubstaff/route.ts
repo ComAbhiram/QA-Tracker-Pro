@@ -17,9 +17,10 @@ export async function GET(request: NextRequest) {
 
         // Fetch optimized activities from client
         // The client handles caching of users/projects and pagination automatically
-        const activities = await hubstaffClient.getDailyActivities(date, date);
+        const userIdNum = userIdFilter ? parseInt(userIdFilter) : undefined;
+        const activities = await hubstaffClient.getDailyActivities(date, date, userIdNum ? [userIdNum] : undefined);
 
-        // Filter by user if requested
+        // Filter by user if requested (client handles this but good to be safe/consistent)
         let filteredActivities = activities;
         if (userIdFilter) {
             const userIdNum = parseInt(userIdFilter);
