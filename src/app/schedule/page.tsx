@@ -150,6 +150,18 @@ export default function Schedule() {
 
         // Historical/Persistent Overdue Check
         if (target > end) {
+            // New Logic: Don't show overdue tasks on future dates if they are > 1 day overdue
+            // This prevents "Feb 6" overdue tasks from showing up on "Feb 12" view
+            if (target > now) {
+                // If viewing a future date (e.g. Next Week), don't show old overdue stuff
+                // Allow "Tomorrow" (+1d) to show, but not beyond that
+                const tomorrow = new Date(now);
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                tomorrow.setHours(23, 59, 59, 999);
+
+                if (target > tomorrow) return false;
+            }
+
             const statusInfo = getStatusOnDate(task, target);
             if (statusInfo.baseStatus === 'Overdue') return true;
             // Also show if completed ON this target date (late)
