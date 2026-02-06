@@ -301,6 +301,7 @@ export async function PUT(request: NextRequest) {
         // Only include fields that are actually present in the request body
         // and filter out any fields that shouldn't be updated directly via this endpoint
         const allowedFields = [
+            'project_name',
             'team_id', 'pc', 'allotted_time_days', 'tl_confirmed_effort_days',
             'blockers', 'expected_effort_days', 'hubstaff_budget', 'committed_days',
             'fixing_text', 'live_text', 'budget_text', 'started_date',
