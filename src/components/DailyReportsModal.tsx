@@ -372,10 +372,12 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
 
             container.innerHTML = `
                 <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 1000px;">
-                    <h1 style="color: #0ea5e9; font-size: 28px; margin-bottom: 8px; font-weight: 700;">
-                        <span>Today's</span><span style="visibility: hidden;">ii</span><span>Work</span><span style="visibility: hidden;">ii</span><span>Status</span>
-                    </h1>
-                    <p style="color: #64748b; font-size: 16px; margin-bottom: 24px;">${new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                    <div style="margin-bottom: 24px; border-bottom: 2px solid #e2e8f0; padding-bottom: 16px;">
+                        <h1 style="color: #1e293b; font-size: 28px; margin-bottom: 8px; font-weight: 700;">
+                            Work Status of the Day : ${formatDate(today)}
+                        </h1>
+                        <p style="color: #64748b; font-size: 16px; margin: 0;">${new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                    </div>
                     
                     ${hubstaffData ? `
                     <!-- Hubstaff Activity Section - Dynamic Team -->
@@ -466,12 +468,12 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                     
                     <table style="width: 100%; border-collapse: collapse; background: white; border: 1px solid #94a3b8; border-radius: 12px; overflow: hidden;">
                         <thead>
-                            <tr style="background: linear-gradient(to right, #0ea5e9, #6366f1);">
-                                <th style="padding: 12px; text-align: left; color: white; font-weight: 600; font-size: 12px; width: 15%; border-right: 1px solid #94a3b8;">Project & Type</th>
-                                <th style="padding: 12px; text-align: left; color: white; font-weight: 600; font-size: 12px; border-right: 1px solid #94a3b8;">Phase & PC</th>
-                                <th style="padding: 12px; text-align: center; color: white; font-weight: 600; font-size: 12px; width: 10%; border-right: 1px solid #94a3b8;">Status</th>
-                                <th style="padding: 12px; text-align: left; color: white; font-weight: 600; font-size: 12px; width: 15%; border-right: 1px solid #94a3b8;">Assignees</th>
-                                <th style="padding: 12px; text-align: left; color: white; font-weight: 600; font-size: 12px; border-right: 1px solid #94a3b8;">Dates (S/E/A)</th>
+                            <tr style="background: #1e293b;">
+                                <th style="padding: 12px; text-align: left; color: white; font-weight: 600; font-size: 12px; width: 15%; border-right: 1px solid #475569;">Project & Type</th>
+                                <th style="padding: 12px; text-align: left; color: white; font-weight: 600; font-size: 12px; border-right: 1px solid #475569;">Phase & PC</th>
+                                <th style="padding: 12px; text-align: center; color: white; font-weight: 600; font-size: 12px; width: 10%; border-right: 1px solid #475569;">Status</th>
+                                <th style="padding: 12px; text-align: left; color: white; font-weight: 600; font-size: 12px; width: 15%; border-right: 1px solid #475569;">Assignees</th>
+                                <th style="padding: 12px; text-align: left; color: white; font-weight: 600; font-size: 12px; border-right: 1px solid #475569;">Dates (S/E/A)</th>
                                 <th style="padding: 12px; text-align: left; color: white; font-weight: 600; font-size: 12px;">Comments/Dev.</th>
                             </tr>
                         </thead>
@@ -652,10 +654,10 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
 
             container.innerHTML = `
                 <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 1000px;">
-                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; border-bottom: 2px solid #e2e8f0; padding-bottom: 16px;">
                         <div>
-                            <h1 style="color: #0ea5e9; font-size: 28px; margin-bottom: 8px; font-weight: 700;">Work Schedule</h1>
-                            <p style="color: #64748b; font-size: 16px; margin: 0;">Schedule For: ${dateStr}</p>
+                            <h1 style="color: #1e293b; font-size: 28px; margin-bottom: 8px; font-weight: 700;">Work Schedule For the Day : ${formatDate(scheduleDate)}</h1>
+                            <p style="color: #64748b; font-size: 14px; margin: 0;">${dateStr}</p>
                         </div>
                         <div style="text-align: right;">
                              <p style="color: #64748b; font-size: 14px; margin: 0;">Total Active Tasks</p>
@@ -665,12 +667,12 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
 
                     <table style="width: 100%; border-collapse: collapse; background: white; border: 1px solid #94a3b8; border-radius: 12px; overflow: hidden;">
                         <thead>
-                            <tr style="background: linear-gradient(to right, #0ea5e9, #6366f1);">
-                                <th style="padding: 12px; text-align: left; color: white; font-weight: 600; font-size: 12px; width: 20%; border-right: 1px solid #94a3b8;">Project Details</th>
-                                <th style="padding: 12px; text-align: left; color: white; font-weight: 600; font-size: 12px; border-right: 1px solid #94a3b8;">Phase & PC</th>
-                                <th style="padding: 12px; text-align: center; color: white; font-weight: 600; font-size: 12px; width: 10%; border-right: 1px solid #94a3b8;">Status</th>
-                                <th style="padding: 12px; text-align: left; color: white; font-weight: 600; font-size: 12px; width: 15%; border-right: 1px solid #94a3b8;">Assignees</th>
-                                <th style="padding: 12px; text-align: left; color: white; font-weight: 600; font-size: 12px; vertical-align: middle; border-right: 1px solid #94a3b8;">Timeline</th>
+                            <tr style="background: #1e293b;">
+                                <th style="padding: 12px; text-align: left; color: white; font-weight: 600; font-size: 12px; width: 20%; border-right: 1px solid #475569;">Project Details</th>
+                                <th style="padding: 12px; text-align: left; color: white; font-weight: 600; font-size: 12px; border-right: 1px solid #475569;">Phase & PC</th>
+                                <th style="padding: 12px; text-align: center; color: white; font-weight: 600; font-size: 12px; width: 10%; border-right: 1px solid #475569;">Status</th>
+                                <th style="padding: 12px; text-align: left; color: white; font-weight: 600; font-size: 12px; width: 15%; border-right: 1px solid #475569;">Assignees</th>
+                                <th style="padding: 12px; text-align: left; color: white; font-weight: 600; font-size: 12px; vertical-align: middle; border-right: 1px solid #475569;">Timeline</th>
                             </tr>
                         </thead>
                         <tbody>
