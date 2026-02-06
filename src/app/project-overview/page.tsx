@@ -251,7 +251,7 @@ export default function ProjectOverviewPage() {
                 setIsModalOpen(false);
             } else {
                 const errorData = await response.json().catch(() => ({}));
-                alert(`Failed to save project: ${errorData.error || errorData.details || 'Unknown error'}`);
+                alert(`Failed to save project: ${errorData.error} \nDetails: ${errorData.details || 'No details provided'}`);
             }
         } catch (error) {
             console.error('Error saving project:', error);

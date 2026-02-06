@@ -67,7 +67,7 @@ export function Sidebar() {
     };
 
     const [userRole, setUserRole] = useState<string | null>(null);
-    const [sidebarTitle, setSidebarTitle] = useState('Advanced Team Tracker');
+    const [sidebarTitle, setSidebarTitle] = useState('Team Tracker');
     const [showManageTeam, setShowManageTeam] = useState(false);
 
     useEffect(() => {
