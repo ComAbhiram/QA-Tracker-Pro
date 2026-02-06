@@ -14,7 +14,7 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "Advanced QA Project Tracker",
+  title: "Advanced Team Tracker",
   description: "Track and manage QA projects efficiently",
 };
 

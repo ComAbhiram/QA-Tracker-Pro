@@ -32,8 +32,19 @@ export default function Reports() {
     const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
     const [editingTask, setEditingTask] = useState<Task | null>(null);
 
-    // MOVED: handleMetricClick was here at top, which is correct.
-    const handleMetricClick = (type: 'total' | 'completed' | 'inProgress' | 'overdue' | 'assignee', assignee?: string, status?: string) => {
+    // Helper for status colors
+    const getStatusColor = (status: string) => {
+        const s = status.toLowerCase();
+        if (s === 'completed') return 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:border-emerald-300';
+        if (s === 'in progress') return 'bg-blue-50 text-blue-700 border-blue-200 hover:border-blue-300';
+        if (s === 'overdue') return 'bg-red-50 text-red-700 border-red-200 hover:border-red-300';
+        if (s === 'rejected' || s.includes('rejected')) return 'bg-rose-50 text-rose-700 border-rose-200 hover:border-rose-300';
+        if (s === 'on hold') return 'bg-amber-50 text-amber-700 border-amber-200 hover:border-amber-300';
+        if (s === 'forecast') return 'bg-slate-50 text-slate-700 border-slate-200 hover:border-slate-300';
+        return 'bg-slate-50 text-slate-700 border-slate-200 hover:border-slate-300';
+    };
+
+    const handleMetricClick = (type: 'total' | 'completed' | 'inProgress' | 'overdue' | 'assignee' | 'status', assignee?: string, status?: string) => {
         let tasksToShow = [...filteredTasks];
         let title = '';
 
@@ -48,6 +59,9 @@ export default function Reports() {
         } else if (type === 'overdue') {
             tasksToShow = tasksToShow.filter(t => getEffectiveStatus(t) === 'Overdue');
             title = 'Overdue Tasks';
+        } else if (type === 'status' && status) {
+            tasksToShow = tasksToShow.filter(t => getEffectiveStatus(t) === status);
+            title = `${status} Tasks`;
         } else if (type === 'assignee' && assignee) {
             const assigneeName = assignee === 'Unassigned' ? null : assignee;
 
@@ -96,10 +110,6 @@ export default function Reports() {
                     setTeamMembers(data.members || []);
                 }
             } else {
-                // Team Account: Fetch from team_members table
-                // Note: We need the team_id. The RLS policy allows selecting own team members.
-                // But we should filter by team_id explicitly if possible, or just select all and RLS handles it.
-                // However, to be safe and explicit:
                 if (userTeam?.team_id) {
                     const { data, error } = await supabase
                         .from('team_members')
@@ -202,8 +212,6 @@ export default function Reports() {
         }
     };
 
-
-
     const getFilteredTasks = () => {
         return tasks.filter(t => {
             const effectiveStatus = getEffectiveStatus(t);
@@ -212,40 +220,30 @@ export default function Reports() {
             if (selectedProject && t.projectName !== selectedProject) return false;
 
             // Filter by QA
-            // Filter by QA
             if (selectedQA) {
-                // Get config to find the short name (e.g. "Aswathi") from Hubstaff name (e.g. "Aswathi M Ashok")
                 const memberConfig = getTeamMemberByHubstaffName(selectedQA);
                 const shortName = memberConfig?.name;
-
                 const qName = selectedQA.trim().toLowerCase();
                 const sName = shortName ? shortName.trim().toLowerCase() : '';
 
-                // Check primary assignee
                 const assigned1 = (t.assignedTo || '').trim().toLowerCase();
                 const match1 = assigned1 === qName || (sName && assigned1 === sName);
 
-                // Check secondary assignee
                 const assigned2 = (t.assignedTo2 || '').trim().toLowerCase();
                 const match2 = assigned2 === qName || (sName && assigned2 === sName);
 
-                // If strict matches fail, try relaxed partial matching (e.g. "minnu" inside "minnu sebastian")
                 if (!match1 && !match2) {
                     const fuzzy1 = (assigned1 && qName.includes(assigned1)) || (assigned1 && assigned1.includes(qName));
                     const fuzzy2 = (assigned2 && qName.includes(assigned2)) || (assigned2 && assigned2.includes(qName));
-
                     if (!fuzzy1 && !fuzzy2) return false;
                 }
             }
 
-            // Filter by Date (checking overlapping intervals)
+            // Filter by Date
             if (dateRange.start && dateRange.end) {
-                if (!t.startDate || !t.endDate) return false; // Skip if no dates
-
-                // Compare YYYY-MM-DD strings directly to avoid Javascript Date timezone shifts
+                if (!t.startDate || !t.endDate) return false;
                 const taskStart = t.startDate.substring(0, 10);
                 const taskEnd = t.endDate.substring(0, 10);
-
                 return taskStart <= dateRange.end && taskEnd >= dateRange.start;
             }
 
@@ -255,7 +253,7 @@ export default function Reports() {
 
     const filteredTasks = getFilteredTasks();
 
-    // Calculate statistics based on FILTERED tasks
+    // Calculate statistics
     const stats = {
         total: filteredTasks.length,
         completed: filteredTasks.filter(t => t.status === 'Completed').length,
@@ -507,9 +505,13 @@ export default function Reports() {
                 <div className="p-6">
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                         {Object.entries(tasksByStatus).map(([status, count]) => (
-                            <div key={status} className="p-4 bg-slate-50 rounded-lg border border-slate-200">
-                                <div className="text-sm text-slate-500 mb-1">{status}</div>
-                                <div className="text-2xl font-bold text-slate-800">{count}</div>
+                            <div
+                                key={status}
+                                onClick={() => handleMetricClick('status', undefined, status)}
+                                className={`p-4 rounded-xl border transition-all cursor-pointer hover:shadow-md ${getStatusColor(status)}`}
+                            >
+                                <div className="text-sm font-medium opacity-80 mb-1">{status}</div>
+                                <div className="text-3xl font-bold">{count}</div>
                             </div>
                         ))}
                     </div>
@@ -553,4 +555,3 @@ export default function Reports() {
         </div>
     );
 }
-

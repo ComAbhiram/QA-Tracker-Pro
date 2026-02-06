@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { mapTaskFromDB, Task, isTaskOverdue, getOverdueDays } from '@/lib/types';
 import { format } from 'date-fns';
-import { Search, Plus, Edit2, AlertCircle } from 'lucide-react';
+import { Search, Plus, Edit2, AlertCircle, Download } from 'lucide-react';
 import TaskModal from '@/components/TaskModal';
 import Pagination from '@/components/Pagination';
 
@@ -175,6 +175,36 @@ export default function Tracker() {
         return acc;
     }, {} as Record<string, Task[]>);
 
+    const exportCSV = () => {
+        const headers = ['Project Name', 'Type', 'Priority', 'Phase', 'Status', 'Start Date', 'End Date', 'Actual End', 'Assignees', 'Bug Count', 'HTML Bugs', 'Functional Bugs', 'Comments'];
+        const csvContent = [
+            headers.join(','),
+            ...tasks.map(t => [
+                `"${t.projectName}"`,
+                `"${t.projectType || ''}"`,
+                `"${t.priority || ''}"`,
+                `"${t.subPhase || ''}"`,
+                `"${t.status}"`,
+                t.startDate || '',
+                t.endDate || '',
+                t.actualCompletionDate || '',
+                `"${t.assignedTo || ''} ${t.assignedTo2 || ''} ${(t.additionalAssignees || []).join(' ')}"`.trim(),
+                t.bugCount || 0,
+                t.htmlBugs || 0,
+                t.functionalBugs || 0,
+                `"${t.comments || ''}"`
+            ].join(','))
+        ].join('\n');
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `tracker_export_${new Date().toISOString().split('T')[0]}.csv`;
+        link.click();
+        URL.revokeObjectURL(url);
+    };
+
     return (
         <div className="max-w-[1800px] mx-auto">
             <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
@@ -182,12 +212,20 @@ export default function Tracker() {
                     <h1 className="text-3xl font-bold text-slate-800">Task Tracker</h1>
                     <p className="text-slate-500">Track all active QA tasks by assignee</p>
                 </div>
-                <button
-                    onClick={handleAddTask}
-                    className="btn btn-primary flex items-center gap-2"
-                >
-                    <Plus size={18} /> New Task
-                </button>
+                <div className="flex gap-2">
+                    <button
+                        onClick={exportCSV}
+                        className="btn btn-secondary flex items-center gap-2"
+                    >
+                        <Download size={18} /> Export CSV
+                    </button>
+                    <button
+                        onClick={handleAddTask}
+                        className="btn btn-primary flex items-center gap-2"
+                    >
+                        <Plus size={18} /> New Task
+                    </button>
+                </div>
             </header>
 
             {/* Filters */}

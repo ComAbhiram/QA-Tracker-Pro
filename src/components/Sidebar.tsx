@@ -67,7 +67,7 @@ export function Sidebar() {
     };
 
     const [userRole, setUserRole] = useState<string | null>(null);
-    const [sidebarTitle, setSidebarTitle] = useState('QA Tracker');
+    const [sidebarTitle, setSidebarTitle] = useState('Advanced Team Tracker');
     const [showManageTeam, setShowManageTeam] = useState(false);
 
     useEffect(() => {
@@ -84,7 +84,7 @@ export function Sidebar() {
                     if (profile.team_id) {
                         const { data: team } = await supabase.from('teams').select('name').eq('id', profile.team_id).single();
                         if (team && team.name !== 'QA Team') {
-                            setSidebarTitle('Team Tracker');
+                            setSidebarTitle(team.name); // Use team name if not QA Team
                         }
                     }
                 }
@@ -103,14 +103,6 @@ export function Sidebar() {
                 ...(userRole === 'super_admin' ? [{ label: 'Super Admin', icon: <Shield size={18} />, href: '/super-admin' }] : []),
             ]
         },
-        analytics: {
-            title: 'ANALYTICS',
-            items: [
-                { label: 'Reports', icon: <BarChart3 size={18} />, href: '/reports' },
-                { label: 'Analytics', icon: <Search size={18} />, href: '/analytics' },
-                { label: 'Attendance', icon: <Calendar size={18} />, href: '/attendance' },
-            ]
-        },
         projects: {
             title: 'PROJECTS',
             items: [
@@ -122,10 +114,18 @@ export function Sidebar() {
                 { label: 'Milestones', icon: <Target size={18} />, href: '/projects/milestones' },
             ]
         },
+        analytics: {
+            title: 'ANALYTICS',
+            items: [
+                { label: 'Reports', icon: <BarChart3 size={18} />, href: '/reports' },
+                { label: 'Analytics', icon: <Search size={18} />, href: '/analytics' },
+                { label: 'Attendance', icon: <Calendar size={18} />, href: '/attendance' },
+            ]
+        },
         requests: {
             title: 'REQUESTS',
             items: [
-                { label: 'Leave', icon: <PlusCircle size={18} />, href: '/requests/new' },
+                { label: 'Leave', icon: <LogOut size={18} className="rotate-180" />, href: '/requests/new' },
             ]
         }
     };
