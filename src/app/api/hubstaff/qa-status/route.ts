@@ -121,14 +121,7 @@ export async function GET(request: NextRequest) {
         });
 
         const orgId = process.env.HUBSTAFF_ORG_ID;
-        const accessToken = await getValidAccessToken();
-
-        if (!orgId || !accessToken) {
-            return NextResponse.json(
-                { error: 'HUBSTAFF_ORG_ID or HUBSTAFF_ACCESS_TOKEN not configured or expired' },
-                { status: 500 }
-            );
-        }
+        // Auth is handled by hubstaffClient
 
         // Note: Hubstaff activity fetching is preserved for the 'hubstaffActivity' value in JSON response,
         // but removed from the text report as per request.
