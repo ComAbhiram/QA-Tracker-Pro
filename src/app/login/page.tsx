@@ -41,7 +41,7 @@ export default function LoginPage() {
     return (
         <div className="min-h-screen flex">
             {/* Left Side - Login Form */}
-            <div className="w-full lg:w-1/2 flex items-center justify-start pl-12 md:pl-16 lg:pl-20 pr-8 md:pr-12 lg:pr-16 py-8 bg-white">
+            <div className="w-full lg:w-1/2 flex items-center justify-start pl-8 pr-8 md:pr-12 lg:pr-16 py-8 bg-white">
                 <div className="w-full max-w-lg">
                     {/* Logo/Brand */}
                     <div className="flex items-center gap-3 mb-8">
