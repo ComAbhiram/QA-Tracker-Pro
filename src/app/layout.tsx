@@ -34,7 +34,7 @@ export default function RootLayout({
               <div className="flex-1">
                 {children}
               </div>
-              <footer className="mt-8 py-6 text-center text-xs font-semibold text-slate-400 uppercase tracking-widest border-t border-slate-200/50">
+              <footer className="mt-8 py-6 text-center text-xs font-semibold text-slate-900 uppercase tracking-widest border-t border-slate-200/50">
                 Crafted By Abhiram P Mohan : Lead QA, InterSmart
               </footer>
             </main>
