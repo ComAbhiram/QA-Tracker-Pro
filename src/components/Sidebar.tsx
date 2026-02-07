@@ -119,7 +119,7 @@ export function Sidebar() {
             items: [
                 { label: 'Reports', icon: <BarChart3 size={18} />, href: '/reports' },
                 { label: 'Analytics', icon: <Search size={18} />, href: '/analytics' },
-                { label: 'Attendance', icon: <Calendar size={18} />, href: '/attendance' },
+                { label: 'Hubstaff', icon: <Calendar size={18} />, href: '/attendance' },
             ]
         },
         requests: {

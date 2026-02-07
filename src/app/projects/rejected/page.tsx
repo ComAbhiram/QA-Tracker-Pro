@@ -4,15 +4,21 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Task, mapTaskFromDB } from '@/lib/types';
-import { AlertCircle, User, Calendar, Briefcase, Activity } from 'lucide-react';
+import { AlertCircle, User, Calendar, Activity, Grid3x3, Table2, ExternalLink } from 'lucide-react';
 import { format } from 'date-fns';
 
 export default function RejectedProjects() {
     const [tasks, setTasks] = useState<Task[]>([]);
     const [loading, setLoading] = useState(true);
+    const [viewMode, setViewMode] = useState<'box' | 'table'>('box');
 
     useEffect(() => {
         fetchRejectedTasks();
+        // Load view preference from localStorage
+        const savedView = localStorage.getItem('rejectedViewMode');
+        if (savedView === 'table' || savedView === 'box') {
+            setViewMode(savedView);
+        }
     }, []);
 
     const fetchRejectedTasks = async () => {
@@ -33,23 +39,54 @@ export default function RejectedProjects() {
         }
     };
 
+    const toggleView = (mode: 'box' | 'table') => {
+        setViewMode(mode);
+        localStorage.setItem('rejectedViewMode', mode);
+    };
+
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-[60vh]">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600"></div>
             </div>
         );
     }
 
     return (
         <div className="max-w-7xl mx-auto space-y-8 p-6">
-            <div className="flex items-center gap-4">
-                <div className="p-3 bg-red-50 text-red-600 rounded-2xl shadow-sm">
-                    <AlertCircle size={28} />
+            <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                    <div className="p-3 bg-red-50 text-red-600 rounded-2xl shadow-sm">
+                        <AlertCircle size={28} />
+                    </div>
+                    <div>
+                        <h1 className="text-3xl font-bold text-slate-800 tracking-tight">Rejected Projects</h1>
+                        <p className="text-slate-500 font-medium">History of cancelled or rejected tasks with reasons</p>
+                    </div>
                 </div>
-                <div>
-                    <h1 className="text-3xl font-bold text-slate-800 tracking-tight">Rejected Projects</h1>
-                    <p className="text-slate-500 font-medium">History of cancelled or rejected tasks with reasons</p>
+
+                {/* View Toggle */}
+                <div className="flex gap-2 bg-white border border-slate-200 rounded-xl p-1">
+                    <button
+                        onClick={() => toggleView('box')}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${viewMode === 'box'
+                            ? 'bg-red-50 text-red-700 font-semibold'
+                            : 'text-slate-600 hover:bg-slate-50'
+                            }`}
+                    >
+                        <Grid3x3 size={18} />
+                        <span className="text-sm">Box View</span>
+                    </button>
+                    <button
+                        onClick={() => toggleView('table')}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${viewMode === 'table'
+                            ? 'bg-red-50 text-red-700 font-semibold'
+                            : 'text-slate-600 hover:bg-slate-50'
+                            }`}
+                    >
+                        <Table2 size={18} />
+                        <span className="text-sm">Table View</span>
+                    </button>
                 </div>
             </div>
 
@@ -61,7 +98,7 @@ export default function RejectedProjects() {
                     <h3 className="text-lg font-semibold text-slate-700">No Rejected Projects</h3>
                     <p className="text-slate-500">All projects are moving forward smoothly!</p>
                 </div>
-            ) : (
+            ) : viewMode === 'box' ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {tasks.map((task) => (
                         <div
@@ -112,6 +149,50 @@ export default function RejectedProjects() {
                             </div>
                         </div>
                     ))}
+                </div>
+            ) : (
+                <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-sm text-slate-600">
+                            <thead className="bg-red-50 border-b-2 border-red-200">
+                                <tr>
+                                    <th className="px-5 py-4 font-semibold text-slate-700 text-left border-r border-red-100">Project</th>
+                                    <th className="px-4 py-4 font-semibold text-slate-700 text-left border-r border-red-100">Phase/Task</th>
+                                    <th className="px-4 py-4 font-semibold text-slate-700 text-left border-r border-red-100">PC</th>
+                                    <th className="px-4 py-4 font-semibold text-slate-700 text-left border-r border-red-100">Assignee 1</th>
+                                    <th className="px-4 py-4 font-semibold text-slate-700 text-left border-r border-red-100">Assignee 2</th>
+                                    <th className="px-4 py-4 font-semibold text-slate-700 text-left border-r border-red-100">Date</th>
+                                    <th className="px-4 py-4 font-semibold text-slate-700 text-left border-r border-red-100">Rejection Reason</th>
+                                    <th className="px-4 py-4 font-semibold text-slate-700 text-left">Sprint Link</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {tasks.map((task) => (
+                                    <tr key={task.id} className="border-b border-slate-100 hover:bg-red-50/20 transition-all">
+                                        <td className="px-5 py-4 font-semibold text-slate-800 border-r border-slate-50">{task.projectName}</td>
+                                        <td className="px-4 py-4 font-medium text-slate-600 border-r border-slate-50">{task.subPhase || '-'}</td>
+                                        <td className="px-4 py-4 text-slate-600 border-r border-slate-50">{task.pc || '-'}</td>
+                                        <td className="px-4 py-4 text-slate-600 border-r border-slate-50">{task.assignedTo || '-'}</td>
+                                        <td className="px-4 py-4 text-slate-600 border-r border-slate-50">{task.assignedTo2 || '-'}</td>
+                                        <td className="px-4 py-4 text-slate-500 font-medium border-r border-slate-50">
+                                            {task.endDate ? format(new Date(task.endDate), 'MMM d, yyyy') : '-'}
+                                        </td>
+                                        <td className="px-4 py-4 text-sm text-slate-600 max-w-md border-r border-slate-50" title={task.deviationReason || ''}>
+                                            {task.deviationReason || '-'}
+                                        </td>
+                                        <td className="px-4 py-4 text-sm text-slate-500">
+                                            {task.sprintLink ? (
+                                                <a href={task.sprintLink} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 hover:underline flex items-center gap-1">
+                                                    <ExternalLink size={14} />
+                                                    Link
+                                                </a>
+                                            ) : '-'}
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             )}
         </div>

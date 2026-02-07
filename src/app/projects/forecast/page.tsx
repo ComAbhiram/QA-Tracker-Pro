@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Task, mapTaskFromDB } from '@/lib/types';
-import { TrendingUp, User, Activity, Calendar, Edit } from 'lucide-react';
+import { TrendingUp, User, Activity, Calendar, Edit, Grid3x3, Table2, ExternalLink } from 'lucide-react';
 import { format } from 'date-fns';
 import TaskModal from '@/components/TaskModal';
 
@@ -12,9 +12,15 @@ export default function ForecastProjects() {
     const [loading, setLoading] = useState(true);
     const [selectedTask, setSelectedTask] = useState<Task | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [viewMode, setViewMode] = useState<'box' | 'table'>('box');
 
     useEffect(() => {
         fetchForecastTasks();
+        // Load view preference from localStorage
+        const savedView = localStorage.getItem('forecastViewMode');
+        if (savedView === 'table' || savedView === 'box') {
+            setViewMode(savedView);
+        }
     }, []);
 
     const fetchForecastTasks = async () => {
@@ -33,6 +39,11 @@ export default function ForecastProjects() {
         } finally {
             setLoading(false);
         }
+    };
+
+    const toggleView = (mode: 'box' | 'table') => {
+        setViewMode(mode);
+        localStorage.setItem('forecastViewMode', mode);
     };
 
     const handleTaskClick = (task: Task) => {
@@ -79,7 +90,7 @@ export default function ForecastProjects() {
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-[60vh]">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-600"></div>
             </div>
         );
     }
@@ -87,13 +98,39 @@ export default function ForecastProjects() {
     return (
         <>
             <div className="max-w-7xl mx-auto space-y-8 p-6">
-                <div className="flex items-center gap-4">
-                    <div className="p-3 bg-blue-50 text-blue-600 rounded-2xl shadow-sm">
-                        <TrendingUp size={28} />
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                        <div className="p-3 bg-yellow-50 text-yellow-600 rounded-2xl shadow-sm">
+                            <TrendingUp size={28} />
+                        </div>
+                        <div>
+                            <h1 className="text-3xl font-bold text-slate-800 tracking-tight">Forecast Projects</h1>
+                            <p className="text-slate-500 font-medium">Upcoming projects and future planning</p>
+                        </div>
                     </div>
-                    <div>
-                        <h1 className="text-3xl font-bold text-slate-800 tracking-tight">Forecast Projects</h1>
-                        <p className="text-slate-500 font-medium">Upcoming projects and future planning</p>
+
+                    {/* View Toggle */}
+                    <div className="flex gap-2 bg-white border border-slate-200 rounded-xl p-1">
+                        <button
+                            onClick={() => toggleView('box')}
+                            className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${viewMode === 'box'
+                                ? 'bg-yellow-50 text-yellow-700 font-semibold'
+                                : 'text-slate-600 hover:bg-slate-50'
+                                }`}
+                        >
+                            <Grid3x3 size={18} />
+                            <span className="text-sm">Box View</span>
+                        </button>
+                        <button
+                            onClick={() => toggleView('table')}
+                            className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${viewMode === 'table'
+                                ? 'bg-yellow-50 text-yellow-700 font-semibold'
+                                : 'text-slate-600 hover:bg-slate-50'
+                                }`}
+                        >
+                            <Table2 size={18} />
+                            <span className="text-sm">Table View</span>
+                        </button>
                     </div>
                 </div>
 
@@ -105,25 +142,25 @@ export default function ForecastProjects() {
                         <h3 className="text-lg font-semibold text-slate-700">No Forecast Projects</h3>
                         <p className="text-slate-500">Projects marked as "Forecast" will appear here.</p>
                     </div>
-                ) : (
+                ) : viewMode === 'box' ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {tasks.map((task) => (
                             <div
                                 key={task.id}
                                 onClick={() => handleTaskClick(task)}
-                                className="bg-white rounded-2xl border border-blue-100 shadow-sm hover:shadow-lg transition-all duration-200 overflow-hidden group cursor-pointer"
+                                className="bg-white rounded-2xl border border-yellow-100 shadow-sm hover:shadow-lg transition-all duration-200 overflow-hidden group cursor-pointer"
                             >
                                 {/* Header */}
-                                <div className="p-6 pb-4 border-b border-blue-50 bg-blue-50/30">
+                                <div className="p-6 pb-4 border-b border-yellow-50 bg-yellow-50/30">
                                     <div className="flex justify-between items-start mb-2">
-                                        <span className="bg-blue-100 text-blue-700 text-[10px] uppercase font-bold px-2 py-1 rounded-full tracking-wide">
+                                        <span className="bg-yellow-100 text-yellow-700 text-[10px] uppercase font-bold px-2 py-1 rounded-full tracking-wide">
                                             Forecast
                                         </span>
-                                        <button className="text-blue-600 hover:text-blue-700 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <button className="text-yellow-600 hover:text-yellow-700 opacity-0 group-hover:opacity-100 transition-opacity">
                                             <Edit size={16} />
                                         </button>
                                     </div>
-                                    <h3 className="text-xl font-bold text-slate-800 mb-1 group-hover:text-blue-700 transition-colors">
+                                    <h3 className="text-xl font-bold text-slate-800 mb-1 group-hover:text-yellow-700 transition-colors">
                                         {task.projectName}
                                     </h3>
                                     {task.subPhase && (
@@ -170,6 +207,64 @@ export default function ForecastProjects() {
                                 </div>
                             </div>
                         ))}
+                    </div>
+                ) : (
+                    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-sm text-slate-600">
+                                <thead className="bg-yellow-50 border-b-2 border-yellow-200">
+                                    <tr>
+                                        <th className="px-5 py-4 font-semibold text-slate-700 text-left border-r border-yellow-100">Project</th>
+                                        <th className="px-4 py-4 font-semibold text-slate-700 text-left border-r border-yellow-100">Phase/Task</th>
+                                        <th className="px-4 py-4 font-semibold text-slate-700 text-left border-r border-yellow-100">Type</th>
+                                        <th className="px-4 py-4 font-semibold text-slate-700 text-left border-r border-yellow-100">Priority</th>
+                                        <th className="px-4 py-4 font-semibold text-slate-700 text-left border-r border-yellow-100">PC</th>
+                                        <th className="px-4 py-4 font-semibold text-slate-700 text-left border-r border-yellow-100">Assignee 1</th>
+                                        <th className="px-4 py-4 font-semibold text-slate-700 text-left border-r border-yellow-100">Assignee 2</th>
+                                        <th className="px-4 py-4 font-semibold text-slate-700 text-left border-r border-yellow-100">Start Date</th>
+                                        <th className="px-4 py-4 font-semibold text-slate-700 text-left border-r border-yellow-100">Comments</th>
+                                        <th className="px-4 py-4 font-semibold text-slate-700 text-left">Sprint Link</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {tasks.map((task) => (
+                                        <tr
+                                            key={task.id}
+                                            onClick={() => handleTaskClick(task)}
+                                            className="border-b border-slate-100 hover:bg-yellow-50/30 transition-all cursor-pointer"
+                                        >
+                                            <td className="px-5 py-4 font-semibold text-slate-800 border-r border-slate-50">{task.projectName}</td>
+                                            <td className="px-4 py-4 font-medium text-slate-600 border-r border-slate-50">{task.subPhase || '-'}</td>
+                                            <td className="px-4 py-4 text-slate-600 border-r border-slate-50">{task.projectType || '-'}</td>
+                                            <td className="px-4 py-4 text-slate-600 border-r border-slate-50">{task.priority || '-'}</td>
+                                            <td className="px-4 py-4 text-slate-600 border-r border-slate-50">{task.pc || '-'}</td>
+                                            <td className="px-4 py-4 text-slate-600 border-r border-slate-50">{task.assignedTo || '-'}</td>
+                                            <td className="px-4 py-4 text-slate-600 border-r border-slate-50">{task.assignedTo2 || '-'}</td>
+                                            <td className="px-4 py-4 text-slate-500 font-medium border-r border-slate-50">
+                                                {task.startDate ? format(new Date(task.startDate), 'MMM d, yyyy') : '-'}
+                                            </td>
+                                            <td className="px-4 py-4 text-sm text-slate-500 max-w-md border-r border-slate-50" title={task.comments || ''}>
+                                                {task.comments || '-'}
+                                            </td>
+                                            <td className="px-4 py-4 text-sm text-slate-500">
+                                                {task.sprintLink ? (
+                                                    <a
+                                                        href={task.sprintLink}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="text-blue-600 hover:text-blue-800 hover:underline flex items-center gap-1"
+                                                        onClick={(e) => e.stopPropagation()}
+                                                    >
+                                                        <ExternalLink size={14} />
+                                                        Link
+                                                    </a>
+                                                ) : '-'}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 )}
             </div>
