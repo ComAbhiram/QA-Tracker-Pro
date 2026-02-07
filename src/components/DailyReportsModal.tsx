@@ -823,7 +823,8 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                 <div className="p-4 pb-10 md:p-6 space-y-3">
 
                     {/* Tracker Screenshot */}
-                    <button
+                    {/* Tracker Screenshot - HIDDEN AS REQUESTED */}
+                    {/* <button
                         onClick={generateScreenshot}
                         disabled={loading}
                         className="w-full flex items-center gap-4 p-4 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition-all duration-200 group text-left"
@@ -837,7 +838,7 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                         </div>
                         <ChevronRight className="text-slate-400 group-hover:text-sky-500 transition-colors" size={20} />
                         {loading && <div className="absolute right-4 top-1/2 -translate-y-1/2"><div className="w-5 h-5 border-2 border-sky-500 border-t-transparent rounded-full animate-spin"></div></div>}
-                    </button>
+                    </button> */}
 
                     {/* Today's Work Status - Expandable */}
                     <div className="border border-slate-200 rounded-xl overflow-hidden">
