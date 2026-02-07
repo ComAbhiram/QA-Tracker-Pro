@@ -14,7 +14,8 @@
   }
 
   html {
-    font-size: 90%; /* Scale entire UI down to mimic 90% zoom */
+    font-size: 90%;
+    /* Scale entire UI down to mimic 90% zoom */
   }
 
   body {
@@ -80,13 +81,14 @@
 
   @screen lg {
     .main-content {
-      margin-left: 16.25rem !important; /* Matches sidebar width */
+      margin-left: 16.25rem !important;
+      /* Matches sidebar width */
     }
   }
 
   /* Cards */
   .stats-card {
-    @apply bg-white rounded-xl p-6 border border-slate-100 shadow-sm transition-all duration-200 hover:shadow-md relative overflow-hidden;
+    @apply rounded-xl p-6 border border-slate-100 shadow-sm transition-all duration-200 hover:shadow-md relative overflow-hidden;
   }
 
   /* Buttons */
