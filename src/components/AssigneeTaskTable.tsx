@@ -29,7 +29,7 @@ export default function AssigneeTaskTable({ assignee, tasks, onEditTask }: Assig
     return (
         <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden mb-6">
             {/* Header Section */}
-            <div className="bg-gradient-to-r from-sky-500 to-indigo-600 p-4 flex items-center justify-between">
+            <div className="bg-yellow-500 p-4 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center text-white font-bold text-lg shadow-lg">
                         {assignee.charAt(0)}
