@@ -34,3 +34,14 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## Recent Updates
+
+### Task Tracker
+- **Per-Member Pagination**: Tasks are now grouped by assignee with individual pagination (5 tasks per page).
+- **UI Enhancements**:
+    - Updated table header colors to match Daily Reports style (`#1e293b`).
+    - Fixed Hubstaff data fetching build errors.
+
+### Dashboard
+- **Stats Cards**: Added distinct color coding (Blue, Amber, Emerald, Red) for better visual hierarchy.
