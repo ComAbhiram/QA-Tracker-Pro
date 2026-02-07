@@ -267,9 +267,9 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                                             ${[task.assignedTo, task.assignedTo2, ...(task.additionalAssignees || [])].filter(Boolean).join(', ') || 'Unassigned'}
                                         </td>
                                         <td style="padding: 12px; color: #475569; font-size: 12px; vertical-align: middle; border-right: 1px solid #94a3b8;">
-                                            <div>S: ${task.startDate ? formatDate(task.startDate) : '-'}</div>
-                                            <div>E: ${task.endDate ? formatDate(task.endDate) : '-'}</div>
-                                            ${task.actualCompletionDate ? `<div style="color:#059669;">A: ${formatDate(task.actualCompletionDate)}</div>` : ''}
+                                            <div>S: ${task.startDate ? formatQADate(task.startDate) : '-'}</div>
+                                            <div>E: ${task.endDate ? formatQADate(task.endDate) : '-'}</div>
+                                            ${task.actualCompletionDate ? `<div style="color:#059669;">A: ${formatQADate(task.actualCompletionDate)}</div>` : ''}
                                         </td>
                                         <td style="padding: 12px; color: #64748b; font-size: 11px; vertical-align: middle;">
                                             <div style="margin-bottom:4px;">${task.comments || '-'}</div>
