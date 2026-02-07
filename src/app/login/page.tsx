@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
-import { Lock, Mail, Loader2, Eye, Users } from 'lucide-react';
+import { Lock, Mail, Loader2, LayoutDashboard, Users } from 'lucide-react';
 import Image from 'next/image';
 
 export default function LoginPage() {
@@ -41,15 +41,15 @@ export default function LoginPage() {
     return (
         <div className="min-h-screen flex">
             {/* Left Side - Login Form */}
-            <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-white">
-                <div className="w-full max-w-md">
+            <div className="w-full lg:w-1/2 flex items-center justify-center px-6 md:px-12 lg:px-16 py-8 bg-white">
+                <div className="w-full max-w-md mx-auto">
                     {/* Logo/Brand */}
                     <div className="flex items-center gap-3 mb-8">
                         <div className="p-2.5 bg-yellow-500 rounded-lg">
-                            <Eye className="text-white" size={28} />
+                            <LayoutDashboard className="text-white" size={28} />
                         </div>
                         <div>
-                            <h2 className="text-2xl font-bold text-slate-800">QA Tracker</h2>
+                            <h2 className="text-2xl font-bold text-slate-800">Team Tracker</h2>
                             <p className="text-sm text-slate-500">Project Management</p>
                         </div>
                     </div>
