@@ -148,19 +148,35 @@ export function getISTDate(): Date {
 }
 
 export function isTaskOverdue(task: Task): boolean {
-    // Completed and Rejected tasks are never overdue
+    // Rejected tasks are never overdue
     const s = (task.status || '').toLowerCase();
-    if (s === 'completed' || s === 'rejected') return false;
+    if (s === 'rejected') return false;
     if (!task.endDate) return false;
 
-    const istNow = getISTDate();
     const endDate = new Date(task.endDate);
 
-    // Set end of work day to 6:30 PM IST
+    // Set end of work day to 6:30 PM IST on the end date
     const endOfWorkDay = new Date(endDate);
     endOfWorkDay.setHours(18, 30, 0, 0);
 
-    // Task is overdue if current IST time is past 6:30 PM on the end date
+    // For completed tasks, check if they were completed AFTER 6:30 PM IST on the due date
+    if (s === 'completed') {
+        // Try to get completion timestamp from completedAt or actualCompletionDate
+        const completionTimestamp = task.completedAt || task.actualCompletionDate;
+
+        if (!completionTimestamp) {
+            // No completion timestamp available - assume completed on time
+            return false;
+        }
+
+        const completedDate = new Date(completionTimestamp);
+
+        // Task is overdue if it was completed AFTER 6:30 PM IST on the due date
+        return completedDate > endOfWorkDay;
+    }
+
+    // For active tasks, check if current time is past 6:30 PM on the end date
+    const istNow = getISTDate();
     return istNow > endOfWorkDay;
 }
 
