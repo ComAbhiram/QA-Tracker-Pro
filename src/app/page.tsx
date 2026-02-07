@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import { mapTaskFromDB, Task } from '@/lib/types';
 import DashboardStats from '@/components/DashboardStats';
@@ -12,86 +12,177 @@ import { Plus, FileText, Layers, Edit2, Search } from 'lucide-react';
 import { useGuestMode } from '@/contexts/GuestContext';
 
 export default function Home() {
+  // Table Data State
   const [tasks, setTasks] = useState<Task[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loadingTasks, setLoadingTasks] = useState(true);
+
+  // Statistics Data State (Global)
+  const [allStatsTasks, setAllStatsTasks] = useState<Task[]>([]);
+  const [loadingStats, setLoadingStats] = useState(true);
+
+  // Filter & Search State
   const [filter, setFilter] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+  const itemsPerPage = 10;
+
+  // Modals
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+
   const { isGuest, selectedTeamId } = useGuestMode();
 
-  useEffect(() => {
-    fetchTasks();
-  }, [selectedTeamId]);
-
-  async function fetchTasks() {
-    setLoading(true);
-
+  // 1. Fetch Stats Data (Global logic for Charts & Stats Cards)
+  // Fetches lightweight data for ALL tasks to populate charts/stats consistently
+  const fetchStatsData = useCallback(async () => {
+    setLoadingStats(true);
     let query = supabase
       .from('tasks')
-      .select('*')
-      .order('created_at', { ascending: false });
+      .select('id, status, end_date, assigned_to, project_name, sub_phase', { count: 'exact' });
 
-    // Filter by team if in guest mode
+    // Apply Team Filter if Guest
     if (isGuest && selectedTeamId) {
-      console.log('Guest mode: Filtering by team_id:', selectedTeamId);
       query = query.eq('team_id', selectedTeamId);
-    } else {
-      console.log('Not in guest mode or no team selected. isGuest:', isGuest, 'selectedTeamId:', selectedTeamId);
     }
 
     const { data, error } = await query;
-
     if (error) {
-      console.error('Error fetching tasks:', error);
+      console.error('Error fetching stats data:', error);
     } else {
-      console.log('Fetched tasks:', data?.length || 0, 'tasks');
-      setTasks((data || []).map(mapTaskFromDB));
-    }
-    setLoading(false);
-  }
+      // We map to a Partial Task structure sufficient for DashboardStats/Charts
+      // Note: DashboardStats calculates 'active' based on status text, so 'status' is crucial.
+      // 'Overdue' needs 'endDate'. Charts need 'assignedTo'.
+      const mappedStatsTasks = (data || []).map((t: any) => ({
+        ...t,
+        status: t.status,
+        endDate: t.end_date,
+        assignedTo: t.assigned_to,
+        // Fill other required Task fields with defaults to satisfy TS (though components only use specific fields)
+        projectName: t.project_name || '',
+        subPhase: t.sub_phase || '',
+        createdAt: '',
+        projectType: null,
+        priority: null,
+        pc: null,
+        assignedTo2: null,
+        additionalAssignees: [],
+        startDate: null,
+        actualCompletionDate: null,
+        includeSaturday: false,
+        actualStartDate: null,
+        actualEndDate: null,
+        startTime: null,
+        endTime: null,
+        completedAt: null,
+        comments: null,
+        currentUpdates: null,
+        bugCount: 0,
+        htmlBugs: 0,
+        functionalBugs: 0,
+        deviationReason: null,
+        sprint: null,
+        sprintLink: null,
+        daysAllotted: 0,
+        timeTaken: null,
+        daysTaken: 0,
+        deviation: 0,
+        activityPercentage: 0,
+      } as Task));
 
-  const filteredTasks = tasks.filter(task => {
-    // 1. Filter by Status/Category
-    if (filter !== 'All') {
-      if (filter === 'active') {
-        // Active includes all non-completed statuses
-        if (!['In Progress', 'Being Developed', 'Ready for QA', 'Assigned to QA', 'Yet to Start', 'Forecast', 'On Hold'].includes(task.status)) return false;
-      } else if (filter === 'Overdue') {
-        if (!task.endDate || task.status === 'Completed' || new Date(task.endDate) >= new Date()) return false;
-      } else if (task.status !== filter) {
-        return false;
+      setAllStatsTasks(mappedStatsTasks);
+    }
+    setLoadingStats(false);
+  }, [isGuest, selectedTeamId]);
+
+
+  // 2. Fetch Table Data (Paginated & Filtered)
+  const fetchTableData = useCallback(async (page: number, currentFilter: string, search: string) => {
+    setLoadingTasks(true);
+
+    let query = supabase
+      .from('tasks')
+      .select('*', { count: 'exact' });
+
+    // Apply Team Filter
+    if (isGuest && selectedTeamId) {
+      query = query.eq('team_id', selectedTeamId);
+    }
+
+    // Apply Status Filter
+    if (currentFilter !== 'All') {
+      if (currentFilter === 'active') {
+        const activeStatuses = ['In Progress', 'Being Developed', 'Ready for QA', 'Assigned to QA', 'Yet to Start', 'Forecast', 'On Hold'];
+        query = query.in('status', activeStatuses);
+      } else if (currentFilter === 'Overdue') {
+        // Server-side overdue approximation: Active tasks where end_date < today
+        // Note: Exact overdue logic involves IST time which is harder in basic SQL query without valid timezone support or RPC
+        const today = new Date().toISOString().split('T')[0];
+        query = query.lt('end_date', today)
+          .not('status', 'in', '("Completed","Rejected")');
+      } else {
+        query = query.eq('status', currentFilter);
       }
     }
 
-    // 2. Filter by Search Query
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      const matchName = task.projectName?.toLowerCase().includes(query);
-      const matchPhase = task.subPhase?.toLowerCase().includes(query);
-      const matchAssignee = task.assignedTo?.toLowerCase().includes(query) || task.assignedTo2?.toLowerCase().includes(query);
-      const matchStatus = task.status?.toLowerCase().includes(query);
-
-      return matchName || matchPhase || matchAssignee || matchStatus;
+    // Apply Search
+    if (search) {
+      const term = `%${search}%`;
+      query = query.or(`project_name.ilike.${term},sub_phase.ilike.${term},assigned_to.ilike.${term},assigned_to2.ilike.${term},status.ilike.${term}`);
     }
 
-    return true;
-  });
+    // Apply Pagination
+    const from = (page - 1) * itemsPerPage;
+    const to = from + itemsPerPage - 1;
 
-  // Pagination logic
-  const totalItems = filteredTasks.length;
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const paginatedTasks = filteredTasks.slice(startIndex, endIndex);
+    query = query
+      .order('created_at', { ascending: false })
+      .range(from, to);
 
-  // Reset to page 1 when filter changes
+    const { data, count, error } = await query;
+    if (error) {
+      console.error('Error fetching table tasks:', error);
+    } else {
+      setTasks((data || []).map(mapTaskFromDB));
+      setTotalItems(count || 0);
+    }
+    setLoadingTasks(false);
+  }, [isGuest, selectedTeamId, itemsPerPage]);
+
+
+  // Effects
+
+  // Initial Data Load (Stats + Table)
+  useEffect(() => {
+    fetchStatsData();
+  }, [fetchStatsData]);
+
+  // Debounced Search & Table Refresh
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      // If search query changed, we might want to reset to page 1.
+      // But this effect also runs on page change (due to dependency on internal logic or if we separated effects).
+      // Let's keep it simple: Call fetchTableData with current state.
+      // BUT: If search query *just* changed, we want page 1.
+      // If page *just* changed, we want that page.
+      // Current implementation of simple debounce might clobber page navigation if typed fast.
+      // Solution: Pass currentPage, but inside the component we need to coordinate resets.
+      fetchTableData(currentPage, filter, searchQuery);
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery, filter, currentPage, fetchTableData]);
+
+  // Reset page when filter/search changes (This works by effect separation or logic)
   useEffect(() => {
     setCurrentPage(1);
   }, [filter, searchQuery]);
 
+
+  // Handlers
   const handleAddTask = () => {
     setEditingTask(null);
     setIsTaskModalOpen(true);
@@ -99,7 +190,6 @@ export default function Home() {
 
   const handleEditTask = (task: Task) => {
     if (isGuest) {
-      // In guest mode, show read-only view
       alert('You are in guest mode. Editing is not allowed.');
       return;
     }
@@ -139,9 +229,7 @@ export default function Home() {
     };
 
     if (editingTask) {
-      // Don't update team_id on edit unless specifically needed (usually strict ownership prevents moving teams)
       const { team_id, ...updatePayload } = dbPayload;
-
       const { error } = await supabase
         .from('tasks')
         .update(updatePayload)
@@ -153,7 +241,6 @@ export default function Home() {
         return;
       }
     } else {
-      // Generate numeric ID based on timestamp for manual insertion (since DB column is not IDENTITY)
       const newId = Date.now();
       const { error } = await supabase
         .from('tasks')
@@ -166,9 +253,9 @@ export default function Home() {
       }
     }
 
-    await fetchTasks();
-    setIsTaskModalOpen(false);
-    await fetchTasks();
+    // Refresh data
+    fetchTableData(currentPage, filter, searchQuery);
+    fetchStatsData();
     setIsTaskModalOpen(false);
   };
 
@@ -182,18 +269,29 @@ export default function Home() {
       console.error('Error deleting task:', error);
       alert('Failed to delete task: ' + error.message);
     } else {
-      await fetchTasks();
+      fetchTableData(currentPage, filter, searchQuery);
+      fetchStatsData();
       setIsTaskModalOpen(false);
     }
   };
 
+
+  const statusColors: Record<string, string> = {
+    'In Progress': 'bg-blue-100 text-blue-700 border-blue-200',
+    'Completed': 'bg-green-100 text-green-700 border-green-200',
+    'Pending': 'bg-orange-100 text-orange-700 border-orange-200',
+    'On Hold': 'bg-red-100 text-red-700 border-red-200',
+    'Review': 'bg-purple-100 text-purple-700 border-purple-200',
+    'Ready for QA': 'bg-yellow-100 text-yellow-700 border-yellow-200',
+  };
+
   return (
-    <div className="max-w-[1600px] mx-auto space-y-8">
+    <div className="max-w-[1600px] mx-auto space-y-8 animate-in fade-in duration-500">
 
       {/* Header & Actions */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-slate-800">Dashboard</h1>
+          <h1 className="text-3xl font-bold text-slate-800">Team Tracker</h1>
           <p className="text-slate-500">Overview of all active team projects</p>
         </div>
         <div className="flex gap-3">
@@ -214,10 +312,18 @@ export default function Home() {
         </div>
       </div>
 
-      <DashboardStats tasks={tasks} onFilterChange={setFilter} activeFilter={filter} />
+      {/* Stats - Powered by lightweight fetch of ALL tasks (filtered by guest team) */}
+      <DashboardStats
+        tasks={allStatsTasks}
+        onFilterChange={(f) => {
+          setFilter(f);
+          // Stats cards don't change charts, but they change the TABLE filter.
+        }}
+        activeFilter={filter}
+      />
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-        {/* Main Task List */}
+        {/* Main Task List - Powered by Paginated Fetch */}
         <div className="xl:col-span-2 bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden flex flex-col">
           <div className="p-6 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <h3 className="font-bold text-lg text-slate-800 flex items-center gap-2">
@@ -237,7 +343,7 @@ export default function Home() {
                 <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
               </div>
               <span className="text-xs font-semibold bg-slate-100 text-slate-600 px-2 py-1 rounded-md whitespace-nowrap">
-                {filteredTasks.length} tasks
+                {totalItems} total results
               </span>
             </div>
           </div>
@@ -250,25 +356,27 @@ export default function Home() {
                   <th className="px-6 py-4 font-semibold text-slate-600 border border-slate-400">Phase</th>
                   <th className="px-6 py-4 font-semibold text-slate-600 border border-slate-400">Status</th>
                   <th className="px-6 py-4 font-semibold text-slate-600 border border-slate-400">Assignees</th>
-                  <th className="px-6 py-4 font-semibold text-slate-600 border border-slate-400">Due Date</th>
+                  <th className="px-6 py-4 font-semibold text-slate-600 border border-slate-400">Timeline</th>
                   <th className="px-6 py-4 font-semibold text-slate-600 text-right">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
-                {loading ? (
+                {loadingTasks ? (
                   <tr><td colSpan={6} className="p-8 text-center">Loading tasks...</td></tr>
-                ) : filteredTasks.length === 0 ? (
+                ) : tasks.length === 0 ? (
                   <tr><td colSpan={6} className="p-8 text-center text-slate-400">No tasks found</td></tr>
                 ) : (
-                  paginatedTasks.map(task => (
+                  tasks.map(task => (
                     <tr key={task.id} className="border-b border-slate-400 hover:bg-slate-50/50 transition-colors group">
-                      <td className="px-6 py-4 font-medium text-slate-800 border border-slate-400">{task.projectName}</td>
+                      <td className="px-6 py-4 font-medium text-slate-800 border border-slate-400">
+                        <div className="flex flex-col">
+                          <span>{task.projectName}</span>
+                          <span className="text-xs text-slate-500 font-normal">{task.projectType}</span>
+                        </div>
+                      </td>
                       <td className="px-6 py-4 border border-slate-400">{task.subPhase || '-'}</td>
                       <td className="px-6 py-4 border border-slate-400">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${task.status === 'Completed' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' :
-                          task.status === 'In Progress' ? 'bg-sky-50 text-sky-700 border-sky-100' :
-                            task.status === 'Overdue' ? 'bg-red-50 text-red-700 border-red-100' :
-                              'bg-slate-50 text-slate-600 border-slate-400'
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${statusColors[task.status] || 'bg-slate-100 text-slate-600 border-slate-200'
                           }`}>
                           {task.status}
                         </span>
@@ -280,7 +388,15 @@ export default function Home() {
                         </div>
                       </td>
                       <td className="px-6 py-4 border border-slate-400">
-                        {task.endDate ? new Date(task.endDate).toLocaleDateString() : '-'}
+                        {task.startDate ? (
+                          <span>
+                            {new Date(task.startDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                            {' - '}
+                            {task.endDate ? new Date(task.endDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : '...'}
+                          </span>
+                        ) : (
+                          <span className="text-slate-300 italic">No timeline</span>
+                        )}
                       </td>
                       <td className="px-6 py-4 text-right">
                         {!isGuest && (
@@ -301,17 +417,19 @@ export default function Home() {
           </div>
 
           {/* Pagination */}
-          <Pagination
-            currentPage={currentPage}
-            totalItems={totalItems}
-            itemsPerPage={itemsPerPage}
-            onPageChange={setCurrentPage}
-          />
+          {!loadingTasks && totalItems > 0 && (
+            <Pagination
+              currentPage={currentPage}
+              totalItems={totalItems}
+              itemsPerPage={itemsPerPage}
+              onPageChange={setCurrentPage}
+            />
+          )}
         </div>
 
-        {/* Side Content */}
+        {/* Side Content: Charts - Powered by lightweight Global Stats Data */}
         <div className="space-y-8">
-          <DashboardCharts tasks={tasks} />
+          <DashboardCharts tasks={allStatsTasks} />
         </div>
       </div>
 
