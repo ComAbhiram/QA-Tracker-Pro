@@ -60,7 +60,12 @@ export default function RejectedProjects() {
                         <AlertCircle size={28} />
                     </div>
                     <div>
-                        <h1 className="text-3xl font-bold text-slate-800 tracking-tight">Rejected Projects</h1>
+                        <div className="flex items-center gap-3">
+                            <h1 className="text-3xl font-bold text-slate-800 tracking-tight">Rejected Projects</h1>
+                            <span className="px-3 py-1 bg-red-100 text-red-700 text-sm font-bold rounded-full">
+                                {tasks.length} {tasks.length === 1 ? 'task' : 'tasks'}
+                            </span>
+                        </div>
                         <p className="text-slate-500 font-medium">History of cancelled or rejected tasks with reasons</p>
                     </div>
                 </div>

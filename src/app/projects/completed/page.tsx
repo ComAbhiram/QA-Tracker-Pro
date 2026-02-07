@@ -75,7 +75,12 @@ export default function CompletedProjects() {
                         <CheckCircle2 size={28} />
                     </div>
                     <div>
-                        <h1 className="text-3xl font-bold text-slate-800 tracking-tight">Completed Projects</h1>
+                        <div className="flex items-center gap-3">
+                            <h1 className="text-3xl font-bold text-slate-800 tracking-tight">Completed Projects</h1>
+                            <span className="px-3 py-1 bg-emerald-100 text-emerald-700 text-sm font-bold rounded-full">
+                                {tasks.length} {tasks.length === 1 ? 'task' : 'tasks'}
+                            </span>
+                        </div>
                         <p className="text-slate-500 font-medium">Archive of successfully delivered projects and tasks</p>
                     </div>
                 </div>
