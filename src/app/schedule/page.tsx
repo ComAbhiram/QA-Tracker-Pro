@@ -94,37 +94,32 @@ export default function Schedule() {
 
             // If completed ON or BEFORE this date
             if (completion <= checkDate) {
-                // Check if it was late (completion > end)
-                if (end && completion > end) {
-                    const diffTime = completion.getTime() - end.getTime();
-                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                    return { status: 'Completed (Overdue)', overdueDays: diffDays, baseStatus: 'Completed' };
+                // Check if it was late (completion > end + 6:30 PM cutoff)
+                if (end) {
+                    const endWithCutoff = new Date(end);
+                    endWithCutoff.setHours(18, 30, 0, 0);
+
+                    if (completion > endWithCutoff) {
+                        const diffTime = completion.getTime() - end.getTime();
+                        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                        return { status: 'Completed (Overdue)', overdueDays: diffDays, baseStatus: 'Completed' };
+                    }
                 }
                 return { status: 'Completed', overdueDays: 0, baseStatus: 'Completed' };
             }
         }
 
-        // --- FIXED LOGIC START ---
-        // If checking a FUTURE DATE relative to TODAY, and the task is NOT YET OVERDUE (today), 
-        // do NOT show it as overdue in the future view.
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-
-        // If the checked date is in the future relative to today
-        if (checkDate > today) {
-            // If task is NOT overdue RIGHT NOW, report its normal status (or projected status)
-            if (!isTaskOverdue(task)) {
-                return { status: getEffectiveStatus(task), overdueDays: 0, baseStatus: getEffectiveStatus(task) };
-            }
-        }
-        // --- FIXED LOGIC END ---
-
         // Not completed yet (or completed in future relative to this date)
-        // Check if Overdue relative to this date
-        if (end && checkDate > end) {
-            const diffTime = checkDate.getTime() - end.getTime();
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-            return { status: 'Overdue', overdueDays: diffDays, baseStatus: 'Overdue' };
+        // Check if Overdue relative to this date (with 6:30 PM cutoff)
+        if (end) {
+            const endWithCutoff = new Date(end);
+            endWithCutoff.setHours(18, 30, 0, 0);
+
+            if (checkDate > endWithCutoff) {
+                const diffTime = checkDate.getTime() - end.getTime();
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                return { status: 'Overdue', overdueDays: diffDays, baseStatus: 'Overdue' };
+            }
         }
 
         // Otherwise return current status or 'In Progress' if within range
@@ -420,15 +415,13 @@ export default function Schedule() {
 
                                     // Check status on this specific day (allow up to Tomorrow)
                                     if (day > end && day <= tomorrow) {
-                                        // ONLY show projected overdue on future days if currently overdue
-                                        if (!isTaskOverdue(task)) return false;
-
                                         const statusInfo = getStatusOnDate(task, day);
 
-                                        // User Request: Don't show +2d, +3d etc on future days. Only show the immediate +1d warning.
-                                        if (statusInfo.overdueDays > 1) return false;
-
+                                        // Show overdue tasks on the next day if they haven't been completed
+                                        // E.g., if today is Saturday 10 PM and task was due Saturday,
+                                        // it should show as overdue on Sunday
                                         if (statusInfo.baseStatus === 'Overdue') return true;
+
                                         // Also show if completed ON this day (late)
                                         if (statusInfo.status.includes('Completed (Overdue)') && task.actualCompletionDate) {
                                             if (isSameDay(new Date(task.actualCompletionDate), day)) return true;
