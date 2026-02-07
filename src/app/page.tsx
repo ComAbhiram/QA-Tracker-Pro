@@ -281,7 +281,7 @@ export default function Home() {
     'Completed': 'bg-green-100 text-green-700 border-green-200',
     'Pending': 'bg-orange-100 text-orange-700 border-orange-200',
     'On Hold': 'bg-red-100 text-red-700 border-red-200',
-    'Review': 'bg-purple-100 text-purple-700 border-purple-200',
+    'Review': 'bg-yellow-100 text-yellow-700 border-yellow-200',
     'Ready for QA': 'bg-yellow-100 text-yellow-700 border-yellow-200',
   };
 

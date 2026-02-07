@@ -6,10 +6,10 @@
   :root {
     --background: #f8fafc;
     --foreground: #1e293b;
-    --primary: #0ea5e9;
-    /* Sky blue */
+    --primary: #F59E0B;
+    /* Yellow/Gold */
     --primary-foreground: #ffffff;
-    --secondary: #f1f5f9;
+    --secondary: #64748B;
     --secondary-foreground: #0f172a;
   }
 
@@ -43,7 +43,7 @@
   }
 
   .logo-icon {
-    @apply p-1.5 bg-sky-500 rounded-lg text-white;
+    @apply p-1.5 bg-yellow-500 rounded-lg text-white;
   }
 
   .sidebar-nav {
@@ -59,13 +59,13 @@
   }
 
   .nav-item.active {
-    @apply text-sky-600 bg-sky-50 font-semibold;
-    /* Clean active state: light blue bg, blue text, left border indicator */
+    @apply text-yellow-600 bg-yellow-50 font-semibold;
+    /* Clean active state: light yellow bg, yellow text, left border indicator */
   }
 
   .nav-item.active::before {
     content: '';
-    @apply absolute left-0 top-0 bottom-0 w-1 bg-sky-500;
+    @apply absolute left-0 top-0 bottom-0 w-1 bg-yellow-500;
   }
 
   .nav-icon {
@@ -97,7 +97,7 @@
   }
 
   .btn-primary {
-    @apply bg-sky-500 text-white hover:bg-sky-600 border border-transparent;
+    @apply bg-yellow-500 text-white hover:bg-yellow-600 border border-transparent;
   }
 
   .btn-secondary {
@@ -132,6 +132,6 @@
   }
 
   .task-card-header {
-    @apply bg-gradient-to-r from-sky-500 to-indigo-600 p-4 rounded-t-xl;
+    @apply bg-gradient-to-r from-yellow-500 to-slate-600 p-4 rounded-t-xl;
   }
 }

@@ -23,7 +23,7 @@ export default function TaskDetailsModal({ isOpen, onClose, task, onEdit }: Task
         if (s === 'on hold') return 'bg-slate-500 text-white border-slate-500';
         if (s === 'rejected') return 'bg-red-600 text-white border-red-600';
         if (s === 'yet to start' || s === 'forecast' || s === 'urgent') return 'bg-amber-500 text-white border-amber-500';
-        if (s.includes('qa') || s === 'ready for qa') return 'bg-purple-600 text-white border-purple-600';
+        if (s.includes('qa') || s === 'ready for qa') return 'bg-yellow-600 text-white border-yellow-600';
         return 'bg-sky-600 text-white border-sky-600';
     };
 

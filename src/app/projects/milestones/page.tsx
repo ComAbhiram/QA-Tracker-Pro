@@ -67,7 +67,7 @@ export default function Milestones() {
     return (
         <div className="max-w-7xl mx-auto space-y-8 p-6">
             <div className="flex items-center gap-4">
-                <div className="p-3 bg-purple-50 text-purple-600 rounded-2xl shadow-sm">
+                <div className="p-3 bg-yellow-50 text-yellow-600 rounded-2xl shadow-sm">
                     <Target size={28} />
                 </div>
                 <div>
@@ -125,7 +125,7 @@ export default function Milestones() {
                 <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                     <div className="flex items-center gap-3 mb-8">
                         <h2 className="text-2xl font-bold text-slate-800">{selectedProject}</h2>
-                        <span className="px-3 py-1 bg-purple-100 text-purple-700 text-xs font-bold uppercase rounded-full tracking-wider">
+                        <span className="px-3 py-1 bg-yellow-100 text-yellow-700 text-xs font-bold uppercase rounded-full tracking-wider">
                             Timeline
                         </span>
                     </div>

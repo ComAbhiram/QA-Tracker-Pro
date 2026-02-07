@@ -186,7 +186,7 @@ export default function Schedule() {
         if (s === 'in progress' || s === 'being developed') return 'bg-blue-600 text-white border-blue-700 shadow-sm';
         if (s === 'rejected') return 'bg-red-600 text-white border-red-700 shadow-sm';
         if (s === 'overdue') return 'bg-rose-600 text-white border-rose-700 shadow-sm';
-        if (s.includes('qa') || s === 'ready for qa' || s === 'assigned to qa') return 'bg-purple-600 text-white border-purple-700 shadow-sm';
+        if (s.includes('qa') || s === 'ready for qa' || s === 'assigned to qa') return 'bg-yellow-600 text-white border-yellow-700 shadow-sm';
         if (s === 'yet to start' || s === 'forecast') return 'bg-amber-500 text-white border-amber-600 shadow-sm';
         if (s === 'on hold') return 'bg-slate-600 text-white border-slate-700 shadow-sm';
         return 'bg-sky-600 text-white border-sky-700 shadow-sm';
@@ -204,7 +204,7 @@ export default function Schedule() {
         if (s === 'in progress' || s === 'being developed') return 'border-blue-600 bg-blue-600 text-white';
         if (s === 'rejected') return 'border-red-600 bg-red-600 text-white';
         if (s === 'overdue') return 'border-rose-600 bg-rose-600 text-white';
-        if (s.includes('qa') || s === 'ready for qa' || s === 'assigned to qa') return 'border-purple-600 bg-purple-600 text-white';
+        if (s.includes('qa') || s === 'ready for qa' || s === 'assigned to qa') return 'border-yellow-600 bg-yellow-600 text-white';
         if (s === 'yet to start' || s === 'forecast') return 'border-amber-500 bg-amber-500 text-white';
         if (s === 'on hold') return 'border-slate-500 bg-slate-500 text-white';
         return 'border-sky-600 bg-sky-600 text-white';
@@ -225,7 +225,7 @@ export default function Schedule() {
         if (s === 'in progress' || s === 'being developed') return 'bg-blue-600 text-white';
         if (s === 'rejected') return 'bg-red-600 text-white';
         if (s === 'overdue') return 'bg-rose-600 text-white';
-        if (s.includes('qa') || s === 'ready for qa' || s === 'assigned to qa') return 'bg-purple-600 text-white';
+        if (s.includes('qa') || s === 'ready for qa' || s === 'assigned to qa') return 'bg-yellow-600 text-white';
         if (s === 'yet to start' || s === 'forecast') return 'bg-amber-500 text-white';
         if (s === 'on hold') return 'bg-slate-600 text-white';
         return 'bg-sky-600 text-white';

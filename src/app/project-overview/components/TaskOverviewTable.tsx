@@ -114,7 +114,7 @@ export default function TaskOverviewTable({ tasks, onEdit }: TaskOverviewTablePr
                                             </div>
                                         )}
                                         {task.assignedTo2 && (
-                                            <div className="w-8 h-8 rounded-full bg-purple-100 border-2 border-white flex items-center justify-center text-xs font-bold text-purple-600 flex-shrink-0" title={`Secondary: ${task.assignedTo2}`}>
+                                            <div className="w-8 h-8 rounded-full bg-yellow-100 border-2 border-white flex items-center justify-center text-xs font-bold text-yellow-600 flex-shrink-0" title={`Secondary: ${task.assignedTo2}`}>
                                                 {task.assignedTo2.charAt(0)}
                                             </div>
                                         )}

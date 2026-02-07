@@ -406,7 +406,7 @@ export default function SuperAdminPage() {
                 <div className="bg-white rounded-xl p-6 border border-slate-200 mb-6">
                     <h3 className="text-lg font-bold text-slate-800 mb-4">Team Time Breakdown (Days)</h3>
                     <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-                        <div className="bg-purple-50 rounded-lg p-4">
+                        <div className="bg-slate-50 rounded-lg p-4">
                             <p className="text-sm text-purple-700 font-semibold mb-1">Design</p>
                             <p className="text-2xl font-bold text-purple-900">{totals.totalDesign.toFixed(2)}</p>
                         </div>

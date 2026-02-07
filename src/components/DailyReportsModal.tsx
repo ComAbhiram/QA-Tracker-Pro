@@ -891,7 +891,7 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                             onClick={() => setExpandedSection(expandedSection === 'today' ? null : 'today')}
                             className="w-full flex items-center gap-4 p-4 bg-white hover:bg-slate-50 transition-all duration-200 group text-left"
                         >
-                            <div className="w-12 h-12 rounded-full bg-purple-500 flex items-center justify-center flex-shrink-0">
+                            <div className="w-12 h-12 rounded-full bg-slate-500 flex items-center justify-center flex-shrink-0">
                                 <FileText className="text-white" size={20} />
                             </div>
                             <div className="flex-1">
