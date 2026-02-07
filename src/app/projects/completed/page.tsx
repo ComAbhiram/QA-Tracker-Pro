@@ -118,7 +118,7 @@ export default function CompletedProjects() {
                     {tasks.map((task) => (
                         <div
                             key={task.id}
-                            className="bg-white rounded-2xl border border-emerald-100 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden group"
+                            className="bg-white rounded-2xl border border-slate-400 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden group"
                         >
                             {/* Header */}
                             <div className="p-6 pb-4 border-b border-emerald-50 bg-emerald-50/30">
@@ -144,18 +144,18 @@ export default function CompletedProjects() {
                             <div className="p-6 space-y-4">
                                 {isQATeam && (
                                     <div className="grid grid-cols-2 gap-4">
-                                        <div className="bg-slate-50 rounded-xl p-3 border border-slate-100">
+                                        <div className="bg-slate-50 rounded-xl p-3 border border-slate-400">
                                             <div className="text-xs text-slate-500 font-semibold uppercase mb-1">HTML Bugs</div>
                                             <div className="text-lg font-mono font-bold text-slate-700">{task.htmlBugs || 0}</div>
                                         </div>
-                                        <div className="bg-slate-50 rounded-xl p-3 border border-slate-100">
+                                        <div className="bg-slate-50 rounded-xl p-3 border border-slate-400">
                                             <div className="text-xs text-slate-500 font-semibold uppercase mb-1">Func. Bugs</div>
                                             <div className="text-lg font-mono font-bold text-slate-700">{task.functionalBugs || 0}</div>
                                         </div>
                                     </div>
                                 )}
 
-                                <div className="pt-4 border-t border-slate-50 flex items-center justify-between text-sm">
+                                <div className="pt-4 border-t border-slate-400 flex items-center justify-between text-sm">
                                     <div className="flex items-center gap-2 text-slate-600">
                                         <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500">
                                             <User size={14} />
@@ -174,44 +174,44 @@ export default function CompletedProjects() {
                 <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
                     <div className="overflow-x-auto">
                         <table className="w-full text-sm text-slate-600">
-                            <thead className="bg-emerald-50 border-b-2 border-emerald-200">
+                            <thead className="bg-emerald-50 border-b-2 border-slate-400">
                                 <tr>
-                                    <th className="px-5 py-4 font-semibold text-slate-700 text-left border-r border-emerald-100">Project</th>
-                                    <th className="px-4 py-4 font-semibold text-slate-700 text-left border-r border-emerald-100">Phase/Task</th>
-                                    <th className="px-4 py-4 font-semibold text-slate-700 text-left border-r border-emerald-100">PC</th>
-                                    <th className="px-4 py-4 font-semibold text-slate-700 text-left border-r border-emerald-100">Assignee 1</th>
-                                    <th className="px-4 py-4 font-semibold text-slate-700 text-left border-r border-emerald-100">Assignee 2</th>
-                                    <th className="px-4 py-4 font-semibold text-slate-700 text-left border-r border-emerald-100">End Date</th>
-                                    <th className="px-4 py-4 font-semibold text-slate-700 text-left border-r border-emerald-100">Actual Completion</th>
-                                    {isQATeam && <th className="px-4 py-4 font-semibold text-slate-700 text-left border-r border-emerald-100">Bugs</th>}
-                                    <th className="px-4 py-4 font-semibold text-slate-700 text-left border-r border-emerald-100">Comments</th>
-                                    <th className="px-4 py-4 font-semibold text-slate-700 text-left border-r border-emerald-100">Deviation Reason</th>
+                                    <th className="px-5 py-4 font-semibold text-slate-700 text-left border-r border-slate-400">Project</th>
+                                    <th className="px-4 py-4 font-semibold text-slate-700 text-left border-r border-slate-400">Phase/Task</th>
+                                    <th className="px-4 py-4 font-semibold text-slate-700 text-left border-r border-slate-400">PC</th>
+                                    <th className="px-4 py-4 font-semibold text-slate-700 text-left border-r border-slate-400">Assignee 1</th>
+                                    <th className="px-4 py-4 font-semibold text-slate-700 text-left border-r border-slate-400">Assignee 2</th>
+                                    <th className="px-4 py-4 font-semibold text-slate-700 text-left border-r border-slate-400">End Date</th>
+                                    <th className="px-4 py-4 font-semibold text-slate-700 text-left border-r border-slate-400">Actual Completion</th>
+                                    {isQATeam && <th className="px-4 py-4 font-semibold text-slate-700 text-left border-r border-slate-400">Bugs</th>}
+                                    <th className="px-4 py-4 font-semibold text-slate-700 text-left border-r border-slate-400">Comments</th>
+                                    <th className="px-4 py-4 font-semibold text-slate-700 text-left border-r border-slate-400">Deviation Reason</th>
                                     <th className="px-4 py-4 font-semibold text-slate-700 text-left">Sprint Link</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {tasks.map((task) => (
-                                    <tr key={task.id} className="border-b border-slate-100 hover:bg-emerald-50/30 transition-all">
-                                        <td className="px-5 py-4 font-semibold text-slate-800 border-r border-slate-50">{task.projectName}</td>
-                                        <td className="px-4 py-4 font-medium text-slate-600 border-r border-slate-50">{task.subPhase || '-'}</td>
-                                        <td className="px-4 py-4 text-slate-600 border-r border-slate-50">{task.pc || '-'}</td>
-                                        <td className="px-4 py-4 text-slate-600 border-r border-slate-50">{task.assignedTo || '-'}</td>
-                                        <td className="px-4 py-4 text-slate-600 border-r border-slate-50">{task.assignedTo2 || '-'}</td>
-                                        <td className="px-4 py-4 text-slate-500 font-medium border-r border-slate-50">
+                                    <tr key={task.id} className="border-b border-slate-400 hover:bg-emerald-50/30 transition-all">
+                                        <td className="px-5 py-4 font-semibold text-slate-800 border-r border-slate-400">{task.projectName}</td>
+                                        <td className="px-4 py-4 font-medium text-slate-600 border-r border-slate-400">{task.subPhase || '-'}</td>
+                                        <td className="px-4 py-4 text-slate-600 border-r border-slate-400">{task.pc || '-'}</td>
+                                        <td className="px-4 py-4 text-slate-600 border-r border-slate-400">{task.assignedTo || '-'}</td>
+                                        <td className="px-4 py-4 text-slate-600 border-r border-slate-400">{task.assignedTo2 || '-'}</td>
+                                        <td className="px-4 py-4 text-slate-500 font-medium border-r border-slate-400">
                                             {task.endDate ? format(new Date(task.endDate), 'MMM d, yyyy') : '-'}
                                         </td>
-                                        <td className="px-4 py-4 text-emerald-600 font-medium border-r border-slate-50">
+                                        <td className="px-4 py-4 text-emerald-600 font-medium border-r border-slate-400">
                                             {task.actualCompletionDate ? format(new Date(task.actualCompletionDate), 'MMM d, yyyy') : '-'}
                                         </td>
                                         {isQATeam && (
-                                            <td className="px-4 py-4 text-center font-mono text-slate-600 border-r border-slate-50">
+                                            <td className="px-4 py-4 text-center font-mono text-slate-600 border-r border-slate-400">
                                                 {task.bugCount || 0}
                                             </td>
                                         )}
-                                        <td className="px-4 py-4 text-sm text-slate-500 max-w-xs truncate border-r border-slate-50" title={task.comments || ''}>
+                                        <td className="px-4 py-4 text-sm text-slate-500 max-w-xs truncate border-r border-slate-400" title={task.comments || ''}>
                                             {task.comments || '-'}
                                         </td>
-                                        <td className="px-4 py-4 text-sm text-slate-500 max-w-xs truncate border-r border-slate-50" title={task.deviationReason || ''}>
+                                        <td className="px-4 py-4 text-sm text-slate-500 max-w-xs truncate border-r border-slate-400" title={task.deviationReason || ''}>
                                             {task.deviationReason || '-'}
                                         </td>
                                         <td className="px-4 py-4 text-sm text-slate-500 max-w-xs truncate">
