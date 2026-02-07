@@ -357,7 +357,7 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                 const day = String(d.getDate()).padStart(2, '0');
                 const month = d.toLocaleString('en-US', { month: 'short' });
                 const year = d.getFullYear();
-                return `${day} ${month} ${year}`;
+                return `${day}\u00A0${month}\u00A0${year}`;
             };
 
             const formatTime = (seconds: number) => {
@@ -373,8 +373,8 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
             container.innerHTML = `
                 <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 1000px;">
                     <div style="margin-bottom: 24px; border-bottom: 2px solid #e2e8f0; padding-bottom: 16px;">
-                        <h1 style="color: #1e293b; font-size: 28px; margin-bottom: 8px; font-weight: 700;">
-                            Work Status of the Day : ${formatDate(today)}
+                        <h1 style="color: #1e293b; font-size: 28px; margin-bottom: 8px; font-weight: 700; word-spacing: normal;">
+                            Work&nbsp;Status&nbsp;of&nbsp;the&nbsp;Day&nbsp;:&nbsp;${formatDate(today)}
                         </h1>
                         <p style="color: #64748b; font-size: 16px; margin: 0;">${new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
                     </div>
