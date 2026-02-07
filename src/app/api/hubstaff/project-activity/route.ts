@@ -4,6 +4,8 @@ import path from 'path';
 import { getValidAccessToken } from '@/lib/hubstaff-auth';
 import { determineUserTeam } from '@/lib/hubstaff-team-mapping';
 
+export const dynamic = 'force-dynamic';
+
 const HUBSTAFF_API_BASE = 'https://api.hubstaff.com/v2';
 
 interface TeamMember {
