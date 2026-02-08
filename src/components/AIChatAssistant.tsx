@@ -70,19 +70,19 @@ export default function AIChatAssistant() {
                 <div className="w-[calc(100vw-48px)] sm:w-[400px] h-[500px] max-h-[80vh] bg-white rounded-2xl shadow-2xl border border-slate-200 flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-5 duration-300">
 
                     {/* Header */}
-                    <div className="bg-indigo-600 p-4 flex items-center justify-between text-white">
+                    <div className="bg-gradient-to-r from-yellow-500 to-slate-600 p-4 flex items-center justify-between text-white">
                         <div className="flex items-center gap-2">
                             <div className="bg-white/20 p-1.5 rounded-lg">
                                 <Bot size={20} className="text-white" />
                             </div>
                             <div>
                                 <h3 className="font-semibold text-sm">AI Assistant</h3>
-                                <p className="text-[10px] text-indigo-200">Powered by Groq</p>
+                                <p className="text-[10px] text-slate-100">Powered by Groq</p>
                             </div>
                         </div>
                         <button
                             onClick={() => setIsOpen(false)}
-                            className="text-indigo-200 hover:text-white transition-colors p-1"
+                            className="text-slate-100 hover:text-white transition-colors p-1"
                         >
                             <X size={18} />
                         </button>
@@ -95,19 +95,19 @@ export default function AIChatAssistant() {
                                 key={idx}
                                 className={`flex gap-3 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}
                             >
-                                <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${msg.role === 'user' ? 'bg-indigo-100 text-indigo-600' : 'bg-green-100 text-green-600'
+                                <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${msg.role === 'user' ? 'bg-yellow-100 text-yellow-600' : 'bg-slate-100 text-slate-600'
                                     }`}>
                                     {msg.role === 'user' ? <User size={14} /> : <Bot size={14} />}
                                 </div>
 
                                 <div className={`max-w-[80%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed shadow-sm ${msg.role === 'user'
-                                    ? 'bg-indigo-600 text-white rounded-tr-none prose-invert'
+                                    ? 'bg-yellow-500 text-white rounded-tr-none prose-invert'
                                     : 'bg-white text-slate-700 border border-slate-100 rounded-tl-none'
                                     }`}>
                                     {msg.role === 'user' ? (
                                         <p>{msg.content}</p>
                                     ) : (
-                                        <div className="prose prose-sm max-w-none prose-p:my-1 prose-ul:my-1 prose-li:my-0.5 prose-headings:text-slate-800 prose-headings:font-bold prose-headings:text-sm prose-headings:mt-2 prose-headings:mb-1 prose-strong:text-slate-800 prose-strong:font-semibold prose-a:text-indigo-600 prose-a:no-underline hover:prose-a:underline prose-code:text-indigo-600 prose-code:bg-indigo-50 prose-code:px-1 prose-code:rounded prose-code:before:content-none prose-code:after:content-none">
+                                        <div className="prose prose-sm max-w-none prose-p:my-1 prose-ul:my-1 prose-li:my-0.5 prose-headings:text-slate-800 prose-headings:font-bold prose-headings:text-sm prose-headings:mt-2 prose-headings:mb-1 prose-strong:text-slate-800 prose-strong:font-semibold prose-a:text-yellow-600 prose-a:no-underline hover:prose-a:underline prose-code:text-yellow-600 prose-code:bg-yellow-50 prose-code:px-1 prose-code:rounded prose-code:before:content-none prose-code:after:content-none">
                                             <ReactMarkdown remarkPlugins={[remarkGfm]}>
                                                 {msg.content}
                                             </ReactMarkdown>
@@ -119,7 +119,7 @@ export default function AIChatAssistant() {
 
                         {isLoading && (
                             <div className="flex gap-3">
-                                <div className="w-8 h-8 rounded-full bg-green-100 text-green-600 flex items-center justify-center shrink-0">
+                                <div className="w-8 h-8 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center shrink-0">
                                     <Bot size={14} />
                                 </div>
                                 <div className="bg-white border border-slate-100 rounded-2xl rounded-tl-none px-4 py-3 shadow-sm inline-flex items-center gap-1">
@@ -140,12 +140,12 @@ export default function AIChatAssistant() {
                                 value={input}
                                 onChange={(e) => setInput(e.target.value)}
                                 placeholder="Ask me anything..."
-                                className="w-full pl-4 pr-12 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all placeholder:text-slate-400"
+                                className="w-full pl-4 pr-12 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500/20 focus:border-yellow-500 transition-all placeholder:text-slate-400"
                             />
                             <button
                                 type="submit"
                                 disabled={!input.trim() || isLoading}
-                                className="absolute right-2 p-1.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:hover:bg-indigo-600 transition-colors"
+                                className="absolute right-2 p-1.5 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 disabled:opacity-50 disabled:hover:bg-yellow-500 transition-colors"
                             >
                                 <Send size={16} />
                             </button>
@@ -160,9 +160,9 @@ export default function AIChatAssistant() {
             {/* Toggle Button */}
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className={`w-14 h-14 rounded-full shadow-lg shadow-indigo-600/30 flex items-center justify-center transition-all duration-300 hover:scale-105 ${isOpen
+                className={`w-14 h-14 rounded-full shadow-lg shadow-yellow-500/30 flex items-center justify-center transition-all duration-300 hover:scale-105 ${isOpen
                     ? 'bg-slate-800 text-white rotate-90'
-                    : 'bg-indigo-600 text-white hover:bg-indigo-700'
+                    : 'bg-yellow-500 text-white hover:bg-yellow-600'
                     }`}
                 aria-label="Toggle AI Chat"
             >
