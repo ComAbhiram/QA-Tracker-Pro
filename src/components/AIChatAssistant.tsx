@@ -67,7 +67,7 @@ export default function AIChatAssistant() {
         <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-4">
             {/* Chat Window */}
             {isOpen && (
-                <div className="w-[350px] sm:w-[400px] h-[500px] bg-white rounded-2xl shadow-2xl border border-slate-200 flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-5 duration-300">
+                <div className="w-[calc(100vw-48px)] sm:w-[400px] h-[500px] max-h-[80vh] bg-white rounded-2xl shadow-2xl border border-slate-200 flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-5 duration-300">
 
                     {/* Header */}
                     <div className="bg-indigo-600 p-4 flex items-center justify-between text-white">
