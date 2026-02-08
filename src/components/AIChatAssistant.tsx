@@ -2,6 +2,8 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { MessageCircle, X, Send, Bot, User } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 interface Message {
     role: 'user' | 'assistant';
@@ -35,7 +37,7 @@ export default function AIChatAssistant() {
         setIsLoading(true);
 
         try {
-            // Prepare message history for context, limit to last 10 messages to save tokens/context
+            // Prepare message history for context, limit to last 10 messages
             const contextMessages = messages.slice(-10).map(m => ({ role: m.role, content: m.content }));
             contextMessages.push(userMessage);
 
@@ -99,10 +101,18 @@ export default function AIChatAssistant() {
                                 </div>
 
                                 <div className={`max-w-[80%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed shadow-sm ${msg.role === 'user'
-                                    ? 'bg-indigo-600 text-white rounded-tr-none'
+                                    ? 'bg-indigo-600 text-white rounded-tr-none prose-invert'
                                     : 'bg-white text-slate-700 border border-slate-100 rounded-tl-none'
                                     }`}>
-                                    {msg.content}
+                                    {msg.role === 'user' ? (
+                                        <p>{msg.content}</p>
+                                    ) : (
+                                        <div className="prose prose-sm max-w-none prose-p:my-1 prose-ul:my-1 prose-li:my-0.5 prose-headings:text-slate-800 prose-headings:font-bold prose-headings:text-sm prose-headings:mt-2 prose-headings:mb-1 prose-strong:text-slate-800 prose-strong:font-semibold prose-a:text-indigo-600 prose-a:no-underline hover:prose-a:underline prose-code:text-indigo-600 prose-code:bg-indigo-50 prose-code:px-1 prose-code:rounded prose-code:before:content-none prose-code:after:content-none">
+                                            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                                {msg.content}
+                                            </ReactMarkdown>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         ))}
