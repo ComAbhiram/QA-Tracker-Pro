@@ -4,28 +4,24 @@
 
 @layer base {
   :root {
-    --background: #0f172a;
-    /* Slate 900 */
-    --foreground: #f8fafc;
-    /* Slate 50 */
+    --background: #f8fafc;
+    --foreground: #1e293b;
     --primary: #F59E0B;
-    /* Yellow-500 */
-    --primary-foreground: #0f172a;
-    --secondary: #334155;
-    /* Slate 700 */
-    --secondary-foreground: #f8fafc;
-    --border: #1e293b;
-    /* Slate 800 */
+    /* Yellow/Gold */
+    --primary-foreground: #ffffff;
+    --secondary: #64748B;
+    --secondary-foreground: #0f172a;
   }
 
   html {
     font-size: 90%;
+    /* Scale entire UI down to mimic 90% zoom */
   }
 
   body {
-    @apply bg-slate-950 text-slate-200 min-h-screen font-sans overflow-x-hidden;
-    background: #020617;
-    /* Slate 950 for deeper contrast */
+    @apply bg-slate-50 text-slate-700 min-h-screen font-sans overflow-x-hidden;
+    /* Clean white/gray background, no gradients */
+    background: #f8fafc;
   }
 }
 
