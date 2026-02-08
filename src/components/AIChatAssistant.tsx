@@ -70,19 +70,19 @@ export default function AIChatAssistant() {
                 <div className="w-[calc(100vw-48px)] sm:w-[400px] h-[500px] max-h-[80vh] bg-white rounded-2xl shadow-2xl border border-slate-200 flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-5 duration-300">
 
                     {/* Header */}
-                    <div className="bg-gradient-to-r from-yellow-500 to-slate-600 p-4 flex items-center justify-between text-white">
+                    <div className="bg-yellow-500 p-4 flex items-center justify-between text-white">
                         <div className="flex items-center gap-2">
                             <div className="bg-white/20 p-1.5 rounded-lg">
                                 <Bot size={20} className="text-white" />
                             </div>
                             <div>
                                 <h3 className="font-semibold text-sm">AI Assistant</h3>
-                                <p className="text-[10px] text-slate-100">Powered by Groq</p>
+                                <p className="text-[10px] text-yellow-50">Powered by Groq</p>
                             </div>
                         </div>
                         <button
                             onClick={() => setIsOpen(false)}
-                            className="text-slate-100 hover:text-white transition-colors p-1"
+                            className="text-yellow-50 hover:text-white transition-colors p-1"
                         >
                             <X size={18} />
                         </button>
