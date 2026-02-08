@@ -146,10 +146,10 @@ export function Sidebar() {
 
             {/* Sidebar */}
             <ManageTeamModal isOpen={showManageTeam} onClose={() => setShowManageTeam(false)} />
-            <nav className={`sidebar ${collapsed ? '-translate-x-full' : 'translate-x-0'} lg:translate-x-0 bg-white border-r border-slate-100 dark:bg-slate-900/80 dark:border-slate-800 dark:backdrop-blur-lg`}>
-                <div className="sidebar-header border-b border-transparent dark:border-slate-800">
-                    <div className="logo text-slate-800 dark:text-slate-100">
-                        <div className="logo-icon text-white dark:text-slate-900">
+            <nav className={`sidebar ${collapsed ? '-translate-x-full' : 'translate-x-0'} lg:translate-x-0`}>
+                <div className="sidebar-header">
+                    <div className="logo">
+                        <div className="logo-icon">
                             {isGuest ? <Eye size={20} /> : <LayoutDashboard size={20} />}
                         </div>
                         {isGuest ? selectedTeamName || 'Guest View' : sidebarTitle}
@@ -157,7 +157,7 @@ export function Sidebar() {
                     {/* Close Button Inside Sidebar */}
                     <button
                         onClick={() => setCollapsed(true)}
-                        className="text-slate-400 hover:text-slate-600 transition-colors lg:hidden ml-auto dark:hover:text-slate-300"
+                        className="text-slate-400 hover:text-slate-600 transition-colors lg:hidden ml-auto"
                         aria-label="Close Sidebar"
                     >
                         <X size={20} />
@@ -167,7 +167,7 @@ export function Sidebar() {
                 <div className="sidebar-nav custom-scrollbar">
                     {Object.entries(navSections).map(([key, section]) => (
                         <div key={key} className="mb-2">
-                            <div className="nav-section-title text-slate-400 dark:text-slate-500">
+                            <div className="nav-section-title">
                                 <span>{section.title}</span>
                             </div>
 
@@ -178,7 +178,7 @@ export function Sidebar() {
                                         <Link
                                             key={item.href}
                                             href={item.href}
-                                            className={`nav-item ${isActive ? 'active' : ''} text-slate-500 hover:bg-slate-50 hover:text-slate-800 dark:text-slate-400 dark:hover:bg-slate-800/50 dark:hover:text-slate-100`}
+                                            className={`nav-item ${isActive ? 'active' : ''}`}
                                         >
                                             <span className="nav-icon flex items-center justify-center">{item.icon}</span>
                                             <span className="nav-text">{item.label}</span>
@@ -195,10 +195,10 @@ export function Sidebar() {
                     ))}
                 </div>
 
-                <div className="mt-auto border-t border-slate-100 p-4 space-y-2 dark:border-slate-800">
+                <div className="mt-auto border-t border-slate-100 p-4 space-y-2">
                     <button
                         onClick={toggleTheme}
-                        className={`flex items-center gap-3 w-full p-3 rounded-xl text-slate-600 hover:bg-slate-100 transition-all ${collapsed ? 'justify-center' : ''} dark:text-slate-400 dark:hover:bg-slate-800`}
+                        className={`flex items-center gap-3 w-full p-3 rounded-xl text-slate-600 hover:bg-slate-100 transition-all ${collapsed ? 'justify-center' : ''}`}
                     >
                         {isModernLook ? <Sun size={20} className="text-yellow-500" /> : <Moon size={20} />}
                         {!collapsed && <span className="font-medium">{isModernLook ? 'Classic Mode' : 'Modern Look'}</span>}
@@ -207,7 +207,7 @@ export function Sidebar() {
                     {userRole !== 'super_admin' && !isGuest && (
                         <button
                             onClick={() => setShowManageTeam(true)}
-                            className={`flex items-center gap-3 w-full p-3 rounded-xl text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 transition-all ${collapsed ? 'justify-center' : ''} dark:text-slate-400 dark:hover:bg-indigo-900/30 dark:hover:text-indigo-400`}
+                            className={`flex items-center gap-3 w-full p-3 rounded-xl text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 transition-all ${collapsed ? 'justify-center' : ''}`}
                         >
                             <Users size={20} />
                             {!collapsed && <span className="font-medium">Manage Team</span>}
@@ -223,7 +223,7 @@ export function Sidebar() {
                                 window.location.href = '/login';
                             }
                         }}
-                        className={`flex items-center gap-3 w-full p-3 rounded-xl text-slate-600 hover:bg-red-50 hover:text-red-600 transition-all ${collapsed ? 'justify-center' : ''} dark:text-slate-400 dark:hover:bg-red-900/30 dark:hover:text-red-400`}
+                        className={`flex items-center gap-3 w-full p-3 rounded-xl text-slate-600 hover:bg-red-50 hover:text-red-600 transition-all ${collapsed ? 'justify-center' : ''}`}
                     >
                         <LogOut size={20} />
                         {!collapsed && <span className="font-medium">{isGuest ? 'Exit Guest Mode' : 'Sign Out'}</span>}

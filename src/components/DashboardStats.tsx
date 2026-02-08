@@ -24,51 +24,51 @@ export default function DashboardStats({ tasks, onFilterChange, activeFilter }: 
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <div
-                className={`stats-card cursor-pointer group transition-all duration-200 ${activeFilter === 'All' ? 'ring-2 ring-sky-500 shadow-lg scale-[1.02]' : 'hover:shadow-md hover:scale-[1.01]'} bg-gradient-to-br from-white to-sky-50 border-l-4 border-sky-500 dark:from-slate-800 dark:to-slate-900 dark:border-sky-500`}
+                className={`stats-card cursor-pointer group transition-all duration-200 ${activeFilter === 'All' ? 'ring-2 ring-sky-500 shadow-lg scale-[1.02]' : 'hover:shadow-md hover:scale-[1.01]'} bg-gradient-to-br from-white to-sky-50 border-l-4 border-sky-500`}
                 onClick={() => onFilterChange('All')}
             >
                 <div className="flex items-center justify-between mb-4">
-                    <div className="text-slate-500 font-medium group-hover:text-sky-600 transition-colors dark:text-slate-400 dark:group-hover:text-sky-400">
+                    <div className="text-slate-500 font-medium group-hover:text-sky-600 transition-colors">
                         Total Projects
                     </div>
                 </div>
-                <div className="text-3xl font-bold mb-1 text-slate-800 dark:text-slate-100">{stats.total}</div>
+                <div className="text-3xl font-bold mb-1 text-slate-800">{stats.total}</div>
             </div>
 
             <div
-                className={`stats-card cursor-pointer group transition-all duration-200 ${activeFilter === 'active' ? 'ring-2 ring-amber-500 shadow-lg scale-[1.02]' : 'hover:shadow-md hover:scale-[1.01]'} bg-gradient-to-br from-white to-amber-50 border-l-4 border-amber-500 dark:from-slate-800 dark:to-slate-900 dark:border-amber-500`}
+                className={`stats-card cursor-pointer group transition-all duration-200 ${activeFilter === 'active' ? 'ring-2 ring-amber-500 shadow-lg scale-[1.02]' : 'hover:shadow-md hover:scale-[1.01]'} bg-gradient-to-br from-white to-amber-50 border-l-4 border-amber-500`}
                 onClick={() => onFilterChange('active')}
             >
                 <div className="flex items-center justify-between mb-4">
-                    <div className="text-slate-500 font-medium group-hover:text-amber-600 transition-colors dark:text-slate-400 dark:group-hover:text-amber-400">
+                    <div className="text-slate-500 font-medium group-hover:text-amber-600 transition-colors">
                         Active Tasks
                     </div>
                 </div>
-                <div className="text-3xl font-bold mb-1 text-slate-800 dark:text-slate-100">{stats.active}</div>
+                <div className="text-3xl font-bold mb-1 text-slate-800">{stats.active}</div>
             </div>
 
             <div
-                className={`stats-card cursor-pointer group transition-all duration-200 ${activeFilter === 'Completed' ? 'ring-2 ring-emerald-500 shadow-lg scale-[1.02]' : 'hover:shadow-md hover:scale-[1.01]'} bg-gradient-to-br from-white to-emerald-50 border-l-4 border-emerald-500 dark:from-slate-800 dark:to-slate-900 dark:border-emerald-500`}
+                className={`stats-card cursor-pointer group transition-all duration-200 ${activeFilter === 'Completed' ? 'ring-2 ring-emerald-500 shadow-lg scale-[1.02]' : 'hover:shadow-md hover:scale-[1.01]'} bg-gradient-to-br from-white to-emerald-50 border-l-4 border-emerald-500`}
                 onClick={() => onFilterChange('Completed')}
             >
                 <div className="flex items-center justify-between mb-4">
-                    <div className="text-slate-500 font-medium group-hover:text-emerald-600 transition-colors dark:text-slate-400 dark:group-hover:text-emerald-400">
+                    <div className="text-slate-500 font-medium group-hover:text-emerald-600 transition-colors">
                         Completed
                     </div>
                 </div>
-                <div className="text-3xl font-bold mb-1 text-slate-800 dark:text-slate-100">{stats.completed}</div>
+                <div className="text-3xl font-bold mb-1 text-slate-800">{stats.completed}</div>
             </div>
 
             <div
-                className={`stats-card cursor-pointer group transition-all duration-200 ${activeFilter === 'Overdue' ? 'ring-2 ring-red-500 shadow-lg scale-[1.02]' : 'hover:shadow-md hover:scale-[1.01]'} bg-gradient-to-br from-white to-red-50 border-l-4 border-red-500 dark:from-slate-800 dark:to-slate-900 dark:border-red-500`}
+                className={`stats-card cursor-pointer group transition-all duration-200 ${activeFilter === 'Overdue' ? 'ring-2 ring-red-500 shadow-lg scale-[1.02]' : 'hover:shadow-md hover:scale-[1.01]'} bg-gradient-to-br from-white to-red-50 border-l-4 border-red-500`}
                 onClick={() => onFilterChange('Overdue')}
             >
                 <div className="flex items-center justify-between mb-4">
-                    <div className="text-slate-500 font-medium group-hover:text-red-600 transition-colors dark:text-slate-400 dark:group-hover:text-red-400">
+                    <div className="text-slate-500 font-medium group-hover:text-red-600 transition-colors">
                         Overdue
                     </div>
                 </div>
-                <div className="text-3xl font-bold mb-1 text-slate-800 dark:text-slate-100">{stats.overdue}</div>
+                <div className="text-3xl font-bold mb-1 text-slate-800">{stats.overdue}</div>
             </div>
         </div>
     );
