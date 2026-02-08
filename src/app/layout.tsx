@@ -6,6 +6,8 @@ import { GuestProvider } from "@/contexts/GuestContext";
 import GuestBanner from "@/components/GuestBanner";
 import AIChatAssistant from "@/components/AIChatAssistant";
 
+import { ThemeProvider } from "@/contexts/ThemeContext";
+
 const inter = Inter({ subsets: ["latin"] });
 
 export const viewport: Viewport = {
@@ -27,21 +29,23 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <GuestProvider>
-          <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-200">
-            <GuestBanner />
-            <Sidebar />
-            <main className="main-content flex flex-col">
-              <div className="flex-1">
-                {children}
-              </div>
-              <footer className="mt-8 py-6 text-center text-xs font-semibold text-slate-900 uppercase tracking-widest border-t border-slate-200/50">
-                Crafted By Abhiram P Mohan : Lead QA, InterSmart
-              </footer>
-            </main>
-            <AIChatAssistant />
-          </div>
-        </GuestProvider>
+        <ThemeProvider>
+          <GuestProvider>
+            <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-200 transition-colors duration-300 modern-look:bg-slate-950 modern-look:from-slate-950 modern-look:to-slate-900">
+              <GuestBanner />
+              <Sidebar />
+              <main className="main-content flex flex-col">
+                <div className="flex-1">
+                  {children}
+                </div>
+                <footer className="mt-8 py-6 text-center text-xs font-semibold text-slate-900 uppercase tracking-widest border-t border-slate-200/50 modern-look:text-slate-500 modern-look:border-slate-800">
+                  Crafted By Abhiram P Mohan : Lead QA, InterSmart
+                </footer>
+              </main>
+              <AIChatAssistant />
+            </div>
+          </GuestProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

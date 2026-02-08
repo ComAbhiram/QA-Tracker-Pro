@@ -1,9 +1,9 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useTheme } from '@/contexts/ThemeContext';
 import {
     LayoutDashboard,
     ClipboardList,
@@ -28,7 +28,9 @@ import {
     Eye,
     Folder,
     FolderKanban,
-    Users
+    Users,
+    Sun,
+    Moon
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useGuestMode } from '@/contexts/GuestContext';
@@ -49,6 +51,7 @@ interface NavSection {
 export function Sidebar() {
     const pathname = usePathname();
     const { isGuest, selectedTeamName, clearGuestSession } = useGuestMode();
+    const { isModernLook, toggleTheme } = useTheme();
 
     // Hide sidebar on login and guest selection pages
     if (pathname === '/login' || pathname === '/guest') return null;
@@ -193,6 +196,14 @@ export function Sidebar() {
                 </div>
 
                 <div className="mt-auto border-t border-slate-100 p-4 space-y-2">
+                    <button
+                        onClick={toggleTheme}
+                        className={`flex items-center gap-3 w-full p-3 rounded-xl text-slate-600 hover:bg-slate-100 transition-all ${collapsed ? 'justify-center' : ''}`}
+                    >
+                        {isModernLook ? <Sun size={20} className="text-yellow-500" /> : <Moon size={20} />}
+                        {!collapsed && <span className="font-medium">{isModernLook ? 'Classic Mode' : 'Modern Look'}</span>}
+                    </button>
+
                     {userRole !== 'super_admin' && !isGuest && (
                         <button
                             onClick={() => setShowManageTeam(true)}
