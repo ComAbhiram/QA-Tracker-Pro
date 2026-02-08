@@ -4,6 +4,7 @@ import "./globals.css";
 import { Sidebar } from "@/components/Sidebar";
 import { GuestProvider } from "@/contexts/GuestContext";
 import GuestBanner from "@/components/GuestBanner";
+import AIChatAssistant from "@/components/AIChatAssistant";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -38,6 +39,7 @@ export default function RootLayout({
                 Crafted By Abhiram P Mohan : Lead QA, InterSmart
               </footer>
             </main>
+            <AIChatAssistant />
           </div>
         </GuestProvider>
       </body>
