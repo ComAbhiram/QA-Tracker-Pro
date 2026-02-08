@@ -77,7 +77,7 @@ export default function AIChatAssistant() {
                             </div>
                             <div>
                                 <h3 className="font-semibold text-sm">AI Assistant</h3>
-                                <p className="text-[10px] text-yellow-50">Powered by Groq</p>
+                                <p className="text-[10px] text-yellow-50">Crafted By : Abhiram P Mohan</p>
                             </div>
                         </div>
                         <button
