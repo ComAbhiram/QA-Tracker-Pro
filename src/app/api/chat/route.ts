@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 
-const MOONSHOT_API_KEY = process.env.MOONSHOT_API_KEY;
-const MOONSHOT_API_URL = 'https://api.moonshot.ai/v1/chat/completions';
+const GROQ_API_KEY = process.env.GROQ_API_KEY;
+const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
 
 const SYSTEM_PROMPT = `
 You are a helpful AI assistant for the "QA Project Tracker" application.
@@ -51,8 +51,8 @@ Tone:
 `;
 
 export async function POST(req: Request) {
-    if (!MOONSHOT_API_KEY) {
-        return NextResponse.json({ error: 'Moonshot API Key not configured' }, { status: 500 });
+    if (!GROQ_API_KEY) {
+        return NextResponse.json({ error: 'Groq API Key not configured' }, { status: 500 });
     }
 
     try {
@@ -69,22 +69,22 @@ export async function POST(req: Request) {
             ...messages
         ];
 
-        const response = await fetch(MOONSHOT_API_URL, {
+        const response = await fetch(GROQ_API_URL, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${MOONSHOT_API_KEY}`
+                'Authorization': `Bearer ${GROQ_API_KEY}`
             },
             body: JSON.stringify({
-                model: 'moonshot-v1-8k', // Using a standard Moonshot model
+                model: 'llama-3.3-70b-versatile', // Using Groq's Llama 3 model
                 messages: completionMessages,
-                temperature: 0.3, // Low temperature for more deterministic/factual answers
+                temperature: 0.3,
             })
         });
 
         if (!response.ok) {
             const errorData = await response.json();
-            console.error('Moonshot API Error:', errorData);
+            console.error('Groq AI Error:', errorData);
             return NextResponse.json({ error: 'Failed to fetch response from AI provider' }, { status: response.status });
         }
 
