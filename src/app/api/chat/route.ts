@@ -1,13 +1,9 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from '@/utils/supabase/server';
+import type { SupabaseClient } from '@supabase/supabase-js';
 
 const GROQ_API_KEY = process.env.GROQ_API_KEY;
 const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
-
-// Initialize Supabase Client
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
-const supabase = createClient(supabaseUrl, supabaseKey);
 
 const BASE_SYSTEM_PROMPT = `
 You are a helpful AI assistant for the "QA Project Tracker" application.
@@ -39,7 +35,7 @@ Tone:
 - Professional, concise, and data-driven.
 `;
 
-async function getEnhancedSystemPrompt() {
+async function getEnhancedSystemPrompt(supabase: SupabaseClient) {
     const today = new Date().toDateString();
     let dataContext = `\n\n=== LIVE DATA CONTEXT (Current Date: ${today}) ===\n`;
 
@@ -56,12 +52,12 @@ async function getEnhancedSystemPrompt() {
 
         dataContext += `\n[Active Tasks] (Top 100 by due date):\n`;
         if (activeTasks && activeTasks.length > 0) {
-            activeTasks.forEach(t => {
+            activeTasks.forEach((t: any) => {
                 const assignees = [t.assigned_to, t.assigned_to2].filter(Boolean).join(', ');
                 dataContext += `- **${t.project_name}**: Status=${t.status}, Phase=${t.sub_phase || 'N/A'}, Assigned=[${assignees}], Due=${t.end_date || 'N/A'}\n`;
             });
         } else {
-            dataContext += "No active tasks found.\n";
+            dataContext += "No active tasks found (Access might be restricted or list is empty).\n";
         }
 
         // 2. Fetch Recently Completed (Last 50) for Performance Context
@@ -76,7 +72,7 @@ async function getEnhancedSystemPrompt() {
 
         dataContext += `\n[Recently Completed Tasks] (Last 50):\n`;
         if (completedTasks && completedTasks.length > 0) {
-            completedTasks.forEach(t => {
+            completedTasks.forEach((t: any) => {
                 dataContext += `- **${t.project_name}**: Completed by ${t.assigned_to} on ${t.actual_completion_date}\n`;
             });
         }
@@ -102,8 +98,11 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'Invalid messages format' }, { status: 400 });
         }
 
-        // Generate System Prompt with Live Data
-        const systemPromptWithData = await getEnhancedSystemPrompt();
+        // Initialize authenticated Supabase client
+        const supabase = createClient();
+
+        // Generate System Prompt with Live Data using authenticated client
+        const systemPromptWithData = await getEnhancedSystemPrompt(supabase);
 
         // Prepend system prompt
         const completionMessages = [
