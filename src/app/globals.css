@@ -36,85 +36,60 @@
 
 @layer components {
 
-  /* Modern Look Utilities */
-  .modern-look .glass-card {
-    @apply bg-slate-900/60 backdrop-blur-md border border-slate-800 shadow-xl;
-  }
-
-  .modern-look .glass-panel {
-    @apply bg-slate-900/80 backdrop-blur-lg border-r border-slate-800;
-  }
-
-  /* Sidebar */
+  /* Sidebar Layout */
   .sidebar {
-    @apply fixed top-0 left-0 w-[16.25rem] h-full flex flex-col z-50 transition-all duration-300 bg-white border-r border-slate-100;
-  }
-
-  .modern-look .sidebar {
-    @apply bg-slate-900/80 backdrop-blur-lg border-slate-800;
+    @apply fixed top-0 left-0 w-[16.25rem] h-full flex flex-col z-50 transition-all duration-300;
   }
 
   .sidebar-header {
-    @apply p-6 border-b border-transparent shrink-0 flex items-center gap-3;
-  }
-
-  .modern-look .sidebar-header {
-    @apply border-slate-800;
+    @apply p-6 shrink-0 flex items-center gap-3 transition-colors duration-300;
   }
 
   .logo {
-    @apply text-xl font-bold text-slate-800 tracking-tight flex items-center gap-2;
-  }
-
-  .modern-look .logo {
-    @apply text-slate-100;
+    @apply text-xl font-bold tracking-tight flex items-center gap-2;
   }
 
   .logo-icon {
-    @apply p-1.5 bg-yellow-500 rounded-lg text-white;
-  }
-
-  .modern-look .logo-icon {
-    @apply text-slate-900;
+    @apply p-1.5 bg-yellow-500 rounded-lg;
   }
 
   .sidebar-nav {
     @apply flex-1 overflow-y-auto p-4 space-y-1;
   }
 
-  /* Fixed scrollbar styles (replaced missing @apply utilities) */
-  .modern-look .sidebar-nav {
+  /* Fixed scrollbar styles */
+  .custom-scrollbar {
     scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 transparent;
+  }
+
+  .modern-look .custom-scrollbar {
     scrollbar-color: #334155 transparent;
   }
 
-  .modern-look .sidebar-nav::-webkit-scrollbar {
+  .custom-scrollbar::-webkit-scrollbar {
     width: 6px;
   }
 
-  .modern-look .sidebar-nav::-webkit-scrollbar-track {
+  .custom-scrollbar::-webkit-scrollbar-track {
     background: transparent;
   }
 
-  .modern-look .sidebar-nav::-webkit-scrollbar-thumb {
-    background-color: #334155;
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: #cbd5e1;
     border-radius: 20px;
   }
 
-  .nav-section-title {
-    @apply text-xs font-semibold uppercase tracking-wider text-slate-400 mt-6 mb-2 px-4;
+  .modern-look .custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: #334155;
   }
 
-  .modern-look .nav-section-title {
-    @apply text-slate-500;
+  .nav-section-title {
+    @apply text-xs font-semibold uppercase tracking-wider mt-6 mb-2 px-4 transition-colors duration-200;
   }
 
   .nav-item {
-    @apply flex items-center px-4 py-3 rounded-lg cursor-pointer transition-all duration-200 font-medium text-slate-500 text-sm hover:bg-slate-50 hover:text-slate-800 relative overflow-hidden;
-  }
-
-  .modern-look .nav-item {
-    @apply text-slate-400 hover:bg-slate-800/50 hover:text-slate-100;
+    @apply flex items-center px-4 py-3 rounded-lg cursor-pointer transition-all duration-200 font-medium text-sm relative overflow-hidden;
   }
 
   .nav-item.active {
@@ -147,15 +122,6 @@
     }
   }
 
-  /* Cards */
-  .stats-card {
-    @apply rounded-xl p-6 border border-slate-100 shadow-sm transition-all duration-200 hover:shadow-md relative overflow-hidden;
-  }
-
-  .modern-look .stats-card {
-    @apply bg-slate-900/50 border-slate-800 hover:bg-slate-800/60 shadow-xl backdrop-blur-md;
-  }
-
   /* Buttons */
   .btn {
     @apply inline-flex items-center justify-center px-4 py-2 rounded-lg font-medium transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm shadow-sm;
@@ -175,64 +141,5 @@
 
   .modern-look .btn-secondary {
     @apply bg-slate-800 text-slate-200 hover:bg-slate-700 border-slate-700;
-  }
-
-  /* Tables */
-  .table-container {
-    @apply bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm;
-  }
-
-  .modern-look .table-container {
-    @apply bg-slate-900/60 backdrop-blur-md border-slate-800;
-  }
-
-  .table-header {
-    @apply bg-slate-50 text-slate-500 text-xs font-semibold uppercase tracking-wider border-b-2 border-slate-200;
-  }
-
-  .modern-look .table-header {
-    @apply bg-slate-900/50 text-slate-400 border-slate-800;
-  }
-
-  .table-row {
-    @apply border-b border-slate-100 last:border-0 hover:bg-slate-50/50 transition-colors;
-  }
-
-  .modern-look .table-row {
-    @apply border-slate-800 hover:bg-slate-800/50;
-  }
-
-  /* Enhanced table cells */
-  table th {
-    @apply px-4 py-4 text-left border-r border-slate-100 last:border-r-0;
-  }
-
-  .modern-look table th {
-    @apply border-slate-800/50 text-slate-400 bg-slate-900/80;
-  }
-
-  table td {
-    @apply px-4 py-4 border-r border-slate-50 last:border-r-0;
-  }
-
-  .modern-look table td {
-    @apply border-slate-800/50 text-slate-300;
-  }
-
-  /* Task card boxes */
-  .task-card {
-    @apply bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-all duration-200;
-  }
-
-  .modern-look .task-card {
-    @apply bg-slate-900/60 backdrop-blur-md border-slate-800 hover:bg-slate-800/60;
-  }
-
-  .task-card-header {
-    @apply bg-gradient-to-r from-yellow-500 to-slate-600 p-4 rounded-t-xl;
-  }
-
-  .modern-look .task-card-header {
-    @apply from-yellow-500/20 to-slate-800/50 border-b border-slate-800;
   }
 }

@@ -8,8 +8,9 @@ import DashboardCharts from '@/components/DashboardCharts';
 import DailyReportsModal from '@/components/DailyReportsModal';
 import TaskModal from '@/components/TaskModal';
 import Pagination from '@/components/Pagination';
-import { Plus, FileText, Layers, Edit2, Search } from 'lucide-react';
+import { Plus, FileText, Layers, Edit2, Search, Sun, Moon } from 'lucide-react';
 import { useGuestMode } from '@/contexts/GuestContext';
+import { useTheme } from '@/contexts/ThemeContext';
 
 export default function Home() {
   // Table Data State
@@ -35,6 +36,7 @@ export default function Home() {
   const [editingTask, setEditingTask] = useState<Task | null>(null);
 
   const { isGuest, selectedTeamId } = useGuestMode();
+  const { isModernLook, toggleTheme } = useTheme();
 
   // 1. Fetch Stats Data (Global logic for Charts & Stats Cards)
   // Fetches lightweight data for ALL tasks to populate charts/stats consistently
@@ -291,10 +293,17 @@ export default function Home() {
       {/* Header & Actions */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pl-16 lg:pl-0">
         <div>
-          <h1 className="text-3xl font-bold text-slate-800">Team Tracker</h1>
-          <p className="text-slate-500">Overview of all active team projects</p>
+          <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-100">Team Tracker</h1>
+          <p className="text-slate-500 dark:text-slate-400">Overview of all active team projects</p>
         </div>
         <div className="flex gap-3">
+          <button
+            onClick={toggleTheme}
+            className="btn bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-700"
+            title={isModernLook ? "Switch to Classic Mode" : "Switch to Modern Look"}
+          >
+            {isModernLook ? <Sun size={18} className="text-yellow-500" /> : <Moon size={18} />}
+          </button>
           <button
             onClick={() => setIsReportModalOpen(true)}
             className="btn btn-secondary flex items-center gap-2"
@@ -324,10 +333,10 @@ export default function Home() {
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
         {/* Main Task List - Powered by Paginated Fetch */}
-        <div className="xl:col-span-2 bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden flex flex-col">
-          <div className="p-6 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <h3 className="font-bold text-lg text-slate-800 flex items-center gap-2">
-              <Layers size={20} className="text-indigo-600" />
+        <div className="xl:col-span-2 bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden flex flex-col dark:bg-slate-900/50 dark:border-slate-800 dark:backdrop-blur-md">
+          <div className="p-6 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4 dark:border-slate-800">
+            <h3 className="font-bold text-lg text-slate-800 flex items-center gap-2 dark:text-slate-100">
+              <Layers size={20} className="text-indigo-600 dark:text-indigo-400" />
               Project Tasks
             </h3>
 
@@ -338,56 +347,56 @@ export default function Home() {
                   placeholder="Search tasks..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 w-full sm:w-64"
+                  className="pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 w-full sm:w-64 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200 dark:placeholder-slate-500"
                 />
-                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
               </div>
-              <span className="text-xs font-semibold bg-slate-100 text-slate-600 px-2 py-1 rounded-md whitespace-nowrap">
+              <span className="text-xs font-semibold bg-slate-100 text-slate-600 px-2 py-1 rounded-md whitespace-nowrap dark:bg-slate-800 dark:text-slate-400">
                 {totalItems} total results
               </span>
             </div>
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm text-slate-600 border-collapse">
-              <thead className="bg-slate-50 border border-slate-400">
+            <table className="w-full text-left text-sm text-slate-600 border-collapse dark:text-slate-300">
+              <thead className="bg-slate-50 border border-slate-400 dark:bg-slate-800/50 dark:border-slate-700">
                 <tr>
-                  <th className="px-6 py-4 font-semibold text-slate-600 border border-slate-400">Project</th>
-                  <th className="px-6 py-4 font-semibold text-slate-600 border border-slate-400">Phase</th>
-                  <th className="px-6 py-4 font-semibold text-slate-600 border border-slate-400">Status</th>
-                  <th className="px-6 py-4 font-semibold text-slate-600 border border-slate-400">Assignees</th>
-                  <th className="px-6 py-4 font-semibold text-slate-600 border border-slate-400">Timeline</th>
-                  <th className="px-6 py-4 font-semibold text-slate-600 text-right">Action</th>
+                  <th className="px-6 py-4 font-semibold text-slate-600 border border-slate-400 dark:text-slate-400 dark:border-slate-700">Project</th>
+                  <th className="px-6 py-4 font-semibold text-slate-600 border border-slate-400 dark:text-slate-400 dark:border-slate-700">Phase</th>
+                  <th className="px-6 py-4 font-semibold text-slate-600 border border-slate-400 dark:text-slate-400 dark:border-slate-700">Status</th>
+                  <th className="px-6 py-4 font-semibold text-slate-600 border border-slate-400 dark:text-slate-400 dark:border-slate-700">Assignees</th>
+                  <th className="px-6 py-4 font-semibold text-slate-600 border border-slate-400 dark:text-slate-400 dark:border-slate-700">Timeline</th>
+                  <th className="px-6 py-4 font-semibold text-slate-600 text-right dark:text-slate-400">Action</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-50">
+              <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
                 {loadingTasks ? (
                   <tr><td colSpan={6} className="p-8 text-center">Loading tasks...</td></tr>
                 ) : tasks.length === 0 ? (
                   <tr><td colSpan={6} className="p-8 text-center text-slate-400">No tasks found</td></tr>
                 ) : (
                   tasks.map(task => (
-                    <tr key={task.id} className="border-b border-slate-400 hover:bg-slate-50/50 transition-colors group">
-                      <td className="px-6 py-4 font-medium text-slate-800 border border-slate-400">
+                    <tr key={task.id} className="border-b border-slate-400 hover:bg-slate-50/50 transition-colors group dark:border-slate-700 dark:hover:bg-slate-800/50">
+                      <td className="px-6 py-4 font-medium text-slate-800 border border-slate-400 dark:text-slate-200 dark:border-slate-700">
                         <div className="flex flex-col">
                           <span>{task.projectName}</span>
-                          <span className="text-xs text-slate-500 font-normal">{task.projectType}</span>
+                          <span className="text-xs text-slate-500 font-normal dark:text-slate-400">{task.projectType}</span>
                         </div>
                       </td>
-                      <td className="px-6 py-4 border border-slate-400">{task.subPhase || '-'}</td>
-                      <td className="px-6 py-4 border border-slate-400">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${statusColors[task.status] || 'bg-slate-100 text-slate-600 border-slate-200'
+                      <td className="px-6 py-4 border border-slate-400 dark:border-slate-700">{task.subPhase || '-'}</td>
+                      <td className="px-6 py-4 border border-slate-400 dark:border-slate-700">
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${statusColors[task.status] || 'bg-slate-100 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700'
                           }`}>
                           {task.status}
                         </span>
                       </td>
-                      <td className="px-6 py-4 border border-slate-400">
+                      <td className="px-6 py-4 border border-slate-400 dark:border-slate-700">
                         <div className="flex -space-x-2">
-                          {task.assignedTo && <div className="w-8 h-8 rounded-full bg-sky-100 border-2 border-white flex items-center justify-center text-xs font-bold text-sky-600 shadow-sm" title={task.assignedTo}>{task.assignedTo.charAt(0)}</div>}
-                          {task.assignedTo2 && <div className="w-8 h-8 rounded-full bg-indigo-100 border-2 border-white flex items-center justify-center text-xs font-bold text-indigo-600 shadow-sm" title={task.assignedTo2}>{task.assignedTo2.charAt(0)}</div>}
+                          {task.assignedTo && <div className="w-8 h-8 rounded-full bg-sky-100 border-2 border-white flex items-center justify-center text-xs font-bold text-sky-600 shadow-sm dark:bg-sky-900/30 dark:border-slate-800 dark:text-sky-400" title={task.assignedTo}>{task.assignedTo.charAt(0)}</div>}
+                          {task.assignedTo2 && <div className="w-8 h-8 rounded-full bg-indigo-100 border-2 border-white flex items-center justify-center text-xs font-bold text-indigo-600 shadow-sm dark:bg-indigo-900/30 dark:border-slate-800 dark:text-indigo-400" title={task.assignedTo2}>{task.assignedTo2.charAt(0)}</div>}
                         </div>
                       </td>
-                      <td className="px-6 py-4 border border-slate-400">
+                      <td className="px-6 py-4 border border-slate-400 dark:border-slate-700">
                         {task.startDate ? (
                           <span>
                             {new Date(task.startDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
