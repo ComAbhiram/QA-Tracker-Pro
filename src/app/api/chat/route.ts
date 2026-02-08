@@ -33,6 +33,10 @@ Data Interpretation Rules:
 
 Tone:
 - Professional, concise, and data-driven.
+
+Special Instructions for Schedule/Time Queries:
+- **Overdue Tasks**: Tasks marked with '[OVERDUE]' are past their due date but still active.
+- **"Today/Tomorrow" Queries**: If a user asks "what is scheduled for tomorrow" or "what do I have today", you **MUST** include relevant Overdue tasks in your answer, noting that they are overdue. Do not ignore them just because their due date was in the past.
 `;
 
 async function getEnhancedSystemPrompt(supabase: SupabaseClient) {
@@ -52,9 +56,22 @@ async function getEnhancedSystemPrompt(supabase: SupabaseClient) {
 
         dataContext += `\n[Active Tasks] (Top 100 by due date):\n`;
         if (activeTasks && activeTasks.length > 0) {
+            const now = new Date();
+            now.setHours(0, 0, 0, 0); // Start of today
+
             activeTasks.forEach((t: any) => {
                 const assignees = [t.assigned_to, t.assigned_to2].filter(Boolean).join(', ');
-                dataContext += `- **${t.project_name}**: Status=${t.status}, Phase=${t.sub_phase || 'N/A'}, Assigned=[${assignees}], Due=${t.end_date || 'N/A'}\n`;
+
+                let timeStatus = '';
+                if (t.end_date) {
+                    const endDate = new Date(t.end_date);
+                    // Check if strictly before today (Overdue)
+                    if (endDate < now) {
+                        timeStatus = ' [OVERDUE]';
+                    }
+                }
+
+                dataContext += `- **${t.project_name}**: Status=${t.status}${timeStatus}, Phase=${t.sub_phase || 'N/A'}, Assigned=[${assignees}], Due=${t.end_date || 'N/A'}\n`;
             });
         } else {
             dataContext += "No active tasks found (Access might be restricted or list is empty).\n";
