@@ -24,6 +24,9 @@ CREATE POLICY "View tasks" ON tasks
         assigned_to = (SELECT name FROM user_profiles WHERE id = auth.uid())
         OR
         assigned_to2 = (SELECT name FROM user_profiles WHERE id = auth.uid())
+        OR
+        -- Allow public read access for Guest/Manager mode
+        auth.role() = 'anon'
     );
 
 -- 3. INSERT Policy

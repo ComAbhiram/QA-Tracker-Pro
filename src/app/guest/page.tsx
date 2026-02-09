@@ -41,7 +41,21 @@ export default function GuestTeamSelectionPage() {
     };
 
     const handleTeamSelect = (team: Team) => {
-        setGuestSession(team.id, team.name);
+        let targetTeamId = team.id;
+        const targetTeamName = team.name;
+
+        // If 'QA Team' is selected, find 'Super Admin' team ID and use that instead
+        if (targetTeamName.toLowerCase() === 'qa team') {
+            const superAdminTeam = teams.find(t => t.name.toLowerCase() === 'super admin');
+            if (superAdminTeam) {
+                targetTeamId = superAdminTeam.id;
+                console.log('Mapping QA Team to Super Admin ID:', targetTeamId);
+            } else {
+                console.warn('Super Admin team not found, using original QA Team ID');
+            }
+        }
+
+        setGuestSession(targetTeamId, targetTeamName);
         router.push('/');
     };
 

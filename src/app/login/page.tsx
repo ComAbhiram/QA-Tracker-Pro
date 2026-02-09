@@ -111,14 +111,21 @@ export default function LoginPage() {
                             )}
                         </button>
 
-                        {/* Guest Login Button */}
+                        {/* Manager Login Button */}
                         <button
                             type="button"
-                            onClick={() => router.push('/guest')}
-                            className="w-full py-3.5 bg-white hover:bg-slate-50 text-yellow-600 font-bold rounded-xl border-2 border-yellow-500 hover:border-yellow-600 transition-all flex items-center justify-center gap-2"
+                            onClick={() => {
+                                const key = prompt("Enter Manager Passkey:");
+                                if (key === 'inter223') {
+                                    router.push('/guest');
+                                } else if (key !== null) {
+                                    alert('Invalid passkey');
+                                }
+                            }}
+                            className="w-full py-3.5 bg-white hover:bg-slate-50 text-indigo-600 font-bold rounded-xl border-2 border-indigo-500 hover:border-indigo-600 transition-all flex items-center justify-center gap-2"
                         >
                             <Users size={20} />
-                            Login as Guest
+                            Login as a Manager
                         </button>
 
                         <div className="text-center pt-2">
@@ -142,4 +149,5 @@ export default function LoginPage() {
             </div>
         </div>
     );
+
 }
