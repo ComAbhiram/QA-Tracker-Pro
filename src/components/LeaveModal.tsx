@@ -25,7 +25,10 @@ const LEAVE_TYPES = [
     'Half Day Morning Session Casual Leave',
     'Half Day Morning Session Sick Leave',
     'Half Day Afternoon Session Casual Leave',
-    'Half Day Afternoon Session Sick Leave'
+    'Half Day Afternoon Session Sick Leave',
+    'WFH',
+    'Half Day WFH Morning session',
+    'Half Day WFH Afternoon session'
 ];
 
 export default function LeaveModal({ isOpen, onClose, onSave }: LeaveModalProps) {
@@ -114,8 +117,8 @@ export default function LeaveModal({ isOpen, onClose, onSave }: LeaveModalProps)
                 {/* Header */}
                 <div className="flex items-center justify-between p-6 border-b border-slate-200 bg-gradient-to-r from-indigo-50 to-blue-50">
                     <div>
-                        <h2 className="text-2xl font-bold text-slate-800">Add Leave Request</h2>
-                        <p className="text-sm text-slate-500 mt-1">Submit a new leave request for a team member</p>
+                        <h2 className="text-2xl font-bold text-slate-800">Add Leave or WFH</h2>
+                        <p className="text-sm text-slate-500 mt-1">Submit a new leave or WFH request for a team member</p>
                     </div>
                     <button
                         onClick={onClose}
@@ -165,7 +168,7 @@ export default function LeaveModal({ isOpen, onClose, onSave }: LeaveModalProps)
                     <div>
                         <label className="flex items-center gap-2 text-sm font-semibold text-slate-700 mb-2">
                             <Tag size={16} className="text-indigo-600" />
-                            Leave Type <span className="text-red-500">*</span>
+                            Type <span className="text-red-500">*</span>
                         </label>
                         <select
                             value={formData.leave_type}
@@ -173,7 +176,7 @@ export default function LeaveModal({ isOpen, onClose, onSave }: LeaveModalProps)
                             required
                             className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all bg-white"
                         >
-                            <option value="">Select leave type</option>
+                            <option value="">Select Type</option>
                             {LEAVE_TYPES.map(type => (
                                 <option key={type} value={type}>
                                     {type}

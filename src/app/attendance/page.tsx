@@ -11,7 +11,7 @@ interface TeamMember {
     name: string;
 }
 
-type ViewMode = 'daily' | 'monthly' | 'hr-daily';
+type ViewMode = 'daily' | 'monthly' | 'hr-daily' | 'custom-range';
 
 export default function Attendance() {
     const [viewMode, setViewMode] = useState<ViewMode>('daily');
@@ -25,6 +25,12 @@ export default function Attendance() {
     const [monthlyData, setMonthlyData] = useState<MonthlyData | null>(null);
     const [hrDailyData, setHrDailyData] = useState<any | null>(null); // Department-based structure
     const [hrSelectedDate, setHrSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+
+    // Custom Range State
+    const [customStartDate, setCustomStartDate] = useState(new Date().toISOString().split('T')[0]);
+    const [customEndDate, setCustomEndDate] = useState(new Date().toISOString().split('T')[0]);
+    const [customRangeData, setCustomRangeData] = useState<HubstaffDailyActivity | null>(null);
+
     const [error, setError] = useState<string | null>(null);
 
     // Fetch team members on component mount
@@ -124,6 +130,43 @@ export default function Attendance() {
         }
     };
 
+    const fetchCustomRangeData = async () => {
+        setLoading(true);
+        setError(null);
+        setCustomRangeData(null);
+
+        if (customStartDate > customEndDate) {
+            setError('Start date cannot be after end date');
+            setLoading(false);
+            return;
+        }
+
+        try {
+            let url = `/api/hubstaff?startDate=${customStartDate}&endDate=${customEndDate}`;
+            if (selectedUserId) {
+                url += `&userId=${selectedUserId}`;
+            }
+
+            const response = await fetch(url);
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || errorData.message || 'Failed to fetch custom range data');
+            }
+
+            const data = await response.json();
+            // Aggregate data if needed (the API now returns aggregated activities)
+            // But we might need to massage it to match HubstaffDailyActivity if the API return type differs slightly
+            // The API returns { date, totalTime, activities: [...] } which matches well enough
+            setCustomRangeData(data);
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Failed to fetch data');
+            console.error('Error fetching custom range data:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const exportReport = () => {
         if (!activityData) return;
 
@@ -213,6 +256,15 @@ export default function Attendance() {
                         }`}
                 >
                     For HR (Daily)
+                </button>
+                <button
+                    onClick={() => setViewMode('custom-range')}
+                    className={`flex-1 px-4 py-2 rounded-lg font-medium transition-colors ${viewMode === 'custom-range'
+                        ? 'bg-sky-500 text-white'
+                        : 'text-slate-600 hover:bg-slate-50'
+                        }`}
+                >
+                    Custom Range
                 </button>
             </div>
 
@@ -705,6 +757,179 @@ export default function Attendance() {
                             <FileSpreadsheet className="mx-auto text-slate-300 mb-4" size={64} />
                             <h3 className="text-xl font-semibold text-slate-700 mb-2">No HR Data</h3>
                             <p className="text-slate-500">Select a date and click "Fetch Data" to view HR daily report</p>
+                        </div>
+                    )}
+                </>
+            )}
+
+            {/* Custom Range View */}
+            {viewMode === 'custom-range' && (
+                <>
+                    {/* Range Selectors */}
+                    <div className="bg-white rounded-xl p-6 border border-slate-100 shadow-sm">
+                        <div className="flex flex-col md:flex-row gap-4 items-end">
+                            <div className="flex-1">
+                                <label className="block text-sm font-medium text-slate-700 mb-2">
+                                    Team Member
+                                </label>
+                                <select
+                                    value={selectedUserId}
+                                    onChange={(e) => setSelectedUserId(e.target.value)}
+                                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 bg-white"
+                                >
+                                    <option value="">All Members</option>
+                                    {teamMembers.map((member) => (
+                                        <option key={member.id} value={member.id}>
+                                            {member.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div className="flex-1">
+                                <label className="block text-sm font-medium text-slate-700 mb-2">
+                                    From Date
+                                </label>
+                                <input
+                                    type="date"
+                                    value={customStartDate}
+                                    onChange={(e) => setCustomStartDate(e.target.value)}
+                                    max={new Date().toISOString().split('T')[0]}
+                                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500"
+                                />
+                            </div>
+                            <div className="flex-1">
+                                <label className="block text-sm font-medium text-slate-700 mb-2">
+                                    To Date
+                                </label>
+                                <input
+                                    type="date"
+                                    value={customEndDate}
+                                    onChange={(e) => setCustomEndDate(e.target.value)}
+                                    max={new Date().toISOString().split('T')[0]}
+                                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500"
+                                />
+                            </div>
+                            <button
+                                onClick={fetchCustomRangeData}
+                                disabled={loading}
+                                className="px-6 py-2 bg-sky-500 text-white rounded-lg hover:bg-sky-600 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                            >
+                                {loading ? 'Loading...' : 'Fetch Range'}
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Error Message */}
+                    {error && (
+                        <div className="bg-red-50 border border-red-200 rounded-xl p-6">
+                            <h3 className="font-semibold text-red-900 mb-2">Error</h3>
+                            <p className="text-sm text-red-700">{error}</p>
+                        </div>
+                    )}
+
+                    {/* Custom Range Data */}
+                    {customRangeData && (
+                        <>
+                            {/* Summary Cards */}
+                            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                                <div className="bg-white rounded-xl p-6 border border-slate-100 shadow-sm">
+                                    <div className="flex items-center justify-between mb-4">
+                                        <div className="text-slate-500">Total Time</div>
+                                        <Clock className="text-sky-500" size={24} />
+                                    </div>
+                                    <div className="text-3xl font-bold text-slate-800">
+                                        {formatDuration(customRangeData.totalTime)}
+                                    </div>
+                                </div>
+
+                                <div className="bg-white rounded-xl p-6 border border-slate-100 shadow-sm">
+                                    <div className="flex items-center justify-between mb-4">
+                                        <div className="text-slate-500">Team Members</div>
+                                        <Users className="text-purple-500" size={24} />
+                                    </div>
+                                    <div className="text-3xl font-bold text-slate-800">
+                                        {customRangeData.activities.length}
+                                    </div>
+                                </div>
+
+                                <div className="bg-white rounded-xl p-6 border border-slate-100 shadow-sm">
+                                    <div className="flex items-center justify-between mb-4">
+                                        <div className="text-slate-500">Avg Activity</div>
+                                        <TrendingUp className="text-emerald-500" size={24} />
+                                    </div>
+                                    <div className="text-3xl font-bold text-slate-800">
+                                        {(() => {
+                                            const weightedActivity = customRangeData.activities.reduce((sum, a) => sum + (a.activityPercentage * a.timeWorked), 0);
+                                            const activeTime = customRangeData.activities.reduce((sum, a) => sum + (a.activityPercentage > 0 ? a.timeWorked : 0), 0);
+
+                                            if (activeTime === 0) return '0';
+
+                                            return Math.round(weightedActivity / activeTime);
+                                        })()}
+                                        %
+                                    </div>
+                                </div>
+
+                                <div className="bg-white rounded-xl p-6 border border-slate-100 shadow-sm">
+                                    <div className="flex items-center justify-between mb-4">
+                                        <div className="text-slate-500">Range</div>
+                                        <Calendar className="text-blue-500" size={24} />
+                                    </div>
+                                    <div className="text-sm font-bold text-slate-800">
+                                        {new Date(customStartDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - {new Date(customEndDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Team Activity Table */}
+                            <div className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
+                                <div className="p-6 border-b border-slate-100 flex justify-between items-center">
+                                    <h2 className="text-xl font-bold text-slate-800">Activity Breakdown</h2>
+                                </div>
+                                <div className="overflow-x-auto">
+                                    <table className="w-full">
+                                        <thead className="bg-slate-50 border-b-2 border-slate-200">
+                                            <tr>
+                                                <th className="px-6 py-4 text-left font-semibold text-slate-600 border-r border-slate-100">Team Member</th>
+                                                <th className="px-6 py-4 text-left font-semibold text-slate-600 border-r border-slate-100">Project</th>
+                                                <th className="px-6 py-4 text-left font-semibold text-slate-600 border-r border-slate-100">Time Worked</th>
+                                                <th className="px-6 py-4 text-left font-semibold text-slate-600">Activity Level</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {customRangeData.activities.map((activity, index) => (
+                                                <tr key={index} className="border-b border-slate-100 hover:bg-slate-50/50 transition-colors">
+                                                    <td className="px-6 py-4 font-medium text-slate-800 border-r border-slate-50">
+                                                        {activity.userName}
+                                                    </td>
+                                                    <td className="px-6 py-4 text-slate-600 border-r border-slate-50">
+                                                        {activity.projectName || 'N/A'}
+                                                    </td>
+                                                    <td className="px-6 py-4 border-r border-slate-50">
+                                                        <span className="font-medium text-slate-800">
+                                                            {formatDuration(activity.timeWorked)}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-6 py-4">
+                                                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${getActivityColor(activity.activityPercentage)}`}>
+                                                            {activity.activityPercentage}%
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </>
+                    )}
+
+                    {/* Empty State */}
+                    {!customRangeData && !loading && !error && (
+                        <div className="bg-white rounded-xl p-12 text-center border border-slate-100">
+                            <Calendar className="mx-auto text-slate-300 mb-4" size={64} />
+                            <h3 className="text-xl font-semibold text-slate-700 mb-2">No Range Data</h3>
+                            <p className="text-slate-500">Select dates and click "Fetch Range" to view activity data</p>
                         </div>
                     )}
                 </>

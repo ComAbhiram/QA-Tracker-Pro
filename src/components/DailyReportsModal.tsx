@@ -5,6 +5,7 @@ import { Task, mapTaskFromDB } from '@/lib/types';
 import { getEffectiveStatus } from '@/utils/taskUtils';
 import { X, Camera, FileText, Calendar, ClipboardList, ChevronRight } from 'lucide-react';
 import html2canvas from 'html2canvas';
+import Combobox from '@/components/ui/Combobox';
 
 interface DailyReportsModalProps {
     isOpen: boolean;
@@ -1005,21 +1006,14 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                                     <label className="block text-sm font-medium text-slate-700 mb-2">
                                         Select Member
                                     </label>
-                                    <div className="relative">
-                                        <select
-                                            value={selectedQA}
-                                            onChange={(e) => setSelectedQA(e.target.value)}
-                                            className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 text-sm appearance-none bg-white"
-                                        >
-                                            <option value="">Choose a Member...</option>
-                                            {teamMembers.map((member) => (
-                                                <option key={member.id} value={member.name}>
-                                                    {member.name}
-                                                </option>
-                                            ))}
-                                        </select>
-                                        <ChevronRight className="absolute right-3 top-1/2 -translate-y-1/2 rotate-90 text-slate-400 pointer-events-none" size={16} />
-                                    </div>
+                                    <Combobox
+                                        options={teamMembers.map(m => ({ id: m.name, label: m.name }))}
+                                        value={selectedQA}
+                                        onChange={(val) => setSelectedQA(val as string)}
+                                        placeholder="Choose a Member..."
+                                        searchPlaceholder="Search member..."
+                                        className="w-full"
+                                    />
                                 </div>
 
 

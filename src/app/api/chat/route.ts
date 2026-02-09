@@ -65,8 +65,12 @@ async function getEnhancedSystemPrompt(supabase: SupabaseClient) {
                 let timeStatus = '';
                 if (t.end_date) {
                     const endDate = new Date(t.end_date);
-                    // Check if strictly before today (Overdue)
-                    if (endDate < now) {
+                    // Set deadline to 6:30 PM on the end date
+                    const deadline = new Date(endDate);
+                    deadline.setHours(18, 30, 0, 0);
+
+                    // Check if now is strictly after the deadline
+                    if (now > deadline) {
                         timeStatus = ' [OVERDUE]';
                     }
                 }

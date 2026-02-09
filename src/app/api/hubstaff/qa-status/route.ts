@@ -259,7 +259,11 @@ function generateWorkStatusText(
             text += `✅ *Actual End Date:* ${actualDate ? formatDateDDMMYYYY(actualDate) : 'Not completed'}\n`;
 
             text += `📊 *Status:* ${task.status}\n`;
-            const isDeviated = task.deviationReason && task.deviationReason.trim() !== '';
+
+            // Check for deviation (either explicit reason OR overdue)
+            const isOverdue = task.endDate && task.endDate < date;
+            const isDeviated = (task.deviationReason && task.deviationReason.trim() !== '') || isOverdue;
+
             text += `✅ *Deviated:* ${isDeviated ? 'Yes' : 'No'}\n`;
             text += `\n`;
         });

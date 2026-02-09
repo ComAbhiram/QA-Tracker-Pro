@@ -6,19 +6,26 @@ export const dynamic = 'force-dynamic';
 export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
     const date = searchParams.get('date');
+    const startDate = searchParams.get('startDate');
+    const endDate = searchParams.get('endDate');
     const userIdFilter = searchParams.get('userId'); // Optional: filter by specific user
 
-    if (!date) {
-        return NextResponse.json({ error: 'Date parameter is required' }, { status: 400 });
+    // Validate parameters: Either 'date' OR 'startDate' + 'endDate' is required
+    if (!date && (!startDate || !endDate)) {
+        return NextResponse.json({ error: 'Either date or startDate/endDate parameters are required' }, { status: 400 });
     }
 
+    // Determine effective start and end dates
+    const effectiveStartDate = startDate || date!;
+    const effectiveEndDate = endDate || date!;
+
     try {
-        console.log(`[API] Fetching activities for date: ${date}`);
+        console.log(`[API] Fetching activities for range: ${effectiveStartDate} to ${effectiveEndDate}`);
 
         // Fetch optimized activities from client
         // The client handles caching of users/projects and pagination automatically
         const userIdNum = userIdFilter ? parseInt(userIdFilter) : undefined;
-        const activities = await hubstaffClient.getDailyActivities(date, date, userIdNum ? [userIdNum] : undefined);
+        const activities = await hubstaffClient.getDailyActivities(effectiveStartDate, effectiveEndDate, userIdNum ? [userIdNum] : undefined);
 
         // Filter by user if requested (client handles this but good to be safe/consistent)
         let filteredActivities = activities;
@@ -33,7 +40,9 @@ export async function GET(request: NextRequest) {
         console.log(`[API] Returned ${filteredActivities.length} activities, total time: ${totalTime}s`);
 
         return NextResponse.json({
-            date,
+            date: date || `${effectiveStartDate} to ${effectiveEndDate}`,
+            startDate: effectiveStartDate,
+            endDate: effectiveEndDate,
             totalTime,
             activities: filteredActivities,
         });

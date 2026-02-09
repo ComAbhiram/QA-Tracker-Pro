@@ -125,7 +125,7 @@ export function Sidebar() {
         requests: {
             title: 'REQUESTS',
             items: [
-                { label: 'Leave', icon: <LogOut size={18} className="rotate-180" />, href: '/requests/new' },
+                { label: 'Leave and WFH', icon: <LogOut size={18} className="rotate-180" />, href: '/requests/new' },
             ]
         }
     };
