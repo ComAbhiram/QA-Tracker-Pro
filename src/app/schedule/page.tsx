@@ -10,7 +10,10 @@ import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSam
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, List, Clock, User, AlertCircle, Plus } from 'lucide-react';
 import TaskModal from '@/components/TaskModal';
 
+import { useGuestMode } from '@/contexts/GuestContext';
+
 export default function Schedule() {
+    const { isGuest, selectedTeamId } = useGuestMode();
     const [tasks, setTasks] = useState<Task[]>([]);
     const [loading, setLoading] = useState(true);
     const [currentDate, setCurrentDate] = useState(new Date());
@@ -20,7 +23,7 @@ export default function Schedule() {
 
     useEffect(() => {
         fetchTasks();
-    }, [currentDate, viewMode]);
+    }, [currentDate, viewMode, isGuest, selectedTeamId]);
 
     async function fetchTasks() {
         setLoading(true);
@@ -35,11 +38,24 @@ export default function Schedule() {
             end = endOfMonth(currentDate);
         }
 
-        const { data, error } = await supabase
+        let query = supabase
             .from('tasks')
             .select('*')
             .lte('start_date', end.toISOString().split('T')[0])
             .gte('end_date', start.toISOString().split('T')[0]);
+
+        // Manager/Guest Mode Filtering
+        if (isGuest) {
+            if (selectedTeamId) {
+                query = query.eq('team_id', selectedTeamId);
+            } else {
+                // Prevent data leak if team ID is missing
+                console.warn('Manager Mode: selectedTeamId is missing, blocking data fetch.');
+                query = query.eq('id', '00000000-0000-0000-0000-000000000000');
+            }
+        }
+
+        const { data, error } = await query;
 
         if (error) {
             console.error('Error fetching tasks:', error);

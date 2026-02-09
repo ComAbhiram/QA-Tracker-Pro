@@ -7,7 +7,10 @@ import { Search, Plus, Download } from 'lucide-react';
 import TaskModal from '@/components/TaskModal';
 import AssigneeTaskTable from '@/components/AssigneeTaskTable';
 
+import { useGuestMode } from '@/contexts/GuestContext';
+
 export default function Tracker() {
+    const { isGuest, selectedTeamId } = useGuestMode();
     const [tasks, setTasks] = useState<Task[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
@@ -27,6 +30,17 @@ export default function Tracker() {
 
             if (searchTerm) {
                 query = query.or(`project_name.ilike.%${searchTerm}%,assigned_to.ilike.%${searchTerm}%,sub_phase.ilike.%${searchTerm}%`);
+            }
+
+            // Manager/Guest Mode Filtering
+            if (isGuest) {
+                if (selectedTeamId) {
+                    query = query.eq('team_id', selectedTeamId);
+                } else {
+                    // Prevent data leak if team ID is missing
+                    console.warn('Manager Mode: selectedTeamId is missing, blocking data fetch.');
+                    query = query.eq('id', '00000000-0000-0000-0000-000000000000');
+                }
             }
 
             const { data, error } = await query;
@@ -55,7 +69,7 @@ export default function Tracker() {
             setLoading(false);
         }
         fetchTasks();
-    }, [searchTerm, dateFilter]);
+    }, [searchTerm, dateFilter, isGuest, selectedTeamId]);
 
     const handleAddTask = () => {
         setEditingTask(null);
