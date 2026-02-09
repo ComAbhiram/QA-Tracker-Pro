@@ -7,7 +7,7 @@ import { supabase } from '@/lib/supabase';
 import { mapTaskFromDB, Task, isTaskOverdue, getOverdueDays } from '@/lib/types';
 import { getEffectiveStatus } from '@/utils/taskUtils';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, isToday, isWeekend, addMonths, subMonths, addDays, subDays } from 'date-fns';
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, List, Clock, User, AlertCircle, Plus, Table2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, List, Clock, User, AlertCircle, Plus, Table2, LayoutGrid } from 'lucide-react';
 import TaskModal from '@/components/TaskModal';
 
 import { useGuestMode } from '@/contexts/GuestContext';
@@ -350,66 +350,74 @@ export default function Schedule() {
         <div className="max-w-[1600px] mx-auto space-y-6">
 
             {/* Header Controls */}
-            <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+            <header className="flex flex-col xl:flex-row xl:items-center justify-between gap-4 bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
                 <div>
                     <h1 className="text-3xl font-bold text-slate-800">Work Schedule</h1>
                     <p className="text-slate-500">Manage project timelines and daily tasks</p>
                 </div>
 
                 <div className="flex flex-col md:flex-row items-center gap-4">
+
+                    <div className="flex items-center gap-3 bg-slate-100 p-1 rounded-xl">
+                        <button
+                            onClick={() => { setViewMode('calendar'); setShowTableView(false); }}
+                            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${viewMode === 'calendar' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                        >
+                            <CalendarIcon size={16} /> Monthly
+                        </button>
+                        <button
+                            onClick={() => { setViewMode('day'); setShowTableView(false); }}
+                            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${viewMode === 'day' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                        >
+                            <List size={16} /> Day View
+                        </button>
+                    </div>
+
+                    <div className="h-8 w-px bg-slate-200 hidden md:block"></div>
+
+                    {/* View Type Toggle (Grid vs Table) */}
+                    <div className="flex bg-slate-100 p-1 rounded-xl">
+                        <button
+                            onClick={() => setShowTableView(false)}
+                            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${!showTableView ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                        >
+                            <LayoutGrid size={16} /> Grid
+                        </button>
+                        <button
+                            onClick={() => setShowTableView(true)}
+                            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${showTableView ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                        >
+                            <Table2 size={16} /> List
+                        </button>
+                    </div>
+
+                    <div className="h-8 w-px bg-slate-200 hidden md:block"></div>
+
+                    {/* Navigation */}
+                    <div className="flex items-center gap-2">
+                        <button onClick={prevPeriod} className="p-2 hover:bg-slate-50 rounded-lg text-slate-600 border border-slate-200 hover:border-indigo-300 transition-all">
+                            <ChevronLeft size={20} />
+                        </button>
+                        <div className="min-w-[160px] text-center font-bold text-lg text-slate-800">
+                            {viewMode === 'calendar' ? format(currentDate, 'MMMM yyyy') : format(currentDate, 'MMM d, yyyy')}
+                        </div>
+                        <button onClick={nextPeriod} className="p-2 hover:bg-slate-50 rounded-lg text-slate-600 border border-slate-200 hover:border-indigo-300 transition-all">
+                            <ChevronRight size={20} />
+                        </button>
+                    </div>
+
+                    <button onClick={goToToday} className="text-sm font-medium text-indigo-600 hover:bg-indigo-50 px-3 py-1.5 rounded-lg transition-colors">
+                        Today
+                    </button>
+
+                    <div className="h-8 w-px bg-slate-200 hidden md:block"></div>
+
                     <button
                         onClick={handleAddTask}
                         className="btn btn-primary flex items-center gap-2"
                     >
                         <Plus size={18} /> New Task
                     </button>
-
-                    <div className="h-8 w-px bg-slate-200 hidden md:block"></div>
-
-                    <div className="flex flex-wrap items-center gap-4">
-                        {/* View Toggle */}
-                        <div className="flex bg-slate-100 p-1 rounded-xl">
-                            <button
-                                onClick={() => { setViewMode('calendar'); setShowTableView(false); }}
-                                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${viewMode === 'calendar' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
-                            >
-                                <CalendarIcon size={16} /> Monthly
-                            </button>
-                            <button
-                                onClick={() => { setViewMode('day'); setShowTableView(false); }}
-                                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${viewMode === 'day' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
-                            >
-                                <List size={16} /> Day View
-                            </button>
-                        </div>
-
-                        {/* Table View Toggle */}
-                        <button
-                            onClick={() => setShowTableView(!showTableView)}
-                            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all border ${showTableView ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm' : 'bg-white text-slate-600 border-slate-200 hover:border-indigo-300'}`}
-                        >
-                            <Table2 size={16} /> {showTableView ? 'Grid View' : 'Table View'}
-                        </button>
-
-                        <div className="h-8 w-px bg-slate-200 hidden md:block"></div>
-
-                        {/* Navigation */}
-                        <div className="flex items-center gap-2">
-                            <button onClick={prevPeriod} className="p-2 hover:bg-slate-50 rounded-lg text-slate-600 border border-slate-200 hover:border-indigo-300 transition-all">
-                                <ChevronLeft size={20} />
-                            </button>
-                            <div className="min-w-[180px] text-center font-bold text-lg text-slate-800">
-                                {viewMode === 'calendar' ? format(currentDate, 'MMMM yyyy') : format(currentDate, 'EEEE, MMM d, yyyy')}
-                            </div>
-                            <button onClick={nextPeriod} className="p-2 hover:bg-slate-50 rounded-lg text-slate-600 border border-slate-200 hover:border-indigo-300 transition-all">
-                                <ChevronRight size={20} />
-                            </button>
-                        </div>
-
-                        <button onClick={goToToday} className="text-sm font-medium text-indigo-600 hover:bg-indigo-50 px-3 py-1.5 rounded-lg transition-colors">
-                            Today
-                        </button>
-                    </div>
                 </div>
             </header>
 
