@@ -369,6 +369,12 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                 // Always include if Overdue, even if outside date range
                 if (effectiveStatus === 'Overdue') return true;
 
+                // Include if completed TODAY (even if overdue completed)
+                if (effectiveStatus === 'Completed' && t.actualCompletionDate) {
+                    const completionDate = new Date(t.actualCompletionDate).toISOString().split('T')[0];
+                    if (completionDate === today) return true;
+                }
+
                 if (!t.startDate || !t.endDate) return false;
                 const start = new Date(t.startDate).toISOString().split('T')[0];
                 const end = new Date(t.endDate).toISOString().split('T')[0];
@@ -653,6 +659,14 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
     const generateTodayWorkStatusText = () => {
         const today = new Date().toISOString().split('T')[0];
         const todayTasks = tasks.filter(t => {
+            const effectiveStatus = getEffectiveStatus(t);
+
+            // Include if completed TODAY
+            if (effectiveStatus === 'Completed' && t.actualCompletionDate) {
+                const completionDate = new Date(t.actualCompletionDate).toISOString().split('T')[0];
+                if (completionDate === today) return true;
+            }
+
             if (!t.startDate || !t.endDate) return false;
             const start = new Date(t.startDate).toISOString().split('T')[0];
             const end = new Date(t.endDate).toISOString().split('T')[0];
