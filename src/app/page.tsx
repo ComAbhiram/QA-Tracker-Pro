@@ -40,6 +40,7 @@ export default function Home() {
   // Fetches lightweight data for ALL tasks to populate charts/stats consistently
   const fetchStatsData = useCallback(async () => {
     setLoadingStats(true);
+    console.log('fetchStatsData: isGuest=', isGuest, 'selectedTeamId=', selectedTeamId);
     let query = supabase
       .from('tasks')
       .select('id, status, end_date, assigned_to, project_name, sub_phase', { count: 'exact' });
@@ -102,6 +103,7 @@ export default function Home() {
   // 2. Fetch Table Data (Paginated & Filtered)
   const fetchTableData = useCallback(async (page: number, currentFilter: string, search: string) => {
     setLoadingTasks(true);
+    console.log('fetchTableData: isGuest=', isGuest, 'selectedTeamId=', selectedTeamId);
 
     let query = supabase
       .from('tasks')

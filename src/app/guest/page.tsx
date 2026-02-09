@@ -41,8 +41,15 @@ export default function GuestTeamSelectionPage() {
     };
 
     const handleTeamSelect = (team: Team) => {
+        console.log('Selected Team:', team);
         let targetTeamId = team.id;
         const targetTeamName = team.name;
+
+        if (!targetTeamId) {
+            console.error('Team ID is missing for:', team.name);
+            alert('Error: Team ID is missing. Please contact support.');
+            return;
+        }
 
         // If 'QA Team' is selected, find 'Super Admin' team ID and use that instead
         if (targetTeamName.toLowerCase() === 'qa team') {
@@ -55,6 +62,7 @@ export default function GuestTeamSelectionPage() {
             }
         }
 
+        console.log('Setting Guest Session:', { targetTeamId, targetTeamName });
         setGuestSession(targetTeamId, targetTeamName);
         router.push('/');
     };
