@@ -216,7 +216,7 @@ export default function ProjectOverviewPage() {
                     // Aggressive deduplication: Ignore team_id, just ensure unique project names.
                     // This resolves issues where the same project exists in multiple teams (or null and valid team)
                     // and causes confusion.
-                    const key = p.project_name.trim().toLowerCase();
+                    const key = (p.project_name || '').trim().toLowerCase();
                     if (!seen.has(key)) {
                         seen.add(key);
                         uniqueProjects.push(p);
@@ -249,6 +249,7 @@ export default function ProjectOverviewPage() {
             if (response.ok) {
                 await fetchData();
                 setIsModalOpen(false);
+            } else {
                 const errorData = await response.json().catch(() => ({}));
                 let errorMessage = `Failed to save project: ${errorData.error}`;
 
