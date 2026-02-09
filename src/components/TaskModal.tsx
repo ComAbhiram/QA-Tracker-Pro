@@ -15,6 +15,8 @@ interface TaskModalProps {
     onDelete?: (taskId: number) => Promise<void>;
 }
 
+import { useGuestMode } from '@/contexts/GuestContext';
+
 export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: TaskModalProps) {
     const [loading, setLoading] = useState(false);
     const [projects, setProjects] = useState<{ id: string | number; label: string }[]>([]);
@@ -23,6 +25,9 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
     const [loadingHubstaffUsers, setLoadingHubstaffUsers] = useState(false);
     const [isQATeam, setIsQATeam] = useState(false);
 
+    const { isGuest, selectedTeamId } = useGuestMode();
+    const [userTeamId, setUserTeamId] = useState<string | null>(null);
+
     // Initial state ...
     const initialState: Partial<Task> = {
         status: 'Yet to Start'
@@ -30,17 +35,32 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
 
     const [formData, setFormData] = useState<Partial<Task>>(initialState);
 
-    // Fetch projects on mount
+    // Fetch Team ID on mount
+    useEffect(() => {
+        const fetchTeam = async () => {
+            const { getCurrentUserTeam } = await import('@/utils/userUtils');
+            const team = await getCurrentUserTeam();
+            if (team) setUserTeamId(team.team_id);
+        };
+        fetchTeam();
+    }, []);
+
+    const effectiveTeamId = isGuest ? selectedTeamId : userTeamId;
+
+    // Fetch projects on mount or when team changes
     useEffect(() => {
         const fetchProjects = async () => {
+            if (!effectiveTeamId) return;
+
             setIsFetchingProjects(true);
-            console.log('[TaskModal] Fetching projects...');
+            console.log('[TaskModal] Fetching projects for team:', effectiveTeamId);
             try {
                 // Fetch from Supabase instead of Hubstaff API
                 const { data, error } = await supabase
                     .from('projects')
                     .select('name')
                     .eq('status', 'active')
+                    .eq('team_id', effectiveTeamId)
                     .order('name', { ascending: true });
 
                 if (!error && data) {
@@ -59,10 +79,10 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
             }
         };
 
-        if (isOpen && projects.length === 0) {
+        if (isOpen) {
             fetchProjects();
         }
-    }, [isOpen]);
+    }, [isOpen, effectiveTeamId]);
 
     // Fetch Hubstaff users OR Team Members on open
     useEffect(() => {
@@ -70,27 +90,18 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
             setLoadingHubstaffUsers(true);
             console.log('[TaskModal] Fetching users...');
             try {
-                // If isQATeam (Super Admin) -> Fetch Hubstaff
-                // If NOT isQATeam (Team Account) -> Fetch Team Members
+                // If isQATeam (Super Admin) AND NOT Guest -> Fetch Hubstaff
+                // If NOT isQATeam (Team Account) OR Guest -> Fetch Team Members
 
-                // We need to know isQATeam result first, but useEffects run in parallel or sequence based on deps.
-                // Let's rely on checking the role directly here or wait for isQATeam to be set? 
-                // Better: fetch logic inside one effect that depends on isQATeam being "settled"? 
-                // But isQATeam is state. Let's try to fetch both or toggle based on a check.
-
-                // Actually, let's just make this effect depend on isOpen. 
-                // Inside, we check the user role again or wait? 
-                // Let's fetch the role first via userUtils if needed, or better:
-                // Modify this effect to run when `isOpen` AND `isQATeam` logic is done? 
-                // The `checkRole` effect runs on open too.
-
+                // Ensure we have role info
                 const { getCurrentUserTeam } = await import('@/utils/userUtils');
                 const userTeam = await getCurrentUserTeam();
-                console.log('[TaskModal] User team info:', userTeam);
+                // We also rely on isQATeam state which is set in another effect, 
+                // but checking role directly here is safer for race conditions.
                 const isSuperAdmin = userTeam?.role === 'super_admin';
-                console.log('[TaskModal] Is super admin:', isSuperAdmin);
 
-                if (isSuperAdmin) {
+                // Use 'isGuest' from context to override super admin fetching behavior
+                if (isSuperAdmin && !isGuest) {
                     // Fetch Hubstaff Users via API
                     console.log('[TaskModal] Fetching Hubstaff users via API...');
                     const response = await fetch('/api/hubstaff/users');
@@ -110,18 +121,17 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
                     }
                 } else {
                     // Fetch Team Members via Supabase Client
-                    // Requires 'team_id' or just RLS? 
-                    // RLS policies allow "Users can view their own team members" (based on auth.uid -> team_id)
-                    // So selecting * should return only their team's members.
-                    console.log('[TaskModal] Fetching team members from Supabase...');
+                    if (!effectiveTeamId) return;
+
+                    console.log('[TaskModal] Fetching team members from Supabase for team:', effectiveTeamId);
                     const { data, error } = await supabase
                         .from('team_members')
                         .select('name')
+                        .eq('team_id', effectiveTeamId)
                         .order('name');
 
                     if (!error && data) {
                         console.log('[TaskModal] Team members fetched successfully:', data.length, 'members');
-                        console.log('[TaskModal] Team members data:', data);
                         const formattedUsers = data.map((u: any) => ({
                             id: u.name,
                             label: u.name
@@ -141,7 +151,7 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
         if (isOpen) {
             fetchUsers();
         }
-    }, [isOpen]);
+    }, [isOpen, effectiveTeamId, isGuest]);
 
     // Detect if user is super admin
     useEffect(() => {
@@ -286,24 +296,14 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
         });
     };
 
-    const [userTeamId, setUserTeamId] = useState<string | null>(null);
 
-    // Fetch Team ID on mount
-    useEffect(() => {
-        const fetchTeam = async () => {
-            const { getCurrentUserTeam } = await import('@/utils/userUtils');
-            const team = await getCurrentUserTeam();
-            if (team) setUserTeamId(team.team_id);
-        };
-        fetchTeam();
-    }, []);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
         try {
             // Use locally fetched teamId if not present in task
-            let teamId = task?.teamId || userTeamId;
+            let teamId = task?.teamId || effectiveTeamId;
 
             if (!teamId) {
                 // Fallback try one last time
