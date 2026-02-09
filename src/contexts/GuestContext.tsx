@@ -9,6 +9,7 @@ interface GuestSession {
 }
 
 interface GuestContextType extends GuestSession {
+    isLoading: boolean;
     isReadOnly: boolean;
     setGuestSession: (teamId: string, teamName: string) => void;
     clearGuestSession: () => void;
@@ -32,6 +33,7 @@ function deleteCookie(name: string) {
 }
 
 export function GuestProvider({ children }: { children: ReactNode }) {
+    const [isLoading, setIsLoading] = useState(true);
     const [guestSession, setGuestSessionState] = useState<GuestSession>({
         isGuest: false,
         selectedTeamId: null,
@@ -55,6 +57,7 @@ export function GuestProvider({ children }: { children: ReactNode }) {
                 deleteCookie(GUEST_COOKIE_NAME);
             }
         }
+        setIsLoading(false);
     }, []);
 
     const setGuestSession = (teamId: string, teamName: string) => {
@@ -83,6 +86,7 @@ export function GuestProvider({ children }: { children: ReactNode }) {
 
     const value: GuestContextType = {
         ...guestSession,
+        isLoading,
         isReadOnly: guestSession.isGuest,
         setGuestSession,
         clearGuestSession,

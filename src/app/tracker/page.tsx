@@ -10,7 +10,7 @@ import AssigneeTaskTable from '@/components/AssigneeTaskTable';
 import { useGuestMode } from '@/contexts/GuestContext';
 
 export default function Tracker() {
-    const { isGuest, selectedTeamId } = useGuestMode();
+    const { isGuest, selectedTeamId, isLoading: isGuestLoading } = useGuestMode();
     const [tasks, setTasks] = useState<Task[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
@@ -20,6 +20,8 @@ export default function Tracker() {
 
     // Fetch ALL active tasks (no pagination in query)
     useEffect(() => {
+        if (isGuestLoading) return; // Wait for guest session to initialize
+
         async function fetchTasks() {
             setLoading(true);
             let query = supabase
@@ -69,7 +71,7 @@ export default function Tracker() {
             setLoading(false);
         }
         fetchTasks();
-    }, [searchTerm, dateFilter, isGuest, selectedTeamId]);
+    }, [searchTerm, dateFilter, isGuest, selectedTeamId, isGuestLoading]);
 
     const handleAddTask = () => {
         setEditingTask(null);

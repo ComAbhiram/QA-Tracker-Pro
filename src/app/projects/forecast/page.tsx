@@ -10,7 +10,7 @@ import TaskModal from '@/components/TaskModal';
 import { useGuestMode } from '@/contexts/GuestContext';
 
 export default function ForecastProjects() {
-    const { isGuest, selectedTeamId } = useGuestMode();
+    const { isGuest, selectedTeamId, isLoading: isGuestLoading } = useGuestMode();
     const [tasks, setTasks] = useState<Task[]>([]);
     const [loading, setLoading] = useState(true);
     const [selectedTask, setSelectedTask] = useState<Task | null>(null);
@@ -18,13 +18,15 @@ export default function ForecastProjects() {
     const [viewMode, setViewMode] = useState<'box' | 'table'>('box');
 
     useEffect(() => {
-        fetchForecastTasks();
+        if (!isGuestLoading) {
+            fetchForecastTasks();
+        }
         // Load view preference from localStorage
         const savedView = localStorage.getItem('forecastViewMode');
         if (savedView === 'table' || savedView === 'box') {
             setViewMode(savedView);
         }
-    }, [isGuest, selectedTeamId]);
+    }, [isGuest, selectedTeamId, isGuestLoading]);
 
     const fetchForecastTasks = async () => {
         try {

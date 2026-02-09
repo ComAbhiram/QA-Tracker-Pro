@@ -14,13 +14,15 @@ import { Task, mapTaskFromDB } from '@/lib/types';
 import { useGuestMode } from '@/contexts/GuestContext';
 
 export default function AnalyticsPage() {
-    const { isGuest, selectedTeamId } = useGuestMode();
+    const { isGuest, selectedTeamId, isLoading: isGuestLoading } = useGuestMode();
     const [tasks, setTasks] = useState<Task[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        fetchData();
-    }, [isGuest, selectedTeamId]);
+        if (!isGuestLoading) {
+            fetchData();
+        }
+    }, [isGuest, selectedTeamId, isGuestLoading]);
 
     const fetchData = async () => {
         setLoading(true);

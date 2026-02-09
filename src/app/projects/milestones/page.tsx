@@ -10,7 +10,7 @@ import { format } from 'date-fns';
 import { useGuestMode } from '@/contexts/GuestContext';
 
 export default function Milestones() {
-    const { isGuest, selectedTeamId } = useGuestMode();
+    const { isGuest, selectedTeamId, isLoading: isGuestLoading } = useGuestMode();
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedProject, setSelectedProject] = useState<string | null>(null);
     const [projectNames, setProjectNames] = useState<string[]>([]); // Distinct project names from tasks
@@ -18,8 +18,10 @@ export default function Milestones() {
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
-        fetchProjectNames();
-    }, [isGuest, selectedTeamId]);
+        if (!isGuestLoading) {
+            fetchProjectNames();
+        }
+    }, [isGuest, selectedTeamId, isGuestLoading]);
 
     useEffect(() => {
         if (selectedProject) {

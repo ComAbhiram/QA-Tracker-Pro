@@ -13,7 +13,7 @@ import TaskModal from '@/components/TaskModal';
 import { useGuestMode } from '@/contexts/GuestContext';
 
 export default function Schedule() {
-    const { isGuest, selectedTeamId } = useGuestMode();
+    const { isGuest, selectedTeamId, isLoading: isGuestLoading } = useGuestMode();
     const [tasks, setTasks] = useState<Task[]>([]);
     const [loading, setLoading] = useState(true);
     const [currentDate, setCurrentDate] = useState(new Date());
@@ -22,8 +22,10 @@ export default function Schedule() {
     const [isDetailModalOpen, setIsDetailModalOpen] = useState(false); const [editingTask, setEditingTask] = useState<Task | null>(null);
 
     useEffect(() => {
-        fetchTasks();
-    }, [currentDate, viewMode, isGuest, selectedTeamId]);
+        if (!isGuestLoading) {
+            fetchTasks();
+        }
+    }, [currentDate, viewMode, isGuest, selectedTeamId, isGuestLoading]);
 
     async function fetchTasks() {
         setLoading(true);

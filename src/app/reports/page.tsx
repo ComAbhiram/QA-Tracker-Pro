@@ -13,7 +13,7 @@ import TaskModal from '@/components/TaskModal';
 import { useGuestMode } from '@/contexts/GuestContext';
 
 export default function Reports() {
-    const { isGuest, selectedTeamId } = useGuestMode();
+    const { isGuest, selectedTeamId, isLoading: isGuestLoading } = useGuestMode();
     const [tasks, setTasks] = useState<Task[]>([]);
     const [loading, setLoading] = useState(true);
     const [teamMembers, setTeamMembers] = useState<{ id: number; name: string }[]>([]);
@@ -97,9 +97,11 @@ export default function Reports() {
     };
 
     useEffect(() => {
-        fetchTasks();
-        fetchFilters();
-    }, [isGuest, selectedTeamId]); // Re-fetch when manager context changes
+        if (!isGuestLoading) {
+            fetchTasks();
+            fetchFilters();
+        }
+    }, [isGuest, selectedTeamId, isGuestLoading]);
 
     async function fetchFilters() {
         // Fetch users based on role
