@@ -17,7 +17,7 @@ export default function DashboardStats({ tasks, onFilterChange, activeFilter }: 
             const end = new Date(t.endDate);
             const now = new Date();
             now.setHours(0, 0, 0, 0);
-            return end < now && t.status !== 'Completed';
+            return end < now && t.status !== 'Completed' && t.status !== 'Rejected';
         }).length
     };
 
