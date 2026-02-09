@@ -369,7 +369,7 @@ export default function Schedule() {
                             onClick={() => { setViewMode('day'); setShowTableView(false); }}
                             className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${viewMode === 'day' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
                         >
-                            <List size={16} /> Day View
+                            <List size={16} /> Daily
                         </button>
                     </div>
 
