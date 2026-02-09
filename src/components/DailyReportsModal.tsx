@@ -21,6 +21,7 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
     const [selectedQADate, setSelectedQADate] = useState(new Date().toISOString().split('T')[0]);
     const [teamName, setTeamName] = useState<string>('Team');
     const [showHubstaffConfirm, setShowHubstaffConfirm] = useState(false);
+    const [hubstaffLoadingState, setHubstaffLoadingState] = useState<'show' | 'hide' | null>(null);
     const [scheduleDate, setScheduleDate] = useState(() => {
         const d = new Date();
         d.setDate(d.getDate() + 1);
@@ -355,10 +356,11 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
     };
 
     const generateTodayWorkStatus = async (includeHubstaff: boolean) => {
-        // Close confirmation modal
-        setShowHubstaffConfirm(false);
+        // Do not close confirmation modal immediately
+        // setShowHubstaffConfirm(false);
 
         setLoading(true);
+        setHubstaffLoadingState(includeHubstaff ? 'show' : 'hide');
         try {
             const today = new Date().toISOString().split('T')[0];
             const todayTasks = tasks.filter(t => {
@@ -643,6 +645,8 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
             alert('Failed to generate work status image');
         } finally {
             setLoading(false);
+            setHubstaffLoadingState(null);
+            setShowHubstaffConfirm(false);
         }
     };
 
@@ -1085,14 +1089,18 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                             <div className="flex gap-3">
                                 <button
                                     onClick={() => generateTodayWorkStatus(false)}
-                                    className="flex-1 px-4 py-2 bg-slate-100 text-slate-700 font-medium rounded-lg hover:bg-slate-200 transition-colors"
+                                    disabled={hubstaffLoadingState !== null}
+                                    className="flex-1 px-4 py-2 bg-slate-100 text-slate-700 font-medium rounded-lg hover:bg-slate-200 transition-colors flex justify-center items-center gap-2 disabled:opacity-50"
                                 >
+                                    {hubstaffLoadingState === 'hide' && <div className="w-4 h-4 border-2 border-slate-600 border-t-transparent rounded-full animate-spin"></div>}
                                     No, Hide It
                                 </button>
                                 <button
                                     onClick={() => generateTodayWorkStatus(true)}
-                                    className="flex-1 px-4 py-2 bg-sky-500 text-white font-medium rounded-lg hover:bg-sky-600 transition-colors shadow-sm"
+                                    disabled={hubstaffLoadingState !== null}
+                                    className="flex-1 px-4 py-2 bg-sky-500 text-white font-medium rounded-lg hover:bg-sky-600 transition-colors shadow-sm flex justify-center items-center gap-2 disabled:opacity-50"
                                 >
+                                    {hubstaffLoadingState === 'show' && <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>}
                                     Yes, Show
                                 </button>
                             </div>
