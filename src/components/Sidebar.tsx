@@ -178,8 +178,11 @@ export function Sidebar() {
                         </div>
                         {isGuest ? (
                             <div className="flex-1 min-w-0 relative group">
+                                <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                                    <ChevronDown size={14} className="text-slate-400 group-hover:text-indigo-600 transition-colors" />
+                                </div>
                                 <select
-                                    className="w-full bg-transparent border-none text-slate-800 font-bold focus:ring-0 p-0 text-sm cursor-pointer truncate appearance-none pr-4"
+                                    className="w-full bg-slate-100 hover:bg-slate-200 border border-transparent hover:border-slate-300 text-slate-700 font-bold focus:ring-2 focus:ring-indigo-500 focus:outline-none rounded-md py-1.5 pl-2 pr-7 text-sm cursor-pointer truncate appearance-none transition-all duration-200"
                                     value={selectedTeamName || ''}
                                     onChange={(e) => {
                                         const newTeamName = e.target.value;
@@ -205,10 +208,9 @@ export function Sidebar() {
                                 >
                                     <option value="" disabled>Select Team</option>
                                     {teams.map(team => (
-                                        <option key={team.id} value={team.name}>{team.name}</option>
+                                        <option key={team.id} value={team.name} className="text-slate-700 bg-white py-2">{team.name}</option>
                                     ))}
                                 </select>
-                                <ChevronDown size={14} className="absolute right-0 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none group-hover:text-slate-600" />
                             </div>
                         ) : sidebarTitle}
                     </div>
