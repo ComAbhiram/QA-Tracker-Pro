@@ -211,19 +211,45 @@ export class HubstaffClient {
             }
         }
 
-        // Enrich activities with cached names
+        // Enrich activities with cached names and team info
         return allActivities.map(activity => {
             const user = userMap?.get(activity.user_id);
             const projectName = activity.project_id ? projectMap?.get(activity.project_id) : undefined;
 
+            // Map team/department from team-members-config
+            const userName = (user ? user.name : null) || 'Unknown User';
+            let teamName = undefined;
+
+            // Try to match with team config to get department
+            try {
+                const { getTeamMemberByHubstaffName } = require('./team-members-config');
+                const teamMember = getTeamMemberByHubstaffName(userName);
+                if (teamMember) {
+                    // Map department to display names
+                    const deptMap: Record<string, string> = {
+                        'DESIGNERS': 'Designers',
+                        'QA': 'QA Developers',
+                        'PHP': 'PHP Developers',
+                        'HTML': 'Frontend Developers',
+                        'APP': 'App Developers',
+                        'WPD': 'WordPress Developers'
+                    };
+                    teamName = deptMap[teamMember.department] || teamMember.department;
+                }
+            } catch (e) {
+                // Fallback if config not found
+                console.warn('Could not load team config for team mapping');
+            }
+
             return {
                 userId: activity.user_id,
-                userName: (user ? user.name : null) || 'Unknown User',
+                userName,
                 date: activity.date,
                 timeWorked: activity.tracked,
                 activityPercentage: activity.tracked > 0 ? Math.round((activity.overall / activity.tracked) * 100) : 0,
                 projectId: activity.project_id,
-                projectName: projectName || 'Unknown Project'
+                projectName: projectName || 'Unknown Project',
+                team: teamName
             };
         });
     }

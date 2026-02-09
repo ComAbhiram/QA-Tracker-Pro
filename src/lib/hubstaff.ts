@@ -11,6 +11,7 @@ export interface HubstaffActivity {
     activityPercentage: number;
     projectName?: string;
     projectId?: number;
+    team?: string; // Team/Department name
 }
 
 export interface HubstaffDailyActivity {

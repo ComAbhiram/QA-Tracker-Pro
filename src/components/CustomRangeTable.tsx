@@ -10,6 +10,7 @@ interface HubstaffActivity {
     timeWorked: number;
     activityPercentage: number;
     date: string;
+    team?: string;
 }
 
 interface CustomRangeTableProps {
@@ -142,7 +143,9 @@ export default function CustomRangeTable({ activities }: CustomRangeTableProps) 
                                                 ? <span className="inline-flex items-center px-2 py-0.5 bg-blue-50 text-blue-700 rounded text-xs font-semibold">{group.projectCount} Projects</span>
                                                 : group.distinctProjects[0] || '-'}
                                         </td>
-                                        <td className="px-4 py-3 text-slate-600">QA Developers</td>
+                                        <td className="px-4 py-3 text-slate-600">
+                                            {group.activities[0]?.team || 'Unknown Team'}
+                                        </td>
                                         <td className="px-4 py-3 text-slate-400">-</td>
                                         <td className="px-4 py-3 text-slate-800 font-medium">
                                             {formatTimeHHMMSS(group.totalTime)}
@@ -173,7 +176,9 @@ export default function CustomRangeTable({ activities }: CustomRangeTableProps) 
                                                 </div>
                                                 <span className="font-semibold text-sm">{activity.projectName || 'Unknown'}</span>
                                             </td>
-                                            <td className="px-4 py-3 text-slate-600 font-medium text-sm">QA Developers</td>
+                                            <td className="px-4 py-3 text-slate-600 font-medium text-sm">
+                                                {activity.team || 'Unknown Team'}
+                                            </td>
                                             <td className="px-4 py-3 text-slate-400">-</td>
                                             <td className="px-4 py-3 text-slate-600 text-sm font-medium">
                                                 {formatTimeHHMMSS(activity.timeWorked)}
