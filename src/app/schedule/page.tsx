@@ -271,14 +271,16 @@ export default function Schedule() {
             time_taken: taskData.timeTaken || '00:00:00',
             days_taken: Number(taskData.daysTaken) || 0,
             deviation: Number(taskData.deviation) || 0,
-            activity_percentage: Number(taskData.activityPercentage) || 0
+            activity_percentage: Number(taskData.activityPercentage) || 0,
+            team_id: taskData.teamId
         };
 
         if (editingTask) {
             // UPDATE existing task
+            const { team_id, ...updatePayload } = dbPayload;
             const { error } = await supabase
                 .from('tasks')
-                .update(dbPayload)
+                .update(updatePayload)
                 .eq('id', editingTask.id);
 
             if (error) {

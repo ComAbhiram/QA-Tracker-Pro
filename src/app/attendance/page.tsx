@@ -5,6 +5,7 @@ import { Calendar, Users, Clock, TrendingUp, Download, FileSpreadsheet } from 'l
 import { HubstaffDailyActivity, formatDuration, getActivityColor } from '@/lib/hubstaff';
 import { formatTime, getMonthName, type MonthlyData } from '@/lib/hubstaff-utils';
 import { mapHubstaffNameToQA } from '@/lib/hubstaff-name-mapping';
+import CustomRangeTable from '@/components/CustomRangeTable';
 
 interface TeamMember {
     id: number;
@@ -831,7 +832,7 @@ export default function Attendance() {
                     {customRangeData && (
                         <>
                             {/* Summary Cards */}
-                            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
                                 <div className="bg-white rounded-xl p-6 border border-slate-100 shadow-sm">
                                     <div className="flex items-center justify-between mb-4">
                                         <div className="text-slate-500">Total Time</div>
@@ -848,7 +849,7 @@ export default function Attendance() {
                                         <Users className="text-purple-500" size={24} />
                                     </div>
                                     <div className="text-3xl font-bold text-slate-800">
-                                        {customRangeData.activities.length}
+                                        {new Set(customRangeData.activities.map(a => a.userId)).size}
                                     </div>
                                 </div>
 
@@ -881,46 +882,8 @@ export default function Attendance() {
                                 </div>
                             </div>
 
-                            {/* Team Activity Table */}
-                            <div className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
-                                <div className="p-6 border-b border-slate-100 flex justify-between items-center">
-                                    <h2 className="text-xl font-bold text-slate-800">Activity Breakdown</h2>
-                                </div>
-                                <div className="overflow-x-auto">
-                                    <table className="w-full">
-                                        <thead className="bg-slate-50 border-b-2 border-slate-200">
-                                            <tr>
-                                                <th className="px-6 py-4 text-left font-semibold text-slate-600 border-r border-slate-100">Team Member</th>
-                                                <th className="px-6 py-4 text-left font-semibold text-slate-600 border-r border-slate-100">Project</th>
-                                                <th className="px-6 py-4 text-left font-semibold text-slate-600 border-r border-slate-100">Time Worked</th>
-                                                <th className="px-6 py-4 text-left font-semibold text-slate-600">Activity Level</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {customRangeData.activities.map((activity, index) => (
-                                                <tr key={index} className="border-b border-slate-100 hover:bg-slate-50/50 transition-colors">
-                                                    <td className="px-6 py-4 font-medium text-slate-800 border-r border-slate-50">
-                                                        {activity.userName}
-                                                    </td>
-                                                    <td className="px-6 py-4 text-slate-600 border-r border-slate-50">
-                                                        {activity.projectName || 'N/A'}
-                                                    </td>
-                                                    <td className="px-6 py-4 border-r border-slate-50">
-                                                        <span className="font-medium text-slate-800">
-                                                            {formatDuration(activity.timeWorked)}
-                                                        </span>
-                                                    </td>
-                                                    <td className="px-6 py-4">
-                                                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${getActivityColor(activity.activityPercentage)}`}>
-                                                            {activity.activityPercentage}%
-                                                        </span>
-                                                    </td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
+                            {/* New Hierarchical Table */}
+                            <CustomRangeTable activities={customRangeData.activities} />
                         </>
                     )}
 
@@ -933,7 +896,8 @@ export default function Attendance() {
                         </div>
                     )}
                 </>
-            )}
-        </div>
+            )
+            }
+        </div >
     );
 }
