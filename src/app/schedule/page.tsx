@@ -416,7 +416,7 @@ export default function Schedule() {
                         onClick={handleAddTask}
                         className="btn btn-primary flex items-center gap-2"
                     >
-                        <Plus size={18} /> New Task
+                        <Plus size={18} /> New
                     </button>
                 </div>
             </header>
