@@ -27,11 +27,11 @@ export default function Tracker() {
             setLoading(true);
 
             // 1. Fetch Tasks
+            // 1. Fetch Tasks
             let taskQuery = supabase
                 .from('tasks')
                 .select('*')
-                .neq('status', 'Completed') // Tracker usually shows active tasks
-                .neq('status', 'Rejected')
+                .not('status', 'in', '("Completed","Rejected")') // Robust filtering
                 .order('start_date', { ascending: false });
 
             if (searchTerm) {
@@ -54,6 +54,9 @@ export default function Tracker() {
                 console.error('Error fetching tasks:', taskError);
             } else {
                 let filteredData = taskData || [];
+
+                // Client-side fallback to ensure Rejected/Completed are hidden
+                filteredData = filteredData.filter(t => t.status !== 'Rejected' && t.status !== 'Completed');
 
                 if (dateFilter) {
                     const selectedDate = new Date(dateFilter);
@@ -174,11 +177,14 @@ export default function Tracker() {
         const { data } = await supabase
             .from('tasks')
             .select('*')
-            .neq('status', 'Completed')
-            .neq('status', 'Rejected')
+            .not('status', 'in', '("Completed","Rejected")')
             .order('start_date', { ascending: false });
 
-        if (data) setTasks((data || []).map(mapTaskFromDB));
+        if (data) {
+            // Client-side fallback
+            const filtered = data.filter((t: any) => t.status !== 'Rejected' && t.status !== 'Completed');
+            setTasks(filtered.map(mapTaskFromDB));
+        }
     };
 
     // Group by assignee (using ALL fetched tasks)
