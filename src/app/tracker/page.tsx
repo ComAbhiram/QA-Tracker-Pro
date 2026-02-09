@@ -31,6 +31,7 @@ export default function Tracker() {
                 .from('tasks')
                 .select('*')
                 .neq('status', 'Completed') // Tracker usually shows active tasks
+                .neq('status', 'Rejected')
                 .order('start_date', { ascending: false });
 
             if (searchTerm) {
@@ -174,6 +175,7 @@ export default function Tracker() {
             .from('tasks')
             .select('*')
             .neq('status', 'Completed')
+            .neq('status', 'Rejected')
             .order('start_date', { ascending: false });
 
         if (data) setTasks((data || []).map(mapTaskFromDB));
