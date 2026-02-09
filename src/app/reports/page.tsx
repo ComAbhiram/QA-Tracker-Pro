@@ -10,7 +10,10 @@ import Combobox from '@/components/ui/Combobox';
 import TaskOverviewTable from '../project-overview/components/TaskOverviewTable';
 import TaskModal from '@/components/TaskModal';
 
+import { useGuestMode } from '@/contexts/GuestContext';
+
 export default function Reports() {
+    const { isGuest, selectedTeamId } = useGuestMode();
     const [tasks, setTasks] = useState<Task[]>([]);
     const [loading, setLoading] = useState(true);
     const [teamMembers, setTeamMembers] = useState<{ id: number; name: string }[]>([]);
@@ -96,7 +99,7 @@ export default function Reports() {
     useEffect(() => {
         fetchTasks();
         fetchFilters();
-    }, []);
+    }, [isGuest, selectedTeamId]); // Re-fetch when manager context changes
 
     async function fetchFilters() {
         // Fetch users based on role
@@ -136,10 +139,22 @@ export default function Reports() {
     }
 
     async function fetchTasks() {
-        const { data, error } = await supabase
+        let query = supabase
             .from('tasks')
             .select('*')
             .order('created_at', { ascending: false });
+
+        // Manager/Guest Mode Filtering
+        if (isGuest) {
+            if (selectedTeamId) {
+                query = query.eq('team_id', selectedTeamId);
+            } else {
+                console.warn('Manager Mode: selectedTeamId is missing, blocking data fetch.');
+                query = query.eq('id', '00000000-0000-0000-0000-000000000000');
+            }
+        }
+
+        const { data, error } = await query;
 
         if (!error && data) {
             setTasks(data.map(mapTaskFromDB));

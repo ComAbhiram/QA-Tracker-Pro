@@ -7,7 +7,10 @@ import { Task, mapTaskFromDB } from '@/lib/types';
 import { Target, Search, CheckCircle2, Calendar, User, Layout, ChevronRight, Hash } from 'lucide-react';
 import { format } from 'date-fns';
 
+import { useGuestMode } from '@/contexts/GuestContext';
+
 export default function Milestones() {
+    const { isGuest, selectedTeamId } = useGuestMode();
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedProject, setSelectedProject] = useState<string | null>(null);
     const [projectNames, setProjectNames] = useState<string[]>([]); // Distinct project names from tasks
@@ -16,7 +19,7 @@ export default function Milestones() {
 
     useEffect(() => {
         fetchProjectNames();
-    }, []);
+    }, [isGuest, selectedTeamId]);
 
     useEffect(() => {
         if (selectedProject) {
@@ -28,10 +31,22 @@ export default function Milestones() {
 
     // Fetch unique project names from actual tasks to ensure we show projects that have data
     const fetchProjectNames = async () => {
-        const { data } = await supabase
+        let query = supabase
             .from('tasks')
             .select('project_name')
             .not('project_name', 'is', null);
+
+        // Manager/Guest Mode Filtering
+        if (isGuest) {
+            if (selectedTeamId) {
+                query = query.eq('team_id', selectedTeamId);
+            } else {
+                console.warn('Manager Mode: selectedTeamId is missing, blocking data fetch.');
+                query = query.eq('id', '00000000-0000-0000-0000-000000000000');
+            }
+        }
+
+        const { data } = await query;
 
         if (data) {
             // Get unique names
@@ -43,11 +58,23 @@ export default function Milestones() {
     const fetchProjectMilestones = async (projectName: string) => {
         setLoading(true);
         try {
-            const { data, error } = await supabase
+            let query = supabase
                 .from('tasks')
                 .select('*')
                 .eq('project_name', projectName)
                 .order('end_date', { ascending: true }); // Timeline order
+
+            // Manager/Guest Mode Filtering
+            if (isGuest) {
+                if (selectedTeamId) {
+                    query = query.eq('team_id', selectedTeamId);
+                } else {
+                    console.warn('Manager Mode: selectedTeamId is missing, blocking data fetch.');
+                    query = query.eq('id', '00000000-0000-0000-0000-000000000000');
+                }
+            }
+
+            const { data, error } = await query;
 
             if (!error && data) {
                 // Filter for completed items or significant phases

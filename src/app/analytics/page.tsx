@@ -11,19 +11,36 @@ import {
 } from 'lucide-react';
 import { Task, mapTaskFromDB } from '@/lib/types';
 
+import { useGuestMode } from '@/contexts/GuestContext';
+
 export default function AnalyticsPage() {
+    const { isGuest, selectedTeamId } = useGuestMode();
     const [tasks, setTasks] = useState<Task[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         fetchData();
-    }, []);
+    }, [isGuest, selectedTeamId]);
 
     const fetchData = async () => {
         setLoading(true);
         try {
             // Reuse the project-overview API which returns all tasks
-            const response = await fetch('/api/project-overview');
+            let url = '/api/project-overview';
+
+            // Manager/Guest Mode Filtering
+            if (isGuest) {
+                if (selectedTeamId) {
+                    url += `?teamId=${selectedTeamId}`;
+                } else {
+                    console.warn('Manager Mode: selectedTeamId is missing, blocking API call.');
+                    setTasks([]);
+                    setLoading(false);
+                    return;
+                }
+            }
+
+            const response = await fetch(url);
             const data = await response.json();
 
             if (data.tasks) {

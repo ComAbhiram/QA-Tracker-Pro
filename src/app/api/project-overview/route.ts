@@ -40,6 +40,9 @@ export async function GET(request: NextRequest) {
             return NextResponse.json({ error: 'User team not found' }, { status: 404 });
         }
 
+        const searchParams = request.nextUrl.searchParams;
+        const requestedTeamId = searchParams.get('teamId');
+
         // 1. Fetch Project Manual Overviews
         let projectsQuery = supabase
             .from('project_overview')
@@ -47,6 +50,10 @@ export async function GET(request: NextRequest) {
 
         if (profile.role !== 'super_admin') {
             projectsQuery = projectsQuery.eq('team_id', profile.team_id);
+        } else if (requestedTeamId) {
+            // If Super Admin (or allowed context) requests a specific team, filter by it
+            // This supports the Manager Mode view
+            projectsQuery = projectsQuery.eq('team_id', requestedTeamId);
         }
 
         const { data: projects, error: projectsError } = await projectsQuery.order('created_at', { ascending: false });
@@ -63,9 +70,9 @@ export async function GET(request: NextRequest) {
             .select('*');
 
         if (profile.role !== 'super_admin') {
-            // Assuming tasks also have team_id. If not, we might be over-fetching, but usually they do or RLS handles it.
-            // For now fetching all, filtering in memory by project name matching if needed, but better to trust RLS/team_id
             tasksQuery = tasksQuery.eq('team_id', profile.team_id);
+        } else if (requestedTeamId) {
+            tasksQuery = tasksQuery.eq('team_id', requestedTeamId);
         }
 
         const { data: tasks, error: tasksError } = await tasksQuery;

@@ -7,7 +7,10 @@ import { TrendingUp, User, Activity, Calendar, Edit, Grid3x3, Table2, ExternalLi
 import { format } from 'date-fns';
 import TaskModal from '@/components/TaskModal';
 
+import { useGuestMode } from '@/contexts/GuestContext';
+
 export default function ForecastProjects() {
+    const { isGuest, selectedTeamId } = useGuestMode();
     const [tasks, setTasks] = useState<Task[]>([]);
     const [loading, setLoading] = useState(true);
     const [selectedTask, setSelectedTask] = useState<Task | null>(null);
@@ -21,15 +24,28 @@ export default function ForecastProjects() {
         if (savedView === 'table' || savedView === 'box') {
             setViewMode(savedView);
         }
-    }, []);
+    }, [isGuest, selectedTeamId]);
 
     const fetchForecastTasks = async () => {
         try {
-            const { data, error } = await supabase
+            let query = supabase
                 .from('tasks')
                 .select('*')
                 .eq('status', 'Forecast')
                 .order('created_at', { ascending: false });
+
+            // Manager/Guest Mode Filtering
+            if (isGuest) {
+                if (selectedTeamId) {
+                    query = query.eq('team_id', selectedTeamId);
+                } else {
+                    // Prevent data leak if team ID is missing
+                    console.warn('Manager Mode: selectedTeamId is missing, blocking data fetch.');
+                    query = query.eq('id', '00000000-0000-0000-0000-000000000000');
+                }
+            }
+
+            const { data, error } = await query;
 
             if (!error && data) {
                 setTasks(data.map(mapTaskFromDB));
