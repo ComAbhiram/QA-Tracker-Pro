@@ -202,7 +202,10 @@ export function Sidebar() {
 
                                             setGuestSession(targetTeamId, newTeamName);
                                             // Force reload to ensure all components and data fetchers update with new context
-                                            window.location.reload();
+                                            // Add small delay to ensure localStorage write is registered
+                                            setTimeout(() => {
+                                                window.location.reload();
+                                            }, 100);
                                         }
                                     }}
                                 >

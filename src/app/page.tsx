@@ -110,8 +110,16 @@ export default function Home() {
       .select('*', { count: 'exact' });
 
     // Apply Team Filter
-    if (isGuest && selectedTeamId) {
-      query = query.eq('team_id', selectedTeamId);
+    if (isGuest) {
+      if (selectedTeamId) {
+        query = query.eq('team_id', selectedTeamId);
+      } else {
+        // Critical Fix: If in Guest/Manager mode but no Team ID is present, DO NOT return all data.
+        // Return an empty result instead to prevent data leakage.
+        // We can achieve this by filtering on an impossible condition.
+        console.warn('Manager Mode: selectedTeamId is missing, blocking data fetch.');
+        query = query.eq('id', '00000000-0000-0000-0000-000000000000');
+      }
     }
 
     // Apply Status Filter
