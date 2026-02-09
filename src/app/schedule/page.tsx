@@ -7,7 +7,7 @@ import { supabase } from '@/lib/supabase';
 import { mapTaskFromDB, Task, isTaskOverdue, getOverdueDays } from '@/lib/types';
 import { getEffectiveStatus } from '@/utils/taskUtils';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, isToday, isWeekend, addMonths, subMonths, addDays, subDays } from 'date-fns';
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, List, Clock, User, AlertCircle, Plus } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, List, Clock, User, AlertCircle, Plus, Table2 } from 'lucide-react';
 import TaskModal from '@/components/TaskModal';
 
 import { useGuestMode } from '@/contexts/GuestContext';
@@ -18,6 +18,7 @@ export default function Schedule() {
     const [loading, setLoading] = useState(true);
     const [currentDate, setCurrentDate] = useState(new Date());
     const [viewMode, setViewMode] = useState<'calendar' | 'day'>('calendar');
+    const [showTableView, setShowTableView] = useState(false);
     const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
     const [isDetailModalOpen, setIsDetailModalOpen] = useState(false); const [editingTask, setEditingTask] = useState<Task | null>(null);
 
@@ -96,6 +97,11 @@ export default function Schedule() {
 
     // Helper to calculate status on a specific date
     const getStatusOnDate = (task: Task, date: Date) => {
+        // Rejected tasks are never overdue
+        if (task.status === 'Rejected') {
+            return { status: 'Rejected', overdueDays: 0, baseStatus: 'Rejected' };
+        }
+
         const start = task.startDate ? new Date(task.startDate) : null;
         const end = task.endDate ? new Date(task.endDate) : null;
 
@@ -364,18 +370,26 @@ export default function Schedule() {
                         {/* View Toggle */}
                         <div className="flex bg-slate-100 p-1 rounded-xl">
                             <button
-                                onClick={() => setViewMode('calendar')}
+                                onClick={() => { setViewMode('calendar'); setShowTableView(false); }}
                                 className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${viewMode === 'calendar' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
                             >
-                                <CalendarIcon size={16} /> Calendar
+                                <CalendarIcon size={16} /> Monthly
                             </button>
                             <button
-                                onClick={() => setViewMode('day')}
+                                onClick={() => { setViewMode('day'); setShowTableView(false); }}
                                 className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${viewMode === 'day' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
                             >
                                 <List size={16} /> Day View
                             </button>
                         </div>
+
+                        {/* Table View Toggle */}
+                        <button
+                            onClick={() => setShowTableView(!showTableView)}
+                            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all border ${showTableView ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm' : 'bg-white text-slate-600 border-slate-200 hover:border-indigo-300'}`}
+                        >
+                            <Table2 size={16} /> {showTableView ? 'Grid View' : 'Table View'}
+                        </button>
 
                         <div className="h-8 w-px bg-slate-200 hidden md:block"></div>
 
@@ -400,9 +414,9 @@ export default function Schedule() {
             </header>
 
             {/* Content Area */}
-            <div className={`bg-white rounded-2xl shadow-xl shadow-slate-200/50 border border-white/20 backdrop-blur-xl ${viewMode === 'calendar' ? 'h-[calc(100vh-220px)] overflow-y-auto custom-scrollbar' : 'min-h-[600px]'}`}>
+            <div className={`bg-white rounded-2xl shadow-xl shadow-slate-200/50 border border-white/20 backdrop-blur-xl ${viewMode === 'calendar' && !showTableView ? 'h-[calc(100vh-220px)] overflow-y-auto custom-scrollbar' : 'min-h-[600px]'}`}>
 
-                {viewMode === 'calendar' && (
+                {viewMode === 'calendar' && !showTableView && (
                     <div className="min-h-full flex flex-col">
                         <div className="grid grid-cols-7 border-b border-slate-400 bg-slate-50/80 sticky top-0 z-10 shadow-sm">
                             {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
@@ -486,7 +500,73 @@ export default function Schedule() {
                     </div>
                 )}
 
-                {viewMode === 'day' && (
+                {viewMode === 'calendar' && showTableView && (
+                    <div className="p-8 overflow-x-auto">
+                        <div className="mb-6">
+                            <h2 className="text-xl font-bold text-slate-800">Tasks for {format(currentDate, 'MMMM yyyy')}</h2>
+                            <p className="text-slate-500">{tasks.length} total tasks</p>
+                        </div>
+                        <div className="overflow-hidden border border-slate-200 rounded-xl">
+                            <table className="w-full">
+                                <thead className="bg-slate-50 border-b border-slate-200">
+                                    <tr>
+                                        <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">Project Name</th>
+                                        <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">Phase/Task</th>
+                                        <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">Assignees</th>
+                                        <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">Start Date</th>
+                                        <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">End Date</th>
+                                        <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-slate-100">
+                                    {tasks.length === 0 ? (
+                                        <tr>
+                                            <td colSpan={6} className="px-6 py-12 text-center text-slate-400">
+                                                <div className="flex flex-col items-center">
+                                                    <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4 text-3xl">📅</div>
+                                                    <p className="text-lg font-medium text-slate-600">No tasks for this month</p>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ) : (
+                                        tasks.map((task) => {
+                                            const statusInfo = getStatusOnDate(task, currentDate);
+                                            const badgeClass = getStatusBadgeColor(task);
+
+                                            return (
+                                                <tr
+                                                    key={task.id}
+                                                    onClick={() => handleTaskClick(task)}
+                                                    className="hover:bg-slate-50 cursor-pointer transition-colors"
+                                                >
+                                                    <td className="px-6 py-4 text-sm font-semibold text-slate-800">{task.projectName}</td>
+                                                    <td className="px-6 py-4 text-sm text-slate-600">{task.subPhase || '-'}</td>
+                                                    <td className="px-6 py-4 text-sm text-slate-600">
+                                                        {task.assignedTo || 'Unassigned'}
+                                                        {task.assignedTo2 && `, ${task.assignedTo2}`}
+                                                    </td>
+                                                    <td className="px-6 py-4 text-sm text-slate-600">
+                                                        {task.startDate ? format(new Date(task.startDate), 'MMM d, yyyy') : '-'}
+                                                    </td>
+                                                    <td className="px-6 py-4 text-sm text-slate-600">
+                                                        {task.endDate ? format(new Date(task.endDate), 'MMM d, yyyy') : '-'}
+                                                    </td>
+                                                    <td className="px-6 py-4">
+                                                        <span className={`inline-flex px-3 py-1 text-xs font-bold rounded-lg ${badgeClass}`}>
+                                                            {statusInfo.status}
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                )}
+
+                {viewMode === 'day' && !showTableView && (
                     <div className="p-8">
                         <div className="flex justify-between items-end mb-6">
                             <div>
@@ -553,6 +633,69 @@ export default function Schedule() {
                                         </div>
                                     );
                                 })}
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {viewMode === 'day' && showTableView && (
+                    <div className="p-8 overflow-x-auto">
+                        <div className="mb-6">
+                            <h2 className="text-xl font-bold text-slate-800">Tasks for {format(currentDate, 'MMMM d')}</h2>
+                            <p className="text-slate-500">{dayViewTasks.length} tasks scheduled</p>
+                        </div>
+                        {dayViewTasks.length === 0 ? (
+                            <div className="flex flex-col items-center justify-center py-20 text-slate-400">
+                                <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4 text-3xl">☕</div>
+                                <p className="text-lg font-medium text-slate-600">No tasks scheduled for this day</p>
+                                <p className="text-sm">Enjoy your free time!</p>
+                            </div>
+                        ) : (
+                            <div className="overflow-hidden border border-slate-200 rounded-xl">
+                                <table className="w-full">
+                                    <thead className="bg-slate-50 border-b border-slate-200">
+                                        <tr>
+                                            <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">Project Name</th>
+                                            <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">Phase/Task</th>
+                                            <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">Assignees</th>
+                                            <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">Start Date</th>
+                                            <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">End Date</th>
+                                            <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-slate-100">
+                                        {dayViewTasks.map((task) => {
+                                            const statusInfo = getStatusOnDate(task, currentDate);
+                                            const badgeClass = getStatusBadgeColor(task);
+
+                                            return (
+                                                <tr
+                                                    key={task.id}
+                                                    onClick={() => handleTaskClick(task)}
+                                                    className="hover:bg-slate-50 cursor-pointer transition-colors"
+                                                >
+                                                    <td className="px-6 py-4 text-sm font-semibold text-slate-800">{task.projectName}</td>
+                                                    <td className="px-6 py-4 text-sm text-slate-600">{task.subPhase || '-'}</td>
+                                                    <td className="px-6 py-4 text-sm text-slate-600">
+                                                        {task.assignedTo || 'Unassigned'}
+                                                        {task.assignedTo2 && `, ${task.assignedTo2}`}
+                                                    </td>
+                                                    <td className="px-6 py-4 text-sm text-slate-600">
+                                                        {task.startDate ? format(new Date(task.startDate), 'MMM d, yyyy') : '-'}
+                                                    </td>
+                                                    <td className="px-6 py-4 text-sm text-slate-600">
+                                                        {task.endDate ? format(new Date(task.endDate), 'MMM d, yyyy') : '-'}
+                                                    </td>
+                                                    <td className="px-6 py-4">
+                                                        <span className={`inline-flex px-3 py-1 text-xs font-bold rounded-lg ${badgeClass}`}>
+                                                            {statusInfo.status}
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
+                                    </tbody>
+                                </table>
                             </div>
                         )}
                     </div>

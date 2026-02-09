@@ -277,7 +277,11 @@ export default function Reports() {
         total: filteredTasks.length,
         completed: filteredTasks.filter(t => t.status === 'Completed').length,
         inProgress: filteredTasks.filter(t => getEffectiveStatus(t) === 'In Progress').length,
-        overdue: filteredTasks.filter(t => getEffectiveStatus(t) === 'Overdue').length
+        overdue: filteredTasks.filter(t => {
+            // Don't count rejected tasks as overdue
+            if (t.status === 'Rejected') return false;
+            return getEffectiveStatus(t) === 'Overdue';
+        }).length
     };
 
     // Group by assignee

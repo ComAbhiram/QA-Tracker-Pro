@@ -117,6 +117,8 @@ export default function AnalyticsPage() {
     const completionRate = totalTasks ? ((completedTasks / totalTasks) * 100).toFixed(1) : '0';
     const totalBugs = tasks.reduce((sum, t) => sum + (t.bugCount || 0), 0);
     const overdueTasks = tasks.filter(t => {
+        // Don't count rejected tasks as overdue
+        if (t.status === 'Rejected') return false;
         if (!t.endDate || t.status === 'Completed') return false;
         return new Date(t.endDate) < new Date();
     }).length;

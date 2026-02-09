@@ -34,6 +34,7 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
     useEffect(() => {
         const fetchProjects = async () => {
             setIsFetchingProjects(true);
+            console.log('[TaskModal] Fetching projects...');
             try {
                 // Fetch from Supabase instead of Hubstaff API
                 const { data, error } = await supabase
@@ -43,15 +44,16 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
                     .order('name', { ascending: true });
 
                 if (!error && data) {
+                    console.log('[TaskModal] Projects fetched successfully:', data.length, 'projects');
                     setProjects(data.map((p: any) => ({
                         id: p.name,
                         label: p.name
                     })));
                 } else {
-                    console.error('Failed to fetch projects from DB:', error);
+                    console.error('[TaskModal] Failed to fetch projects from DB:', error);
                 }
             } catch (error) {
-                console.error('Error fetching projects:', error);
+                console.error('[TaskModal] Error fetching projects:', error);
             } finally {
                 setIsFetchingProjects(false);
             }
@@ -66,6 +68,7 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
     useEffect(() => {
         const fetchUsers = async () => {
             setLoadingHubstaffUsers(true);
+            console.log('[TaskModal] Fetching users...');
             try {
                 // If isQATeam (Super Admin) -> Fetch Hubstaff
                 // If NOT isQATeam (Team Account) -> Fetch Team Members
@@ -83,41 +86,53 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
 
                 const { getCurrentUserTeam } = await import('@/utils/userUtils');
                 const userTeam = await getCurrentUserTeam();
+                console.log('[TaskModal] User team info:', userTeam);
                 const isSuperAdmin = userTeam?.role === 'super_admin';
+                console.log('[TaskModal] Is super admin:', isSuperAdmin);
 
                 if (isSuperAdmin) {
                     // Fetch Hubstaff Users via API
+                    console.log('[TaskModal] Fetching Hubstaff users via API...');
                     const response = await fetch('/api/hubstaff/users');
                     if (response.ok) {
                         const data = await response.json();
+                        console.log('[TaskModal] Hubstaff API response:', data);
                         if (data.members) {
                             const formattedUsers = data.members.map((u: any) => ({
                                 id: u.name,
                                 label: u.name
                             }));
+                            console.log('[TaskModal] Formatted Hubstaff users:', formattedUsers.length, 'users');
                             setHubstaffUsers(formattedUsers);
                         }
+                    } else {
+                        console.error('[TaskModal] Hubstaff API failed with status:', response.status);
                     }
                 } else {
                     // Fetch Team Members via Supabase Client
                     // Requires 'team_id' or just RLS? 
                     // RLS policies allow "Users can view their own team members" (based on auth.uid -> team_id)
                     // So selecting * should return only their team's members.
+                    console.log('[TaskModal] Fetching team members from Supabase...');
                     const { data, error } = await supabase
                         .from('team_members')
                         .select('name')
                         .order('name');
 
                     if (!error && data) {
+                        console.log('[TaskModal] Team members fetched successfully:', data.length, 'members');
+                        console.log('[TaskModal] Team members data:', data);
                         const formattedUsers = data.map((u: any) => ({
                             id: u.name,
                             label: u.name
                         }));
                         setHubstaffUsers(formattedUsers);
+                    } else {
+                        console.error('[TaskModal] Failed to fetch team members:', error);
                     }
                 }
             } catch (error) {
-                console.error('Error fetching users:', error);
+                console.error('[TaskModal] Error fetching users:', error);
             } finally {
                 setLoadingHubstaffUsers(false);
             }
@@ -557,22 +572,24 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
                         </div>
                     </div>
 
-                    {/* 10. Actual Completion Date */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <div className="space-y-3">
-                            <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-                                <Calendar size={16} className="text-emerald-500" /> Actual Completion Date
-                                {formData.status === 'Completed' && <span className="text-xs text-emerald-600">(Auto-filled)</span>}
-                            </label>
-                            <input
-                                type="date"
-                                name="actualCompletionDate"
-                                value={formData.actualCompletionDate || ''}
-                                onChange={handleChange}
-                                className="w-full px-5 py-3 bg-emerald-50 border border-emerald-200 rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all font-medium text-slate-700"
-                            />
+                    {/* 10. Actual Completion Date - Hide when Rejected */}
+                    {formData.status !== 'Rejected' && (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div className="space-y-3">
+                                <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                                    <Calendar size={16} className="text-emerald-500" /> Actual Completion Date
+                                    {formData.status === 'Completed' && <span className="text-xs text-emerald-600">(Auto-filled)</span>}
+                                </label>
+                                <input
+                                    type="date"
+                                    name="actualCompletionDate"
+                                    value={formData.actualCompletionDate || ''}
+                                    onChange={handleChange}
+                                    className="w-full px-5 py-3 bg-emerald-50 border border-emerald-200 rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all font-medium text-slate-700"
+                                />
+                            </div>
                         </div>
-                    </div>
+                    )}
 
                     {/* 11. Comments & 12. Current Updates */}
                     <div className="grid grid-cols-1 gap-8">
