@@ -48,7 +48,7 @@ interface NavSection {
 
 export function Sidebar() {
     const pathname = usePathname();
-    const { isGuest, selectedTeamName, clearGuestSession } = useGuestMode();
+    const { isGuest, selectedTeamName, setGuestSession, clearGuestSession } = useGuestMode();
 
     // Hide sidebar on login and guest selection pages
     if (pathname === '/login' || pathname === '/guest') return null;
@@ -69,6 +69,14 @@ export function Sidebar() {
     const [userRole, setUserRole] = useState<string | null>(null);
     const [sidebarTitle, setSidebarTitle] = useState('Team Tracker');
     const [showManageTeam, setShowManageTeam] = useState(false);
+
+    // Guest Mode Team Switcher State
+    interface Team {
+        id: string;
+        name: string;
+    }
+    const [teams, setTeams] = useState<Team[]>([]);
+    const [loadingTeams, setLoadingTeams] = useState(false);
 
     useEffect(() => {
         // Fetch user role for sidebar visibility
@@ -92,6 +100,25 @@ export function Sidebar() {
         };
         fetchRole();
     }, []);
+
+    // Fetch teams for Manager Mode dropdown
+    useEffect(() => {
+        if (isGuest) {
+            const fetchTeams = async () => {
+                setLoadingTeams(true);
+                try {
+                    const { data, error } = await supabase.from('teams').select('id, name').order('name');
+                    if (error) throw error;
+                    if (data) setTeams(data);
+                } catch (error) {
+                    console.error('Error fetching teams for sidebar:', error);
+                } finally {
+                    setLoadingTeams(false);
+                }
+            };
+            fetchTeams();
+        }
+    }, [isGuest]);
 
     const navSections: Record<string, NavSection> = {
         main: {
@@ -149,7 +176,41 @@ export function Sidebar() {
                         <div className="logo-icon">
                             {isGuest ? <Eye size={20} /> : <LayoutDashboard size={20} />}
                         </div>
-                        {isGuest ? selectedTeamName || 'Manager View' : sidebarTitle}
+                        {isGuest ? (
+                            <div className="flex-1 min-w-0 relative group">
+                                <select
+                                    className="w-full bg-transparent border-none text-slate-800 font-bold focus:ring-0 p-0 text-sm cursor-pointer truncate appearance-none pr-4"
+                                    value={selectedTeamName || ''}
+                                    onChange={(e) => {
+                                        const newTeamName = e.target.value;
+                                        const selectedTeam = teams.find(t => t.name === newTeamName);
+
+                                        if (selectedTeam) {
+                                            let targetTeamId = selectedTeam.id;
+
+                                            // QA Team -> Super Admin mapping logic
+                                            if (newTeamName.toLowerCase() === 'qa team') {
+                                                const superAdminTeam = teams.find(t => t.name.toLowerCase() === 'super admin');
+                                                if (superAdminTeam) {
+                                                    targetTeamId = superAdminTeam.id;
+                                                    console.log('Sidebar: Mapping QA Team to Super Admin ID:', targetTeamId);
+                                                }
+                                            }
+
+                                            setGuestSession(targetTeamId, newTeamName);
+                                            // Force reload to ensure all components and data fetchers update with new context
+                                            window.location.reload();
+                                        }
+                                    }}
+                                >
+                                    <option value="" disabled>Select Team</option>
+                                    {teams.map(team => (
+                                        <option key={team.id} value={team.name}>{team.name}</option>
+                                    ))}
+                                </select>
+                                <ChevronDown size={14} className="absolute right-0 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none group-hover:text-slate-600" />
+                            </div>
+                        ) : sidebarTitle}
                     </div>
                     {/* Close Button Inside Sidebar */}
                     <button
