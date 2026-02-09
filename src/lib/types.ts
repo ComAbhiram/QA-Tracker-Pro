@@ -93,7 +93,7 @@ export interface Project {
 
 export const mapTaskFromDB = (task: DBTask): Task => ({
     id: task.id,
-    projectName: task.project_name,
+    projectName: task.project_name || '',
     projectType: task.project_type,
     subPhase: task.sub_phase,
     priority: task.priority,

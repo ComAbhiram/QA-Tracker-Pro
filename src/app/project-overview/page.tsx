@@ -113,7 +113,9 @@ export default function ProjectOverviewPage() {
 
     const filteredTasks = tasks.filter(t => {
         // Search
-        const matchesSearch = t.projectName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        // Search
+        const pName = t.projectName || '';
+        const matchesSearch = pName.toLowerCase().includes(searchTerm.toLowerCase()) ||
             (t.assignedTo && t.assignedTo.toLowerCase().includes(searchTerm.toLowerCase()));
 
         // Date Range (using startDate and endDate overlap)
