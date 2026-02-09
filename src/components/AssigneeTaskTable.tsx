@@ -1,18 +1,19 @@
 'use client';
 
 import { useState } from 'react';
-import { Task, isTaskOverdue, getOverdueDays } from '@/lib/types';
-import { format } from 'date-fns';
-import { Edit2, AlertCircle } from 'lucide-react';
+import { Task, isTaskOverdue, getOverdueDays, Leave, getISTDate } from '@/lib/types';
+import { format, addDays, isSameDay } from 'date-fns';
+import { Edit2, AlertCircle, CalendarClock, Palmtree } from 'lucide-react';
 import Pagination from '@/components/Pagination';
 
 interface AssigneeTaskTableProps {
     assignee: string;
     tasks: Task[];
+    leaves: Leave[];
     onEditTask: (task: Task) => void;
 }
 
-export default function AssigneeTaskTable({ assignee, tasks, onEditTask }: AssigneeTaskTableProps) {
+export default function AssigneeTaskTable({ assignee, tasks, leaves, onEditTask }: AssigneeTaskTableProps) {
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 5; // Reduced to 5 per user for better compactness, or could be 10
 
@@ -26,18 +27,85 @@ export default function AssigneeTaskTable({ assignee, tasks, onEditTask }: Assig
     // Styling constants matching Daily Reports image
     const headerStyle = "bg-[#1e293b] text-white";
 
+    // --- Availability Calculation ---
+    const calculateAvailability = () => {
+        // 1. Find max end date from active tasks
+        let maxTaskEnd = new Date();
+        maxTaskEnd.setHours(0, 0, 0, 0);
+
+        tasks.forEach(task => {
+            if (task.endDate) {
+                const end = new Date(task.endDate);
+                end.setHours(0, 0, 0, 0);
+                if (end > maxTaskEnd) maxTaskEnd = end;
+            }
+        });
+
+        // Initial availability is next day after max task end
+        let availableFrom = addDays(maxTaskEnd, 1);
+
+        // 2. Adjust for leaves
+        // Sort leaves by date ascending
+        const sortedLeaves = [...leaves].sort((a, b) => new Date(a.leave_date).getTime() - new Date(b.leave_date).getTime());
+
+        let isChecking = true;
+        while (isChecking) {
+            const dateStr = availableFrom.toISOString().split('T')[0];
+            const hasLeave = sortedLeaves.some(l => l.leave_date === dateStr);
+
+            if (hasLeave) {
+                availableFrom = addDays(availableFrom, 1);
+            } else {
+                isChecking = false;
+            }
+        }
+
+        return availableFrom;
+    };
+
+    const availabilityDate = calculateAvailability();
+    const activeLeaves = leaves.filter(l => new Date(l.leave_date) >= new Date());
+
     return (
         <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden mb-6">
             {/* Header Section */}
-            <div className="bg-yellow-500 p-4 flex items-center justify-between">
+            <div className="bg-yellow-500 p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center text-white font-bold text-lg shadow-lg">
+                    <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center text-white font-bold text-xl shadow-lg">
                         {assignee.charAt(0)}
                     </div>
                     <div>
-                        <h3 className="font-bold text-white text-lg">{assignee}</h3>
-                        <p className="text-white/80 text-sm">{totalItems} task{totalItems !== 1 ? 's' : ''}</p>
+                        <h3 className="font-bold text-white text-lg leading-tight">{assignee}</h3>
+                        <p className="text-white/80 text-sm font-medium">{totalItems} active task{totalItems !== 1 ? 's' : ''}</p>
                     </div>
+                </div>
+
+                {/* Availability Info */}
+                <div className="flex flex-col md:items-end text-white">
+                    <div className="flex items-center gap-2 bg-white/20 backdrop-blur-md px-4 py-2 rounded-lg border border-white/10 shadow-sm">
+                        <CalendarClock size={20} className="text-white" />
+                        <div>
+                            <p className="text-[10px] uppercase font-bold tracking-wider opacity-80 leading-none mb-1">Available From</p>
+                            <p className="text-sm font-bold leading-none">{format(availabilityDate, 'MMM d, yyyy')}</p>
+                        </div>
+                    </div>
+
+                    {activeLeaves.length > 0 && (
+                        <div className="mt-2 text-right">
+                            <div className="flex items-center justify-end gap-1.5 text-xs font-medium text-white/90">
+                                <Palmtree size={12} />
+                                <span>Upcoming Leaves:</span>
+                            </div>
+                            <div className="flex flex-wrap justify-end gap-2 mt-1">
+                                {activeLeaves.slice(0, 3).map(l => (
+                                    <span key={l.id} className="inline-flex items-center px-1.5 py-0.5 rounded bg-white/20 text-[10px] border border-white/10">
+                                        {format(new Date(l.leave_date), 'MMM d')}
+                                    </span>
+                                ))}
+                                {activeLeaves.length > 3 && <span className="text-[10px] opacity-80">+{activeLeaves.length - 3} more</span>}
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
 

@@ -81,6 +81,19 @@ export interface Task {
     teamId?: string; // Multi-tenancy support
 }
 
+export interface Leave {
+    id: number;
+    team_member_id: string; // auth.users id
+    team_member_name: string;
+    leave_date: string; // YYYY-MM-DD
+    leave_type: string;
+    reason?: string;
+    status: string; // 'Approved', 'Pending', 'Rejected'
+    created_by?: string;
+    created_at: string;
+    team_id: string;
+}
+
 export interface Project {
     id: number;
     name: string;

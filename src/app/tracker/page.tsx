@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
-import { mapTaskFromDB, Task } from '@/lib/types';
+import { mapTaskFromDB, Task, Leave } from '@/lib/types';
 import { Search, Plus, Download } from 'lucide-react';
 import TaskModal from '@/components/TaskModal';
 import AssigneeTaskTable from '@/components/AssigneeTaskTable';
@@ -12,6 +12,7 @@ import { useGuestMode } from '@/contexts/GuestContext';
 export default function Tracker() {
     const { isGuest, selectedTeamId, isLoading: isGuestLoading } = useGuestMode();
     const [tasks, setTasks] = useState<Task[]>([]);
+    const [leaves, setLeaves] = useState<Leave[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [dateFilter, setDateFilter] = useState('');
@@ -22,35 +23,36 @@ export default function Tracker() {
     useEffect(() => {
         if (isGuestLoading) return; // Wait for guest session to initialize
 
-        async function fetchTasks() {
+        async function fetchData() {
             setLoading(true);
-            let query = supabase
+
+            // 1. Fetch Tasks
+            let taskQuery = supabase
                 .from('tasks')
                 .select('*')
                 .neq('status', 'Completed') // Tracker usually shows active tasks
                 .order('start_date', { ascending: false });
 
             if (searchTerm) {
-                query = query.or(`project_name.ilike.%${searchTerm}%,assigned_to.ilike.%${searchTerm}%,sub_phase.ilike.%${searchTerm}%`);
+                taskQuery = taskQuery.or(`project_name.ilike.%${searchTerm}%,assigned_to.ilike.%${searchTerm}%,sub_phase.ilike.%${searchTerm}%`);
             }
 
             // Manager/Guest Mode Filtering
             if (isGuest) {
                 if (selectedTeamId) {
-                    query = query.eq('team_id', selectedTeamId);
+                    taskQuery = taskQuery.eq('team_id', selectedTeamId);
                 } else {
-                    // Prevent data leak if team ID is missing
                     console.warn('Manager Mode: selectedTeamId is missing, blocking data fetch.');
-                    query = query.eq('id', '00000000-0000-0000-0000-000000000000');
+                    taskQuery = taskQuery.eq('id', '00000000-0000-0000-0000-000000000000');
                 }
             }
 
-            const { data, error } = await query;
+            const { data: taskData, error: taskError } = await taskQuery;
 
-            if (error) {
-                console.error('Error fetching tasks:', error);
+            if (taskError) {
+                console.error('Error fetching tasks:', taskError);
             } else {
-                let filteredData = data || [];
+                let filteredData = taskData || [];
 
                 if (dateFilter) {
                     const selectedDate = new Date(dateFilter);
@@ -68,9 +70,21 @@ export default function Tracker() {
 
                 setTasks(filteredData.map(mapTaskFromDB));
             }
+
+            // 2. Fetch Leaves (Active team only)
+            try {
+                const leavesRes = await fetch('/api/leaves');
+                if (leavesRes.ok) {
+                    const leavesData = await leavesRes.json();
+                    setLeaves(leavesData.leaves || []);
+                }
+            } catch (error) {
+                console.error('Error fetching leaves:', error);
+            }
+
             setLoading(false);
         }
-        fetchTasks();
+        fetchData();
     }, [searchTerm, dateFilter, isGuest, selectedTeamId, isGuestLoading]);
 
     const handleAddTask = () => {
@@ -261,6 +275,7 @@ export default function Tracker() {
                             key={assignee}
                             assignee={assignee}
                             tasks={groupedTasks[assignee]}
+                            leaves={leaves.filter(l => l.team_member_name === assignee)}
                             onEditTask={handleEditTask}
                         />
                     ))
