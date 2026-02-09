@@ -34,7 +34,7 @@ export default function Home() {
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
 
-  const { isGuest, selectedTeamId } = useGuestMode();
+  const { isGuest, selectedTeamId, isLoading: isGuestLoading } = useGuestMode();
 
   // 1. Fetch Stats Data (Global logic for Charts & Stats Cards)
   // Fetches lightweight data for ALL tasks to populate charts/stats consistently
@@ -97,7 +97,7 @@ export default function Home() {
       setAllStatsTasks(mappedStatsTasks);
     }
     setLoadingStats(false);
-  }, [isGuest, selectedTeamId]);
+  }, [isGuest, selectedTeamId, isGuestLoading]);
 
 
   // 2. Fetch Table Data (Paginated & Filtered)
@@ -164,15 +164,17 @@ export default function Home() {
       setTotalItems(count || 0);
     }
     setLoadingTasks(false);
-  }, [isGuest, selectedTeamId, itemsPerPage]);
+  }, [isGuest, selectedTeamId, itemsPerPage, isGuestLoading]);
 
 
   // Effects
 
   // Initial Data Load (Stats + Table)
   useEffect(() => {
-    fetchStatsData();
-  }, [fetchStatsData]);
+    if (!isGuestLoading) {
+      fetchStatsData();
+    }
+  }, [fetchStatsData, isGuestLoading]);
 
   // Debounced Search & Table Refresh
   useEffect(() => {
