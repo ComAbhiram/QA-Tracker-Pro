@@ -29,7 +29,7 @@ export default function RootLayout({
       <body className={inter.className}>
         <GuestProvider>
           <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-200">
-            <GuestBanner />
+            {/* GuestBanner removed as per request */}
             <Sidebar />
             <main className="main-content flex flex-col">
               <div className="flex-1">

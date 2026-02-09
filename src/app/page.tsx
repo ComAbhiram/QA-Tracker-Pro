@@ -145,6 +145,10 @@ export default function Home() {
     const { data, count, error } = await query;
     if (error) {
       console.error('Error fetching table tasks:', error);
+      // If in guest mode, this might be RLS blocking access.
+      if (isGuest) {
+        console.error('Manager Mode Access Error: Possible RLS restriction on production DB.');
+      }
     } else {
       setTasks((data || []).map(mapTaskFromDB));
       setTotalItems(count || 0);

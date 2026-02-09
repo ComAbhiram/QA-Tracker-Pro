@@ -149,7 +149,7 @@ export function Sidebar() {
                         <div className="logo-icon">
                             {isGuest ? <Eye size={20} /> : <LayoutDashboard size={20} />}
                         </div>
-                        {isGuest ? selectedTeamName || 'Guest View' : sidebarTitle}
+                        {isGuest ? selectedTeamName || 'Manager View' : sidebarTitle}
                     </div>
                     {/* Close Button Inside Sidebar */}
                     <button
@@ -215,7 +215,7 @@ export function Sidebar() {
                         className={`flex items-center gap-3 w-full p-3 rounded-xl text-slate-600 hover:bg-red-50 hover:text-red-600 transition-all ${collapsed ? 'justify-center' : ''}`}
                     >
                         <LogOut size={20} />
-                        {!collapsed && <span className="font-medium">{isGuest ? 'Exit Guest Mode' : 'Sign Out'}</span>}
+                        {!collapsed && <span className="font-medium">{isGuest ? 'Exit Manager Mode' : 'Sign Out'}</span>}
                     </button>
                 </div>
             </nav>
