@@ -54,11 +54,13 @@ export async function GET(request: Request) {
             .not('status', 'in', '("Completed","Rejected")');
 
         // Fetch Leaves (Active only)
+        // Note: The 'status' column might not exist in the leaves table based on recent errors.
+        // If it doesn't exist, we assume all leaves are valid or we can't filter by status.
         const leavesPromise = supabaseAdmin
             .from('leaves')
             .select('*')
-            .eq('team_id', teamId)
-            .neq('status', 'Rejected');
+            .eq('team_id', teamId);
+        // .neq('status', 'Rejected'); // Removed due to missing column error
 
         const [tasksRes, leavesRes] = await Promise.all([tasksPromise, leavesPromise]);
 
