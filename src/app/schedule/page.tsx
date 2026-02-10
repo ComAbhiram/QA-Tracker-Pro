@@ -464,6 +464,13 @@ export default function Schedule() {
 
                                     // Check status on this specific day (allow up to Tomorrow)
                                     if (day > end && day <= tomorrow) {
+                                        // Logic update: Only show 'spilled' overdue tasks on future dates if they are ACTUALLY overdue right now.
+                                        // This prevents a task due Today (Feb 10) from showing up on Tomorrow (Feb 11) 
+                                        // if it's currently 10:00 AM (before the 6:30 PM cutoff).
+                                        if (day > now && !isTaskOverdue(task)) {
+                                            return false;
+                                        }
+
                                         const statusInfo = getStatusOnDate(task, day);
 
                                         // Show overdue tasks on the next day if they haven't been completed
