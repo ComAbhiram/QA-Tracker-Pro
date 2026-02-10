@@ -240,6 +240,7 @@ export default function Tracker() {
 
         // Iterate over all assignees in groupedTasks
         Object.keys(groupedTasks).forEach(assignee => {
+            if (assignee === 'Unassigned') return; // Skip Unassigned
             const assigneeTasks = groupedTasks[assignee];
             const assigneeLeaves = leaves.filter(l => l.team_member_name === assignee);
 
