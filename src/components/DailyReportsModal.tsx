@@ -720,7 +720,9 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                 <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 1000px;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; border-bottom: 2px solid #e2e8f0; padding-bottom: 16px;">
                         <div>
-                            <h1 style="color: #1e293b; font-size: 28px; margin-bottom: 8px; font-weight: 700;">Work Schedule For the Day : ${formatDate(scheduleDate)}</h1>
+                            <h1 style="color: #1e293b; font-size: 28px; margin-bottom: 8px; font-weight: 700;">
+                                <span>Work Schedule For the Day</span><span style="margin: 0 8px;">:</span><span>${formatDate(scheduleDate)}</span>
+                            </h1>
                             <p style="color: #64748b; font-size: 14px; margin: 0;">${dateStr}</p>
                         </div>
                         <div style="text-align: right;">
