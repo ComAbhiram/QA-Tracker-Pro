@@ -198,8 +198,29 @@ export function isTaskOverdue(task: Task): boolean {
     }
 
     // For active tasks, check if current time is past 6:30 PM on the end date
+    // 1. Create a UTC date for "Now" adjusted to IST
     const istNow = getISTDate();
-    return istNow > endOfWorkDay;
+
+    // 2. Create the deadline: 6:30 PM IST on the End Date
+    // Parse YYYY-MM-DD
+    const [y, m, d] = task.endDate.split('-').map(Number);
+    // Construct a Date object that Represents 18:30 IST
+    // 18:30 IST = 13:00 UTC (18.5 - 5.5)
+    // We want to compare the "shifted" istNow with a "shifted" deadline.
+    // If istNow is shifted +5.5h, then 18:30 IST should be represented as... 18:30.
+    // Let's use the same logic as getISTDate:
+    // Create a date at 18:30 UTC, and then pretend it's IST? No.
+
+    // Better Approach: Convert everything to absolute UTC timestamps for comparison.
+
+    // Deadline: 18:30 IST on YYYY-MM-DD
+    // = YYYY-MM-DD T 13:00:00 UTC
+    const deadlineUTC = new Date(Date.UTC(y, m - 1, d, 13, 0, 0)); // 13:00 UTC = 18:30 IST
+
+    // Current Time: Absolute UTC
+    const nowUTC = new Date();
+
+    return nowUTC > deadlineUTC;
 }
 
 export function getOverdueDays(task: Task): number {
