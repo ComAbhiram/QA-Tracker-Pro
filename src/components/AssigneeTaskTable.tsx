@@ -40,8 +40,8 @@ export default function AssigneeTaskTable({ assignee, tasks, leaves, onEditTask 
                         {assignee.charAt(0)}
                     </div>
                     <div>
-                        <h3 className="font-bold text-white text-lg leading-tight">{assignee}</h3>
-                        <p className="text-white/80 text-sm font-medium">{totalItems} active task{totalItems !== 1 ? 's' : ''}</p>
+                        <h3 className="font-extrabold text-slate-900 text-lg leading-tight">{assignee}</h3>
+                        <p className="text-slate-800 text-sm font-medium">{totalItems} active task{totalItems !== 1 ? 's' : ''}</p>
                     </div>
                 </div>
 
