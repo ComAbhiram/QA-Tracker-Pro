@@ -105,6 +105,25 @@ export default function ForecastProjects() {
         }
     };
 
+    const handleDeleteTask = async (taskId: number) => {
+        try {
+            const { error } = await supabase
+                .from('tasks')
+                .delete()
+                .eq('id', taskId);
+
+            if (error) {
+                console.error('Error deleting task:', error);
+                alert('Failed to delete task');
+            } else {
+                setIsModalOpen(false);
+                fetchForecastTasks();
+            }
+        } catch (error) {
+            console.error('Error deleting task:', error);
+        }
+    };
+
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-[60vh]">
@@ -301,6 +320,7 @@ export default function ForecastProjects() {
                 }}
                 task={selectedTask}
                 onSave={handleSaveTask}
+                onDelete={handleDeleteTask}
             />
         </>
     );
