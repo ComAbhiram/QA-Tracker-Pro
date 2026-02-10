@@ -72,30 +72,17 @@ export default function GlobalAvailabilityModal({ isOpen, onClose }: GlobalAvail
             const targetDate = new Date(checkDate);
             targetDate.setHours(0, 0, 0, 0);
 
-            // 1. Fetch ALL active tasks for this team
-            const { data: tasksData, error: taskError } = await supabase
-                .from('tasks')
-                .select('*')
-                .eq('team_id', selectedTeam.id)
-                .not('status', 'in', '("Completed","Rejected")');
+            // Fetch data via API to avoid RLS issues when checking other teams
+            const res = await fetch(`/api/availability/data?team_id=${selectedTeam.id}`);
 
-            if (taskError) throw taskError;
+            if (!res.ok) {
+                const err = await res.json();
+                throw new Error(err.error || 'Failed to fetch availability data');
+            }
+
+            const { tasks: tasksData, leaves: leavesData } = await res.json();
 
             const tasks: Task[] = (tasksData || []).map(mapTaskFromDB);
-
-            // 2. Fetch leaves for this team
-            // Note: Leaves API might return all, so we might need to filter manually if endpoint doesn't support filtering
-            // Or use supabase directly if RLS allows. Let's try direct supabase for efficiency if RLS permits public read on leaves (likely yes for authenticated)
-            // Actually, the previous code used /api/leaves. Let's use supabase directly for speed if possible, 
-            // matching the table structure: 'leaves' table has 'team_id'.
-            const { data: leavesData, error: leaveError } = await supabase
-                .from('leaves')
-                .select('*')
-                .eq('team_id', selectedTeam.id)
-                .neq('status', 'Rejected');
-
-            if (leaveError) throw leaveError;
-
             const leaves: Leave[] = leavesData || [];
 
             // 3. Group tasks by assignee to calculate individual availability
@@ -106,15 +93,7 @@ export default function GlobalAvailabilityModal({ isOpen, onClose }: GlobalAvail
                 return acc;
             }, {} as Record<string, Task[]>);
 
-            // 4. Identify all unique members from tasks AND leaves (in case someone has leave but no active tasks)
-            // Note: Ideally we should fetch 'team_members' table, but we might rely on tasks/leaves for now or just tasks.
-            // If a member has NO tasks and NO leaves, they are technically available, but we won't know they exist solely from this.
-            // For now, let's stick to the pattern used in Tracker: derived from tasks. 
-            // But wait, if they have no tasks, they SHOULD appear as available.
-            // In the Tracker page, it iterates `Object.keys(groupedTasks)`. So if a user has 0 tasks, they don't show up in Tracker.
-            // So for consistency, we will check availability only for those who have at least one active task OR a leave record.
-            // This is a limitation: "Ghost" users (on team but no tasks/leaves) won't show up. 
-
+            // 4. Identify all unique members
             const allMembers = new Set<string>();
             Object.keys(groupedTasks).forEach(m => allMembers.add(m));
             leaves.forEach(l => allMembers.add(l.team_member_name));
