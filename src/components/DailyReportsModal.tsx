@@ -193,43 +193,42 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
             };
 
             container.innerHTML = `
-                <div style="font-family: Arial, sans-serif; max-width: 1000px;">
-                    <div style="margin-bottom: 24px; border-bottom: 2px solid #e2e8f0; padding-bottom: 16px;">
-                        <h1 style="color: #1e293b; font-size: 28px; margin-bottom: 8px; font-weight: 700; font-family: Arial, sans-serif;">
-                            <span>QA Work Status</span><span style="margin: 0 8px;">-</span><span>${selectedQA}</span>
+                <div style="font-family: Arial, sans-serif; max-width: 1200px; padding: 40px; background: white;">
+                    <div style="margin-bottom: 32px; border-bottom: 3px solid #cbd5e1; padding-bottom: 24px;">
+                        <h1 style="color: #0f172a; font-size: 36px; margin-bottom: 12px; font-weight: 800; font-family: Arial, sans-serif;">
+                            <span>QA Work Status</span><span style="margin: 0 12px;">-</span><span>${selectedQA}</span>
                         </h1>
-                        <p style="color: #64748b; font-size: 16px; margin: 0;">${formatQADate(selectedQADate)}</p>
+                        <p style="color: #334155; font-size: 18px; margin: 0; font-weight: 500;">${formatQADate(selectedQADate)}</p>
                     </div>
                     
                     <!-- Hubstaff Activity Section -->
-                    <div style="background: #f8fafc; border-left: 4px solid #0ea5e9; padding: 16px; margin-bottom: 24px; border-radius: 8px;">
-                        <h3 style="color: #1e293b; font-size: 18px; margin-bottom: 12px; font-weight: 600;">Hubstaff Activity</h3>
-                        <p style="color: #475569; margin: 4px 0;"><strong>Time Worked:</strong> ${formatTime(qaData.hubstaffActivity.timeWorked)}</p>
-                        <p style="color: #475569; margin: 4px 0;"><strong>Activity Level:</strong> ${qaData.hubstaffActivity.activityPercentage}%</p>
-                        ${qaData.hubstaffActivity.projects.length > 0 ? `<p style="color: #475569; margin: 4px 0;"><strong>Projects:</strong> ${qaData.hubstaffActivity.projects.join(', ')}</p>` : ''}
+                    <div style="background: #f1f5f9; border-left: 6px solid #0284c7; padding: 24px; margin-bottom: 32px; border-radius: 12px;">
+                        <h3 style="color: #0f172a; font-size: 22px; margin-bottom: 16px; font-weight: 700;">Hubstaff Activity</h3>
+                        <p style="color: #334155; margin: 6px 0; font-size: 16px;"><strong>Time Worked:</strong> ${formatTime(qaData.hubstaffActivity.timeWorked)}</p>
+                        <p style="color: #334155; margin: 6px 0; font-size: 16px;"><strong>Activity Level:</strong> ${qaData.hubstaffActivity.activityPercentage}%</p>
+                        ${qaData.hubstaffActivity.projects.length > 0 ? `<p style="color: #334155; margin: 6px 0; font-size: 16px;"><strong>Projects:</strong> ${qaData.hubstaffActivity.projects.join(', ')}</p>` : ''}
                     </div>
 
                     <!-- Tasks Table -->
-                    <table style="width: 100%; border-collapse: collapse; background: white; border: 1px solid #94a3b8; border-radius: 12px; overflow: hidden;">
+                    <table style="width: 100%; border-collapse: separate; border-spacing: 0; background: white; border: 1px solid #64748b; border-radius: 12px; overflow: hidden;">
                         <thead>
-                            <tr style="background: #1e293b;">
-                                <th style="padding: 12px; text-align: left; color: white; font-weight: 600; font-size: 12px; width: 15%; border-right: 1px solid #475569;">Project & Type</th>
-                                <th style="padding: 12px; text-align: left; color: white; font-weight: 600; font-size: 12px; border-right: 1px solid #475569;">Phase & PC</th>
-                                <th style="padding: 12px; text-align: center; color: white; font-weight: 600; font-size: 12px; width: 10%; border-right: 1px solid #475569;">Status</th>
-                                <th style="padding: 12px; text-align: left; color: white; font-weight: 600; font-size: 12px; width: 15%; border-right: 1px solid #475569;">Assignees</th>
-                                <th style="padding: 12px; text-align: left; color: white; font-weight: 600; font-size: 12px; border-right: 1px solid #475569;">Dates (S/E/A)</th>
-                                <th style="padding: 12px; text-align: left; color: white; font-weight: 600; font-size: 12px;">Comments/Dev.</th>
+                            <tr style="background: #0f172a;">
+                                <th style="padding: 16px; text-align: left; color: white; font-weight: 700; font-size: 15px; width: 15%; border-right: 1px solid #334155;">Project & Type</th>
+                                <th style="padding: 16px; text-align: left; color: white; font-weight: 700; font-size: 15px; border-right: 1px solid #334155;">Phase & PC</th>
+                                <th style="padding: 16px; text-align: center; color: white; font-weight: 700; font-size: 15px; width: 12%; border-right: 1px solid #334155;">Status</th>
+                                <th style="padding: 16px; text-align: left; color: white; font-weight: 700; font-size: 15px; width: 15%; border-right: 1px solid #334155;">Assignees</th>
+                                <th style="padding: 16px; text-align: left; color: white; font-weight: 700; font-size: 15px; border-right: 1px solid #334155;">Dates (S/E/A)</th>
+                                <th style="padding: 16px; text-align: left; color: white; font-weight: 700; font-size: 15px;">Comments/Dev.</th>
                             </tr>
                         </thead>
                         <tbody>
                             ${qaData.tasks.length === 0 ?
-                    '<tr><td colspan="7" style="padding: 40px; text-align: center; color: #94a3b8; font-size: 16px;">No tasks scheduled for this date</td></tr>' :
+                    '<tr><td colspan="6" style="padding: 40px; text-align: center; color: #64748b; font-size: 18px; font-weight: 500;">No tasks scheduled for this date</td></tr>' :
                     qaData.tasks.map((task: any, index: number) => {
                         const effectiveStatus = getEffectiveStatus(task);
                         let displayStatus = effectiveStatus;
 
                         // Check overdue logic manually for display if needed
-                        // (The API might already handle this, but for consistency with frontend logic):
                         if (effectiveStatus === 'Overdue' && task.endDate) {
                             const end = new Date(task.endDate);
                             const now = new Date();
@@ -243,39 +242,39 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                         }
 
                         return `
-                                    <tr style="border-bottom: 1px solid #94a3b8; ${index % 2 === 0 ? 'background: #f8fafc;' : 'background: white;'}">
-                                        <td style="padding: 12px; color: #1e293b; font-weight: 600; font-size: 12px; vertical-align: middle; border-right: 1px solid #94a3b8;">
-                                            <div>${task.projectName}</div>
-                                            <div style="color: #64748b; font-size: 11px; font-weight: 400;">${task.projectType || '-'}</div>
-                                            ${task.priority ? `<div style="margin-top:4px; display:inline-block; padding:2px 6px; background:#f1f5f9; border-radius:4px; font-size:10px;">${task.priority}</div>` : ''}
+                                    <tr style="border-bottom: 1px solid #cbd5e1; ${index % 2 === 0 ? 'background: #f8fafc;' : 'background: white;'}">
+                                        <td style="padding: 16px; color: #0f172a; font-weight: 600; font-size: 15px; vertical-align: middle; border-right: 1px solid #cbd5e1;">
+                                            <div style="margin-bottom: 4px;">${task.projectName}</div>
+                                            <div style="color: #475569; font-size: 13px; font-weight: 500;">${task.projectType || '-'}</div>
+                                            ${task.priority ? `<div style="margin-top:6px; display:inline-block; padding:4px 8px; background:#e2e8f0; border-radius:4px; font-size:12px; font-weight: 600; color: #334155;">${task.priority}</div>` : ''}
                                         </td>
-                                        <td style="padding: 12px; color: #475569; font-size: 12px; vertical-align: middle; border-right: 1px solid #94a3b8;">
-                                            <div>${task.subPhase || 'N/A'}</div>
-                                            <div style="color: #94a3b8; font-size: 11px;">PC: ${task.pc || '-'}</div>
+                                        <td style="padding: 16px; color: #334155; font-size: 15px; vertical-align: middle; border-right: 1px solid #cbd5e1;">
+                                            <div style="font-weight: 500;">${task.subPhase || 'N/A'}</div>
+                                            <div style="color: #64748b; font-size: 13px; margin-top: 4px;">PC: ${task.pc || '-'}</div>
                                         </td>
-                                        <td style="padding: 12px; text-align: center; vertical-align: middle; border-right: 1px solid #94a3b8;">
+                                        <td style="padding: 16px; text-align: center; vertical-align: middle; border-right: 1px solid #cbd5e1;">
                                             <div style="display: flex; align-items: center; justify-content: center; width: 100%; height: 100%;">
-                                                <span style="font-size: 12px; font-weight: 700;
-                                                    ${effectiveStatus === 'Completed' ? 'color: #15803d;' :
-                                effectiveStatus === 'In Progress' ? 'color: #1d4ed8;' :
-                                    effectiveStatus === 'Yet to Start' ? 'color: #b45309;' :
-                                        effectiveStatus === 'Overdue' ? 'color: #b91c1c;' :
+                                                <span style="font-size: 14px; font-weight: 800;
+                                                    ${effectiveStatus === 'Completed' ? 'color: #166534;' :
+                                effectiveStatus === 'In Progress' ? 'color: #1e40af;' :
+                                    effectiveStatus === 'Yet to Start' ? 'color: #92400e;' :
+                                        effectiveStatus === 'Overdue' ? 'color: #991b1b;' :
                                             'color: #475569;'}">
                                                     ${displayStatus}
                                                 </span>
                                             </div>
                                         </td>
-                                        <td style="padding: 12px; color: #475569; font-size: 12px; vertical-align: middle; border-right: 1px solid #94a3b8;">
+                                        <td style="padding: 16px; color: #334155; font-size: 14px; vertical-align: middle; border-right: 1px solid #cbd5e1; font-weight: 500;">
                                             ${[task.assignedTo, task.assignedTo2, ...(task.additionalAssignees || [])].filter(Boolean).join(', ') || 'Unassigned'}
                                         </td>
-                                        <td style="padding: 12px; color: #475569; font-size: 12px; vertical-align: middle; border-right: 1px solid #94a3b8;">
-                                            <div>S: ${task.startDate ? formatQADate(task.startDate) : '-'}</div>
-                                            <div>E: ${task.endDate ? formatQADate(task.endDate) : '-'}</div>
-                                            ${task.actualCompletionDate ? `<div style="color:#059669;">A: ${formatQADate(task.actualCompletionDate)}</div>` : ''}
+                                        <td style="padding: 16px; color: #334155; font-size: 14px; vertical-align: middle; border-right: 1px solid #cbd5e1;">
+                                            <div style="margin-bottom: 4px;"><span style="font-weight: 600;">S:</span> ${task.startDate ? formatQADate(task.startDate) : '-'}</div>
+                                            <div style="margin-bottom: 4px;"><span style="font-weight: 600;">E:</span> ${task.endDate ? formatQADate(task.endDate) : '-'}</div>
+                                            ${task.actualCompletionDate ? `<div style="color:#059669; font-weight: 600;">A: ${formatQADate(task.actualCompletionDate)}</div>` : ''}
                                         </td>
-                                        <td style="padding: 12px; color: #64748b; font-size: 11px; vertical-align: middle;">
-                                            <div style="margin-bottom:4px;">${task.comments || '-'}</div>
-                                            ${task.sprintLink ? `<div style="color:#3b82f6;">Sprint Link Available</div>` : ''}
+                                        <td style="padding: 16px; color: #475569; font-size: 13px; vertical-align: middle;">
+                                            <div style="margin-bottom:6px; line-height: 1.4;">${task.comments || '-'}</div>
+                                            ${task.sprintLink ? `<div style="color:#2563eb; font-weight: 500;">Sprint Link Available</div>` : ''}
                                         </td>
                                     </tr>
                                 `}).join('')
@@ -425,18 +424,18 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
             container.style.cssText = 'position: absolute; left: -9999px; top: -9999px; background: white; padding: 30px;';
 
             container.innerHTML = `
-                <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 1000px;">
-                    <div style="margin-bottom: 24px; border-bottom: 2px solid #e2e8f0; padding-bottom: 16px;">
-                        <h1 style="color: #1e293b; font-size: 28px; margin-bottom: 8px; font-weight: 700; font-family: Arial, sans-serif;">
-                            <span>Work Status of the Day</span><span style="margin: 0 8px;">:</span><span>${formatDate(today)}</span>
+                <div style="font-family: Arial, sans-serif; max-width: 1200px; padding: 40px; background: white;">
+                    <div style="margin-bottom: 32px; border-bottom: 3px solid #cbd5e1; padding-bottom: 24px;">
+                        <h1 style="color: #0f172a; font-size: 36px; margin-bottom: 12px; font-weight: 800; font-family: Arial, sans-serif;">
+                            <span>Work Status of the Day</span><span style="margin: 0 12px;">:</span><span>${formatDate(today)}</span>
                         </h1>
-                        <p style="color: #64748b; font-size: 16px; margin: 0;">${new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                        <p style="color: #334155; font-size: 18px; margin: 0; font-weight: 500;">${new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
                     </div>
                     
                     ${hubstaffData ? `
                     <!-- Hubstaff Activity Section - Dynamic Team -->
-                    <div style="background: #f8fafc; border-left: 4px solid #0ea5e9; padding: 16px; margin-bottom: 24px; border-radius: 8px;">
-                        <h3 style="color: #1e293b; font-size: 18px; margin-bottom: 16px; font-weight: 600;">Hubstaff Activity - ${teamName}</h3>
+                    <div style="background: #f1f5f9; border-left: 6px solid #0284c7; padding: 24px; margin-bottom: 32px; border-radius: 12px;">
+                        <h3 style="color: #0f172a; font-size: 22px; margin-bottom: 16px; font-weight: 700;">Hubstaff Activity - ${teamName}</h3>
                         ${(() => {
                         // Filter activities (exclude 0% or empty)
                         const relevantActivities = hubstaffData.activities.filter((a: any) => {
@@ -462,7 +461,7 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
 
                         if (relevantActivities.length === 0) {
                             const activeAssignees = Array.from(new Set(todayTasks.map(t => t.assignedTo).filter(Boolean))).join(', ');
-                            return `<p style="color: #64748b; font-size: 14px; margin: 0;">No Hubstaff activity found for active assignees (${activeAssignees || 'None'}).</p>`;
+                            return `<p style="color: #475569; font-size: 16px; margin: 0;">No Hubstaff activity found for active assignees (${activeAssignees || 'None'}).</p>`;
                         }
 
                         // Aggregate activities by user
@@ -496,22 +495,22 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                             const projectList = Array.from(user.projects).join(' / ') || 'N/A';
 
                             return `
-                                    <div style="background: white; padding: 12px; margin-bottom: 12px; border-radius: 6px; border: 1px solid #e2e8f0;">
-                                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                                            <p style="color: #1e293b; font-size: 15px; font-weight: 600; margin: 0;">${user.userName}</p>
+                                    <div style="background: white; padding: 16px; margin-bottom: 16px; border-radius: 8px; border: 1px solid #cbd5e1;">
+                                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                                            <p style="color: #0f172a; font-size: 16px; font-weight: 700; margin: 0;">${user.userName}</p>
                                         </div>
-                                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
+                                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
                                             <div>
-                                                <p style="color: #64748b; font-size: 11px; margin: 0 0 2px 0;">Time Worked</p>
-                                                <p style="color: #0ea5e9; font-size: 16px; font-weight: 600; margin: 0;">${formatTime(user.timeWorked)}</p>
+                                                <p style="color: #475569; font-size: 13px; margin: 0 0 4px 0; font-weight: 500;">Time Worked</p>
+                                                <p style="color: #0284c7; font-size: 18px; font-weight: 700; margin: 0;">${formatTime(user.timeWorked)}</p>
                                             </div>
                                             <div>
-                                                <p style="color: #64748b; font-size: 11px; margin: 0 0 2px 0;">Activity</p>
-                                                <p style="color: #10b981; font-size: 16px; font-weight: 600; margin: 0;">${avgActivity}%</p>
+                                                <p style="color: #475569; font-size: 13px; margin: 0 0 4px 0; font-weight: 500;">Activity</p>
+                                                <p style="color: #166534; font-size: 18px; font-weight: 700; margin: 0;">${avgActivity}%</p>
                                             </div>
                                             <div>
-                                                <p style="color: #64748b; font-size: 11px; margin: 0 0 2px 0;">Project</p>
-                                                <p style="color: #475569; font-size: 13px; font-weight: 500; margin: 0;">${projectList}</p>
+                                                <p style="color: #475569; font-size: 13px; margin: 0 0 4px 0; font-weight: 500;">Project</p>
+                                                <p style="color: #334155; font-size: 14px; font-weight: 600; margin: 0;">${projectList}</p>
                                             </div>
                                         </div>
                                     </div>
@@ -520,20 +519,20 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                     </div>
                     ` : ''}
                     
-                    <table style="width: 100%; border-collapse: collapse; background: white; border: 1px solid #94a3b8; border-radius: 12px; overflow: hidden;">
+                    <table style="width: 100%; border-collapse: separate; border-spacing: 0; background: white; border: 1px solid #64748b; border-radius: 12px; overflow: hidden;">
                         <thead>
-                            <tr style="background: #1e293b;">
-                                <th style="padding: 12px; text-align: left; color: white; font-weight: 600; font-size: 12px; width: 15%; border-right: 1px solid #475569;">Project & Type</th>
-                                <th style="padding: 12px; text-align: left; color: white; font-weight: 600; font-size: 12px; border-right: 1px solid #475569;">Phase & PC</th>
-                                <th style="padding: 12px; text-align: center; color: white; font-weight: 600; font-size: 12px; width: 10%; border-right: 1px solid #475569;">Status</th>
-                                <th style="padding: 12px; text-align: left; color: white; font-weight: 600; font-size: 12px; width: 15%; border-right: 1px solid #475569;">Assignees</th>
-                                <th style="padding: 12px; text-align: left; color: white; font-weight: 600; font-size: 12px; border-right: 1px solid #475569;">Dates (S/E/A)</th>
-                                <th style="padding: 12px; text-align: left; color: white; font-weight: 600; font-size: 12px;">Comments/Dev.</th>
+                            <tr style="background: #0f172a;">
+                                <th style="padding: 16px; text-align: left; color: white; font-weight: 700; font-size: 15px; width: 15%; border-right: 1px solid #334155;">Project & Type</th>
+                                <th style="padding: 16px; text-align: left; color: white; font-weight: 700; font-size: 15px; border-right: 1px solid #334155;">Phase & PC</th>
+                                <th style="padding: 16px; text-align: center; color: white; font-weight: 700; font-size: 15px; width: 12%; border-right: 1px solid #334155;">Status</th>
+                                <th style="padding: 16px; text-align: left; color: white; font-weight: 700; font-size: 15px; width: 15%; border-right: 1px solid #334155;">Assignees</th>
+                                <th style="padding: 16px; text-align: left; color: white; font-weight: 700; font-size: 15px; border-right: 1px solid #334155;">Dates (S/E/A)</th>
+                                <th style="padding: 16px; text-align: left; color: white; font-weight: 700; font-size: 15px;">Comments/Dev.</th>
                             </tr>
                         </thead>
                         <tbody>
                             ${todayTasks.length === 0 ?
-                    '<tr><td colspan="7" style="padding: 40px; text-align: center; color: #94a3b8; font-size: 16px;">No tasks scheduled for today</td></tr>' :
+                    '<tr><td colspan="6" style="padding: 40px; text-align: center; color: #64748b; font-size: 18px; font-weight: 500;">No tasks scheduled for today</td></tr>' :
                     todayTasks.map((task, index) => {
                         const isLateCompletion = task.status === 'Completed' && task.endDate && task.actualCompletionDate && new Date(task.actualCompletionDate) > new Date(task.endDate);
 
@@ -568,41 +567,41 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                         }
 
                         return `
-                                    <tr style="border-bottom: 1px solid #94a3b8; ${index % 2 === 0 ? 'background: #f8fafc;' : 'background: white;'}">
-                                        <td style="padding: 12px; color: #1e293b; font-weight: 600; font-size: 12px; vertical-align: middle; border-right: 1px solid #94a3b8;">
-                                            <div>${task.projectName}</div>
-                                            <div style="color: #64748b; font-size: 11px; font-weight: 400;">${task.projectType || '-'}</div>
-                                            ${task.priority ? `<div style="margin-top:4px; display:inline-block; padding:2px 6px; background:#f1f5f9; border-radius:4px; font-size:10px;">${task.priority}</div>` : ''}
+                                    <tr style="border-bottom: 1px solid #cbd5e1; ${index % 2 === 0 ? 'background: #f8fafc;' : 'background: white;'}">
+                                        <td style="padding: 16px; color: #0f172a; font-weight: 600; font-size: 15px; vertical-align: middle; border-right: 1px solid #cbd5e1;">
+                                            <div style="margin-bottom: 4px;">${task.projectName}</div>
+                                            <div style="color: #475569; font-size: 13px; font-weight: 500;">${task.projectType || '-'}</div>
+                                            ${task.priority ? `<div style="margin-top:6px; display:inline-block; padding:4px 8px; background:#e2e8f0; border-radius:4px; font-size:12px; font-weight: 600; color: #334155;">${task.priority}</div>` : ''}
                                         </td>
-                                        <td style="padding: 12px; color: #475569; font-size: 12px; vertical-align: middle; border-right: 1px solid #94a3b8;">
-                                            <div>${task.subPhase || 'N/A'}</div>
-                                            <div style="color: #94a3b8; font-size: 11px;">PC: ${task.pc || '-'}</div>
+                                        <td style="padding: 16px; color: #334155; font-size: 15px; vertical-align: middle; border-right: 1px solid #cbd5e1;">
+                                            <div style="font-weight: 500;">${task.subPhase || 'N/A'}</div>
+                                            <div style="color: #64748b; font-size: 13px; margin-top: 4px;">PC: ${task.pc || '-'}</div>
                                         </td>
-                                    <td style="padding: 12px; text-align: center; vertical-align: middle; border-right: 1px solid #94a3b8;">
+                                    <td style="padding: 16px; text-align: center; vertical-align: middle; border-right: 1px solid #cbd5e1;">
                                         <div style="display: flex; align-items: center; justify-content: center; width: 100%; height: 100%;">
-                                            <span style="font-size: 12px; font-weight: 700;
-                                                ${effectiveStatus === 'Completed' ? 'color: #15803d;' :
-                                effectiveStatus === 'In Progress' ? 'color: #1d4ed8;' :
-                                    effectiveStatus === 'Yet to Start' ? 'color: #b45309;' :
-                                        effectiveStatus === 'Overdue' ? 'color: #b91c1c;' :
+                                            <span style="font-size: 14px; font-weight: 800;
+                                                ${effectiveStatus === 'Completed' ? 'color: #166534;' :
+                                effectiveStatus === 'In Progress' ? 'color: #1e40af;' :
+                                    effectiveStatus === 'Yet to Start' ? 'color: #92400e;' :
+                                        effectiveStatus === 'Overdue' ? 'color: #991b1b;' :
                                             'color: #475569;'}
-                                                ${isLateCompletion ? 'color: #b91c1c;' : ''}">
+                                                ${isLateCompletion ? 'color: #991b1b;' : ''}">
                                                 ${isLateCompletion ? lateLabel : displayStatus}
                                             </span>
                                         </div>
                                     </td>
-                                        <td style="padding: 12px; color: #475569; font-size: 12px; vertical-align: middle; border-right: 1px solid #94a3b8;">
+                                        <td style="padding: 16px; color: #334155; font-size: 14px; vertical-align: middle; border-right: 1px solid #cbd5e1; font-weight: 500;">
                                             ${[task.assignedTo, task.assignedTo2, ...(task.additionalAssignees || [])].filter(Boolean).join(', ') || 'Unassigned'}
                                         </td>
-                                        <td style="padding: 12px; color: #475569; font-size: 12px; vertical-align: middle; border-right: 1px solid #94a3b8;">
-                                            <div>S: ${task.startDate ? formatDate(task.startDate) : '-'}</div>
-                                            <div>E: ${task.endDate ? formatDate(task.endDate) : '-'}</div>
-                                            ${task.actualCompletionDate ? `<div style="color:#059669;">A: ${formatDate(task.actualCompletionDate)}</div>` : ''}
+                                        <td style="padding: 16px; color: #334155; font-size: 14px; vertical-align: middle; border-right: 1px solid #cbd5e1;">
+                                            <div style="margin-bottom: 4px;"><span style="font-weight: 600;">S:</span> ${task.startDate ? formatDate(task.startDate) : '-'}</div>
+                                            <div style="margin-bottom: 4px;"><span style="font-weight: 600;">E:</span> ${task.endDate ? formatDate(task.endDate) : '-'}</div>
+                                            ${task.actualCompletionDate ? `<div style="color:#059669; font-weight: 600;">A: ${formatDate(task.actualCompletionDate)}</div>` : ''}
                                         </td>
-                                        <td style="padding: 12px; color: #64748b; font-size: 11px; vertical-align: middle;">
-                                            <div style="margin-bottom:4px;">${task.comments || '-'}</div>
+                                        <td style="padding: 16px; color: #475569; font-size: 13px; vertical-align: middle;">
+                                            <div style="margin-bottom:6px; line-height: 1.4;">${task.comments || '-'}</div>
                                             ${'' /* Deviation reason hidden as requested */}
-                                            ${task.sprintLink ? `<div style="color:#3b82f6;">Sprint Link Available</div>` : ''}
+                                            ${task.sprintLink ? `<div style="color:#2563eb; font-weight: 500;">Sprint Link Available</div>` : ''}
                                         </td>
                                     </tr>
         `;
@@ -611,9 +610,9 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                         </tbody>
                     </table>
                     
-                    <div style="margin-top: 24px; padding: 16px; background: #f8fafc; border-radius: 8px; border-left: 4px solid #0ea5e9;">
-                        <p style="color: #64748b; font-size: 14px; margin: 0;">
-                            <strong style="color: #1e293b;">Total Tasks Scheduled:</strong> ${todayTasks.length}
+                    <div style="margin-top: 32px; padding: 24px; background: #f1f5f9; border-radius: 12px; border-left: 6px solid #0284c7;">
+                        <p style="color: #334155; font-size: 16px; margin: 0;">
+                            <strong style="color: #0f172a;">Total Tasks Scheduled:</strong> ${todayTasks.length}
                         </p>
                     </div>
                 </div>
@@ -717,39 +716,39 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
             container.style.cssText = 'position: absolute; left: -9999px; top: -9999px; background: white; padding: 30px;';
 
             container.innerHTML = `
-                <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 1000px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; border-bottom: 2px solid #e2e8f0; padding-bottom: 16px;">
+                <div style="font-family: Arial, sans-serif; max-width: 1200px; padding: 40px; background: white;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; border-bottom: 3px solid #cbd5e1; padding-bottom: 24px;">
                         <div>
-                            <h1 style="color: #1e293b; font-size: 28px; margin-bottom: 8px; font-weight: 700; display: block;">
-                                <span style="display: inline-block; margin-right: 8px;">Work</span><span style="display: inline-block; margin-right: 8px;">Schedule</span><span style="display: inline-block; margin-right: 8px;">For</span><span style="display: inline-block; margin-right: 8px;">the</span><span style="display: inline-block; margin-right: 8px;">Day</span><span style="display: inline-block; margin-right: 12px;">:</span><span>${(() => {
+                            <h1 style="color: #0f172a; font-size: 36px; margin-bottom: 12px; font-weight: 800; display: block; font-family: Arial, sans-serif;">
+                                <span style="display: inline-block; margin-right: 10px;">Work</span><span style="display: inline-block; margin-right: 10px;">Schedule</span><span style="display: inline-block; margin-right: 10px;">For</span><span style="display: inline-block; margin-right: 10px;">the</span><span style="display: inline-block; margin-right: 10px;">Day</span><span style="display: inline-block; margin-right: 16px;">:</span><span>${(() => {
                     const d = new Date(scheduleDate);
                     const day = String(d.getDate()).padStart(2, '0');
                     const month = d.toLocaleString('en-US', { month: 'short' });
                     const year = d.getFullYear();
-                    return `<span style="display: inline-block; margin-right: 8px;">${day}</span><span style="display: inline-block; margin-right: 8px;">${month}</span><span style="display: inline-block;">${year}</span>`;
+                    return `<span style="display: inline-block; margin-right: 10px;">${day}</span><span style="display: inline-block; margin-right: 10px;">${month}</span><span style="display: inline-block;">${year}</span>`;
                 })()}</span>
                             </h1>
-                            <p style="color: #64748b; font-size: 14px; margin: 0;">${dateStr}</p>
+                            <p style="color: #334155; font-size: 18px; margin: 0; font-weight: 500;">${dateStr}</p>
                         </div>
                         <div style="text-align: right;">
-                             <p style="color: #64748b; font-size: 14px; margin: 0;">Total Active Tasks</p>
-                             <p style="color: #0f172a; font-size: 24px; font-weight: 700; margin: 0;">${scheduleTasks.length}</p>
+                             <p style="color: #475569; font-size: 16px; margin: 0; font-weight: 500;">Total Active Tasks</p>
+                             <p style="color: #0f172a; font-size: 28px; font-weight: 700; margin: 0;">${scheduleTasks.length}</p>
                         </div>
                     </div>
 
-                    <table style="width: 100%; border-collapse: collapse; background: white; border: 1px solid #94a3b8; border-radius: 12px; overflow: hidden;">
+                    <table style="width: 100%; border-collapse: separate; border-spacing: 0; background: white; border: 1px solid #64748b; border-radius: 12px; overflow: hidden;">
                         <thead>
-                            <tr style="background: #1e293b;">
-                                <th style="padding: 12px; text-align: left; color: white; font-weight: 600; font-size: 12px; width: 20%; border-right: 1px solid #475569;">Project Details</th>
-                                <th style="padding: 12px; text-align: left; color: white; font-weight: 600; font-size: 12px; border-right: 1px solid #475569;">Phase & PC</th>
-                                <th style="padding: 12px; text-align: center; color: white; font-weight: 600; font-size: 12px; width: 10%; border-right: 1px solid #475569;">Status</th>
-                                <th style="padding: 12px; text-align: left; color: white; font-weight: 600; font-size: 12px; width: 15%; border-right: 1px solid #475569;">Assignees</th>
-                                <th style="padding: 12px; text-align: left; color: white; font-weight: 600; font-size: 12px; vertical-align: middle; border-right: 1px solid #475569;">Timeline</th>
+                            <tr style="background: #0f172a;">
+                                <th style="padding: 16px; text-align: left; color: white; font-weight: 700; font-size: 15px; width: 20%; border-right: 1px solid #334155;">Project Details</th>
+                                <th style="padding: 16px; text-align: left; color: white; font-weight: 700; font-size: 15px; border-right: 1px solid #334155;">Phase & PC</th>
+                                <th style="padding: 16px; text-align: center; color: white; font-weight: 700; font-size: 15px; width: 10%; border-right: 1px solid #334155;">Status</th>
+                                <th style="padding: 16px; text-align: left; color: white; font-weight: 700; font-size: 15px; width: 15%; border-right: 1px solid #334155;">Assignees</th>
+                                <th style="padding: 16px; text-align: left; color: white; font-weight: 700; font-size: 15px; vertical-align: middle; border-right: 1px solid #334155;">Timeline</th>
                             </tr>
                         </thead>
                         <tbody>
                             ${scheduleTasks.length === 0 ?
-                    '<tr><td colspan="5" style="padding: 40px; text-align: center; color: #94a3b8; font-size: 16px;">No active tasks found in schedule</td></tr>' :
+                    '<tr><td colspan="5" style="padding: 40px; text-align: center; color: #64748b; font-size: 18px; font-weight: 500;">No active tasks found in schedule</td></tr>' :
                     scheduleTasks.map((task, index) => {
                         const effectiveStatus = getEffectiveStatus(task);
                         let displayStatus = effectiveStatus;
@@ -769,19 +768,19 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                         }
 
                         return `
-                                    <tr style="border-bottom: 1px solid #94a3b8; ${index % 2 === 0 ? 'background: #f8fafc;' : 'background: white;'}">
-                                        <td style="padding: 12px; color: #1e293b; font-weight: 600; font-size: 12px; vertical-align: middle; border-right: 1px solid #94a3b8;">
-                                            <div>${task.projectName}</div>
-                                            <div style="color: #64748b; font-size: 11px; font-weight: 400;">${task.projectType || '-'}</div>
-                                            ${task.priority ? `<div style="margin-top:4px; display:inline-block; padding:2px 6px; background:#f1f5f9; border-radius:4px; font-size:10px;">${task.priority}</div>` : ''}
+                                    <tr style="border-bottom: 1px solid #cbd5e1; ${index % 2 === 0 ? 'background: #f8fafc;' : 'background: white;'}">
+                                        <td style="padding: 16px; color: #0f172a; font-weight: 600; font-size: 15px; vertical-align: middle; border-right: 1px solid #cbd5e1;">
+                                            <div style="margin-bottom: 4px;">${task.projectName}</div>
+                                            <div style="color: #475569; font-size: 13px; font-weight: 500;">${task.projectType || '-'}</div>
+                                            ${task.priority ? `<div style="margin-top:6px; display:inline-block; padding:4px 8px; background:#e2e8f0; border-radius:4px; font-size:12px; font-weight: 600; color: #334155;">${task.priority}</div>` : ''}
                                         </td>
-                                        <td style="padding: 12px; color: #475569; font-size: 12px; vertical-align: middle; border-right: 1px solid #94a3b8;">
-                                            <div>${task.subPhase || '-'}</div>
-                                            <div style="color: #94a3b8; font-size: 11px;">PC: ${task.pc || '-'}</div>
+                                        <td style="padding: 16px; color: #334155; font-size: 15px; vertical-align: middle; border-right: 1px solid #cbd5e1;">
+                                            <div style="font-weight: 500;">${task.subPhase || '-'}</div>
+                                            <div style="color: #64748b; font-size: 13px; margin-top: 4px;">PC: ${task.pc || '-'}</div>
                                         </td>
-                                        <td style="padding: 12px; text-align: center; vertical-align: middle; border-right: 1px solid #94a3b8;">
+                                        <td style="padding: 16px; text-align: center; vertical-align: middle; border-right: 1px solid #cbd5e1;">
                                             <div style="display: flex; align-items: center; justify-content: center; width: 100%; height: 100%;">
-                                                <span style="font-size: 12px; font-weight: 700;
+                                                <span style="font-size: 14px; font-weight: 800;
                                                     ${effectiveStatus === 'In Progress' ? 'color: #1d4ed8;' :
                                 effectiveStatus === 'Yet to Start' ? 'color: #b45309;' :
                                     effectiveStatus === 'On Hold' ? 'color: #991b1b;' :
@@ -791,10 +790,10 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                                                 </span>
                                             </div>
                                         </td>
-                                        <td style="padding: 12px; color: #475569; font-size: 12px; vertical-align: middle; border-right: 1px solid #94a3b8;">
+                                        <td style="padding: 16px; color: #334155; font-size: 14px; vertical-align: middle; border-right: 1px solid #cbd5e1; font-weight: 500;">
                                             ${[task.assignedTo, task.assignedTo2, ...(task.additionalAssignees || [])].filter(Boolean).join(', ') || 'Unassigned'}
                                         </td>
-                                        <td style="padding: 12px; color: #475569; font-size: 12px; vertical-align: middle;">${task.startDate ? formatDate(task.startDate) : 'TBD'} - ${task.endDate ? formatDate(task.endDate) : 'TBD'}</td>
+                                        <td style="padding: 16px; color: #334155; font-size: 14px; vertical-align: middle;">${task.startDate ? formatDate(task.startDate) : 'TBD'} - ${task.endDate ? formatDate(task.endDate) : 'TBD'}</td>
                                     </tr>
                                 `;
                     }).join('')
