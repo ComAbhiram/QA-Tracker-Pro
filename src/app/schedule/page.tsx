@@ -525,6 +525,47 @@ export default function Schedule() {
                                                 <div className="text-[10px] text-slate-400 font-medium pl-1">+{dayTasks.length - 3} more</div>
                                             )}
                                         </div>
+
+                                        {/* Hover Popup - Shows ALL tasks for the day */}
+                                        {dayTasks.length > 0 && (
+                                            <div className="absolute left-0 top-0 w-[120%] min-w-[280px] z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 delay-150 transform translate-x-4 translate-y-4 pointer-events-none group-hover:pointer-events-auto">
+                                                <div className="bg-white rounded-xl shadow-2xl border border-slate-200 p-3 flex flex-col gap-2 max-h-[300px] overflow-y-auto custom-scrollbar">
+                                                    <div className="sticky top-0 bg-white pb-2 border-b border-slate-100 mb-1 z-10">
+                                                        <h4 className="font-bold text-slate-800 text-sm flex items-center justify-between">
+                                                            {format(day, 'MMMM d')}
+                                                            <span className="text-xs font-normal text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">{dayTasks.length} tasks</span>
+                                                        </h4>
+                                                    </div>
+                                                    {dayTasks.map(task => {
+                                                        const statusInfo = getStatusOnDate(task, day);
+                                                        const badgeColor = getStatusBadgeColor(task);
+                                                        const isOverdue = statusInfo.baseStatus === 'Overdue' || statusInfo.status.includes('Completed (Overdue)');
+
+                                                        return (
+                                                            <div key={`popup-${task.id}`} className="p-2 rounded-lg bg-slate-50 border border-slate-100 hover:border-indigo-200 transition-colors">
+                                                                <div className="flex items-start justify-between gap-2 mb-1">
+                                                                    <span className="font-semibold text-xs text-slate-800 line-clamp-2 leading-tight">{task.projectName}</span>
+                                                                    {isOverdue && (
+                                                                        <AlertCircle size={12} className="text-rose-500 flex-shrink-0" />
+                                                                    )}
+                                                                </div>
+                                                                <div className="flex items-center justify-between mt-1.5">
+                                                                    <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${badgeColor} bg-opacity-90`}>
+                                                                        {statusInfo.status}
+                                                                    </span>
+                                                                    {task.assignedTo && (
+                                                                        <div className="flex items-center gap-1 text-[10px] text-slate-500" title={`Assigned to ${task.assignedTo}`}>
+                                                                            <User size={10} />
+                                                                            <span className="truncate max-w-[60px]">{task.assignedTo}</span>
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                 );
                             })}
