@@ -1,10 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { Task, isTaskOverdue, getOverdueDays, Leave, getISTDate } from '@/lib/types';
-import { format, addDays, isSameDay } from 'date-fns';
-import { Edit2, AlertCircle, CalendarClock, Palmtree } from 'lucide-react';
+import { Task, isTaskOverdue, getOverdueDays, Leave } from '@/lib/types';
+import { format, addDays } from 'date-fns';
+import { AlertCircle, CalendarClock, Palmtree } from 'lucide-react';
 import Pagination from '@/components/Pagination';
+import { calculateAvailability } from '@/lib/availability';
 
 interface AssigneeTaskTableProps {
     assignee: string;
@@ -18,18 +19,14 @@ export default function AssigneeTaskTable({ assignee, tasks, leaves, onEditTask 
     const itemsPerPage = 5; // Reduced to 5 per user for better compactness, or could be 10
 
     const totalItems = tasks.length;
-    const totalPages = Math.ceil(totalItems / itemsPerPage);
+    const items = tasks; // We will paginate this array
 
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
-    const paginatedTasks = tasks.slice(startIndex, endIndex);
+    const paginatedTasks = items.slice(startIndex, endIndex);
 
     // Styling constants matching Daily Reports image
     const headerStyle = "bg-[#1e293b] text-white";
-
-    import { calculateAvailability } from '@/lib/availability';
-
-    // ...
 
     const availabilityDate = calculateAvailability(tasks, leaves);
     const activeLeaves = leaves.filter(l => new Date(l.leave_date) >= new Date());
@@ -85,7 +82,7 @@ export default function AssigneeTaskTable({ assignee, tasks, leaves, onEditTask 
                             <th className="px-5 py-4 font-semibold text-left border-r border-slate-600">Project</th>
                             <th className="px-4 py-4 font-semibold text-left border-r border-slate-600">Type</th>
                             <th className="px-4 py-4 font-semibold text-left border-r border-slate-600">Priority</th>
-                            <th className="px-4 py-4 font-semibold text-left border-r border-slate-600">Edit</th>
+                            {/* Edit column removed */}
                             <th className="px-5 py-4 font-semibold text-left border-r border-slate-600">Phase</th>
                             <th className="px-4 py-4 font-semibold text-left border-r border-slate-600">PC</th>
                             <th className="px-4 py-4 font-semibold text-left border-r border-slate-600">Assignees</th>
@@ -101,7 +98,12 @@ export default function AssigneeTaskTable({ assignee, tasks, leaves, onEditTask 
                     </thead>
                     <tbody>
                         {paginatedTasks.map(task => (
-                            <tr key={task.id} className="border-b border-slate-200 hover:bg-slate-50/50 transition-all group">
+                            <tr
+                                key={task.id}
+                                onClick={() => onEditTask(task)}
+                                className="border-b border-slate-200 hover:bg-slate-50 cursor-pointer transition-all group"
+                                title="Click to edit task"
+                            >
                                 <td className="px-5 py-4 font-semibold text-slate-800 border-r border-slate-200">{task.projectName}</td>
                                 <td className="px-4 py-4 text-slate-600 border-r border-slate-200">{task.projectType || '-'}</td>
                                 <td className="px-4 py-4 text-slate-600 border-r border-slate-200">
@@ -115,15 +117,7 @@ export default function AssigneeTaskTable({ assignee, tasks, leaves, onEditTask 
                                         </span>
                                     )}
                                 </td>
-                                <td className="px-4 py-4 border-r border-slate-200">
-                                    <button
-                                        onClick={() => onEditTask(task)}
-                                        className="text-slate-400 hover:text-sky-600 hover:bg-sky-50 p-2 rounded-lg transition-all"
-                                        title="Edit Task"
-                                    >
-                                        <Edit2 size={16} />
-                                    </button>
-                                </td>
+                                {/* Edit cell removed */}
                                 <td className="px-5 py-4 font-medium text-slate-600 border-r border-slate-200">{task.subPhase || '-'}</td>
                                 <td className="px-4 py-4 border-r border-slate-200">{task.pc || '-'}</td>
                                 <td className="px-4 py-4 border-r border-slate-200">
@@ -180,7 +174,7 @@ export default function AssigneeTaskTable({ assignee, tasks, leaves, onEditTask 
                                 </td>
                                 <td className="px-4 py-4 text-sm text-slate-500 max-w-xs truncate" title={task.sprintLink || ''}>
                                     {task.sprintLink ? (
-                                        <a href={task.sprintLink} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 hover:underline">
+                                        <a href={task.sprintLink} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 hover:underline" onClick={(e) => e.stopPropagation()}>
                                             Link
                                         </a>
                                     ) : '-'}
