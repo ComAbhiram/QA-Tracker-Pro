@@ -27,43 +27,11 @@ export default function AssigneeTaskTable({ assignee, tasks, leaves, onEditTask 
     // Styling constants matching Daily Reports image
     const headerStyle = "bg-[#1e293b] text-white";
 
-    // --- Availability Calculation ---
-    const calculateAvailability = () => {
-        // 1. Find max end date from active tasks
-        let maxTaskEnd = new Date();
-        maxTaskEnd.setHours(0, 0, 0, 0);
+    import { calculateAvailability } from '@/lib/availability';
 
-        tasks.forEach(task => {
-            if (task.endDate) {
-                const end = new Date(task.endDate);
-                end.setHours(0, 0, 0, 0);
-                if (end > maxTaskEnd) maxTaskEnd = end;
-            }
-        });
+    // ...
 
-        // Initial availability is next day after max task end
-        let availableFrom = addDays(maxTaskEnd, 1);
-
-        // 2. Adjust for leaves
-        // Sort leaves by date ascending
-        const sortedLeaves = [...leaves].sort((a, b) => new Date(a.leave_date).getTime() - new Date(b.leave_date).getTime());
-
-        let isChecking = true;
-        while (isChecking) {
-            const dateStr = availableFrom.toISOString().split('T')[0];
-            const hasLeave = sortedLeaves.some(l => l.leave_date === dateStr);
-
-            if (hasLeave) {
-                availableFrom = addDays(availableFrom, 1);
-            } else {
-                isChecking = false;
-            }
-        }
-
-        return availableFrom;
-    };
-
-    const availabilityDate = calculateAvailability();
+    const availabilityDate = calculateAvailability(tasks, leaves);
     const activeLeaves = leaves.filter(l => new Date(l.leave_date) >= new Date());
 
     return (
@@ -82,11 +50,11 @@ export default function AssigneeTaskTable({ assignee, tasks, leaves, onEditTask 
 
                 {/* Availability Info */}
                 <div className="flex flex-col md:items-end text-white">
-                    <div className="flex items-center gap-2 bg-white/20 backdrop-blur-md px-4 py-2 rounded-lg border border-white/10 shadow-sm">
-                        <CalendarClock size={20} className="text-white" />
+                    <div className="flex items-center gap-2 bg-gradient-to-r from-red-500 to-red-600 backdrop-blur-md px-4 py-2.5 rounded-xl border border-white/20 shadow-xl transform transition-transform hover:scale-105 duration-200">
+                        <CalendarClock size={22} className="text-white animate-pulse" />
                         <div>
-                            <p className="text-[10px] uppercase font-bold tracking-wider opacity-80 leading-none mb-1">Available From</p>
-                            <p className="text-sm font-bold leading-none">{format(availabilityDate, 'MMM d, yyyy')}</p>
+                            <p className="text-[10px] uppercase font-bold tracking-wider opacity-90 leading-none mb-1 text-yellow-100">Available From</p>
+                            <p className="text-base font-extrabold leading-none text-white drop-shadow-sm">{format(availabilityDate, 'MMM d, yyyy')}</p>
                         </div>
                     </div>
 

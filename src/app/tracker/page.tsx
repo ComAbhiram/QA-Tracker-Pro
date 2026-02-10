@@ -3,11 +3,11 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { mapTaskFromDB, Task, Leave } from '@/lib/types';
-import { Search, Plus, Download } from 'lucide-react';
+import { Search, Plus, Download, CalendarClock, X } from 'lucide-react';
 import TaskModal from '@/components/TaskModal';
 import AssigneeTaskTable from '@/components/AssigneeTaskTable';
-
 import { useGuestMode } from '@/contexts/GuestContext';
+import { calculateAvailability } from '@/lib/availability';
 
 export default function Tracker() {
     const { isGuest, selectedTeamId, isLoading: isGuestLoading } = useGuestMode();
@@ -19,6 +19,12 @@ export default function Tracker() {
     const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
     const [editingTask, setEditingTask] = useState<Task | null>(null);
 
+    // Availability Check State
+    const [isAvailabilityCheckOpen, setIsAvailabilityCheckOpen] = useState(false);
+    const [checkDate, setCheckDate] = useState('');
+    const [availableMembers, setAvailableMembers] = useState<string[]>([]);
+    const [hasChecked, setHasChecked] = useState(false);
+
     // Fetch ALL active tasks (no pagination in query)
     useEffect(() => {
         if (isGuestLoading) return; // Wait for guest session to initialize
@@ -26,7 +32,6 @@ export default function Tracker() {
         async function fetchData() {
             setLoading(true);
 
-            // 1. Fetch Tasks
             // 1. Fetch Tasks
             let taskQuery = supabase
                 .from('tasks')
@@ -225,6 +230,31 @@ export default function Tracker() {
         URL.revokeObjectURL(url);
     };
 
+    const handleCheckAvailability = () => {
+        if (!checkDate) return;
+
+        const targetDate = new Date(checkDate);
+        targetDate.setHours(0, 0, 0, 0);
+
+        const available: string[] = [];
+
+        // Iterate over all assignees in groupedTasks
+        Object.keys(groupedTasks).forEach(assignee => {
+            const assigneeTasks = groupedTasks[assignee];
+            const assigneeLeaves = leaves.filter(l => l.team_member_name === assignee);
+
+            const availableFrom = calculateAvailability(assigneeTasks, assigneeLeaves);
+            availableFrom.setHours(0, 0, 0, 0);
+
+            if (availableFrom <= targetDate) {
+                available.push(assignee);
+            }
+        });
+
+        setAvailableMembers(available.sort());
+        setHasChecked(true);
+    };
+
     return (
         <div className="max-w-[1800px] mx-auto">
             <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
@@ -233,6 +263,12 @@ export default function Tracker() {
                     <p className="text-slate-500">Track all active QA tasks by assignee</p>
                 </div>
                 <div className="flex gap-2">
+                    <button
+                        onClick={() => { setIsAvailabilityCheckOpen(true); setHasChecked(false); setCheckDate(''); setAvailableMembers([]); }}
+                        className="btn bg-indigo-600 hover:bg-indigo-700 text-white flex items-center gap-2 shadow-lg shadow-indigo-200"
+                    >
+                        <CalendarClock size={18} /> Check Resource Availability
+                    </button>
                     <button
                         onClick={exportCSV}
                         className="btn btn-secondary flex items-center gap-2"
@@ -247,6 +283,66 @@ export default function Tracker() {
                     </button>
                 </div>
             </header>
+
+            {/* Availability Check Modal */}
+            {isAvailabilityCheckOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
+                        <div className="flex items-center justify-between p-6 border-b border-slate-100 bg-slate-50/50">
+                            <h3 className="text-xl font-bold text-slate-800">Check Availability</h3>
+                            <button onClick={() => setIsAvailabilityCheckOpen(false)} className="p-2 hover:bg-slate-100 rounded-lg text-slate-500 transition-colors">
+                                <X size={20} />
+                            </button>
+                        </div>
+
+                        <div className="p-6 space-y-6">
+                            <div>
+                                <label className="block text-sm font-semibold text-slate-700 mb-2">Select Date needed from</label>
+                                <div className="flex gap-2">
+                                    <input
+                                        type="date"
+                                        value={checkDate}
+                                        onChange={(e) => setCheckDate(e.target.value)}
+                                        className="flex-1 px-4 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
+                                    />
+                                    <button
+                                        onClick={handleCheckAvailability}
+                                        disabled={!checkDate}
+                                        className="px-4 py-2.5 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                    >
+                                        Check
+                                    </button>
+                                </div>
+                            </div>
+
+                            {hasChecked && (
+                                <div className="animate-in slide-in-from-bottom-2 duration-300">
+                                    <h4 className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-3">
+                                        {availableMembers.length} Available Member{availableMembers.length !== 1 ? 's' : ''}
+                                    </h4>
+
+                                    {availableMembers.length > 0 ? (
+                                        <div className="space-y-2 max-h-[300px] overflow-y-auto custom-scrollbar pr-2">
+                                            {availableMembers.map(member => (
+                                                <div key={member} className="flex items-center gap-3 p-3 rounded-xl bg-emerald-50 border border-emerald-100 text-emerald-900">
+                                                    <div className="w-8 h-8 rounded-full bg-emerald-200 flex items-center justify-center text-emerald-800 font-bold text-xs">
+                                                        {member.charAt(0)}
+                                                    </div>
+                                                    <span className="font-semibold">{member}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <div className="text-center py-8 bg-slate-50 rounded-xl border border-slate-100 border-dashed">
+                                            <p className="text-slate-500">No members available on this date.</p>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Filters */}
             <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 mb-8">
