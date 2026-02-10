@@ -28,7 +28,8 @@ import {
     Eye,
     Folder,
     FolderKanban,
-    Users
+    Users,
+    PauseCircle
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useGuestMode } from '@/contexts/GuestContext';
@@ -135,6 +136,7 @@ export function Sidebar() {
             items: [
                 { label: 'Project Overview', icon: <FolderKanban size={18} />, href: '/project-overview' },
                 { label: 'Manage Projects', icon: <Database size={18} />, href: '/projects' },
+                { label: 'On Hold', icon: <PauseCircle size={18} />, href: '/projects/on-hold' },
                 { label: 'Completed', icon: <CheckSquare size={18} />, href: '/projects/completed' },
                 { label: 'Rejected', icon: <XSquare size={18} />, href: '/projects/rejected' },
                 { label: 'Forecast', icon: <TrendingUp size={18} />, href: '/projects/forecast' },

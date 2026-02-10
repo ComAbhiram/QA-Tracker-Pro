@@ -313,6 +313,17 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        // Warn if Start Date is present but End Date is missing
+        if (formData.startDate && !formData.endDate) {
+            const confirmed = window.confirm(
+                "End date is not selected. If you continue without selecting an end date, this task won't appear on the Schedule page, but can be found on the Project Overview and Dashboard pages."
+            );
+            if (!confirmed) {
+                return;
+            }
+        }
+
         setLoading(true);
         try {
             // Use locally fetched teamId if not present in task
