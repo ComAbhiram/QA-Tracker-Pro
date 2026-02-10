@@ -720,13 +720,13 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                 <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 1000px;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; border-bottom: 2px solid #e2e8f0; padding-bottom: 16px;">
                         <div>
-                            <h1 style="color: #1e293b; font-size: 28px; margin-bottom: 8px; font-weight: 700; display: flex; align-items: center; gap: 8px;">
-                                <span>Work</span><span>Schedule</span><span>For</span><span>the</span><span>Day</span><span>:</span><span>${(() => {
+                            <h1 style="color: #1e293b; font-size: 28px; margin-bottom: 8px; font-weight: 700; display: block;">
+                                <span style="display: inline-block; margin-right: 8px;">Work</span><span style="display: inline-block; margin-right: 8px;">Schedule</span><span style="display: inline-block; margin-right: 8px;">For</span><span style="display: inline-block; margin-right: 8px;">the</span><span style="display: inline-block; margin-right: 8px;">Day</span><span style="display: inline-block; margin-right: 12px;">:</span><span>${(() => {
                     const d = new Date(scheduleDate);
                     const day = String(d.getDate()).padStart(2, '0');
                     const month = d.toLocaleString('en-US', { month: 'short' });
                     const year = d.getFullYear();
-                    return `<span style="margin-right: 6px;">${day}</span><span style="margin-right: 6px;">${month}</span><span>${year}</span>`;
+                    return `<span style="display: inline-block; margin-right: 8px;">${day}</span><span style="display: inline-block; margin-right: 8px;">${month}</span><span style="display: inline-block;">${year}</span>`;
                 })()}</span>
                             </h1>
                             <p style="color: #64748b; font-size: 14px; margin: 0;">${dateStr}</p>
