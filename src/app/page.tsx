@@ -8,7 +8,8 @@ import DashboardCharts from '@/components/DashboardCharts';
 import DailyReportsModal from '@/components/DailyReportsModal';
 import TaskModal from '@/components/TaskModal';
 import Pagination from '@/components/Pagination';
-import { Plus, FileText, Layers, Edit2, Search } from 'lucide-react';
+import GlobalAvailabilityModal from '@/components/GlobalAvailabilityModal';
+import { Plus, FileText, Layers, Edit2, Search, CalendarClock } from 'lucide-react';
 import { useGuestMode } from '@/contexts/GuestContext';
 
 export default function Home() {
@@ -32,6 +33,7 @@ export default function Home() {
   // Modals
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
+  const [isAvailabilityModalOpen, setIsAvailabilityModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
 
   const { isGuest, selectedTeamId, isLoading: isGuestLoading } = useGuestMode();
@@ -317,6 +319,12 @@ export default function Home() {
           >
             <FileText size={18} /> Daily Reports
           </button>
+          <button
+            onClick={() => setIsAvailabilityModalOpen(true)}
+            className="btn bg-indigo-600 hover:bg-indigo-700 text-white flex items-center gap-2 shadow-lg shadow-indigo-200"
+          >
+            <CalendarClock size={18} /> Check Availability
+          </button>
           {!isGuest && (
             <button
               onClick={handleAddTask}
@@ -452,6 +460,11 @@ export default function Home() {
       <DailyReportsModal
         isOpen={isReportModalOpen}
         onClose={() => setIsReportModalOpen(false)}
+      />
+
+      <GlobalAvailabilityModal
+        isOpen={isAvailabilityModalOpen}
+        onClose={() => setIsAvailabilityModalOpen(false)}
       />
 
       <TaskModal

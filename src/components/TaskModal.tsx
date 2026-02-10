@@ -30,7 +30,9 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
 
     // Initial state ...
     const initialState: Partial<Task> = {
-        status: 'Yet to Start'
+        status: 'Yet to Start',
+        includeSaturday: false,
+        includeSunday: false
     };
 
     const [formData, setFormData] = useState<Partial<Task>>(initialState);
@@ -204,7 +206,9 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
                 timeTaken: task.timeTaken || '00:00:00',
                 daysTaken: task.daysTaken || 0,
                 deviation: task.deviation || 0,
-                activityPercentage: task.activityPercentage || 0
+                activityPercentage: task.activityPercentage || 0,
+                includeSaturday: task.includeSaturday || false,
+                includeSunday: task.includeSunday || false
             });
 
             // Initialize dynamic assignees list
@@ -257,8 +261,17 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
                     ? parseInt(value) || 0
                     : ['daysAllotted'].includes(name)
                         ? parseFloat(value) || 0
-                        : value
+                        : ['daysAllotted'].includes(name)
+                            ? parseFloat(value) || 0
+                            : value,
+                // Handle checkboxes separately if needed, but for now we use handleChange for inputs
+                // For checkboxes, we need to check type
             };
+
+            if (e.target.type === 'checkbox') {
+                const { checked } = e.target as HTMLInputElement;
+                newData[name as keyof Task] = checked as any;
+            }
 
 
 
@@ -318,6 +331,12 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
                 return;
             }
 
+            if (!teamId) {
+                alert('Error: Could not determine your Team ID. Please refresh the page.');
+                setLoading(false);
+                return;
+            }
+
             // Map assignees array back to individual fields
             const validAssignees = assignees.filter((a): a is string => !!a);
 
@@ -326,6 +345,8 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
                 assignedTo: validAssignees[0] || null,
                 assignedTo2: validAssignees[1] || null,
                 additionalAssignees: validAssignees.slice(2),
+                includeSaturday: formData.includeSaturday || false,
+                includeSunday: formData.includeSunday || false,
                 teamId
             };
 
@@ -558,17 +579,44 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
                                 className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all font-medium text-slate-700"
                             />
                         </div>
-                        <div className="space-y-3">
-                            <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-                                <Calendar size={16} className="text-indigo-500" /> End Date
-                            </label>
-                            <input
-                                type="date"
-                                name="endDate"
-                                value={formData.endDate || ''}
-                                onChange={handleChange}
-                                className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all font-medium text-slate-700"
-                            />
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div className="space-y-3">
+                                <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                                    <Calendar size={16} className="text-indigo-500" /> End Date
+                                </label>
+                                <input
+                                    type="date"
+                                    name="endDate"
+                                    value={formData.endDate || ''}
+                                    onChange={handleChange}
+                                    className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all font-medium text-slate-700"
+                                />
+                            </div>
+                            <div className="space-y-3 flex flex-col justify-end pb-2">
+                                <label className="text-sm font-semibold text-slate-700 mb-2 block">Weekend Schedule</label>
+                                <div className="flex gap-4">
+                                    <label className="flex items-center gap-2 cursor-pointer bg-slate-50 px-4 py-2.5 rounded-xl border border-slate-200 hover:bg-slate-100 transition-colors">
+                                        <input
+                                            type="checkbox"
+                                            name="includeSaturday"
+                                            checked={formData.includeSaturday || false}
+                                            onChange={handleChange}
+                                            className="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500 border-gray-300"
+                                        />
+                                        <span className="text-sm font-medium text-slate-700">Work Saturday</span>
+                                    </label>
+                                    <label className="flex items-center gap-2 cursor-pointer bg-slate-50 px-4 py-2.5 rounded-xl border border-slate-200 hover:bg-slate-100 transition-colors">
+                                        <input
+                                            type="checkbox"
+                                            name="includeSunday"
+                                            checked={formData.includeSunday || false}
+                                            onChange={handleChange}
+                                            className="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500 border-gray-300"
+                                        />
+                                        <span className="text-sm font-medium text-slate-700">Work Sunday</span>
+                                    </label>
+                                </div>
+                            </div>
                         </div>
                     </div>
 

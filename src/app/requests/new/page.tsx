@@ -71,12 +71,14 @@ export default function LeavePage() {
             });
 
             if (!response.ok) {
-                throw new Error('Failed to save leave');
+                const errData = await response.json();
+                throw new Error(errData.error || 'Failed to save leave');
             }
 
             await fetchLeaves();
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error saving leave:', error);
+            alert(`Error: ${error.message}`);
             throw error;
         }
     };

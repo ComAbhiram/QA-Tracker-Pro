@@ -1,43 +1,46 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@supabase/supabase-js';
+
+export const dynamic = 'force-dynamic';
 
 export async function GET() {
     try {
-        // Fetch all tasks
-        const { data: tasks, error } = await supabase
+        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+        const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+        const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+        // Test 1: Chained .neq()
+        const { data: chainedData, error: chainedError } = await supabase
             .from('tasks')
-            .select('id, project_name, sub_phase, assigned_to, assigned_to2, start_date, end_date, status')
-            .order('created_at', { ascending: false })
-            .limit(20);
+            .select('id, status')
+            .neq('status', 'Completed')
+            .neq('status', 'Rejected');
 
-        if (error) {
-            return NextResponse.json({ error: error.message }, { status: 500 });
-        }
+        if (chainedError) return NextResponse.json({ error: chainedError });
 
-        // Filter for tasks that might be Aswathi's
-        const aswathiTasks = tasks?.filter(t =>
-            (t.assigned_to && t.assigned_to.toLowerCase().includes('aswathi')) ||
-            (t.assigned_to2 && t.assigned_to2.toLowerCase().includes('aswathi'))
-        ) || [];
+        const chainedCounts: Record<string, number> = {};
+        chainedData?.forEach((t: any) => {
+            chainedCounts[t.status] = (chainedCounts[t.status] || 0) + 1;
+        });
+
+        // Test 2: Using .in() filter to see what we SHOULD get active
+        // Actually we want NOT IN.
+        // Supabase syntax for NOT IN is .not('status', 'in', '("Completed","Rejected")')
+        const { data: notInData, error: notInError } = await supabase
+            .from('tasks')
+            .select('id, status')
+            .not('status', 'in', '("Completed","Rejected")');
+
+        const notInCounts: Record<string, number> = {};
+        notInData?.forEach((t: any) => {
+            notInCounts[t.status] = (notInCounts[t.status] || 0) + 1;
+        });
 
         return NextResponse.json({
-            totalTasks: tasks?.length || 0,
-            aswathiTasks: aswathiTasks.length,
-            sampleTasks: tasks?.slice(0, 5).map(t => ({
-                project: t.project_name,
-                phase: t.sub_phase,
-                assigned: t.assigned_to,
-                assigned2: t.assigned_to2,
-                dates: `${t.start_date} to ${t.end_date}`,
-                status: t.status
-            })),
-            aswathiTaskDetails: aswathiTasks.map(t => ({
-                project: t.project_name,
-                assigned: t.assigned_to,
-                assigned2: t.assigned_to2,
-                dates: `${t.start_date} to ${t.end_date}`
-            }))
+            chainedResult: chainedCounts,
+            notInResult: notInCounts
         });
+
     } catch (error: any) {
         return NextResponse.json({ error: error.message }, { status: 500 });
     }

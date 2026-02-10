@@ -14,6 +14,7 @@ export interface DBTask {
     end_date: string | null;
     actual_completion_date: string | null;
     include_saturday: boolean | null;
+    include_sunday: boolean | null;
     actual_start_date: string | null;
     actual_end_date: string | null;
     start_time: string | null;
@@ -59,6 +60,7 @@ export interface Task {
     endDate: string | null;
     actualCompletionDate: string | null;
     includeSaturday: boolean;
+    includeSunday: boolean;
     actualStartDate: string | null;
     actualEndDate: string | null;
     startTime: string | null;
@@ -119,6 +121,7 @@ export const mapTaskFromDB = (task: DBTask): Task => ({
     endDate: task.end_date,
     actualCompletionDate: task.actual_completion_date,
     includeSaturday: task.include_saturday || false,
+    includeSunday: task.include_sunday || false,
     actualStartDate: task.actual_start_date,
     actualEndDate: task.actual_end_date,
     startTime: task.start_time || '09:30',
@@ -139,6 +142,7 @@ export const mapTaskFromDB = (task: DBTask): Task => ({
     activityPercentage: task.activity_percentage || 0,
     createdAt: task.created_at,
     teamId: (task as any).team_id
+
 });
 
 export const mapProjectFromDB = (project: DBProject): Project => ({
@@ -168,11 +172,16 @@ export function isTaskOverdue(task: Task): boolean {
 
     const endDate = new Date(task.endDate);
 
-    // Set end of work day to 6:30 PM IST on the end date
+    // Set end of work day to 6:30 PM IST on the end date for ACTIVE check
     const endOfWorkDay = new Date(endDate);
     endOfWorkDay.setHours(18, 30, 0, 0);
 
-    // For completed tasks, check if they were completed AFTER 6:30 PM IST on the due date
+    // Set end of absolute day (11:59:59 PM) for COMPLETED check
+    // User requested lenient check: if completed "before today 11.59 PM" it's not overdue.
+    const endOfAbsoluteDay = new Date(endDate);
+    endOfAbsoluteDay.setHours(23, 59, 59, 999);
+
+    // For completed tasks, check if they were completed AFTER the due date (allowing same-day completion)
     if (s === 'completed') {
         // Try to get completion timestamp from completedAt or actualCompletionDate
         const completionTimestamp = task.completedAt || task.actualCompletionDate;
@@ -184,8 +193,8 @@ export function isTaskOverdue(task: Task): boolean {
 
         const completedDate = new Date(completionTimestamp);
 
-        // Task is overdue if it was completed AFTER 6:30 PM IST on the due date
-        return completedDate > endOfWorkDay;
+        // Task is overdue if it was completed AFTER the end of the due date (11:59 PM)
+        return completedDate > endOfAbsoluteDay;
     }
 
     // For active tasks, check if current time is past 6:30 PM on the end date

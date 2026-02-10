@@ -452,6 +452,13 @@ export default function Schedule() {
                                     const tomorrow = new Date(now);
                                     tomorrow.setDate(tomorrow.getDate() + 1);
 
+                                    // Check if weekend and excluded
+                                    const isSat = day.getDay() === 6;
+                                    const isSun = day.getDay() === 0;
+
+                                    if (isSat && !task.includeSaturday) return false;
+                                    if (isSun && !task.includeSunday) return false;
+
                                     // Normal range check
                                     if (day >= start && day <= end) return true;
 
@@ -462,6 +469,14 @@ export default function Schedule() {
                                         // Show overdue tasks on the next day if they haven't been completed
                                         // E.g., if today is Saturday 10 PM and task was due Saturday,
                                         // it should show as overdue on Sunday
+                                        // BUT if it's Sunday and we don't work Sunday, maybe we shouldn't show it?
+                                        // User said: "no need to show tasks in satrday and sunday as those days are holidays.. but... just show those tasks in sat and sunday"
+                                        // This implies strict visibility control.
+                                        // However, if a task is OVERDUE, it might be important to see it even on a weekend?
+                                        // Let's stick to the rule: If not working on weekend, don't show on weekend.
+                                        if (isSat && !task.includeSaturday) return false;
+                                        if (isSun && !task.includeSunday) return false;
+
                                         if (statusInfo.baseStatus === 'Overdue') return true;
 
                                         // Also show if completed ON this day (late)
