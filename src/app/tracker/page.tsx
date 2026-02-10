@@ -373,8 +373,8 @@ export default function Tracker() {
                 ) : Object.keys(groupedTasks).length === 0 ? (
                     <div className="text-center py-12 text-slate-400">No tasks found</div>
                 ) : (
-                    // Sort authors alphabetically
-                    Object.keys(groupedTasks).sort().map((assignee) => (
+                    // Sort authors alphabetically and exclude "Unassigned"
+                    Object.keys(groupedTasks).filter(key => key !== 'Unassigned').sort().map((assignee) => (
                         <AssigneeTaskTable
                             key={assignee}
                             assignee={assignee}
