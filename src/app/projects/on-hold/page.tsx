@@ -1,16 +1,26 @@
-
 'use client';
 
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Task, mapTaskFromDB } from '@/lib/types';
-import { PauseCircle, User, Calendar, Activity, Grid3x3, Table2, ExternalLink } from 'lucide-react';
+import { PauseCircle, User, Activity, Grid3x3, Table2, ExternalLink, Pencil } from 'lucide-react';
 import { format } from 'date-fns';
+import TaskModal from '@/components/TaskModal';
+import TaskDetailsModal from '@/components/TaskDetailsModal';
+import { useToast } from '@/contexts/ToastContext';
 
 export default function OnHoldProjects() {
     const [tasks, setTasks] = useState<Task[]>([]);
     const [loading, setLoading] = useState(true);
     const [viewMode, setViewMode] = useState<'box' | 'table'>('box');
+
+    // Modal State
+    const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
+    const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+    const [selectedTask, setSelectedTask] = useState<Task | null>(null); // For details view
+    const [editingTask, setEditingTask] = useState<Task | null>(null); // For edit view
+
+    const { success, error: toastError } = useToast();
 
     useEffect(() => {
         fetchOnHoldTasks();
@@ -22,6 +32,7 @@ export default function OnHoldProjects() {
     }, []);
 
     const fetchOnHoldTasks = async () => {
+        setLoading(true);
         try {
             const { data, error } = await supabase
                 .from('tasks')
@@ -43,6 +54,93 @@ export default function OnHoldProjects() {
         setViewMode(mode);
         localStorage.setItem('onHoldViewMode', mode);
     };
+
+    // --- Modal Handlers ---
+
+    const handleViewDetails = (task: Task) => {
+        setSelectedTask(task);
+        setIsDetailsModalOpen(true);
+    };
+
+    const handleEditTask = (task: Task) => {
+        // Close details if open
+        setIsDetailsModalOpen(false);
+        setEditingTask(task);
+        setIsTaskModalOpen(true);
+    };
+
+    const saveTask = async (taskData: Partial<Task>) => {
+        const dbPayload: any = {
+            project_name: taskData.projectName,
+            sub_phase: taskData.subPhase,
+            status: taskData.status,
+            assigned_to: taskData.assignedTo,
+            assigned_to2: taskData.assignedTo2,
+            additional_assignees: taskData.additionalAssignees || [],
+            pc: taskData.pc,
+            start_date: taskData.startDate || null,
+            end_date: taskData.endDate || null,
+            actual_completion_date: taskData.actualCompletionDate ? new Date(taskData.actualCompletionDate).toISOString() : null,
+            start_time: taskData.startTime || null,
+            end_time: taskData.endTime || null,
+            bug_count: taskData.bugCount,
+            html_bugs: taskData.htmlBugs,
+            functional_bugs: taskData.functionalBugs,
+            deviation_reason: taskData.deviationReason,
+            sprint_link: taskData.sprintLink,
+            days_allotted: Number(taskData.daysAllotted) || 0,
+            time_taken: taskData.timeTaken || '00:00:00',
+            days_taken: Number(taskData.daysTaken) || 0,
+            deviation: Number(taskData.deviation) || 0,
+            activity_percentage: Number(taskData.activityPercentage) || 0,
+            comments: taskData.comments,
+            include_saturday: taskData.includeSaturday || false,
+            include_sunday: taskData.includeSunday || false,
+            team_id: taskData.teamId,
+        };
+
+        if (editingTask) {
+            const { team_id, ...updatePayload } = dbPayload;
+            const { error } = await supabase
+                .from('tasks')
+                .update(updatePayload)
+                .eq('id', editingTask.id);
+
+            if (error) {
+                console.error('Error updating task:', error);
+                toastError(`Failed to save task: ${error.message}`);
+                return;
+            }
+            success('Task updated successfully');
+        }
+
+        // Refresh tasks
+        await fetchOnHoldTasks();
+        setIsTaskModalOpen(false);
+        setEditingTask(null);
+    };
+
+    const handleDeleteTask = async (taskId: number) => {
+        // We will keep the confirm dialog for deletion as it's a critical action, 
+        // or we could replace it with a custom modal later if requested.
+        // For now, replacing alert failure with toast.
+        if (!confirm('Are you sure you want to delete this task?')) return;
+
+        const { error } = await supabase
+            .from('tasks')
+            .delete()
+            .eq('id', taskId);
+
+        if (error) {
+            console.error('Error deleting task:', error);
+            toastError('Failed to delete task');
+        } else {
+            success('Task deleted successfully');
+            await fetchOnHoldTasks();
+            setIsTaskModalOpen(false);
+        }
+    };
+
 
     if (loading) {
         return (
@@ -108,10 +206,11 @@ export default function OnHoldProjects() {
                     {tasks.map((task) => (
                         <div
                             key={task.id}
-                            className="bg-white rounded-2xl border border-slate-400 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden group"
+                            className="bg-white rounded-2xl border border-slate-400 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden group flex flex-col cursor-pointer"
+                            onClick={() => handleViewDetails(task)}
                         >
                             {/* Header */}
-                            <div className="p-6 pb-4 border-b border-amber-50 bg-amber-50/30">
+                            <div className="p-6 pb-4 border-b border-amber-50 bg-amber-50/30 relative">
                                 <div className="flex justify-between items-start mb-2">
                                     <span className="bg-amber-100 text-amber-700 text-[10px] uppercase font-bold px-2 py-1 rounded-full tracking-wide">
                                         On Hold
@@ -127,28 +226,41 @@ export default function OnHoldProjects() {
                                     <Activity size={14} className="text-slate-400" />
                                     {task.subPhase}
                                 </div>
+
+                                {/* Edit Button Overlay */}
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleEditTask(task);
+                                    }}
+                                    className="absolute top-4 right-4 p-2 bg-white/80 hover:bg-white text-slate-400 hover:text-indigo-600 rounded-lg shadow-sm backdrop-blur-sm transition-all opacity-0 group-hover:opacity-100"
+                                    title="Edit Task"
+                                >
+                                    <Pencil size={16} />
+                                </button>
                             </div>
 
                             {/* Body */}
-                            <div className="p-6 space-y-4">
+                            <div className="p-6 space-y-4 flex-1">
                                 <div className="space-y-2">
                                     <label className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
                                         Current Updates/Comments
                                     </label>
-                                    <div className="bg-slate-50 rounded-xl p-4 text-sm text-slate-700 leading-relaxed border border-slate-200">
+                                    <div className="bg-slate-50 rounded-xl p-4 text-sm text-slate-700 leading-relaxed border border-slate-200 line-clamp-3">
                                         {task.currentUpdates || task.comments || (
                                             <span className="italic text-slate-400">No updates provided</span>
                                         )}
                                     </div>
                                 </div>
+                            </div>
 
-                                <div className="pt-4 border-t border-slate-400 flex items-center justify-between text-sm">
-                                    <div className="flex items-center gap-2 text-slate-600">
-                                        <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500">
-                                            <User size={14} />
-                                        </div>
-                                        <span className="font-medium">{task.assignedTo || 'Unassigned'}</span>
+                            {/* Footer */}
+                            <div className="p-4 pt-4 border-t border-slate-400 flex items-center justify-between text-sm bg-slate-50/50 mt-auto">
+                                <div className="flex items-center gap-2 text-slate-600">
+                                    <div className="w-8 h-8 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-500">
+                                        <User size={14} />
                                     </div>
+                                    <span className="font-medium">{task.assignedTo || 'Unassigned'}</span>
                                 </div>
                             </div>
                         </div>
@@ -167,12 +279,13 @@ export default function OnHoldProjects() {
                                     <th className="px-4 py-4 font-semibold text-slate-700 text-left border-r border-slate-400">Assignee 2</th>
                                     <th className="px-4 py-4 font-semibold text-slate-700 text-left border-r border-slate-400">Date</th>
                                     <th className="px-4 py-4 font-semibold text-slate-700 text-left border-r border-slate-400">Updates</th>
-                                    <th className="px-4 py-4 font-semibold text-slate-700 text-left">Sprint Link</th>
+                                    <th className="px-4 py-4 font-semibold text-slate-700 text-left border-r border-slate-400">Sprint Link</th>
+                                    <th className="px-4 py-4 font-semibold text-slate-700 text-center">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {tasks.map((task) => (
-                                    <tr key={task.id} className="border-b border-slate-400 hover:bg-amber-50/20 transition-all">
+                                    <tr key={task.id} className="border-b border-slate-400 hover:bg-amber-50/20 transition-all cursor-pointer" onClick={() => handleViewDetails(task)}>
                                         <td className="px-5 py-4 font-semibold text-slate-800 border-r border-slate-400">{task.projectName}</td>
                                         <td className="px-4 py-4 font-medium text-slate-600 border-r border-slate-400">{task.subPhase || '-'}</td>
                                         <td className="px-4 py-4 text-slate-600 border-r border-slate-400">{task.pc || '-'}</td>
@@ -181,16 +294,27 @@ export default function OnHoldProjects() {
                                         <td className="px-4 py-4 text-slate-500 font-medium border-r border-slate-400">
                                             {task.endDate ? format(new Date(task.endDate), 'MMM d, yyyy') : '-'}
                                         </td>
-                                        <td className="px-4 py-4 text-sm text-slate-600 max-w-md border-r border-slate-400" title={task.currentUpdates || task.comments || ''}>
+                                        <td className="px-4 py-4 text-sm text-slate-600 max-w-md border-r border-slate-400 truncate" title={task.currentUpdates || task.comments || ''}>
                                             {task.currentUpdates || task.comments || '-'}
                                         </td>
-                                        <td className="px-4 py-4 text-sm text-slate-500">
+                                        <td className="px-4 py-4 text-sm text-slate-500 border-r border-slate-400">
                                             {task.sprintLink ? (
-                                                <a href={task.sprintLink} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 hover:underline flex items-center gap-1">
+                                                <a href={task.sprintLink} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 hover:underline flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
                                                     <ExternalLink size={14} />
                                                     Link
                                                 </a>
                                             ) : '-'}
+                                        </td>
+                                        <td className="px-4 py-4 text-center">
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleEditTask(task);
+                                                }}
+                                                className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-slate-100 rounded-lg transition-colors"
+                                            >
+                                                <Pencil size={16} />
+                                            </button>
                                         </td>
                                     </tr>
                                 ))}
@@ -199,6 +323,23 @@ export default function OnHoldProjects() {
                     </div>
                 </div>
             )}
+
+            {/* Task Details Modal */}
+            <TaskDetailsModal
+                isOpen={isDetailsModalOpen}
+                onClose={() => setIsDetailsModalOpen(false)}
+                task={selectedTask}
+                onEdit={handleEditTask}
+            />
+
+            {/* Edit Task Modal */}
+            <TaskModal
+                isOpen={isTaskModalOpen}
+                onClose={() => setIsTaskModalOpen(false)}
+                task={editingTask}
+                onSave={saveTask}
+                onDelete={handleDeleteTask}
+            />
         </div>
     );
 }

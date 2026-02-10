@@ -8,6 +8,7 @@ import TaskModal from '@/components/TaskModal';
 import AssigneeTaskTable from '@/components/AssigneeTaskTable';
 import { useGuestMode } from '@/contexts/GuestContext';
 import { calculateAvailability } from '@/lib/availability';
+import { useToast } from '@/contexts/ToastContext';
 
 export default function Tracker() {
     const { isGuest, selectedTeamId, isLoading: isGuestLoading } = useGuestMode();
@@ -24,6 +25,8 @@ export default function Tracker() {
     const [checkDate, setCheckDate] = useState('');
     const [availableMembers, setAvailableMembers] = useState<string[]>([]);
     const [hasChecked, setHasChecked] = useState(false);
+
+    const { success, error: toastError } = useToast();
 
     // Fetch ALL active tasks (no pagination in query)
     useEffect(() => {
@@ -145,9 +148,10 @@ export default function Tracker() {
 
             if (error) {
                 console.error('Error updating task:', error);
-                alert(`Failed to save task: ${error.message}`);
+                toastError(`Failed to save task: ${error.message}`);
                 return;
             }
+            success('Task updated successfully');
         } else {
             const { error } = await supabase
                 .from('tasks')
@@ -155,9 +159,10 @@ export default function Tracker() {
 
             if (error) {
                 console.error('Error creating task:', error);
-                alert(`Failed to create task: ${error.message}`);
+                toastError(`Failed to create task: ${error.message}`);
                 return;
             }
+            success('Task created successfully');
         }
 
         // Refresh tasks
@@ -173,8 +178,9 @@ export default function Tracker() {
 
         if (error) {
             console.error('Error deleting task:', error);
-            alert('Failed to delete task');
+            toastError('Failed to delete task');
         } else {
+            success('Task deleted successfully');
             refreshTasks();
             setIsTaskModalOpen(false);
         }

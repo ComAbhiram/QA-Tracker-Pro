@@ -6,6 +6,9 @@ import { Task } from '@/lib/types';
 import { supabase } from '@/lib/supabase';
 import Combobox from './ui/Combobox';
 import { getHubstaffNameFromQA } from '@/lib/hubstaff-name-mapping';
+import { useGuestMode } from '@/contexts/GuestContext';
+import { useToast } from '@/contexts/ToastContext';
+import ConfirmationModal from './ConfirmationModal';
 
 interface TaskModalProps {
     isOpen: boolean;
@@ -14,8 +17,6 @@ interface TaskModalProps {
     onSave: (task: Partial<Task>) => Promise<void>;
     onDelete?: (taskId: number) => Promise<void>;
 }
-
-import { useGuestMode } from '@/contexts/GuestContext';
 
 export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: TaskModalProps) {
     const [loading, setLoading] = useState(false);
@@ -27,6 +28,11 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
 
     const { isGuest, selectedTeamId } = useGuestMode();
     const [userTeamId, setUserTeamId] = useState<string | null>(null);
+    const { error: toastError } = useToast();
+
+    // Confirmation Modal State
+    const [showEndDateWarning, setShowEndDateWarning] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
 
     // Initial state ...
     const initialState: Partial<Task> = {
@@ -55,7 +61,6 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
             if (!effectiveTeamId) return;
 
             setIsFetchingProjects(true);
-            console.log('[TaskModal] Fetching projects for team:', effectiveTeamId);
             try {
                 // Fetch from Supabase instead of Hubstaff API
                 const { data, error } = await supabase
@@ -66,7 +71,6 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
                     .order('name', { ascending: true });
 
                 if (!error && data) {
-                    console.log('[TaskModal] Projects fetched successfully:', data.length, 'projects');
                     setProjects(data.map((p: any) => ({
                         id: p.name,
                         label: p.name
@@ -90,32 +94,22 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
     useEffect(() => {
         const fetchUsers = async () => {
             setLoadingHubstaffUsers(true);
-            console.log('[TaskModal] Fetching users...');
             try {
-                // If isQATeam (Super Admin) AND NOT Guest -> Fetch Hubstaff
-                // If NOT isQATeam (Team Account) OR Guest -> Fetch Team Members
-
-                // Ensure we have role info
                 const { getCurrentUserTeam } = await import('@/utils/userUtils');
                 const userTeam = await getCurrentUserTeam();
-                // We also rely on isQATeam state which is set in another effect, 
-                // but checking role directly here is safer for race conditions.
                 const isSuperAdmin = userTeam?.role === 'super_admin';
 
                 // Use 'isGuest' from context to override super admin fetching behavior
                 if (isSuperAdmin && !isGuest) {
                     // Fetch Hubstaff Users via API
-                    console.log('[TaskModal] Fetching Hubstaff users via API...');
                     const response = await fetch('/api/hubstaff/users');
                     if (response.ok) {
                         const data = await response.json();
-                        console.log('[TaskModal] Hubstaff API response:', data);
                         if (data.members) {
                             const formattedUsers = data.members.map((u: any) => ({
                                 id: u.name,
                                 label: u.name
                             }));
-                            console.log('[TaskModal] Formatted Hubstaff users:', formattedUsers.length, 'users');
                             setHubstaffUsers(formattedUsers);
                         }
                     } else {
@@ -125,7 +119,6 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
                     // Fetch Team Members via Supabase Client
                     if (!effectiveTeamId) return;
 
-                    console.log('[TaskModal] Fetching team members from Supabase for team:', effectiveTeamId);
                     const { data, error } = await supabase
                         .from('team_members')
                         .select('name')
@@ -133,7 +126,6 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
                         .order('name');
 
                     if (!error && data) {
-                        console.log('[TaskModal] Team members fetched successfully:', data.length, 'members');
                         const formattedUsers = data.map((u: any) => ({
                             id: u.name,
                             label: u.name
@@ -212,8 +204,6 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
             });
 
             // Initialize dynamic assignees list
-            // Map Short Names (from DB) back to Canonical Full Names for display
-            // If getHubstaffNameFromQA returns null (no mapping), use the value as is
             const initialAssignees = [
                 task.assignedTo,
                 task.assignedTo2,
@@ -264,16 +254,12 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
                         : ['daysAllotted'].includes(name)
                             ? parseFloat(value) || 0
                             : value,
-                // Handle checkboxes separately if needed, but for now we use handleChange for inputs
-                // For checkboxes, we need to check type
             };
 
             if (e.target.type === 'checkbox') {
                 const { checked } = e.target as HTMLInputElement;
                 newData[name as keyof Task] = checked as any;
             }
-
-
 
             // Auto-calculation logic for Time/Days/Deviation
             if (name === 'timeTaken' || name === 'daysAllotted') {
@@ -309,21 +295,7 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
         });
     };
 
-
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-
-        // Warn if Start Date is present but End Date is missing
-        if (formData.startDate && !formData.endDate) {
-            const confirmed = window.confirm(
-                "End date is not selected. If you continue without selecting an end date, this task won't appear on the Schedule page, but can be found on the Project Overview and Dashboard pages."
-            );
-            if (!confirmed) {
-                return;
-            }
-        }
-
+    const executeSave = async () => {
         setLoading(true);
         try {
             // Use locally fetched teamId if not present in task
@@ -337,14 +309,9 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
             }
 
             if (!teamId) {
-                alert('Error: Could not determine your Team ID. Please refresh the page.');
+                toastError('Error: Could not determine your Team ID. Please refresh the page.');
                 setLoading(false);
-                return;
-            }
-
-            if (!teamId) {
-                alert('Error: Could not determine your Team ID. Please refresh the page.');
-                setLoading(false);
+                setShowEndDateWarning(false);
                 return;
             }
 
@@ -366,12 +333,25 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
                 setFormData(initialState);
                 setAssignees([null]);
             }
+            setShowEndDateWarning(false);
         } catch (error) {
             console.error('Error saving task:', error);
-            alert('Failed to save task. Please try again.');
+            toastError('Failed to save task. Please try again.');
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+
+        // Warn if Start Date is present but End Date is missing
+        if (formData.startDate && !formData.endDate) {
+            setShowEndDateWarning(true);
+            return;
+        }
+
+        await executeSave();
     };
 
     const handleProjectChange = (value: string | number | null) => {
@@ -392,6 +372,19 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
 
     return (
         <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200 p-4">
+            {/* End Date Warning Modal */}
+            <ConfirmationModal
+                isOpen={showEndDateWarning}
+                onClose={() => setShowEndDateWarning(false)}
+                onConfirm={executeSave}
+                title="End date missing"
+                message="End date is not selected. If you continue without selecting an end date, this task won't appear on the Schedule page, but can be found on the Project Overview and Dashboard pages."
+                confirmText="Continue Anyway"
+                cancelText="Go Back"
+                type="warning"
+                isLoading={loading}
+            />
+
             <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[85dvh] overflow-y-auto animate-in zoom-in-95 duration-200 custom-scrollbar">
 
                 {/* Header */}
