@@ -131,6 +131,8 @@ export default function Tracker() {
             deviation: Number(taskData.deviation) || 0,
             activity_percentage: Number(taskData.activityPercentage) || 0,
             comments: taskData.comments,
+            include_saturday: taskData.includeSaturday || false,
+            include_sunday: taskData.includeSunday || false,
             team_id: taskData.teamId,
         };
 

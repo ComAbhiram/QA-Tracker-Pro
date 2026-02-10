@@ -92,7 +92,9 @@ export default function ForecastProjects() {
                     html_bugs: updatedTask.htmlBugs,
                     functional_bugs: updatedTask.functionalBugs,
                     deviation_reason: updatedTask.deviationReason,
-                    sprint_link: updatedTask.sprintLink
+                    sprint_link: updatedTask.sprintLink,
+                    include_saturday: updatedTask.includeSaturday || false,
+                    include_sunday: updatedTask.includeSunday || false
                 })
                 .eq('id', selectedTask?.id);
 

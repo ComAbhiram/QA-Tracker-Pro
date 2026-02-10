@@ -308,6 +308,8 @@ export default function ProjectOverviewPage() {
                 deviation: taskData.deviation ?? 0,
                 activity_percentage: taskData.activityPercentage ?? 0,
                 comments: taskData.comments || null,
+                include_saturday: taskData.includeSaturday || false,
+                include_sunday: taskData.includeSunday || false,
                 team_id: taskData.teamId ?? null,
                 start_time: taskData.startTime || null,
                 end_time: taskData.endTime || null,

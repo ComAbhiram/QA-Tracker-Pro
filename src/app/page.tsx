@@ -243,6 +243,8 @@ export default function Home() {
       days_taken: Number(taskData.daysTaken) || 0,
       deviation: Number(taskData.deviation) || 0,
       activity_percentage: Number(taskData.activityPercentage) || 0,
+      include_saturday: taskData.includeSaturday || false,
+      include_sunday: taskData.includeSunday || false,
       team_id: taskData.teamId
     };
 
