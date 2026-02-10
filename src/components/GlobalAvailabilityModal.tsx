@@ -95,13 +95,17 @@ export default function GlobalAvailabilityModal({ isOpen, onClose }: GlobalAvail
 
             // 4. Identify all unique members
             const allMembers = new Set<string>();
-            Object.keys(groupedTasks).forEach(m => allMembers.add(m));
-            leaves.forEach(l => allMembers.add(l.team_member_name));
+            Object.keys(groupedTasks).forEach(m => {
+                if (m) allMembers.add(m);
+            });
+            leaves.forEach(l => {
+                if (l.team_member_name) allMembers.add(l.team_member_name);
+            });
 
             const available: string[] = [];
 
             allMembers.forEach(member => {
-                if (member === 'Unassigned') return;
+                if (!member || member === 'Unassigned') return;
 
                 const memberTasks = groupedTasks[member] || [];
                 const memberLeaves = leaves.filter(l => l.team_member_name === member);
