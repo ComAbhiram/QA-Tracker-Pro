@@ -23,7 +23,7 @@ export async function GET(request: Request) {
             return NextResponse.json({ error: 'Server misconfiguration: Missing Service Role Key' }, { status: 500 });
         }
 
-        // 1. Verify Authentication
+        // 1. Verify Authentication (User OR Guest Mode)
         const supabase = createServerClient(
             supabaseUrl,
             process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -37,8 +37,9 @@ export async function GET(request: Request) {
         );
 
         const { data: { user }, error: authError } = await supabase.auth.getUser();
+        const isGuest = cookieStore.get('guest_mode')?.value === 'true';
 
-        if (authError || !user) {
+        if ((authError || !user) && !isGuest) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
