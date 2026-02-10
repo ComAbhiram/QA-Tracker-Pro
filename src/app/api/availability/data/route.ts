@@ -18,6 +18,11 @@ export async function GET(request: Request) {
             return NextResponse.json({ error: 'Missing team_id' }, { status: 400 });
         }
 
+        if (!supabaseServiceKey) {
+            console.error('SERVER ERROR: SUPABASE_SERVICE_ROLE_KEY is not defined.');
+            return NextResponse.json({ error: 'Server misconfiguration: Missing Service Role Key' }, { status: 500 });
+        }
+
         // 1. Verify Authentication
         const supabase = createServerClient(
             supabaseUrl,

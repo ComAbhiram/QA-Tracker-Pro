@@ -117,9 +117,9 @@ export default function GlobalAvailabilityModal({ isOpen, onClose }: GlobalAvail
             setAvailableMembers(available.sort());
             setStep('RESULTS');
 
-        } catch (error) {
+        } catch (error: any) {
             console.error("Error calculating availability:", error);
-            alert("Failed to check availability. Please try again.");
+            alert(`Failed to check availability: ${error.message || 'Unknown error'}`);
         } finally {
             setCalculating(false);
         }
