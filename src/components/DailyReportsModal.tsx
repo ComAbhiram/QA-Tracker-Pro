@@ -721,7 +721,13 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; border-bottom: 2px solid #e2e8f0; padding-bottom: 16px;">
                         <div>
                             <h1 style="color: #1e293b; font-size: 28px; margin-bottom: 8px; font-weight: 700;">
-                                <span>Work&nbsp;Schedule&nbsp;For&nbsp;the&nbsp;Day</span><span style="margin: 0 8px;">:</span><span>${formatDate(scheduleDate).replace(/ /g, '&nbsp;')}</span>
+                                <span style="margin-right: 6px;">Work</span><span style="margin-right: 6px;">Schedule</span><span style="margin-right: 6px;">For</span><span style="margin-right: 6px;">the</span><span style="margin-right: 6px;">Day</span><span style="margin: 0 8px;">:</span><span>${(() => {
+                    const d = new Date(scheduleDate);
+                    const day = String(d.getDate()).padStart(2, '0');
+                    const month = d.toLocaleString('en-US', { month: 'short' });
+                    const year = d.getFullYear();
+                    return `<span style="margin-right: 6px;">${day}</span><span style="margin-right: 6px;">${month}</span><span>${year}</span>`;
+                })()}</span>
                             </h1>
                             <p style="color: #64748b; font-size: 14px; margin: 0;">${dateStr}</p>
                         </div>
