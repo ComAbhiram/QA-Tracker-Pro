@@ -579,50 +579,49 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
                                 className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all font-medium text-slate-700"
                             />
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            <div className="space-y-3">
-                                <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-                                    <Calendar size={16} className="text-indigo-500" /> End Date
-                                </label>
-                                <input
-                                    type="date"
-                                    name="endDate"
-                                    value={formData.endDate || ''}
-                                    onChange={handleChange}
-                                    className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all font-medium text-slate-700"
-                                />
-                            </div>
-                            <div className="space-y-3 flex flex-col justify-end pb-2">
-                                <label className="text-sm font-semibold text-slate-700 mb-2 block">Weekend Schedule</label>
-                                <div className="flex gap-4">
-                                    <label className="flex items-center gap-2 cursor-pointer bg-slate-50 px-4 py-2.5 rounded-xl border border-slate-200 hover:bg-slate-100 transition-colors">
-                                        <input
-                                            type="checkbox"
-                                            name="includeSaturday"
-                                            checked={formData.includeSaturday || false}
-                                            onChange={handleChange}
-                                            className="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500 border-gray-300"
-                                        />
-                                        <span className="text-sm font-medium text-slate-700">Work Saturday</span>
-                                    </label>
-                                    <label className="flex items-center gap-2 cursor-pointer bg-slate-50 px-4 py-2.5 rounded-xl border border-slate-200 hover:bg-slate-100 transition-colors">
-                                        <input
-                                            type="checkbox"
-                                            name="includeSunday"
-                                            checked={formData.includeSunday || false}
-                                            onChange={handleChange}
-                                            className="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500 border-gray-300"
-                                        />
-                                        <span className="text-sm font-medium text-slate-700">Work Sunday</span>
-                                    </label>
-                                </div>
-                            </div>
+                        <div className="space-y-3">
+                            <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                                <Calendar size={16} className="text-indigo-500" /> End Date
+                            </label>
+                            <input
+                                type="date"
+                                name="endDate"
+                                value={formData.endDate || ''}
+                                onChange={handleChange}
+                                className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all font-medium text-slate-700"
+                            />
                         </div>
                     </div>
 
-                    {/* 10. Actual Completion Date - Hide when Rejected */}
-                    {formData.status !== 'Rejected' && (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    {/* Weekend Schedule & Actual Completion Date */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div className="space-y-3">
+                            <label className="text-sm font-semibold text-slate-700 block">Weekend Schedule</label>
+                            <div className="flex gap-4">
+                                <label className="flex items-center gap-2 cursor-pointer bg-slate-50 px-4 py-3 rounded-xl border border-slate-200 hover:bg-slate-100 transition-colors flex-1 justify-center">
+                                    <input
+                                        type="checkbox"
+                                        name="includeSaturday"
+                                        checked={formData.includeSaturday || false}
+                                        onChange={handleChange}
+                                        className="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500 border-gray-300"
+                                    />
+                                    <span className="text-sm font-medium text-slate-700">Work Saturday</span>
+                                </label>
+                                <label className="flex items-center gap-2 cursor-pointer bg-slate-50 px-4 py-3 rounded-xl border border-slate-200 hover:bg-slate-100 transition-colors flex-1 justify-center">
+                                    <input
+                                        type="checkbox"
+                                        name="includeSunday"
+                                        checked={formData.includeSunday || false}
+                                        onChange={handleChange}
+                                        className="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500 border-gray-300"
+                                    />
+                                    <span className="text-sm font-medium text-slate-700">Work Sunday</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        {formData.status !== 'Rejected' && (
                             <div className="space-y-3">
                                 <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
                                     <Calendar size={16} className="text-emerald-500" /> Actual Completion Date
@@ -636,8 +635,8 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
                                     className="w-full px-5 py-3 bg-emerald-50 border border-emerald-200 rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all font-medium text-slate-700"
                                 />
                             </div>
-                        </div>
-                    )}
+                        )}
+                    </div>
 
                     {/* 11. Comments & 12. Current Updates */}
                     <div className="grid grid-cols-1 gap-8">
