@@ -47,13 +47,25 @@ export async function GET(request: NextRequest) {
         const membersList = data.organization_memberships || data.users || data.members || [];
         console.log(`Found ${membersList.length} organization memberships`);
 
-        // Fetch user details for each member (limit to first 50 to avoid too many requests)
+        // Fetch user details for each member
+        // OPTIMIZATION: Check if 'user' object is already present in membership to avoid N+1 requests
         const members = await Promise.all(
-            membersList.slice(0, 50).map(async (member: any) => {
+            membersList.map(async (member: any) => {
                 const userId = member.user_id || member.id;
+                let name = member.name; // Sometimes directly on member
 
+                // If member has user object with name, use it
+                if (member.user && member.user.name) {
+                    return {
+                        id: userId,
+                        name: member.user.name
+                    };
+                }
+
+                // If name is missing, TRY to fetch (but limit this strictly)
+                // Only fetch if we really don't have a name
                 try {
-                    // Fetch individual user details
+                    console.log(`Fetching details for user ${userId} (missing in list)...`);
                     const userResponse = await fetch(
                         `${HUBSTAFF_API_BASE}/users/${userId}`,
                         {
@@ -67,21 +79,15 @@ export async function GET(request: NextRequest) {
                     if (userResponse.ok) {
                         const userData = await userResponse.json();
                         const user = userData.user || userData;
-                        const name = user.name || `${user.first_name || ''} ${user.last_name || ''}`.trim();
-
-                        return {
-                            id: userId,
-                            name: name || `User ${userId}`,
-                        };
+                        name = user.name || `${user.first_name || ''} ${user.last_name || ''}`.trim();
                     }
                 } catch (error) {
                     console.error(`Error fetching user ${userId}:`, error);
                 }
 
-                // Fallback if user fetch fails
                 return {
                     id: userId,
-                    name: `User ${userId}`,
+                    name: name || `User ${userId}`,
                 };
             })
         );

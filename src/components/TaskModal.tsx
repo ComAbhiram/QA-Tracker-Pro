@@ -110,9 +110,12 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
                 const isSuperAdmin = userTeam?.role === 'super_admin';
                 const isQATeamGlobal = effectiveTeamId === 'ba60298b-8635-4cca-bcd5-7e470fad60e6';
 
+                console.log('[TaskModal] Debug Fetch Users:', { isGuest, effectiveTeamId, isSuperAdmin, isQATeamGlobal });
+
                 // Use 'isGuest' from context to override super admin fetching behavior
                 // BUT if it's QA Team (which is Global), we want to fetch all users too
                 if ((isSuperAdmin && !isGuest) || (isGuest && isQATeamGlobal)) {
+                    console.log('[TaskModal] Fetching Hubstaff Users via API...');
                     // Fetch Hubstaff Users via API
                     const response = await fetch('/api/hubstaff/users');
                     if (response.ok) {
@@ -126,6 +129,11 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
                         }
                     } else {
                         console.error('[TaskModal] Hubstaff API failed with status:', response.status);
+                        if (response.status === 429) {
+                            toastError('Hubstaff API Rate Limit Reached. Please wait a moment and try again.');
+                        } else {
+                            toastError('Failed to load Hubstaff users. Please check configuration.');
+                        }
                     }
                 } else {
                     // Fetch Team Members via Supabase Client
