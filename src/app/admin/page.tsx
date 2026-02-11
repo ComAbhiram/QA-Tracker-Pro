@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
-import { Users, Plus, Shield, Loader2, Building, Layers } from 'lucide-react';
+import { Users, Plus, Shield, Loader2, Building, Layers, User } from 'lucide-react';
+import PCManagementModal from '@/components/PCManagementModal';
 
 interface Team {
     id: string;
@@ -18,6 +19,7 @@ export default function AdminDashboard() {
     const [creating, setCreating] = useState(false);
     const [isAdmin, setIsAdmin] = useState(false);
     const router = useRouter();
+    const [showPCModal, setShowPCModal] = useState(false);
 
     useEffect(() => {
         checkAdmin();
@@ -113,6 +115,13 @@ export default function AdminDashboard() {
                     <Layers size={20} />
                     Manage Teams & Sub-Phases
                 </button>
+                <button
+                    onClick={() => setShowPCModal(true)}
+                    className="flex items-center gap-2 px-5 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl transition-all shadow-lg hover:shadow-xl"
+                >
+                    <User size={20} />
+                    Manage PCs
+                </button>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -193,6 +202,12 @@ export default function AdminDashboard() {
                     </li>
                 </ol>
             </div>
+
+            {/* PC Management Modal */}
+            <PCManagementModal
+                isOpen={showPCModal}
+                onClose={() => setShowPCModal(false)}
+            />
         </div>
     );
 }

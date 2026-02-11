@@ -27,6 +27,8 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
     const [isQATeam, setIsQATeam] = useState(false);
     const [subPhases, setSubPhases] = useState<{ id: string; label: string }[]>([]);
     const [loadingSubPhases, setLoadingSubPhases] = useState(false);
+    const [globalPCs, setGlobalPCs] = useState<{ id: string; label: string }[]>([]);
+    const [loadingPCs, setLoadingPCs] = useState(false);
 
     const { isGuest, selectedTeamId } = useGuestMode();
     const [userTeamId, setUserTeamId] = useState<string | null>(null);
@@ -200,6 +202,36 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
             fetchSubPhases();
         }
     }, [isOpen, effectiveTeamId]);
+
+    // Fetch global PCs
+    useEffect(() => {
+        const fetchGlobalPCs = async () => {
+            setLoadingPCs(true);
+            try {
+                const response = await fetch('/api/pcs');
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.pcs) {
+                        const formattedPCs = data.pcs.map((pc: any) => ({
+                            id: pc.name,
+                            label: pc.name
+                        }));
+                        setGlobalPCs(formattedPCs);
+                    }
+                } else {
+                    console.error('[TaskModal] Failed to fetch PCs');
+                }
+            } catch (error) {
+                console.error('[TaskModal] Error fetching PCs:', error);
+            } finally {
+                setLoadingPCs(false);
+            }
+        };
+
+        if (isOpen) {
+            fetchGlobalPCs();
+        }
+    }, [isOpen]);
 
 
     // Populate form data when task changes
@@ -497,13 +529,15 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
                             <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
                                 <User size={16} className="text-indigo-500" /> Project Coordinator (PC)
                             </label>
-                            <input
-                                type="text"
-                                name="pc"
+                            <Combobox
+                                options={globalPCs}
                                 value={formData.pc || ''}
-                                onChange={handleChange}
-                                className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all placeholder:text-slate-400 font-medium text-slate-700"
-                                placeholder="Project Coordinator Name"
+                                onChange={(val) => setFormData(prev => ({ ...prev, pc: val ? String(val) : '' }))}
+                                placeholder={loadingPCs ? "Loading PCs..." : "Select or type PC..."}
+                                searchPlaceholder="Search or type PC name..."
+                                emptyMessage="No matching PC. Press Enter to use custom value."
+                                allowCustomValue={true}
+                                isLoading={loadingPCs}
                             />
                         </div>
                     </div>
