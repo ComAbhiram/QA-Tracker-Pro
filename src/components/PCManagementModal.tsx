@@ -195,52 +195,53 @@ export default function PCManagementModal({ isOpen, onClose }: PCManagementModal
                                 No PCs added yet. Add one above to get started.
                             </div>
                         ) : (
-                            <div className="space-y-2">
-                                {pcs.map((pc) => (
-                                    <div
-                                        key={pc.id}
-                                        className="flex items-center justify-between p-4 bg-white border border-slate-100 rounded-xl hover:bg-slate-50 transition-colors group"
-                                    >
-                                        <div className="flex items-center gap-3">
-                                            <div className="p-2 bg-emerald-50 text-emerald-600 rounded-lg">
-                                                <User size={16} />
-                                            </div>
-                                            <span className="font-medium text-slate-800">{pc.name}</span>
-                                        </div>
-                                        <button
-                                            onClick={() => handleDeletePC(pc.id, pc.name)}
-                                            disabled={deleting === pc.id}
-                                            className="flex items-center gap-1.5 px-3 py-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100 disabled:opacity-50"
-                                        >
-                                            {deleting === pc.id ? (
-                                                <>
-                                                    <Loader2 size={16} className="animate-spin" />
-                                                    Deleting...
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <Trash2 size={16} />
-                                                    Delete
-                                                </>
-                                            )}
-                                        </button>
+                            {/* Scrollable container for PC list */ }
+                            < div className="space-y-2 max-h-80 overflow-y-auto pr-2 custom-scrollbar">
+                        {pcs.map((pc) => (
+                            <div
+                                key={pc.id}
+                                className="flex items-center justify-between p-4 bg-white border border-slate-100 rounded-xl hover:bg-slate-50 transition-colors group"
+                            >
+                                <div className="flex items-center gap-3">
+                                    <div className="p-2 bg-emerald-50 text-emerald-600 rounded-lg">
+                                        <User size={16} />
                                     </div>
-                                ))}
+                                    <span className="font-medium text-slate-800">{pc.name}</span>
+                                </div>
+                                <button
+                                    onClick={() => handleDeletePC(pc.id, pc.name)}
+                                    disabled={deleting === pc.id}
+                                    className="flex items-center gap-1.5 px-3 py-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100 disabled:opacity-50"
+                                >
+                                    {deleting === pc.id ? (
+                                        <>
+                                            <Loader2 size={16} className="animate-spin" />
+                                            Deleting...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Trash2 size={16} />
+                                            Delete
+                                        </>
+                                    )}
+                                </button>
                             </div>
-                        )}
+                        ))}
                     </div>
-                </div>
-
-                {/* Footer */}
-                <div className="sticky bottom-0 bg-white border-t border-slate-100 p-6">
-                    <button
-                        onClick={onClose}
-                        className="w-full py-3 bg-slate-100 text-slate-700 font-semibold rounded-xl hover:bg-slate-200 transition-colors"
-                    >
-                        Close
-                    </button>
+                        )}
                 </div>
             </div>
+
+            {/* Footer */}
+            <div className="sticky bottom-0 bg-white border-t border-slate-100 p-6">
+                <button
+                    onClick={onClose}
+                    className="w-full py-3 bg-slate-100 text-slate-700 font-semibold rounded-xl hover:bg-slate-200 transition-colors"
+                >
+                    Close
+                </button>
+            </div>
         </div>
+        </div >
     );
 }
