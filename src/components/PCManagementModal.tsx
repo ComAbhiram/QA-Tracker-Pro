@@ -195,9 +195,9 @@ export default function PCManagementModal({ isOpen, onClose }: PCManagementModal
                                 No PCs added yet. Add one above to get started.
                             </div>
                         ) : (
-                            {/* Scrollable container for PC list */ }
-                            < div className="space-y-2 max-h-80 overflow-y-auto pr-2 custom-scrollbar">
-                        {pcs.map((pc) => (
+                            {/* Scrollable container for PC list */}
+                            <div className="space-y-2 max-h-80 overflow-y-auto pr-2 custom-scrollbar">
+                                {pcs.map((pc) => (
                             <div
                                 key={pc.id}
                                 className="flex items-center justify-between p-4 bg-white border border-slate-100 rounded-xl hover:bg-slate-50 transition-colors group"
@@ -227,7 +227,7 @@ export default function PCManagementModal({ isOpen, onClose }: PCManagementModal
                                 </button>
                             </div>
                         ))}
-                    </div>
+                            </div>
                         )}
                 </div>
             </div>
