@@ -11,6 +11,7 @@ import { supabase } from '@/lib/supabase';
 import { mapTaskFromDB, Task } from '@/lib/types'; // Import types and mapper
 import { useGuestMode } from '@/contexts/GuestContext';
 
+
 interface ProjectOverview {
     id: string;
     project_name: string;
@@ -70,6 +71,7 @@ export default function ProjectOverviewPage() {
     const [selectedTask, setSelectedTask] = useState<Task | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
     const { isGuest, selectedTeamId } = useGuestMode();
+
 
     // Filter State
     const [filterStartDate, setFilterStartDate] = useState('');
