@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
-import { Users, Plus, Shield, Loader2, Building } from 'lucide-react';
+import { Users, Plus, Shield, Loader2, Building, Layers } from 'lucide-react';
 
 interface Team {
     id: string;
@@ -96,14 +96,23 @@ export default function AdminDashboard() {
 
     return (
         <div className="max-w-6xl mx-auto p-8 space-y-8">
-            <div className="flex items-center gap-4 mb-8">
-                <div className="p-3 bg-indigo-600 text-white rounded-2xl shadow-lg">
-                    <Shield size={32} />
+            <div className="flex items-center justify-between mb-8">
+                <div className="flex items-center gap-4">
+                    <div className="p-3 bg-indigo-600 text-white rounded-2xl shadow-lg">
+                        <Shield size={32} />
+                    </div>
+                    <div>
+                        <h1 className="text-3xl font-bold text-slate-800 tracking-tight">Super Admin Dashboard</h1>
+                        <p className="text-slate-500 font-medium">Manage teams and organizations</p>
+                    </div>
                 </div>
-                <div>
-                    <h1 className="text-3xl font-bold text-slate-800 tracking-tight">Super Admin Dashboard</h1>
-                    <p className="text-slate-500 font-medium">Manage teams and organizations</p>
-                </div>
+                <button
+                    onClick={() => router.push('/admin/teams')}
+                    className="flex items-center gap-2 px-5 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl transition-all shadow-lg hover:shadow-xl"
+                >
+                    <Layers size={20} />
+                    Manage Teams & Sub-Phases
+                </button>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
