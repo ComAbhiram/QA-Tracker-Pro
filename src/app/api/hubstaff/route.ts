@@ -9,6 +9,8 @@ export async function GET(request: NextRequest) {
     const startDate = searchParams.get('startDate');
     const endDate = searchParams.get('endDate');
     const userIdFilter = searchParams.get('userId'); // Optional: filter by specific user
+    const projectIdFilter = searchParams.get('projectId'); // Optional: filter by project
+    const teamFilter = searchParams.get('team'); // Optional: filter by team
 
     // Validate parameters: Either 'date' OR 'startDate' + 'endDate' is required
     if (!date && (!startDate || !endDate)) {
@@ -32,6 +34,17 @@ export async function GET(request: NextRequest) {
         if (userIdFilter) {
             const userIdNum = parseInt(userIdFilter);
             filteredActivities = activities.filter(a => a.userId === userIdNum);
+        }
+
+        // Filter by project if requested
+        if (projectIdFilter) {
+            const projectIdNum = parseInt(projectIdFilter);
+            filteredActivities = filteredActivities.filter(a => a.projectId === projectIdNum);
+        }
+
+        // Filter by team if requested
+        if (teamFilter) {
+            filteredActivities = filteredActivities.filter(a => a.team === teamFilter);
         }
 
         // Calculate total time

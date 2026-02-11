@@ -32,6 +32,12 @@ export default function Attendance() {
     const [customEndDate, setCustomEndDate] = useState(new Date().toISOString().split('T')[0]);
     const [customRangeData, setCustomRangeData] = useState<HubstaffDailyActivity | null>(null);
 
+    // Filter State for Custom Range
+    const [projects, setProjects] = useState<Array<{ id: number; name: string }>>([]);
+    const [selectedProjectId, setSelectedProjectId] = useState<string>('');
+    const [teams, setTeams] = useState<string[]>([]);
+    const [selectedTeam, setSelectedTeam] = useState<string>('');
+
     const [error, setError] = useState<string | null>(null);
 
     // Fetch team members on component mount
@@ -48,7 +54,34 @@ export default function Attendance() {
             }
         };
 
+        const fetchProjects = async () => {
+            try {
+                const response = await fetch('/api/hubstaff/projects');
+                if (response.ok) {
+                    const data = await response.json();
+                    setProjects(data.projects || []);
+                }
+            } catch (err) {
+                console.error('Error fetching projects:', err);
+            }
+        };
+
+        const fetchTeams = async () => {
+            // Fetch distinct teams from recent activity data
+            try {
+                const response = await fetch('/api/hubstaff/teams');
+                if (response.ok) {
+                    const data = await response.json();
+                    setTeams(data.teams || []);
+                }
+            } catch (err) {
+                console.error('Error fetching teams:', err);
+            }
+        };
+
         fetchTeamMembers();
+        fetchProjects();
+        fetchTeams();
         fetchHubstaffData(); // Auto-fetch activity data for today
     }, []);
 
@@ -146,6 +179,12 @@ export default function Attendance() {
             let url = `/api/hubstaff?startDate=${customStartDate}&endDate=${customEndDate}`;
             if (selectedUserId) {
                 url += `&userId=${selectedUserId}`;
+            }
+            if (selectedProjectId) {
+                url += `&projectId=${selectedProjectId}`;
+            }
+            if (selectedTeam) {
+                url += `&team=${encodeURIComponent(selectedTeam)}`;
             }
 
             const response = await fetch(url);
@@ -768,8 +807,8 @@ export default function Attendance() {
                 <>
                     {/* Range Selectors */}
                     <div className="bg-white rounded-xl p-6 border border-slate-100 shadow-sm">
-                        <div className="flex flex-col md:flex-row gap-4 items-end">
-                            <div className="flex-1">
+                        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 items-end">
+                            <div>
                                 <label className="block text-sm font-medium text-slate-700 mb-2">
                                     Team Member
                                 </label>
@@ -786,7 +825,41 @@ export default function Attendance() {
                                     ))}
                                 </select>
                             </div>
-                            <div className="flex-1">
+                            <div>
+                                <label className="block text-sm font-medium text-slate-700 mb-2">
+                                    Project
+                                </label>
+                                <select
+                                    value={selectedProjectId}
+                                    onChange={(e) => setSelectedProjectId(e.target.value)}
+                                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 bg-white"
+                                >
+                                    <option value="">All Projects</option>
+                                    {projects.map((project) => (
+                                        <option key={project.id} value={project.id}>
+                                            {project.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-slate-700 mb-2">
+                                    Team
+                                </label>
+                                <select
+                                    value={selectedTeam}
+                                    onChange={(e) => setSelectedTeam(e.target.value)}
+                                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 bg-white"
+                                >
+                                    <option value="">All Teams</option>
+                                    {teams.map((team) => (
+                                        <option key={team} value={team}>
+                                            {team}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div>
                                 <label className="block text-sm font-medium text-slate-700 mb-2">
                                     From Date
                                 </label>
@@ -798,7 +871,7 @@ export default function Attendance() {
                                     className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500"
                                 />
                             </div>
-                            <div className="flex-1">
+                            <div>
                                 <label className="block text-sm font-medium text-slate-700 mb-2">
                                     To Date
                                 </label>
@@ -810,6 +883,8 @@ export default function Attendance() {
                                     className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500"
                                 />
                             </div>
+                        </div>
+                        <div className="mt-4">
                             <button
                                 onClick={fetchCustomRangeData}
                                 disabled={loading}
