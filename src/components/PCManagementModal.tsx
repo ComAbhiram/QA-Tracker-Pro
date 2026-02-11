@@ -38,11 +38,17 @@ export default function PCManagementModal({ isOpen, onClose }: PCManagementModal
                 setPcs(data.pcs || []);
             } else {
                 const data = await response.json();
-                setError(data.error || 'Failed to load PCs');
+                const errorMsg = data.error || 'Failed to load PCs';
+                // Check if it's a database table error
+                if (errorMsg.includes('relation') || errorMsg.includes('does not exist')) {
+                    setError('Database table not found. Please run the create_global_pcs.sql migration script in Supabase.');
+                } else {
+                    setError(errorMsg);
+                }
             }
         } catch (err) {
             console.error('Error fetching PCs:', err);
-            setError('Failed to load PCs');
+            setError('Failed to load PCs. The database table may not exist yet.');
         } finally {
             setLoading(false);
         }
