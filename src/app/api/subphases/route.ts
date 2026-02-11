@@ -20,11 +20,17 @@ export async function GET(request: NextRequest) {
             );
         }
 
-        const { data, error } = await supabase
+        let query = supabase
             .from('team_subphases')
-            .select('*')
-            .eq('team_id', teamId)
-            .order('name', { ascending: true });
+            .select('*');
+
+        // QA Team ID: ba60298b-8635-4cca-bcd5-7e470fad60e6
+        // If it's NOT the QA Team (Global), filter by team_id
+        if (teamId !== 'ba60298b-8635-4cca-bcd5-7e470fad60e6') {
+            query = query.eq('team_id', teamId);
+        }
+
+        const { data, error } = await query.order('name', { ascending: true });
 
         if (error) {
             console.error('Error fetching sub-phases:', error);

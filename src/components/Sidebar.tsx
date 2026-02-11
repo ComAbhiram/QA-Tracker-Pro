@@ -193,14 +193,8 @@ export function Sidebar() {
                                         if (selectedTeam) {
                                             let targetTeamId = selectedTeam.id;
 
-                                            // QA Team -> Super Admin mapping logic
-                                            if (newTeamName.toLowerCase() === 'qa team') {
-                                                const superAdminTeam = teams.find(t => t.name.toLowerCase() === 'super admin');
-                                                if (superAdminTeam) {
-                                                    targetTeamId = superAdminTeam.id;
-                                                    console.log('Sidebar: Mapping QA Team to Super Admin ID:', targetTeamId);
-                                                }
-                                            }
+                                            // Mapping removed to allow QA Team to use its own ID
+                                            // if (newTeamName.toLowerCase() === 'qa team') { ... }
 
                                             setGuestSession(targetTeamId, newTeamName);
                                             // Force reload to ensure all components and data fetchers update with new context

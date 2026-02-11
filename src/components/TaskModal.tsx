@@ -67,12 +67,18 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
             setIsFetchingProjects(true);
             try {
                 // Fetch from Supabase instead of Hubstaff API
-                const { data, error } = await supabase
+                let query = supabase
                     .from('projects')
                     .select('name')
-                    .eq('status', 'active')
-                    .eq('team_id', effectiveTeamId)
-                    .order('name', { ascending: true });
+                    .eq('status', 'active');
+
+                // If NOT QA Team (Global), filter by team
+                // QA Team ID: ba60298b-8635-4cca-bcd5-7e470fad60e6
+                if (effectiveTeamId !== 'ba60298b-8635-4cca-bcd5-7e470fad60e6') {
+                    query = query.eq('team_id', effectiveTeamId);
+                }
+
+                const { data, error } = await query.order('name', { ascending: true });
 
                 if (!error && data) {
                     setProjects(data.map((p: any) => ({
@@ -102,9 +108,11 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
                 const { getCurrentUserTeam } = await import('@/utils/userUtils');
                 const userTeam = await getCurrentUserTeam();
                 const isSuperAdmin = userTeam?.role === 'super_admin';
+                const isQATeamGlobal = effectiveTeamId === 'ba60298b-8635-4cca-bcd5-7e470fad60e6';
 
                 // Use 'isGuest' from context to override super admin fetching behavior
-                if (isSuperAdmin && !isGuest) {
+                // BUT if it's QA Team (which is Global), we want to fetch all users too
+                if ((isSuperAdmin && !isGuest) || (isGuest && isQATeamGlobal)) {
                     // Fetch Hubstaff Users via API
                     const response = await fetch('/api/hubstaff/users');
                     if (response.ok) {

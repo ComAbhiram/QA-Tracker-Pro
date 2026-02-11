@@ -9,6 +9,7 @@ import ProjectDetailsModal from './components/ProjectDetailsModal';
 import TaskModal from '@/components/TaskModal'; // Import TaskModal
 import { supabase } from '@/lib/supabase';
 import { mapTaskFromDB, Task } from '@/lib/types'; // Import types and mapper
+import { useGuestMode } from '@/contexts/GuestContext';
 
 interface ProjectOverview {
     id: string;
@@ -68,6 +69,7 @@ export default function ProjectOverviewPage() {
     const [selectedProject, setSelectedProject] = useState<ProjectOverview | null>(null);
     const [selectedTask, setSelectedTask] = useState<Task | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
+    const { isGuest, selectedTeamId } = useGuestMode();
 
     // Filter State
     const [filterStartDate, setFilterStartDate] = useState('');
@@ -206,7 +208,15 @@ export default function ProjectOverviewPage() {
     const fetchData = async () => {
         setLoading(true);
         try {
-            const response = await fetch('/api/project-overview');
+            let url = '/api/project-overview';
+
+            // If in Manager Mode (Guest), filter by team UNLESS it's QA Team (Global)
+            // QA Team ID: ba60298b-8635-4cca-bcd5-7e470fad60e6
+            if (isGuest && selectedTeamId && selectedTeamId !== 'ba60298b-8635-4cca-bcd5-7e470fad60e6') {
+                url += `?teamId=${selectedTeamId}`;
+            }
+
+            const response = await fetch(url);
             const data = await response.json();
 
             if (data.projects) {
