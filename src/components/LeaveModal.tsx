@@ -153,7 +153,7 @@ export default function LeaveModal({ isOpen, onClose, onSave }: LeaveModalProps)
                     <div>
                         <label className="flex items-center gap-2 text-sm font-semibold text-slate-700 mb-2">
                             <Calendar size={16} className="text-indigo-600" />
-                            Leave Date <span className="text-red-500">*</span>
+                            Leave/WFH Date <span className="text-red-500">*</span>
                         </label>
                         <input
                             type="date"

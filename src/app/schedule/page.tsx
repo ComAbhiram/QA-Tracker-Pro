@@ -114,17 +114,23 @@ export default function Schedule() {
         // Check if completed by this date
         if (task.actualCompletionDate) {
             const completion = new Date(task.actualCompletionDate);
-            completion.setHours(0, 0, 0, 0); // normalize completion to start of day
+            // completion.setHours(0, 0, 0, 0); // Don't normalize here, we care about the exact time for cutoff
 
-            // If completed ON or BEFORE this date
-            if (completion <= checkDate) {
-                // Check if it was late (completion > end + 6:30 PM cutoff)
+            // If completed ON or BEFORE this date (approx check)
+            // If completion was <= checkDate (end of day), we show it.
+            const checkEndOfDay = new Date(checkDate);
+            checkEndOfDay.setHours(23, 59, 59, 999);
+
+            if (completion <= checkEndOfDay) {
                 if (end) {
-                    const endWithCutoff = new Date(end);
-                    endWithCutoff.setHours(18, 30, 0, 0);
+                    // Completion Rule: If completed AFTER [Due Date + 1 day at 00:00:00], it is late.
+                    // i.e., strict deadline is End Date @ 23:59:59.
+                    const strictDeadline = new Date(end);
+                    strictDeadline.setHours(23, 59, 59, 999);
 
-                    if (completion > endWithCutoff) {
-                        const diffTime = completion.getTime() - end.getTime();
+                    if (completion > strictDeadline) {
+                        // It is completed late. Calculate overdue days relative to deadline.
+                        const diffTime = completion.getTime() - strictDeadline.getTime();
                         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
                         return { status: 'Completed (Overdue)', overdueDays: diffDays, baseStatus: 'Completed' };
                     }
@@ -133,13 +139,28 @@ export default function Schedule() {
             }
         }
 
-        // Not completed yet (or completed in future relative to this date)
-        // Check if Overdue relative to this date (with 6:30 PM cutoff)
+        // Not completed yet (or completed later than this checkDate)
+        // Check if Overdue relative to this date
         if (end) {
-            const endWithCutoff = new Date(end);
-            endWithCutoff.setHours(18, 30, 0, 0);
+            // Overdue Rule: Use 6:30 PM cutoff for FUTURE days.
+            // If checkDate > EndDate, we only mark overdue if NOW > (EndDate + 6:30 PM).
 
-            if (checkDate > endWithCutoff) {
+            const now = new Date();
+            const overdueCutoff = new Date(end);
+            overdueCutoff.setHours(18, 30, 0, 0); // 6:30 PM on Due Date
+
+            // If the date we are checking is AFTER the end date
+            if (checkDate > end) {
+                // Visibility logic: Is it ACTUALLY overdue right now?
+                // If NOT overdue yet (before 6:30 PM on due date), show normal status (In Progress)
+                if (now < overdueCutoff) {
+                    return { status: getEffectiveStatus(task), overdueDays: 0, baseStatus: getEffectiveStatus(task) };
+                }
+
+                // If it IS overdue (after 6:30 PM), calculate how many days late relative to checkDate
+                // Logic: checkDate - end
+                // E.g. Due Feb 11. checkDate Feb 12. 
+                // diff = 1 day.
                 const diffTime = checkDate.getTime() - end.getTime();
                 const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
                 return { status: 'Overdue', overdueDays: diffDays, baseStatus: 'Overdue' };

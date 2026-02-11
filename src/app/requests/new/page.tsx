@@ -256,8 +256,21 @@ export default function LeavePage() {
                                         </div>
                                         <div className="flex-1 overflow-y-auto space-y-1 custom-scrollbar">
                                             {dayLeaves.slice(0, 3).map(leave => (
-                                                <div key={leave.id} className={`text-[11px] px-2 py-1.5 rounded-md border truncate font-semibold mb-1 transition-all hover:scale-[1.02] ${getLeaveTypeColor(leave.leave_type)}`}>
+                                                <div key={leave.id} className={`group relative text-[11px] px-2 py-1.5 rounded-md border truncate font-semibold mb-1 transition-all hover:scale-[1.02] ${getLeaveTypeColor(leave.leave_type)} cursor-help`}>
                                                     {leave.team_member_name}
+
+                                                    {/* Hover Popup */}
+                                                    <div className="hidden group-hover:block absolute left-0 bottom-full mb-2 z-50 w-48 bg-slate-800 text-white text-xs p-2 rounded-lg shadow-xl pointer-events-none">
+                                                        <div className="font-bold mb-1">{leave.team_member_name}</div>
+                                                        <div className="mb-1 opacity-90">{leave.leave_type}</div>
+                                                        {leave.reason && (
+                                                            <div className="text-[10px] opacity-75 italic border-t border-white/20 pt-1 mt-1">
+                                                                "{leave.reason}"
+                                                            </div>
+                                                        )}
+                                                        {/* Arrow */}
+                                                        <div className="absolute top-full left-4 -mt-1 border-4 border-transparent border-t-slate-800"></div>
+                                                    </div>
                                                 </div>
                                             ))}
                                             {dayLeaves.length > 3 && (
