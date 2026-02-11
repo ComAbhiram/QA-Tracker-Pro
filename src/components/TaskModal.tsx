@@ -203,12 +203,21 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
         }
     }, [isOpen, effectiveTeamId]);
 
-    // Fetch global PCs
+    // Fetch global PCs with timeout protection
     useEffect(() => {
         const fetchGlobalPCs = async () => {
             setLoadingPCs(true);
             try {
-                const response = await fetch('/api/pcs');
+                // Add timeout to prevent hanging requests
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+
+                const response = await fetch('/api/pcs', {
+                    signal: controller.signal
+                });
+
+                clearTimeout(timeoutId);
+
                 if (response.ok) {
                     const data = await response.json();
                     if (data.pcs) {
@@ -220,9 +229,15 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
                     }
                 } else {
                     console.error('[TaskModal] Failed to fetch PCs');
+                    setGlobalPCs([]); // Set empty array on error
                 }
-            } catch (error) {
-                console.error('[TaskModal] Error fetching PCs:', error);
+            } catch (error: any) {
+                if (error.name === 'AbortError') {
+                    console.error('[TaskModal] PC fetch timeout');
+                } else {
+                    console.error('[TaskModal] Error fetching PCs:', error);
+                }
+                setGlobalPCs([]); // Set empty array on error
             } finally {
                 setLoadingPCs(false);
             }
