@@ -70,8 +70,11 @@ export default function PCManagementModal({ isOpen, onClose }: PCManagementModal
             const data = await response.json();
 
             if (response.ok) {
+                // Add the new PC directly to state instead of refetching
+                if (data.pc) {
+                    setPcs(prev => [...prev, data.pc].sort((a, b) => a.name.localeCompare(b.name)));
+                }
                 setNewPCName('');
-                await fetchPCs();
             } else {
                 setError(data.error || 'Failed to add PC');
             }
@@ -96,7 +99,8 @@ export default function PCManagementModal({ isOpen, onClose }: PCManagementModal
             });
 
             if (response.ok) {
-                await fetchPCs();
+                // Remove PC directly from state instead of refetching
+                setPcs(prev => prev.filter(pc => pc.id !== id));
             } else {
                 const data = await response.json();
                 setError(data.error || 'Failed to delete PC');
