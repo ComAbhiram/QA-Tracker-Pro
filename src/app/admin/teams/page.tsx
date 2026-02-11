@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Users, Plus, Trash2, AlertCircle } from 'lucide-react';
+import { Users, Plus, Trash2, AlertCircle, Layers } from 'lucide-react';
+import SubPhasesModal from '@/components/SubPhasesModal';
 
 interface Team {
     id: number;
@@ -20,6 +21,10 @@ export default function TeamsManagement() {
     });
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
+
+    // Sub-phases modal state
+    const [showSubPhasesModal, setShowSubPhasesModal] = useState(false);
+    const [selectedTeam, setSelectedTeam] = useState<Team | null>(null);
 
     useEffect(() => {
         fetchTeams();
@@ -135,13 +140,14 @@ export default function TeamsManagement() {
                             <tr>
                                 <th className="px-6 py-4 text-left font-semibold text-slate-600">Team Name</th>
                                 <th className="px-6 py-4 text-left font-semibold text-slate-600">Created</th>
+                                <th className="px-6 py-4 text-left font-semibold text-slate-600">Sub-Phases</th>
                                 <th className="px-6 py-4 text-left font-semibold text-slate-600">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             {teams.length === 0 ? (
                                 <tr>
-                                    <td colSpan={3} className="px-6 py-8 text-center text-slate-500">
+                                    <td colSpan={4} className="px-6 py-8 text-center text-slate-500">
                                         No teams found. Create your first team to get started.
                                     </td>
                                 </tr>
@@ -154,6 +160,18 @@ export default function TeamsManagement() {
                                         </td>
                                         <td className="px-6 py-4 text-slate-600">
                                             {new Date(team.created_at).toLocaleDateString()}
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <button
+                                                onClick={() => {
+                                                    setSelectedTeam(team);
+                                                    setShowSubPhasesModal(true);
+                                                }}
+                                                className="flex items-center gap-1.5 px-3 py-1.5 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors font-medium"
+                                            >
+                                                <Layers size={16} />
+                                                Manage Sub-Phases
+                                            </button>
                                         </td>
                                         <td className="px-6 py-4">
                                             <button
@@ -240,6 +258,19 @@ export default function TeamsManagement() {
                         </form>
                     </div>
                 </div>
+            )}
+
+            {/* Sub-Phases Modal */}
+            {selectedTeam && (
+                <SubPhasesModal
+                    isOpen={showSubPhasesModal}
+                    onClose={() => {
+                        setShowSubPhasesModal(false);
+                        setSelectedTeam(null);
+                    }}
+                    teamId={String(selectedTeam.id)}
+                    teamName={selectedTeam.name}
+                />
             )}
         </div>
     );

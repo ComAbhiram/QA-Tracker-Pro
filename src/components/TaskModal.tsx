@@ -25,6 +25,8 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
     const [hubstaffUsers, setHubstaffUsers] = useState<{ id: string; label: string }[]>([]);
     const [loadingHubstaffUsers, setLoadingHubstaffUsers] = useState(false);
     const [isQATeam, setIsQATeam] = useState(false);
+    const [subPhases, setSubPhases] = useState<{ id: string; label: string }[]>([]);
+    const [loadingSubPhases, setLoadingSubPhases] = useState(false);
 
     const { isGuest, selectedTeamId } = useGuestMode();
     const [userTeamId, setUserTeamId] = useState<string | null>(null);
@@ -166,6 +168,38 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
             checkRole();
         }
     }, [isOpen]);
+
+    // Fetch sub-phases for team
+    useEffect(() => {
+        const fetchSubPhases = async () => {
+            if (!effectiveTeamId) return;
+
+            setLoadingSubPhases(true);
+            try {
+                const response = await fetch(`/api/subphases?team_id=${effectiveTeamId}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.subphases) {
+                        const formattedPhases = data.subphases.map((sp: any) => ({
+                            id: sp.name,
+                            label: sp.name
+                        }));
+                        setSubPhases(formattedPhases);
+                    }
+                } else {
+                    console.error('[TaskModal] Failed to fetch sub-phases');
+                }
+            } catch (error) {
+                console.error('[TaskModal] Error fetching sub-phases:', error);
+            } finally {
+                setLoadingSubPhases(false);
+            }
+        };
+
+        if (isOpen) {
+            fetchSubPhases();
+        }
+    }, [isOpen, effectiveTeamId]);
 
 
     // Populate form data when task changes
@@ -479,13 +513,15 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
                         <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
                             <Layers size={16} className="text-indigo-500" /> Phase/Task
                         </label>
-                        <input
-                            type="text"
-                            name="subPhase"
+                        <Combobox
+                            options={subPhases}
                             value={formData.subPhase || ''}
-                            onChange={handleChange}
-                            className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all placeholder:text-slate-400 font-medium text-slate-700"
-                            placeholder="e.g. Smoke Test, Dev Test, Before Live..."
+                            onChange={(val) => setFormData(prev => ({ ...prev, subPhase: val ? String(val) : '' }))}
+                            placeholder={loadingSubPhases ? "Loading phases..." : "Select or type phase..."}
+                            searchPlaceholder="Search or type custom phase..."
+                            emptyMessage="No matching phase. Press Enter to use custom value."
+                            allowCustomValue={true}
+                            isLoading={loadingSubPhases}
                         />
                     </div>
 
