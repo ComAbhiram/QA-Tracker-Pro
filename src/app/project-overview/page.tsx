@@ -10,7 +10,7 @@ import TaskModal from '@/components/TaskModal'; // Import TaskModal
 import { supabase } from '@/lib/supabase';
 import { mapTaskFromDB, Task } from '@/lib/types'; // Import types and mapper
 import { useGuestMode } from '@/contexts/GuestContext';
-
+import TaskMigration from '@/components/TaskMigration';
 
 interface ProjectOverview {
     id: string;
@@ -407,6 +407,10 @@ export default function ProjectOverviewPage() {
                                     New Project
                                 </button>
                             )}
+                            {/* Migration Tools */}
+                            <div className="border-l border-slate-300 pl-3 ml-1">
+                                <TaskMigration />
+                            </div>
                         </div>
                     </div>
 
