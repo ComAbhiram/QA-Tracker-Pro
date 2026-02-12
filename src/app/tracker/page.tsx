@@ -321,7 +321,7 @@ export default function Tracker() {
                 </div>
 
                 <div className="flex flex-wrap items-center gap-3">
-                    {/* Search Box - Dark Styling */}
+                    {/* Search Box - Light Styling */}
                     <div className="relative">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
                         <input
@@ -329,7 +329,7 @@ export default function Tracker() {
                             placeholder="Filter tasks..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-[200px] bg-slate-900 text-slate-200 placeholder:text-slate-500 pl-9 pr-3 py-2 border border-slate-700 rounded-md focus:outline-none focus:ring-1 focus:ring-slate-500 text-xs transition-all"
+                            className="w-[200px] bg-white text-slate-700 placeholder:text-slate-500 pl-9 pr-3 py-2 border border-slate-200 rounded-md focus:outline-none focus:ring-1 focus:ring-slate-300 text-xs transition-all shadow-sm"
                         />
                     </div>
 

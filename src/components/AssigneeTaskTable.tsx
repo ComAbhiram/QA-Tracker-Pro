@@ -153,7 +153,7 @@ export default function AssigneeTaskTable({ assignee, tasks, leaves, onEditTask,
             </div>
 
             {/* Table (Compact & Resizable) */}
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto pb-4 custom-scrollbar">
                 <table className="w-full text-xs text-slate-800 border-collapse table-fixed border border-slate-900">
                     <thead>
                         <tr className="border-b border-black">
