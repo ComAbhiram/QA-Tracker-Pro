@@ -153,6 +153,7 @@ export default function Tracker() {
                 headers: {
                     'Content-Type': 'application/json',
                 },
+                credentials: 'include', // Ensure cookies are sent
                 body: JSON.stringify({ id: editingTask.id, ...updatePayload })
             });
 
@@ -188,7 +189,8 @@ export default function Tracker() {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
-            }
+            },
+            credentials: 'include', // Ensure cookies are sent
         });
 
         if (!response.ok) {
