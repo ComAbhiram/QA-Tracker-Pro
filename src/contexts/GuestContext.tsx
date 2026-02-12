@@ -70,6 +70,8 @@ export function GuestProvider({ children }: { children: ReactNode }) {
         localStorage.setItem(GUEST_SESSION_KEY, JSON.stringify(session));
         // Set cookie for server-side detection
         setCookie(GUEST_COOKIE_NAME, 'true');
+        // Set a special guest token for API authentication
+        setCookie('guest_token', 'manager_access_token_2026', 30); // 30 days
     };
 
     const clearGuestSession = () => {

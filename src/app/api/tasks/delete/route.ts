@@ -35,10 +35,14 @@ export async function DELETE(request: NextRequest) {
             }
         );
 
-        // Get authenticated user from session
+        // Get authenticated user from session OR check for guest token
         const { data: { user }, error: authError } = await supabase.auth.getUser();
 
-        if (authError || !user) {
+        // Check for guest token (manager mode)
+        const guestToken = cookieStore.get('guest_token')?.value;
+        const isManagerMode = guestToken === 'manager_access_token_2026';
+
+        if (!user && !isManagerMode) {
             return NextResponse.json({ error: 'Unauthorized - please log in' }, { status: 401 });
         }
 
@@ -50,11 +54,15 @@ export async function DELETE(request: NextRequest) {
         }
 
         // Check Permissions
-        const { data: profile } = await supabaseServer
-            .from('user_profiles')
-            .select('role, team_id')
-            .eq('id', user.id)
-            .single();
+        let profile = null;
+        if (user) {
+            const { data: profileData } = await supabaseServer
+                .from('user_profiles')
+                .select('role, team_id')
+                .eq('id', user.id)
+                .single();
+            profile = profileData;
+        }
 
         const { data: task } = await supabaseServer
             .from('tasks')
@@ -66,13 +74,19 @@ export async function DELETE(request: NextRequest) {
             return NextResponse.json({ error: 'Task not found' }, { status: 404 });
         }
 
-        const isSuperAdmin = profile?.role === 'super_admin';
-        const isManager = profile?.role === 'manager';
-        const isTeamOwner = profile?.team_id === task.team_id;
+        // Manager mode has full access
+        if (isManagerMode) {
+            // Proceed with delete - manager mode can delete any task
+        } else {
+            // Regular user - check permissions
+            const isSuperAdmin = profile?.role === 'super_admin';
+            const isManager = profile?.role === 'manager';
+            const isTeamOwner = profile?.team_id === task.team_id;
 
-        // Allow super_admin, manager, or team owners to delete
-        if (!isSuperAdmin && !isManager && !isTeamOwner) {
-            return NextResponse.json({ error: 'Unauthorized to delete this task' }, { status: 403 });
+            // Allow super_admin, manager, or team owners to delete
+            if (!isSuperAdmin && !isManager && !isTeamOwner) {
+                return NextResponse.json({ error: 'Unauthorized to delete this task' }, { status: 403 });
+            }
         }
 
         // Perform Delete
