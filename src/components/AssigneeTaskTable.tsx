@@ -19,6 +19,7 @@ import {
 import Pagination from '@/components/Pagination';
 import { calculateAvailability } from '@/lib/availability';
 import ResizableHeader from '@/components/ui/ResizableHeader';
+import { DatePicker } from '@/components/DatePicker';
 import useColumnResizing from '@/hooks/useColumnResizing';
 
 interface AssigneeTaskTableProps {
