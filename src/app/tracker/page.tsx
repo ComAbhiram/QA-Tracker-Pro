@@ -315,22 +315,22 @@ export default function Tracker() {
                     <h1 className="text-3xl font-bold text-slate-800">Task Tracker</h1>
                     <p className="text-slate-500">Track all active QA tasks by assignee</p>
                 </div>
-                <div className="flex gap-2">
-                    <div className="bg-slate-100 p-1 rounded-lg flex items-center mr-2 border border-slate-200">
+                <div className="flex gap-2 flex-wrap justify-end">
+                    <div className="bg-white p-1 rounded-lg flex items-center mr-2 border border-slate-300 shadow-sm">
                         <button
                             onClick={() => setViewMode('active')}
-                            className={`px-3 py-1.5 text-sm font-medium rounded-md transition-all ${viewMode === 'active'
-                                    ? 'bg-white text-slate-800 shadow-sm'
-                                    : 'text-slate-500 hover:text-slate-700'
+                            className={`px-4 py-2 text-sm font-bold rounded-md transition-all ${viewMode === 'active'
+                                    ? 'bg-slate-800 text-white shadow-md'
+                                    : 'text-slate-600 hover:bg-slate-100'
                                 }`}
                         >
-                            All Active
+                            Active
                         </button>
                         <button
                             onClick={() => setViewMode('forecast')}
-                            className={`px-3 py-1.5 text-sm font-medium rounded-md transition-all ${viewMode === 'forecast'
-                                    ? 'bg-white text-purple-700 shadow-sm'
-                                    : 'text-slate-500 hover:text-slate-700'
+                            className={`px-4 py-2 text-sm font-bold rounded-md transition-all ${viewMode === 'forecast'
+                                    ? 'bg-purple-600 text-white shadow-md'
+                                    : 'text-slate-600 hover:bg-slate-100'
                                 }`}
                         >
                             Forecast
