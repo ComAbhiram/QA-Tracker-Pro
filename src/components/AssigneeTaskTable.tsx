@@ -42,7 +42,6 @@ export default function AssigneeTaskTable({ assignee, tasks, leaves, onEditTask 
         priority: 70,
         subPhase: 120,
         pc: 80,
-        assignees: 80,
         status: 120,
         startDate: 80,
         endDate: 80,
@@ -132,26 +131,25 @@ export default function AssigneeTaskTable({ assignee, tasks, leaves, onEditTask 
     const activeLeaves = leaves.filter(l => new Date(l.leave_date) >= new Date());
 
     return (
-        <div className="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden mb-6">
+        <div className="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden mb-4">
             {/* Header Section (Compact) */}
-            <div className={`px-4 py-3 flex flex-col md:flex-row md:items-center justify-between gap-3 border-b ${headerColorClass}`}>
+            <div className={`px-3 py-2 flex flex-col md:flex-row md:items-center justify-between gap-3 border-b ${headerColorClass}`}>
                 <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-full bg-white/60 backdrop-blur-sm border border-black/5 flex items-center justify-center font-bold text-sm shadow-sm">
                         {assignee.charAt(0)}
                     </div>
                     <div>
-                        <h3 className="font-bold text-base leading-tight opacity-90">{assignee}</h3>
+                        <h3 className="font-bold text-sm leading-tight opacity-90">{assignee}</h3>
                     </div>
                 </div>
 
-                {/* Availability Info (Compact) */}
+                {/* Availability Info (Compact & Single Line) */}
                 <div className="flex items-center gap-3 text-slate-700">
-                    <div className="flex items-center gap-2 bg-white/50 px-3 py-1.5 rounded-md border border-black/5">
-                        <CalendarClock size={16} className="text-red-600" />
-                        <div>
-                            <p className="text-[10px] uppercase font-bold tracking-wider opacity-70 leading-none mb-1">Available</p>
-                            <p className="text-sm font-bold leading-none">{format(availabilityDate, 'MMM d')}</p>
-                        </div>
+                    <div className="flex items-center gap-2 bg-white/50 px-3 py-1 rounded-md border border-black/5">
+                        <CalendarClock size={14} className="text-red-600" />
+                        <span className="text-xs font-bold text-slate-700">
+                            Available: {format(availabilityDate, 'MMM d')}
+                        </span>
                     </div>
                 </div>
             </div>
@@ -193,7 +191,6 @@ export default function AssigneeTaskTable({ assignee, tasks, leaves, onEditTask 
                             />
                             <ResizableHeader label="Phase" sortKey="subPhase" widthKey="subPhase" width={columnWidths.subPhase} currentSortKey={sortConfig?.key} sortDirection={sortConfig?.direction} onSort={(k) => requestSort(k as SortKey)} onResizeStart={startResizing} />
                             <ResizableHeader label="PC" sortKey="pc" widthKey="pc" width={columnWidths.pc} currentSortKey={sortConfig?.key} sortDirection={sortConfig?.direction} onSort={(k) => requestSort(k as SortKey)} onResizeStart={startResizing} />
-                            <ResizableHeader label="Assignees" widthKey="assignees" width={columnWidths.assignees} isSortable={false} onResizeStart={startResizing} />
                             <ResizableHeader label="Status" sortKey="status" widthKey="status" width={columnWidths.status} currentSortKey={sortConfig?.key} sortDirection={sortConfig?.direction} onSort={(k) => requestSort(k as SortKey)} onResizeStart={startResizing} />
                             <ResizableHeader label="Start" sortKey="startDate" widthKey="startDate" width={columnWidths.startDate} currentSortKey={sortConfig?.key} sortDirection={sortConfig?.direction} onSort={(k) => requestSort(k as SortKey)} onResizeStart={startResizing} />
                             <ResizableHeader label="End" sortKey="endDate" widthKey="endDate" width={columnWidths.endDate} currentSortKey={sortConfig?.key} sortDirection={sortConfig?.direction} onSort={(k) => requestSort(k as SortKey)} onResizeStart={startResizing} />
@@ -225,12 +222,6 @@ export default function AssigneeTaskTable({ assignee, tasks, leaves, onEditTask 
                                 </td>
                                 <td className="px-2 py-2 truncate border-r border-slate-900">{task.subPhase || '-'}</td>
                                 <td className="px-2 py-2 truncate border-r border-slate-900">{task.pc || '-'}</td>
-                                <td className="px-2 py-2 border-r border-slate-900">
-                                    <div className="flex -space-x-1.5 overflow-hidden">
-                                        {task.assignedTo && <div className="w-6 h-6 rounded-full bg-indigo-100 border border-slate-900 flex items-center justify-center text-[9px] font-bold text-indigo-800" title={task.assignedTo}>{task.assignedTo.charAt(0)}</div>}
-                                        {task.assignedTo2 && <div className="w-6 h-6 rounded-full bg-yellow-100 border border-slate-900 flex items-center justify-center text-[9px] font-bold text-yellow-800" title={task.assignedTo2}>{task.assignedTo2.charAt(0)}</div>}
-                                    </div>
-                                </td>
                                 <td className="px-2 py-2 border-r border-slate-900">
                                     <div className="flex items-center gap-2">
                                         {getStatusDisplay(task.status)}
