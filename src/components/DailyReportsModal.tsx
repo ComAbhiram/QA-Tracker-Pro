@@ -534,14 +534,31 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                     </div>
                     ` : ''}
                     
-                ${sortedAssignees.map(assignee => `
+                ${sortedAssignees.map(assignee => {
+                        // Dynamic Header Color Logic
+                        const getHeaderColorHex = (name: string) => {
+                            const colors = [
+                                '#f1f5f9', '#fef2f2', '#fff7ed', '#fffbeb', '#fefce8', '#f7fee7',
+                                '#f0fdf4', '#ecfdf5', '#f0fdfa', '#ecfeff', '#f0f9ff', '#eff6ff',
+                                '#eef2ff', '#f5f3ff', '#faf5ff', '#fdf4ff', '#fdf2f8', '#fff1f2'
+                            ];
+                            let hash = 0;
+                            for (let i = 0; i < name.length; i++) {
+                                hash = name.charCodeAt(i) + ((hash << 5) - hash);
+                            }
+                            const index = Math.abs(hash) % colors.length;
+                            return colors[index];
+                        };
+                        const headerBg = getHeaderColorHex(assignee);
+
+                        return `
                     <div style="margin-bottom: 30px; border: 1px solid #000000; border-radius: 12px; overflow: hidden; page-break-inside: avoid;">
-                        <!-- Assignee Header (Simple) -->
-                        <div style="background: #f8fafc; padding: 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #000000;">
+                        <!-- Assignee Header -->
+                        <div style="background: ${headerBg}; padding: 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #000000;">
                             <div style="display: flex; align-items: center; gap: 12px;">
-                                <h3 style="color: #0f172a; font-size: 18px; font-weight: 800; margin: 0;">${assignee}</h3>
+                                <h3 style="color: #0f172a; font-size: 18px; font-weight: 800; margin: 0; opacity: 0.9;">${assignee}</h3>
                             </div>
-                            <span style="background: #e2e8f0; color: #334155; padding: 4px 12px; border-radius: 20px; font-size: 14px; font-weight: 600;">
+                            <span style="color: #334155; font-size: 14px; font-weight: 600; opacity: 0.8;">
                                 ${groupedTasks[assignee].length} Tasks
                             </span>
                         </div>
@@ -559,38 +576,42 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                             </thead>
                             <tbody>
                                 ${groupedTasks[assignee].map((task, index) => {
-                        const isLateCompletion = task.status === 'Completed' && task.endDate && task.actualCompletionDate && new Date(task.actualCompletionDate) > new Date(task.endDate);
+                            const isLateCompletion = task.status === 'Completed' && task.endDate && task.actualCompletionDate && new Date(task.actualCompletionDate) > new Date(task.endDate);
+                            let lateLabel = 'Completed (Overdue)';
+                            if (isLateCompletion && task.endDate && task.actualCompletionDate) {
+                                const end = new Date(task.endDate);
+                                const actual = new Date(task.actualCompletionDate);
+                                const e = new Date(end); e.setHours(0, 0, 0, 0);
+                                const a = new Date(actual); a.setHours(0, 0, 0, 0);
+                                const diffTime = a.getTime() - e.getTime();
+                                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                                lateLabel = `Completed (Overdue ${diffDays}d)`;
+                            }
 
-                        let lateLabel = 'Completed (Overdue)';
-                        if (isLateCompletion && task.endDate && task.actualCompletionDate) {
-                            const end = new Date(task.endDate);
-                            const actual = new Date(task.actualCompletionDate);
-                            const e = new Date(end); e.setHours(0, 0, 0, 0);
-                            const a = new Date(actual); a.setHours(0, 0, 0, 0);
-                            const diffTime = a.getTime() - e.getTime();
-                            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                            lateLabel = `Completed (Overdue ${diffDays}d)`;
-                        }
+                            const effectiveStatus = getEffectiveStatus(task);
+                            let displayStatus = effectiveStatus;
+                            if (effectiveStatus === 'Overdue' && task.endDate) {
+                                const end = new Date(task.endDate);
+                                const now = new Date();
+                                end.setHours(0, 0, 0, 0);
+                                now.setHours(0, 0, 0, 0);
+                                const diffTime = now.getTime() - end.getTime();
+                                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                                if (diffDays > 0) displayStatus = `Overdue (+${diffDays}d)`;
+                            }
 
-                        const effectiveStatus = getEffectiveStatus(task);
-                        let displayStatus = effectiveStatus;
-                        if (effectiveStatus === 'Overdue' && task.endDate) {
-                            const end = new Date(task.endDate);
-                            const now = new Date();
-                            end.setHours(0, 0, 0, 0);
-                            now.setHours(0, 0, 0, 0);
-                            const diffTime = now.getTime() - end.getTime();
-                            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                            if (diffDays > 0) displayStatus = `Overdue (+${diffDays}d)`;
-                        }
+                            let priorityColor = '#64748b';
+                            if (task.priority === 'High') priorityColor = '#dc2626';
+                            else if (task.priority === 'Medium') priorityColor = '#ea580c';
+                            else if (task.priority === 'Low') priorityColor = '#16a34a';
 
-                        return `
+                            return `
                                         <tr style="border-bottom: 1px solid #000000; ${index % 2 === 0 ? 'background: #f8fafc;' : 'background: white;'}">
                                             <td style="padding: 12px 16px; vertical-align: top; border-right: 1px solid #000000;">
                                                 <div style="color: #0f172a; font-weight: 600; font-size: 14px; margin-bottom: 4px;">${task.projectName}</div>
                                                 <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
                                                     <div style="color: #475569; font-size: 12px;">${task.projectType || '-'}</div>
-                                                    ${task.priority ? `<div style="display:inline-flex; align-items:center; padding:2px 6px; background:#e2e8f0; border-radius:4px; font-size: 11px; font-weight: 600; color: #334155;">${task.priority}</div>` : ''}
+                                                    ${task.priority ? `<div style="font-size: 11px; font-weight: 700; color: ${priorityColor}; text-transform: uppercase; letter-spacing: 0.5px;">${task.priority}</div>` : ''}
                                                 </div>
                                             </td>
                                             <td style="padding: 12px 16px; vertical-align: top; border-right: 1px solid #000000;">
@@ -600,10 +621,10 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                                             <td style="padding: 12px 16px; text-align: center; vertical-align: middle; border-right: 1px solid #000000;">
                                                  <span style="font-size: 13px; font-weight: 800;
                                                     ${effectiveStatus === 'Completed' ? 'color: #166534;' :
-                                effectiveStatus === 'In Progress' ? 'color: #1e40af;' :
-                                    effectiveStatus === 'Yet to Start' ? 'color: #92400e;' :
-                                        effectiveStatus === 'Overdue' ? 'color: #991b1b;' :
-                                            'color: #475569;'}
+                                    effectiveStatus === 'In Progress' ? 'color: #1e40af;' :
+                                        effectiveStatus === 'Yet to Start' ? 'color: #92400e;' :
+                                            effectiveStatus === 'Overdue' ? 'color: #991b1b;' :
+                                                'color: #475569;'}
                                                     ${isLateCompletion ? 'color: #991b1b;' : ''}">
                                                     ${isLateCompletion ? lateLabel : displayStatus}
                                                 </span>
@@ -619,11 +640,12 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                                             </td>
                                         </tr>
                                     `;
-                    }).join('')}
+                        }).join('')}
                             </tbody>
                         </table>
                     </div>
-                `).join('')}
+                    `;
+                    }).join('')}
 
                 <div style="margin-top: 32px; padding: 24px; background: #f1f5f9; border-radius: 12px; border-left: 6px solid #0284c7;">
                     <p style="color: #334155; font-size: 16px; margin: 0;">
