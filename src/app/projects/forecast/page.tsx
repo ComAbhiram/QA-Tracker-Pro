@@ -254,25 +254,76 @@ export default function ForecastProjects() {
                         ))}
                     </div>
                 ) : (
-                                </tbody>
-        </table >
-                        </div >
-                    </div >
+                    <div className={StandardTableStyles.container}>
+                        <table className="w-full">
+                            <thead className={StandardTableStyles.header}>
+                                <tr>
+                                    <th className={StandardTableStyles.headerCell}>Project</th>
+                                    <th className={StandardTableStyles.headerCell}>Phase/Task</th>
+                                    <th className={StandardTableStyles.headerCell}>Type</th>
+                                    <th className={StandardTableStyles.headerCell}>Priority</th>
+                                    <th className={StandardTableStyles.headerCell}>PC</th>
+                                    <th className={StandardTableStyles.headerCell}>Assignee 1</th>
+                                    <th className={StandardTableStyles.headerCell}>Assignee 2</th>
+                                    <th className={StandardTableStyles.headerCell}>Start Date</th>
+                                    <th className={StandardTableStyles.headerCell}>Comments</th>
+                                    <th className={StandardTableStyles.headerCell}>Sprint Link</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {tasks.map((task) => (
+                                    <tr key={task.id} className={StandardTableStyles.row}>
+                                        <td className={`${StandardTableStyles.cell} font-bold`}>{task.projectName}</td>
+                                        <td className={StandardTableStyles.cell}>{task.subPhase || '-'}</td>
+                                        <td className={StandardTableStyles.cell}>{task.projectType || '-'}</td>
+                                        <td className={StandardTableStyles.cell}>
+                                            {task.priority ? (
+                                                <span className={`font-bold ${task.priority === 'High' ? 'text-orange-700' :
+                                                        task.priority === 'Urgent' ? 'text-red-800' :
+                                                            task.priority === 'Medium' ? 'text-amber-700' :
+                                                                'text-green-700'
+                                                    }`}>
+                                                    {task.priority}
+                                                </span>
+                                            ) : '-'}
+                                        </td>
+                                        <td className={StandardTableStyles.cell}>{task.pc || '-'}</td>
+                                        <td className={StandardTableStyles.cell}>{task.assignedTo || '-'}</td>
+                                        <td className={StandardTableStyles.cell}>{task.assignedTo2 || '-'}</td>
+                                        <td className={StandardTableStyles.cell}>
+                                            {task.startDate ? format(new Date(task.startDate), 'MMM d, yyyy') : '-'}
+                                        </td>
+                                        <td className={StandardTableStyles.cell} title={task.comments || ''}>
+                                            <div className="truncate max-w-xs">{task.comments || '-'}</div>
+                                        </td>
+                                        <td className={StandardTableStyles.cell}>
+                                            {task.sprintLink ? (
+                                                <a href={task.sprintLink} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 hover:underline flex items-center gap-1">
+                                                    <ExternalLink size={14} />
+                                                    Link
+                                                </a>
+                                            ) : '-'}
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
                 )
-}
+                }
             </div >
 
-    {/* Task Edit Modal */ }
-    < TaskModal
-isOpen = { isModalOpen }
-onClose = {() => {
-    setIsModalOpen(false);
-    setSelectedTask(null);
-}}
-task = { selectedTask }
-onSave = { handleSaveTask }
-onDelete = { handleDeleteTask }
-    />
+            {/* Task Edit Modal */}
+            < TaskModal
+                isOpen={isModalOpen}
+                onClose={() => {
+                    setIsModalOpen(false);
+                    setSelectedTask(null);
+                }}
+                task={selectedTask}
+                onSave={handleSaveTask}
+                onDelete={handleDeleteTask}
+            />
         </>
     );
 }
