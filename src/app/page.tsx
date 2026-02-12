@@ -23,7 +23,7 @@ export default function Home() {
   const [loadingStats, setLoadingStats] = useState(true);
 
   // Filter & Search State
-  const [filter, setFilter] = useState('All');
+  const [filter, setFilter] = useState('active');
   const [searchQuery, setSearchQuery] = useState('');
 
   // Pagination State
@@ -136,6 +136,8 @@ export default function Home() {
         const today = new Date().toISOString().split('T')[0];
         query = query.lt('end_date', today)
           .not('status', 'in', '("Completed","Rejected")');
+      } else if (currentFilter === 'Forecast') {
+        query = query.eq('status', 'Forecast');
       } else {
         query = query.eq('status', currentFilter);
       }
@@ -151,9 +153,25 @@ export default function Home() {
     const from = (page - 1) * itemsPerPage;
     const to = from + itemsPerPage - 1;
 
-    query = query
-      .order('created_at', { ascending: false })
-      .range(from, to);
+    // Default sorting logic for fetching
+    // If we are in 'active' or 'Forecast' view, we might want to fetch all and sort client side
+    // BUT pagination makes this tricky.
+    // For now, let's keep server side pagination and just order by created_at.
+    // Ideally, we'd use a custom sort order in SQL but that requires a function or complex order string.
+    // Given the request, user wants: In Progress > Forecast > On Hold > Yet to Start > Being Developed
+    // Let's TRY to fetch all if 'active' to sort correctly, assuming reasonable task count (e.g. < 50-100 active tasks per team).
+    // If 'active' or 'Forecast' filter is on, let's bypass pagination range for FETCHING, sort locally, then slice for pagination.
+
+    const shouldCustomSort = currentFilter === 'active' || currentFilter === 'Forecast';
+
+    if (!shouldCustomSort) {
+      query = query
+        .order('created_at', { ascending: false })
+        .range(from, to);
+    } else {
+      // Fetch ALL matching active tasks to sort them properly
+      query = query.order('created_at', { ascending: false });
+    }
 
     const { data, count, error } = await query;
     if (error) {
@@ -163,8 +181,35 @@ export default function Home() {
         console.error('Manager Mode Access Error: Possible RLS restriction on production DB.');
       }
     } else {
-      setTasks((data || []).map(mapTaskFromDB));
-      setTotalItems(count || 0);
+      let finalTasks = (data || []).map(mapTaskFromDB);
+
+      if (shouldCustomSort) {
+        // Client-side Custom Sort
+        const statusOrder: Record<string, number> = {
+          'In Progress': 1,
+          'Forecast': 2,
+          'On Hold': 3,
+          'Yet to Start': 4,
+          'Being Developed': 5,
+          'Ready for QA': 6,
+          'Assigned to QA': 7
+          // Others will be at the end
+        };
+
+        finalTasks.sort((a, b) => {
+          const orderA = statusOrder[a.status] || 99;
+          const orderB = statusOrder[b.status] || 99;
+          return orderA - orderB;
+        });
+
+        // Re-apply Pagination logic client-side since we fetched all
+        setTotalItems(finalTasks.length); // Count is total fetched
+        const paginatedTasks = finalTasks.slice(from, to + 1); // slice end is exclusive
+        setTasks(paginatedTasks);
+      } else {
+        setTasks(finalTasks);
+        setTotalItems(count || 0);
+      }
     }
     setLoadingTasks(false);
   }, [isGuest, selectedTeamId, itemsPerPage, isGuestLoading]);

@@ -22,7 +22,7 @@ export default function DashboardStats({ tasks, onFilterChange, activeFilter }: 
     };
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
             <div
                 className={`stats-card cursor-pointer group transition-all duration-200 ${activeFilter === 'All' ? 'ring-2 ring-sky-500 shadow-lg scale-[1.02]' : 'hover:shadow-md hover:scale-[1.01]'} bg-gradient-to-br from-white to-sky-50 border-l-4 border-sky-500`}
                 onClick={() => onFilterChange('All')}
@@ -45,6 +45,18 @@ export default function DashboardStats({ tasks, onFilterChange, activeFilter }: 
                     </div>
                 </div>
                 <div className="text-3xl font-bold mb-1 text-slate-800">{stats.active}</div>
+            </div>
+
+            <div
+                className={`stats-card cursor-pointer group transition-all duration-200 ${activeFilter === 'Forecast' ? 'ring-2 ring-purple-500 shadow-lg scale-[1.02]' : 'hover:shadow-md hover:scale-[1.01]'} bg-gradient-to-br from-white to-purple-50 border-l-4 border-purple-500`}
+                onClick={() => onFilterChange('Forecast')}
+            >
+                <div className="flex items-center justify-between mb-4">
+                    <div className="text-slate-500 font-medium group-hover:text-purple-600 transition-colors">
+                        Forecast
+                    </div>
+                </div>
+                <div className="text-3xl font-bold mb-1 text-slate-800">{tasks.filter(t => t.status === 'Forecast').length}</div>
             </div>
 
             <div
