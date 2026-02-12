@@ -31,7 +31,7 @@ export default function Home() {
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
-  const itemsPerPage = 10;
+  const itemsPerPage = 15;
 
   // Modals
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
