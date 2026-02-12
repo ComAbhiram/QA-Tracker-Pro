@@ -409,13 +409,13 @@ export default function Schedule() {
         <div className="max-w-[1600px] mx-auto space-y-6">
             <header className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-6">
 
-                {/* Row 1: Title & Status Guide */}
-                <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
+                {/* Vertical Stack: Title/Desc then Status Guide */}
+                <div className="flex flex-col gap-4">
                     <div>
                         <h1 className="text-3xl font-bold text-slate-800">Work Schedule</h1>
                         <p className="text-slate-500">Manage project timelines and daily tasks</p>
                     </div>
-                    <div className="overflow-x-auto max-w-full pb-2 xl:pb-0">
+                    <div className="overflow-x-auto max-w-full pb-2">
                         <StatusLegend />
                     </div>
                 </div>
