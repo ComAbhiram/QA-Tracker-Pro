@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Initialize Resend only if API key is available
+const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
 const RECIPIENTS = [
     'steve@intersmart.in',
@@ -137,6 +138,15 @@ export async function POST(request: NextRequest) {
 </body>
 </html>
         `;
+
+        // Check if Resend is configured
+        if (!resend) {
+            console.warn('[Email API] Resend API key not configured - skipping email');
+            return NextResponse.json({
+                error: 'Email service not configured',
+                message: 'RESEND_API_KEY environment variable is not set'
+            }, { status: 503 });
+        }
 
         // Send email to all recipients
         const { data, error } = await resend.emails.send({
