@@ -42,7 +42,7 @@ export default function Home() {
   const { isGuest, selectedTeamId, isLoading: isGuestLoading } = useGuestMode();
 
   // Column Resizing
-  const { columnWidths, handleResizeStart } = useColumnResizing({
+  const { columnWidths, startResizing: handleResizeStart } = useColumnResizing({
     projectName: 250,
     phase: 150,
     status: 140,
