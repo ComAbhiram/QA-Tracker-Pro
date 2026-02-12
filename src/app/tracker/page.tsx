@@ -500,13 +500,23 @@ export default function Tracker() {
                                 leaves={leaves}
                                 onEditTask={handleEditTask}
                                 onDateUpdate={async (taskId, field, date) => {
-                                    const { error } = await supabase
-                                        .from('tasks')
-                                        .update({ [field]: date || null })
-                                        .eq('id', taskId);
+                                    // Use API route to support manager mode
+                                    const response = await fetch('/api/tasks/update', {
+                                        method: 'PUT',
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                            'X-Manager-Mode': localStorage.getItem('qa_tracker_guest_session') ? 'true' : 'false',
+                                        },
+                                        credentials: 'include',
+                                        body: JSON.stringify({
+                                            id: taskId,
+                                            [field]: date || null
+                                        })
+                                    });
 
-                                    if (error) {
-                                        console.error('Error updating date:', error);
+                                    if (!response.ok) {
+                                        const err = await response.json();
+                                        console.error('Error updating date:', err);
                                         toastError('Failed to update date');
                                     } else {
                                         success('Date has been changed successfully.');
