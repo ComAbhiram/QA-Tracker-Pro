@@ -29,6 +29,8 @@ interface AssigneeTaskTableProps {
     onDateUpdate: (taskId: number, field: 'start_date' | 'end_date', date: string) => Promise<void>;
 }
 
+type SortKey = 'projectName' | 'projectType' | 'priority' | 'subPhase' | 'pc' | 'status' | 'startDate' | 'endDate' | 'actualCompletionDate' | 'deviation';
+
 export default function AssigneeTaskTable({ assignee, tasks, leaves, onEditTask, onDateUpdate }: AssigneeTaskTableProps) {
     const [currentPage, setCurrentPage] = useState(1);
     const [sortConfig, setSortConfig] = useState<{ key: SortKey; direction: 'asc' | 'desc' } | null>(null);

@@ -311,50 +311,75 @@ export default function Tracker() {
 
     return (
         <div className="max-w-[1800px] mx-auto">
-            <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+            <header className="flex flex-col xl:flex-row xl:items-center justify-between gap-6 mb-8">
                 <div>
                     <h1 className="text-3xl font-bold text-slate-800">Task Tracker</h1>
                     <p className="text-slate-500">Track all active QA tasks by assignee</p>
                 </div>
-                <div className="flex gap-2 flex-wrap justify-end">
-                    <div className="bg-white p-1 rounded-lg flex items-center mr-2 border border-slate-300 shadow-sm">
+
+                <div className="flex flex-wrap items-center gap-3">
+                    {/* Search Box - Dark Styling */}
+                    <div className="relative">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                        <input
+                            type="text"
+                            placeholder="Filter tasks..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="w-[200px] bg-slate-900 text-slate-200 placeholder:text-slate-500 pl-9 pr-3 py-2 border border-slate-700 rounded-md focus:outline-none focus:ring-1 focus:ring-slate-500 text-xs transition-all"
+                        />
+                    </div>
+
+                    {/* Date Filter - Compact */}
+                    <input
+                        type="date"
+                        value={dateFilter}
+                        onChange={(e) => setDateFilter(e.target.value)}
+                        className="w-[130px] bg-white text-slate-700 px-3 py-2 border border-slate-200 rounded-md focus:outline-none focus:ring-1 focus:ring-slate-300 text-xs shadow-sm"
+                    />
+
+                    <div className="h-6 w-px bg-slate-200 mx-1 hidden md:block"></div>
+
+                    {/* View Mode Toggle */}
+                    <div className="bg-slate-100 p-0.5 rounded-lg flex items-center border border-slate-200">
                         <button
                             onClick={() => setViewMode('active')}
-                            className={`px-4 py-2 text-sm font-bold rounded-md transition-all ${viewMode === 'active'
-                                ? 'bg-slate-800 text-white shadow-md'
-                                : 'text-slate-600 hover:bg-slate-100'
+                            className={`px-3 py-1.5 text-xs font-bold rounded-md transition-all ${viewMode === 'active'
+                                ? 'bg-white text-slate-800 shadow-sm'
+                                : 'text-slate-500 hover:text-slate-700'
                                 }`}
                         >
                             Active
                         </button>
                         <button
                             onClick={() => setViewMode('forecast')}
-                            className={`px-4 py-2 text-sm font-bold rounded-md transition-all ${viewMode === 'forecast'
-                                ? 'bg-purple-600 text-white shadow-md'
-                                : 'text-slate-600 hover:bg-slate-100'
+                            className={`px-3 py-1.5 text-xs font-bold rounded-md transition-all ${viewMode === 'forecast'
+                                ? 'bg-white text-purple-600 shadow-sm'
+                                : 'text-slate-500 hover:text-slate-700'
                                 }`}
                         >
                             Forecast
                         </button>
                     </div>
 
+                    {/* Actions */}
                     <button
                         onClick={() => { setIsAvailabilityCheckOpen(true); setHasChecked(false); setCheckDate(''); setAvailableMembers([]); }}
-                        className="btn bg-indigo-600 hover:bg-indigo-700 text-white flex items-center gap-2 shadow-lg shadow-indigo-200"
+                        className="px-3 py-2 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200 rounded-md flex items-center gap-2 text-xs font-semibold transition-colors"
                     >
-                        <CalendarClock size={18} /> Check Availability
+                        <CalendarClock size={16} /> Check
                     </button>
                     <button
                         onClick={exportCSV}
-                        className="btn btn-secondary flex items-center gap-2"
+                        className="px-3 py-2 bg-white text-slate-700 hover:bg-slate-50 border border-slate-200 rounded-md flex items-center gap-2 text-xs font-semibold shadow-sm transition-colors"
                     >
-                        <Download size={18} /> Export CSV
+                        <Download size={16} /> Export
                     </button>
                     <button
                         onClick={handleAddTask}
-                        className="btn btn-primary flex items-center gap-2"
+                        className="px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md flex items-center gap-2 text-xs font-bold shadow-sm transition-colors"
                     >
-                        <Plus size={18} /> New Task
+                        <Plus size={16} /> New Task
                     </button>
                 </div>
             </header>
@@ -419,27 +444,7 @@ export default function Tracker() {
                 </div>
             )}
 
-            {/* Filters */}
-            <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 mb-8">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                        <input
-                            type="text"
-                            placeholder="Search by project, assignee, or phase..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full pl-10 pr-4 py-2.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent text-sm"
-                        />
-                    </div>
-                    <input
-                        type="date"
-                        value={dateFilter}
-                        onChange={(e) => setDateFilter(e.target.value)}
-                        className="px-4 py-2.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent text-sm"
-                    />
-                </div>
-            </div>
+
 
             {/* Grouped Tasks - No global pagination, but each assignee table is paginated */}
             <div className="space-y-6">
