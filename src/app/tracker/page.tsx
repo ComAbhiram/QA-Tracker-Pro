@@ -500,6 +500,8 @@ export default function Tracker() {
                                 leaves={leaves}
                                 onEditTask={handleEditTask}
                                 onDateUpdate={async (taskId, field, date) => {
+                                    console.log('[Date Update] Starting update:', { taskId, field, date });
+
                                     // Use API route to support manager mode
                                     const response = await fetch('/api/tasks/update', {
                                         method: 'PUT',
@@ -514,11 +516,15 @@ export default function Tracker() {
                                         })
                                     });
 
+                                    console.log('[Date Update] Response status:', response.status);
+
                                     if (!response.ok) {
                                         const err = await response.json();
-                                        console.error('Error updating date:', err);
+                                        console.error('[Date Update] Error:', err);
+                                        console.log('[Date Update] Calling toastError...');
                                         toastError('Failed to update date');
                                     } else {
+                                        console.log('[Date Update] Success! Calling success toast...');
                                         success('Date has been changed successfully.');
                                         refreshTasks();
                                     }
