@@ -42,6 +42,13 @@ export async function PUT(request: NextRequest) {
         const guestToken = cookieStore.get('guest_token')?.value;
         const isManagerMode = guestToken === 'manager_access_token_2026';
 
+        console.log('[API Update] Auth check:', {
+            hasUser: !!user,
+            guestToken,
+            isManagerMode,
+            allCookies: Array.from(cookieStore.getAll()).map(c => c.name)
+        });
+
         if (!user && !isManagerMode) {
             console.error('[API Update] Auth error:', authError);
             return NextResponse.json({ error: 'Unauthorized - please log in' }, { status: 401 });
