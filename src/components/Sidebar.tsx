@@ -110,7 +110,12 @@ export function Sidebar() {
                 try {
                     const { data, error } = await supabase.from('teams').select('id, name').order('name');
                     if (error) throw error;
-                    if (data) setTeams(data);
+                    if (data) {
+                        const filteredTeams = data.filter(team =>
+                            !['cochin', 'dubai'].includes(team.name.toLowerCase())
+                        );
+                        setTeams(filteredTeams);
+                    }
                 } catch (error) {
                     console.error('Error fetching teams for sidebar:', error);
                 } finally {
