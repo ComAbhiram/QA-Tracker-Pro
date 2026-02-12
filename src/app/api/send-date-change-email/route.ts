@@ -150,7 +150,7 @@ export async function POST(request: NextRequest) {
 
         // Send email to all recipients
         const { data, error } = await resend.emails.send({
-            from: 'QA Tracker <notifications@qatracker.com>',
+            from: 'QA Tracker <onboarding@resend.dev>',
             to: RECIPIENTS,
             subject: `Task ${dateFieldLabel} Changed - ${teamName}`,
             html: htmlContent,
