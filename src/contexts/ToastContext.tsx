@@ -1,7 +1,7 @@
 'use client';
 
-import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
-import { X, CheckCircle, AlertCircle, Info, AlertTriangle } from 'lucide-react';
+import React, { createContext, useContext, ReactNode } from 'react';
+import { toast } from 'sonner';
 
 export type ToastType = 'success' | 'error' | 'warning' | 'info';
 
@@ -12,7 +12,7 @@ export interface Toast {
 }
 
 interface ToastContextType {
-    toasts: Toast[];
+    toasts: Toast[]; // Kept for type compatibility, though always empty with Sonner
     showToast: (message: string, type: ToastType) => void;
     removeToast: (id: string) => void;
     success: (message: string) => void;
@@ -32,96 +32,45 @@ export const useToast = () => {
 };
 
 export const ToastProvider = ({ children }: { children: ReactNode }) => {
-    const [toasts, setToasts] = useState<Toast[]>([]);
 
-    const removeToast = useCallback((id: string) => {
-        setToasts((prev) => prev.filter((toast) => toast.id !== id));
-    }, []);
+    const showToast = (message: string, type: ToastType = 'info') => {
+        switch (type) {
+            case 'success':
+                toast.success(message);
+                break;
+            case 'error':
+                toast.error(message);
+                break;
+            case 'warning':
+                toast.warning(message);
+                break;
+            case 'info':
+            default:
+                toast.info(message);
+                break;
+        }
+    };
 
-    const showToast = useCallback((message: string, type: ToastType = 'info') => {
-        const id = Math.random().toString(36).substring(2, 9);
-        const newToast: Toast = { id, message, type };
+    const success = (message: string) => toast.success(message);
+    const error = (message: string) => toast.error(message);
+    const warning = (message: string) => toast.warning(message);
+    const info = (message: string) => toast.info(message);
 
-        console.log('[ToastContext] Creating toast:', newToast);
-        setToasts((prev) => {
-            console.log('[ToastContext] Current toasts:', prev);
-            console.log('[ToastContext] New toasts array:', [...prev, newToast]);
-            return [...prev, newToast];
-        });
-
-        // Auto-remove after 3 seconds
-        setTimeout(() => {
-            console.log('[ToastContext] Removing toast:', id);
-            removeToast(id);
-        }, 4000);
-    }, [removeToast]);
-
-    const success = (message: string) => showToast(message, 'success');
-    const error = (message: string) => showToast(message, 'error');
-    const warning = (message: string) => showToast(message, 'warning');
-    const info = (message: string) => showToast(message, 'info');
+    const removeToast = (id: string) => {
+        toast.dismiss(id);
+    };
 
     return (
-        <ToastContext.Provider value={{ toasts, showToast, removeToast, success, error, warning, info }}>
+        <ToastContext.Provider value={{
+            toasts: [],
+            showToast,
+            removeToast,
+            success,
+            error,
+            warning,
+            info
+        }}>
             {children}
-            <ToastContainer toasts={toasts} removeToast={removeToast} />
         </ToastContext.Provider>
-    );
-};
-
-const ToastContainer = ({ toasts, removeToast }: { toasts: Toast[]; removeToast: (id: string) => void }) => {
-    console.log('[ToastContainer] Rendering with toasts:', toasts);
-
-    return (
-        <div
-            className="fixed bottom-4 right-4 z-[99999] flex flex-col gap-2"
-            style={{
-                position: 'fixed',
-                bottom: '16px',
-                right: '16px',
-                zIndex: 99999,
-                pointerEvents: 'none'
-            }}
-        >
-            {toasts.map((toast) => {
-                console.log('[ToastContainer] Rendering toast:', toast);
-                return (
-                    <div
-                        key={toast.id}
-                        className={`
-                            pointer-events-auto
-                            flex items-center gap-3 px-4 py-3 rounded-xl shadow-lg border backdrop-blur-sm
-                            ${toast.type === 'success' ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : ''}
-                            ${toast.type === 'error' ? 'bg-rose-50 border-rose-200 text-rose-800' : ''}
-                            ${toast.type === 'warning' ? 'bg-amber-50 border-amber-200 text-amber-800' : ''}
-                            ${toast.type === 'info' ? 'bg-indigo-50 border-indigo-200 text-indigo-800' : ''}
-                            min-w-[300px] max-w-md
-                        `}
-                        style={{
-                            pointerEvents: 'auto',
-                            backgroundColor: toast.type === 'success' ? '#d1fae5' : '#fecaca',
-                            border: '2px solid #000',
-                            padding: '12px 16px',
-                            borderRadius: '12px',
-                            minWidth: '300px'
-                        }}
-                    >
-                        <div className="flex-shrink-0">
-                            {toast.type === 'success' && <CheckCircle size={20} className="text-emerald-500" />}
-                            {toast.type === 'error' && <AlertCircle size={20} className="text-rose-500" />}
-                            {toast.type === 'warning' && <AlertTriangle size={20} className="text-amber-500" />}
-                            {toast.type === 'info' && <Info size={20} className="text-indigo-500" />}
-                        </div>
-                        <p className="text-sm font-medium flex-1">{toast.message}</p>
-                        <button
-                            onClick={() => removeToast(toast.id)}
-                            className="p-1 rounded-full hover:bg-black/5 transition-colors text-current opacity-60 hover:opacity-100"
-                        >
-                            <X size={16} />
-                        </button>
-                    </div>
-                );
-            })}
-        </div>
     );
 };

@@ -9,6 +9,8 @@ import { getHubstaffNameFromQA } from '@/lib/hubstaff-name-mapping';
 import { useGuestMode } from '@/contexts/GuestContext';
 import { useToast } from '@/contexts/ToastContext';
 import ConfirmationModal from './ConfirmationModal';
+import { DatePicker } from './DatePicker';
+import { Button } from './ui/button';
 
 interface TaskModalProps {
     isOpen: boolean;
@@ -462,6 +464,13 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
         await executeSave();
     };
 
+    const handleDateChange = (field: 'startDate' | 'endDate' | 'actualCompletionDate', date?: Date) => {
+        setFormData(prev => ({
+            ...prev,
+            [field]: date ? date.toISOString().split('T')[0] : ''
+        }));
+    };
+
     const handleProjectChange = (value: string | number | null) => {
         setFormData(prev => ({
             ...prev,
@@ -687,24 +696,20 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
                             <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
                                 <Calendar size={16} className="text-indigo-500" /> Start Date
                             </label>
-                            <input
-                                type="date"
-                                name="startDate"
-                                value={formData.startDate || ''}
-                                onChange={handleChange}
-                                className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all font-medium text-slate-700"
+                            <DatePicker
+                                date={formData.startDate ? new Date(formData.startDate) : undefined}
+                                setDate={(date) => handleDateChange('startDate', date)}
+                                placeholder="Pick a start date"
                             />
                         </div>
                         <div className="space-y-3">
                             <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
                                 <Calendar size={16} className="text-indigo-500" /> End Date
                             </label>
-                            <input
-                                type="date"
-                                name="endDate"
-                                value={formData.endDate || ''}
-                                onChange={handleChange}
-                                className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all font-medium text-slate-700"
+                            <DatePicker
+                                date={formData.endDate ? new Date(formData.endDate) : undefined}
+                                setDate={(date) => handleDateChange('endDate', date)}
+                                placeholder="Pick an end date"
                             />
                         </div>
                     </div>
@@ -743,12 +748,11 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
                                     <Calendar size={16} className="text-emerald-500" /> Actual Completion Date
                                     {formData.status === 'Completed' && <span className="text-xs text-emerald-600">(Auto-filled)</span>}
                                 </label>
-                                <input
-                                    type="date"
-                                    name="actualCompletionDate"
-                                    value={formData.actualCompletionDate || ''}
-                                    onChange={handleChange}
-                                    className="w-full px-5 py-3 bg-emerald-50 border border-emerald-200 rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all font-medium text-slate-700"
+                                <DatePicker
+                                    date={formData.actualCompletionDate ? new Date(formData.actualCompletionDate) : undefined}
+                                    setDate={(date) => handleDateChange('actualCompletionDate', date)}
+                                    placeholder="Pick completion date"
+                                    className="bg-emerald-50 border-emerald-200"
                                 />
                             </div>
                         )}
@@ -917,8 +921,9 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
                             Cancel
                         </button>
                         {task && onDelete && (
-                            <button
+                            <Button
                                 type="button"
+                                variant="destructive"
                                 onClick={async () => {
                                     if (confirm('Are you sure you want to delete this task? This action cannot be undone.')) {
                                         setLoading(true);
@@ -926,10 +931,10 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
                                         setLoading(false);
                                     }
                                 }}
-                                className="px-6 py-3 text-red-600 font-bold hover:bg-red-50 rounded-xl transition-colors text-sm"
+                                className="px-6 py-3 rounded-xl shadow-none"
                             >
                                 Delete
-                            </button>
+                            </Button>
                         )}
                         <button
                             type="submit"

@@ -1,6 +1,6 @@
 'use client';
 
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+
 
 interface PaginationProps {
     currentPage: number;
@@ -8,6 +8,16 @@ interface PaginationProps {
     itemsPerPage: number;
     onPageChange: (page: number) => void;
 }
+
+import {
+    Pagination as ShadcnPagination,
+    PaginationContent,
+    PaginationEllipsis,
+    PaginationItem,
+    PaginationLink,
+    PaginationNext,
+    PaginationPrevious,
+} from "@/components/ui/pagination";
 
 export default function Pagination({ currentPage, totalItems, itemsPerPage, onPageChange }: PaginationProps) {
     const totalPages = Math.ceil(totalItems / itemsPerPage);
@@ -56,46 +66,51 @@ export default function Pagination({ currentPage, totalItems, itemsPerPage, onPa
                 <span className="font-semibold text-slate-800">{totalItems}</span> results
             </div>
 
-            <div className="flex items-center gap-2">
-                <button
-                    onClick={() => onPageChange(currentPage - 1)}
-                    disabled={currentPage === 1}
-                    className="p-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-white hover:text-sky-600 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-slate-600 transition-colors"
-                    aria-label="Previous page"
-                >
-                    <ChevronLeft size={18} />
-                </button>
+            <ShadcnPagination className="mx-0 w-auto justify-end">
+                <PaginationContent>
+                    <PaginationItem>
+                        <PaginationPrevious
+                            href="#"
+                            onClick={(e) => {
+                                e.preventDefault();
+                                if (currentPage > 1) onPageChange(currentPage - 1);
+                            }}
+                            className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                        />
+                    </PaginationItem>
 
-                <div className="flex items-center gap-1">
                     {getPageNumbers().map((page, index) => (
-                        page === '...' ? (
-                            <span key={`ellipsis-${index}`} className="px-3 py-2 text-slate-400">
-                                ...
-                            </span>
-                        ) : (
-                            <button
-                                key={page}
-                                onClick={() => onPageChange(page as number)}
-                                className={`min-w-[40px] px-3 py-2 rounded-lg text-sm font-medium transition-colors ${currentPage === page
-                                        ? 'bg-sky-500 text-white shadow-sm'
-                                        : 'text-slate-600 hover:bg-white hover:text-sky-600 border border-transparent hover:border-slate-200'
-                                    }`}
-                            >
-                                {page}
-                            </button>
-                        )
+                        <PaginationItem key={index}>
+                            {page === '...' ? (
+                                <PaginationEllipsis />
+                            ) : (
+                                <PaginationLink
+                                    href="#"
+                                    isActive={currentPage === page}
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        onPageChange(page as number);
+                                    }}
+                                    className="cursor-pointer"
+                                >
+                                    {page}
+                                </PaginationLink>
+                            )}
+                        </PaginationItem>
                     ))}
-                </div>
 
-                <button
-                    onClick={() => onPageChange(currentPage + 1)}
-                    disabled={currentPage === totalPages}
-                    className="p-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-white hover:text-sky-600 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-slate-600 transition-colors"
-                    aria-label="Next page"
-                >
-                    <ChevronRight size={18} />
-                </button>
-            </div>
+                    <PaginationItem>
+                        <PaginationNext
+                            href="#"
+                            onClick={(e) => {
+                                e.preventDefault();
+                                if (currentPage < totalPages) onPageChange(currentPage + 1);
+                            }}
+                            className={currentPage === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                        />
+                    </PaginationItem>
+                </PaginationContent>
+            </ShadcnPagination>
         </div>
     );
 }

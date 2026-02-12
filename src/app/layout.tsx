@@ -6,6 +6,7 @@ import { GuestProvider } from "@/contexts/GuestContext";
 import { ToastProvider } from "@/contexts/ToastContext";
 import GuestBanner from "@/components/GuestBanner";
 import AIChatAssistant from "@/components/AIChatAssistant";
+import { Toaster } from "@/components/ui/sonner";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -42,6 +43,7 @@ export default function RootLayout({
                 </footer>
               </main>
               <AIChatAssistant />
+              <Toaster />
             </div>
           </ToastProvider>
         </GuestProvider>
