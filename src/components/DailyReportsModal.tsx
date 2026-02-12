@@ -419,6 +419,21 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                 return hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
             };
 
+            // Group tasks by assignee (primary assignee)
+            const groupedTasks = todayTasks.reduce((acc, task) => {
+                const assignee = task.assignedTo || 'Unassigned';
+                if (!acc[assignee]) acc[assignee] = [];
+                acc[assignee].push(task);
+                return acc;
+            }, {} as Record<string, typeof todayTasks>);
+
+            // Sort assignees alphabetically, keeping Unassigned last
+            const sortedAssignees = Object.keys(groupedTasks).sort((a, b) => {
+                if (a === 'Unassigned') return 1;
+                if (b === 'Unassigned') return -1;
+                return a.localeCompare(b);
+            });
+
             // Create a temporary container for the table
             const container = document.createElement('div');
             container.style.cssText = 'position: absolute; left: -9999px; top: -9999px; background: white; padding: 30px;';
@@ -519,102 +534,102 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                     </div>
                     ` : ''}
                     
-                    <table style="width: 100%; border-collapse: separate; border-spacing: 0; background: white; border: 1px solid #64748b; border-radius: 12px; overflow: hidden;">
-                        <thead>
-                            <tr style="background: #0f172a;">
-                                <th style="padding: 16px; text-align: left; color: white; font-weight: 700; font-size: 15px; width: 15%; border-right: 1px solid #334155;">Project & Type</th>
-                                <th style="padding: 16px; text-align: left; color: white; font-weight: 700; font-size: 15px; border-right: 1px solid #334155;">Phase & PC</th>
-                                <th style="padding: 16px; text-align: center; color: white; font-weight: 700; font-size: 15px; width: 12%; border-right: 1px solid #334155;">Status</th>
-                                <th style="padding: 16px; text-align: left; color: white; font-weight: 700; font-size: 15px; width: 15%; border-right: 1px solid #334155;">Assignees</th>
-                                <th style="padding: 16px; text-align: left; color: white; font-weight: 700; font-size: 15px; border-right: 1px solid #334155;">Dates (S/E/A)</th>
-                                <th style="padding: 16px; text-align: left; color: white; font-weight: 700; font-size: 15px;">Comments/Dev.</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${todayTasks.length === 0 ?
-                    '<tr><td colspan="6" style="padding: 40px; text-align: center; color: #64748b; font-size: 18px; font-weight: 500;">No tasks scheduled for today</td></tr>' :
-                    todayTasks.map((task, index) => {
+                ${sortedAssignees.map(assignee => `
+                    <div style="margin-bottom: 30px; border: 1px solid #cbd5e1; border-radius: 12px; overflow: hidden; page-break-inside: avoid;">
+                        <!-- Assignee Header -->
+                        <div style="background: #eab308; padding: 16px; display: flex; justify-content: space-between; align-items: center;">
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <div style="width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 18px;">
+                                    ${assignee.charAt(0)}
+                                </div>
+                                <h3 style="color: #0f172a; font-size: 18px; font-weight: 800; margin: 0;">${assignee}</h3>
+                            </div>
+                            <span style="background: rgba(255,255,255,0.2); color: white; padding: 4px 12px; border-radius: 20px; font-size: 14px; font-weight: 600;">
+                                ${groupedTasks[assignee].length} Tasks
+                            </span>
+                        </div>
+
+                        <!-- Assignee Table -->
+                        <table style="width: 100%; border-collapse: separate; border-spacing: 0; background: white;">
+                             <thead>
+                                <tr style="background: #0f172a;">
+                                    <th style="padding: 12px 16px; text-align: left; color: white; font-weight: 700; font-size: 14px; width: 22%; border-right: 1px solid #334155;">Project & Type</th>
+                                    <th style="padding: 12px 16px; text-align: left; color: white; font-weight: 700; font-size: 14px; width: 14%; border-right: 1px solid #334155;">Phase & PC</th>
+                                    <th style="padding: 12px 16px; text-align: center; color: white; font-weight: 700; font-size: 14px; width: 12%; border-right: 1px solid #334155;">Status</th>
+                                    <th style="padding: 12px 16px; text-align: left; color: white; font-weight: 700; font-size: 14px; width: 18%; border-right: 1px solid #334155;">Dates (S/E/A)</th>
+                                    <th style="padding: 12px 16px; text-align: left; color: white; font-weight: 700; font-size: 14px;">Comments</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${groupedTasks[assignee].map((task, index) => {
                         const isLateCompletion = task.status === 'Completed' && task.endDate && task.actualCompletionDate && new Date(task.actualCompletionDate) > new Date(task.endDate);
 
                         let lateLabel = 'Completed (Overdue)';
                         if (isLateCompletion && task.endDate && task.actualCompletionDate) {
                             const end = new Date(task.endDate);
                             const actual = new Date(task.actualCompletionDate);
-                            // Set to end of days to be safe or just use raw dates if they are date strings.
-                            // Assuming YYYY-MM-DD
                             const e = new Date(end); e.setHours(0, 0, 0, 0);
                             const a = new Date(actual); a.setHours(0, 0, 0, 0);
-
                             const diffTime = a.getTime() - e.getTime();
                             const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
                             lateLabel = `Completed (Overdue ${diffDays}d)`;
                         }
 
                         const effectiveStatus = getEffectiveStatus(task);
-
                         let displayStatus = effectiveStatus;
                         if (effectiveStatus === 'Overdue' && task.endDate) {
                             const end = new Date(task.endDate);
                             const now = new Date();
                             end.setHours(0, 0, 0, 0);
                             now.setHours(0, 0, 0, 0);
-
                             const diffTime = now.getTime() - end.getTime();
                             const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                            if (diffDays > 0) {
-                                displayStatus = `Overdue (+${diffDays}d)`;
-                            }
+                            if (diffDays > 0) displayStatus = `Overdue (+${diffDays}d)`;
                         }
 
                         return `
-                                    <tr style="border-bottom: 1px solid #cbd5e1; ${index % 2 === 0 ? 'background: #f8fafc;' : 'background: white;'}">
-                                        <td style="padding: 16px; color: #0f172a; font-weight: 600; font-size: 15px; vertical-align: middle; border-right: 1px solid #cbd5e1;">
-                                            <div style="margin-bottom: 4px;">${task.projectName}</div>
-                                            <div style="color: #475569; font-size: 13px; font-weight: 500;">${task.projectType || '-'}</div>
-                                            ${task.priority ? `<div style="margin-top:6px; display:inline-block; padding:4px 8px; background:#e2e8f0; border-radius:4px; font-size:12px; font-weight: 600; color: #334155;">${task.priority}</div>` : ''}
-                                        </td>
-                                        <td style="padding: 16px; color: #334155; font-size: 15px; vertical-align: middle; border-right: 1px solid #cbd5e1;">
-                                            <div style="font-weight: 500;">${task.subPhase || 'N/A'}</div>
-                                            <div style="color: #64748b; font-size: 13px; margin-top: 4px;">PC: ${task.pc || '-'}</div>
-                                        </td>
-                                    <td style="padding: 16px; text-align: center; vertical-align: middle; border-right: 1px solid #cbd5e1;">
-                                        <div style="display: flex; align-items: center; justify-content: center; width: 100%; height: 100%;">
-                                            <span style="font-size: 14px; font-weight: 800;
-                                                ${effectiveStatus === 'Completed' ? 'color: #166534;' :
+                                        <tr style="border-bottom: 1px solid #e2e8f0; ${index % 2 === 0 ? 'background: #f8fafc;' : 'background: white;'}">
+                                            <td style="padding: 12px 16px; vertical-align: top; border-right: 1px solid #e2e8f0;">
+                                                <div style="color: #0f172a; font-weight: 600; font-size: 14px; margin-bottom: 4px;">${task.projectName}</div>
+                                                <div style="color: #475569; font-size: 12px;">${task.projectType || '-'}</div>
+                                                ${task.priority ? `<div style="margin-top:4px; display:inline-block; padding:2px 6px; background:#e2e8f0; border-radius:4px; font-size: 11px; font-weight: 600; color: #334155;">${task.priority}</div>` : ''}
+                                            </td>
+                                            <td style="padding: 12px 16px; vertical-align: top; border-right: 1px solid #e2e8f0;">
+                                                <div style="color: #334155; font-size: 13px; font-weight: 500;">${task.subPhase || 'N/A'}</div>
+                                                <div style="color: #64748b; font-size: 12px; margin-top: 2px;">PC: ${task.pc || '-'}</div>
+                                            </td>
+                                            <td style="padding: 12px 16px; text-align: center; vertical-align: middle; border-right: 1px solid #e2e8f0;">
+                                                 <span style="font-size: 13px; font-weight: 800;
+                                                    ${effectiveStatus === 'Completed' ? 'color: #166534;' :
                                 effectiveStatus === 'In Progress' ? 'color: #1e40af;' :
                                     effectiveStatus === 'Yet to Start' ? 'color: #92400e;' :
                                         effectiveStatus === 'Overdue' ? 'color: #991b1b;' :
                                             'color: #475569;'}
-                                                ${isLateCompletion ? 'color: #991b1b;' : ''}">
-                                                ${isLateCompletion ? lateLabel : displayStatus}
-                                            </span>
-                                        </div>
-                                    </td>
-                                        <td style="padding: 16px; color: #334155; font-size: 14px; vertical-align: middle; border-right: 1px solid #cbd5e1; font-weight: 500;">
-                                            ${[task.assignedTo, task.assignedTo2, ...(task.additionalAssignees || [])].filter(Boolean).join(', ') || 'Unassigned'}
-                                        </td>
-                                        <td style="padding: 16px; color: #334155; font-size: 14px; vertical-align: middle; border-right: 1px solid #cbd5e1;">
-                                            <div style="margin-bottom: 4px;"><span style="font-weight: 600;">S:</span> ${task.startDate ? formatDate(task.startDate) : '-'}</div>
-                                            <div style="margin-bottom: 4px;"><span style="font-weight: 600;">E:</span> ${task.endDate ? formatDate(task.endDate) : '-'}</div>
-                                            ${task.actualCompletionDate ? `<div style="color:#059669; font-weight: 600;">A: ${formatDate(task.actualCompletionDate)}</div>` : ''}
-                                        </td>
-                                        <td style="padding: 16px; color: #475569; font-size: 13px; vertical-align: middle;">
-                                            <div style="margin-bottom:6px; line-height: 1.4;">${task.comments || '-'}</div>
-                                            ${'' /* Deviation reason hidden as requested */}
-                                            ${task.sprintLink ? `<div style="color:#2563eb; font-weight: 500;">Sprint Link Available</div>` : ''}
-                                        </td>
-                                    </tr>
-        `;
-                    }).join('')
-                }
-                        </tbody>
-                    </table>
-                    
-                    <div style="margin-top: 32px; padding: 24px; background: #f1f5f9; border-radius: 12px; border-left: 6px solid #0284c7;">
-                        <p style="color: #334155; font-size: 16px; margin: 0;">
-                            <strong style="color: #0f172a;">Total Tasks Scheduled:</strong> ${todayTasks.length}
-                        </p>
+                                                    ${isLateCompletion ? 'color: #991b1b;' : ''}">
+                                                    ${isLateCompletion ? lateLabel : displayStatus}
+                                                </span>
+                                            </td>
+                                             <td style="padding: 12px 16px; vertical-align: top; border-right: 1px solid #e2e8f0;">
+                                                <div style="color: #334155; font-size: 13px; margin-bottom: 2px;"><span style="font-weight: 600;">S:</span> ${task.startDate ? formatDate(task.startDate) : '-'}</div>
+                                                <div style="color: #334155; font-size: 13px; margin-bottom: 2px;"><span style="font-weight: 600;">E:</span> ${task.endDate ? formatDate(task.endDate) : '-'}</div>
+                                                ${task.actualCompletionDate ? `<div style="color:#059669; font-size: 13px; font-weight: 600;">A: ${formatDate(task.actualCompletionDate)}</div>` : ''}
+                                            </td>
+                                            <td style="padding: 12px 16px; vertical-align: top;">
+                                                <div style="color: #475569; font-size: 12px; line-height: 1.4;">${task.comments || '-'}</div>
+                                                ${task.sprintLink ? `<div style="color:#2563eb; font-size: 11px; margin-top: 4px;">Link Available</div>` : ''}
+                                            </td>
+                                        </tr>
+                                    `;
+                    }).join('')}
+                            </tbody>
+                        </table>
                     </div>
+                `).join('')}
+
+                <div style="margin-top: 32px; padding: 24px; background: #f1f5f9; border-radius: 12px; border-left: 6px solid #0284c7;">
+                    <p style="color: #334155; font-size: 16px; margin: 0;">
+                        <strong style="color: #0f172a;">Total Tasks Scheduled:</strong> ${todayTasks.length}
+                    </p>
                 </div>
             `;
 
@@ -672,7 +687,7 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
             return today >= start && today <= end;
         });
 
-        let report = `*Today's Work Status - ${today}*\n\n`;
+        let report = `* Today's Work Status - ${today}*\n\n`;
         report += `*Tasks Scheduled (${todayTasks.length}):*\n`;
         todayTasks.forEach(t => {
             report += `- ${t.projectName} (${t.subPhase || 'N/A'}): ${t.status} - ${t.assignedTo || 'Unassigned'}\n`;
@@ -1129,6 +1144,6 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                     </div>
                 )
             }
-        </div >
+        </div>
     );
 }

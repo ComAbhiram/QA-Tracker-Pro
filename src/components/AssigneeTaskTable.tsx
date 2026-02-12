@@ -1,9 +1,7 @@
-'use client';
-
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Task, isTaskOverdue, getOverdueDays, Leave } from '@/lib/types';
 import { format, addDays } from 'date-fns';
-import { AlertCircle, CalendarClock, Palmtree } from 'lucide-react';
+import { AlertCircle, CalendarClock, Palmtree, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import Pagination from '@/components/Pagination';
 import { calculateAvailability } from '@/lib/availability';
 
@@ -14,16 +12,72 @@ interface AssigneeTaskTableProps {
     onEditTask: (task: Task) => void;
 }
 
+type SortKey = 'projectName' | 'projectType' | 'priority' | 'subPhase' | 'pc' | 'status' | 'startDate' | 'endDate' | 'actualCompletionDate' | 'bugCount' | 'deviation';
+
 export default function AssigneeTaskTable({ assignee, tasks, leaves, onEditTask }: AssigneeTaskTableProps) {
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 5; // Reduced to 5 per user for better compactness, or could be 10
+    const [sortConfig, setSortConfig] = useState<{ key: SortKey; direction: 'asc' | 'desc' } | null>(null);
+    const itemsPerPage = 5;
 
-    const totalItems = tasks.length;
-    const items = tasks; // We will paginate this array
+    // Sorting Logic
+    const sortedTasks = useMemo(() => {
+        let sortableTasks = [...tasks];
+        if (sortConfig !== null) {
+            sortableTasks.sort((a, b) => {
+                let aValue: any = a[sortConfig.key];
+                let bValue: any = b[sortConfig.key];
 
+                // Handle special cases
+                if (sortConfig.key === 'bugCount') {
+                    // Sort by total bugs (T: bugCount)
+                    aValue = a.bugCount || 0;
+                    bValue = b.bugCount || 0;
+                }
+
+                if (aValue < bValue) {
+                    return sortConfig.direction === 'asc' ? -1 : 1;
+                }
+                if (aValue > bValue) {
+                    return sortConfig.direction === 'asc' ? 1 : -1;
+                }
+                return 0;
+            });
+        }
+        return sortableTasks;
+    }, [tasks, sortConfig]);
+
+    const totalItems = sortedTasks.length;
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
-    const paginatedTasks = items.slice(startIndex, endIndex);
+    const paginatedTasks = sortedTasks.slice(startIndex, endIndex);
+
+    const requestSort = (key: SortKey) => {
+        let direction: 'asc' | 'desc' = 'asc';
+        if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') {
+            direction = 'desc';
+        }
+        setSortConfig({ key, direction });
+    };
+
+    const getSortIcon = (key: SortKey) => {
+        if (!sortConfig || sortConfig.key !== key) {
+            return <ArrowUpDown size={14} className="ml-1 text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity" />;
+        }
+        return sortConfig.direction === 'asc' ? <ArrowUp size={14} className="ml-1 text-white" /> : <ArrowDown size={14} className="ml-1 text-white" />;
+    };
+
+    // Helper for table headers to reduce boilerplate
+    const SortableHeader = ({ label, sortKey, className = "" }: { label: string, sortKey: SortKey, className?: string }) => (
+        <th
+            className={`px-4 py-4 font-semibold text-left border-r border-slate-600 cursor-pointer hover:bg-slate-700 transition-colors group ${className}`}
+            onClick={() => requestSort(sortKey)}
+        >
+            <div className="flex items-center">
+                {label}
+                {getSortIcon(sortKey)}
+            </div>
+        </th>
+    );
 
     // Styling constants matching Daily Reports image
     const headerStyle = "bg-[#1e293b] text-white";
@@ -79,20 +133,21 @@ export default function AssigneeTaskTable({ assignee, tasks, leaves, onEditTask 
                 <table className="w-full text-sm text-slate-600 border-collapse">
                     <thead className={`${headerStyle} border border-slate-600`}>
                         <tr>
-                            <th className="px-5 py-4 font-semibold text-left border-r border-slate-600">Project</th>
-                            <th className="px-4 py-4 font-semibold text-left border-r border-slate-600">Type</th>
-                            <th className="px-4 py-4 font-semibold text-left border-r border-slate-600">Priority</th>
-                            {/* Edit column removed */}
-                            <th className="px-5 py-4 font-semibold text-left border-r border-slate-600">Phase</th>
-                            <th className="px-4 py-4 font-semibold text-left border-r border-slate-600">PC</th>
+                            <SortableHeader label="Project" sortKey="projectName" className="px-5" />
+                            <SortableHeader label="Type" sortKey="projectType" />
+                            <SortableHeader label="Priority" sortKey="priority" />
+                            <SortableHeader label="Phase" sortKey="subPhase" className="px-5" />
+                            <SortableHeader label="PC" sortKey="pc" />
+                            {/* Assignees not sortable for now as it's a list */}
                             <th className="px-4 py-4 font-semibold text-left border-r border-slate-600">Assignees</th>
-                            <th className="px-4 py-4 font-semibold text-left border-r border-slate-600">Status</th>
-                            <th className="px-4 py-4 font-semibold text-left border-r border-slate-600">Start</th>
-                            <th className="px-4 py-4 font-semibold text-left border-r border-slate-600">End</th>
-                            <th className="px-4 py-4 font-semibold text-left border-r border-slate-600">Actual End</th>
-                            <th className="px-4 py-4 font-semibold text-left border-r border-slate-600">Bugs (H/F/T)</th>
+                            <SortableHeader label="Status" sortKey="status" />
+                            <SortableHeader label="Start" sortKey="startDate" />
+                            <SortableHeader label="End" sortKey="endDate" />
+                            <SortableHeader label="Actual End" sortKey="actualCompletionDate" />
+                            <SortableHeader label="Bugs (H/F/T)" sortKey="bugCount" />
+                            {/* Comments not sortable */}
                             <th className="px-5 py-4 font-semibold text-left border-r border-slate-600">Comments</th>
-                            <th className="px-4 py-4 font-semibold text-left border-r border-slate-600">Deviation</th>
+                            <SortableHeader label="Deviation" sortKey="deviation" />
                             <th className="px-4 py-4 font-semibold text-left">Sprint</th>
                         </tr>
                     </thead>
@@ -117,7 +172,6 @@ export default function AssigneeTaskTable({ assignee, tasks, leaves, onEditTask 
                                         </span>
                                     )}
                                 </td>
-                                {/* Edit cell removed */}
                                 <td className="px-5 py-4 font-medium text-slate-600 border-r border-slate-200">{task.subPhase || '-'}</td>
                                 <td className="px-4 py-4 border-r border-slate-200">{task.pc || '-'}</td>
                                 <td className="px-4 py-4 border-r border-slate-200">

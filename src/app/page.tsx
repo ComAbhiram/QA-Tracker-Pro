@@ -11,6 +11,7 @@ import Pagination from '@/components/Pagination';
 import GlobalAvailabilityModal from '@/components/GlobalAvailabilityModal';
 import { Plus, FileText, Layers, Edit2, Search, CalendarClock } from 'lucide-react';
 import { useGuestMode } from '@/contexts/GuestContext';
+import TaskMigration from '@/components/TaskMigration';
 
 export default function Home() {
   // Table Data State
@@ -327,6 +328,8 @@ export default function Home() {
           >
             <CalendarClock size={18} /> Check Availability
           </button>
+
+          {!isGuest && <TaskMigration />}
           {!isGuest && (
             <button
               onClick={handleAddTask}
