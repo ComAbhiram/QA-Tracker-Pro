@@ -1,25 +1,28 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseServer } from '@/lib/supabase-server';
-import { createClient } from '@supabase/supabase-js';
+import { createServerClient } from '@supabase/ssr';
+import { cookies } from 'next/headers';
 
 export async function DELETE(request: NextRequest) {
     try {
-        const authHeader = request.headers.get('Authorization');
-        if (!authHeader) {
-            return NextResponse.json({ error: 'Missing Authorization header' }, { status: 401 });
-        }
-
-        const token = authHeader.replace('Bearer ', '');
-
-        // Verify User
+        // Create Supabase client with cookies for proper session handling
+        const cookieStore = cookies();
         const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
         const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-        const authClient = createClient(supabaseUrl, supabaseAnonKey);
 
-        const { data: { user }, error: authError } = await authClient.auth.getUser(token);
+        const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
+            cookies: {
+                get(name: string) {
+                    return cookieStore.get(name)?.value;
+                },
+            },
+        });
+
+        // Get authenticated user from session
+        const { data: { user }, error: authError } = await supabase.auth.getUser();
 
         if (authError || !user) {
-            return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
+            return NextResponse.json({ error: 'Unauthorized - please log in' }, { status: 401 });
         }
 
         const { searchParams } = new URL(request.url);
