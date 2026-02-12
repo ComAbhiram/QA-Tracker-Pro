@@ -42,10 +42,16 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
         const id = Math.random().toString(36).substring(2, 9);
         const newToast: Toast = { id, message, type };
 
-        setToasts((prev) => [...prev, newToast]);
+        console.log('[ToastContext] Creating toast:', newToast);
+        setToasts((prev) => {
+            console.log('[ToastContext] Current toasts:', prev);
+            console.log('[ToastContext] New toasts array:', [...prev, newToast]);
+            return [...prev, newToast];
+        });
 
         // Auto-remove after 3 seconds
         setTimeout(() => {
+            console.log('[ToastContext] Removing toast:', id);
             removeToast(id);
         }, 4000);
     }, [removeToast]);
