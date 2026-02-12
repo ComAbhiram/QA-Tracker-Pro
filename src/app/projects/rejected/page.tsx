@@ -53,7 +53,7 @@ export default function RejectedProjects() {
     }
 
     return (
-        <div className="max-w-7xl mx-auto space-y-8 p-6">
+        <div className="max-w-[1800px] mx-auto space-y-8 p-4">
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
                     <div className="p-3 bg-red-50 text-red-600 rounded-2xl shadow-sm">
