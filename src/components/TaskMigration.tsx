@@ -38,7 +38,7 @@ export default function TaskMigration() {
 
         setIsExporting(true);
         try {
-            const response = await fetch(`/api/tasks/export?teamId=${teamId}`);
+            const response = await fetch(`/api/migration/export?teamId=${teamId}`);
             if (!response.ok) throw new Error('Export failed');
 
             const blob = await response.blob();
@@ -46,16 +46,16 @@ export default function TaskMigration() {
             const a = document.createElement('a');
             a.href = url;
             const date = new Date().toISOString().split('T')[0];
-            a.download = `tasks_migration_${date}.json`;
+            a.download = `team_migration_${date}.json`;
             document.body.appendChild(a);
             a.click();
             window.URL.revokeObjectURL(url);
             document.body.removeChild(a);
 
-            toastSuccess('Tasks exported successfully!');
+            toastSuccess('Team data (Projects & Tasks) exported successfully!');
         } catch (error) {
             console.error('Export error:', error);
-            toastError('Failed to export tasks.');
+            toastError('Failed to export data.');
         } finally {
             setIsExporting(false);
         }
@@ -75,7 +75,7 @@ export default function TaskMigration() {
             return;
         }
 
-        if (!confirm(`Are you sure you want to import tasks into the current team? This will create new copies of the tasks.`)) {
+        if (!confirm(`Importing will:\n1. Create missing Projects\n2. Create copies of all Tasks\n\nAre you sure you want to proceed?`)) {
             if (fileInputRef.current) fileInputRef.current.value = '';
             return;
         }
@@ -83,21 +83,25 @@ export default function TaskMigration() {
         setIsImporting(true);
         try {
             const fileContent = await file.text();
-            let tasks;
+            let data;
             try {
-                tasks = JSON.parse(fileContent);
+                data = JSON.parse(fileContent);
             } catch (jsonError) {
                 throw new Error('Invalid JSON file format');
             }
 
-            if (!Array.isArray(tasks)) {
-                throw new Error('Invalid file structure: Expected an array of tasks');
+            // Support both old (array) and new (object) formats for backward compatibility?
+            // Or just assume new format. Let's handle new format primarily.
+            // If it's an array, assume it's just tasks (legacy support)
+            let payload = data;
+            if (Array.isArray(data)) {
+                payload = { tasks: data, projects: [] };
             }
 
-            const response = await fetch('/api/tasks/import', {
+            const response = await fetch('/api/migration/import', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ teamId, tasks })
+                body: JSON.stringify({ teamId, data: payload })
             });
 
             const result = await response.json();
@@ -106,12 +110,12 @@ export default function TaskMigration() {
                 throw new Error(result.error || 'Import failed');
             }
 
-            toastSuccess(`Successfully imported ${result.count} tasks!`);
-            // Optional: Trigger refresh? relying on user to refresh for now or parent reload
+            toastSuccess(`Migration Complete: ${result.details.projectsCreated} Projects, ${result.details.tasksCreated} Tasks imported.`);
+            // Optional: Trigger refresh
             window.location.reload();
         } catch (error: any) {
             console.error('Import error:', error);
-            toastError(error.message || 'Failed to import tasks.');
+            toastError(error.message || 'Failed to import data.');
         } finally {
             setIsImporting(false);
             if (fileInputRef.current) fileInputRef.current.value = '';
