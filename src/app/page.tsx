@@ -25,7 +25,7 @@ export default function Home() {
   const [loadingStats, setLoadingStats] = useState(true);
 
   // Filter & Search State
-  const [filter, setFilter] = useState('active');
+  const [filter, setFilter] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
 
   // Pagination State
@@ -415,7 +415,7 @@ export default function Home() {
           <div className="p-6 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <h3 className="font-bold text-lg text-slate-800 flex items-center gap-2">
               <Layers size={20} className="text-indigo-600" />
-              Project Tasks
+              All Tasks
             </h3>
 
             <div className="flex items-center gap-3">
