@@ -193,8 +193,8 @@ export default function AssigneeTaskTable({ assignee, tasks, leaves, onEditTask 
                     <div className="flex items-center gap-2 bg-white/50 px-3 py-1.5 rounded-md border border-black/5">
                         <CalendarClock size={16} className="text-red-600" />
                         <div>
-                            <p className="text-[10px] uppercase font-bold tracking-wider opacity-70 leading-none">Available</p>
-                            <p className="text-xs font-bold leading-none">{format(availabilityDate, 'MMM d')}</p>
+                            <p className="text-[10px] uppercase font-bold tracking-wider opacity-70 leading-none mb-1">Available</p>
+                            <p className="text-sm font-bold leading-none">{format(availabilityDate, 'MMM d')}</p>
                         </div>
                     </div>
                 </div>
