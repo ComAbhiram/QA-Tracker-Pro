@@ -114,15 +114,40 @@ export default function LoginPage() {
                         {/* Manager Login Button */}
                         <button
                             type="button"
-                            onClick={() => {
+                            onClick={async () => {
                                 const key = prompt("Enter Manager Passkey:");
                                 if (key === 'inter223') {
-                                    router.push('/guest');
+                                    setLoading(true);
+                                    try {
+                                        // Authenticate as manager user
+                                        const { data, error } = await supabase.auth.signInWithPassword({
+                                            email: 'manager@intersmart.in',
+                                            password: 'inter223',
+                                        });
+
+                                        if (error) {
+                                            console.error('Manager login error:', error);
+                                            alert('Failed to authenticate manager. Please try again.');
+                                            setLoading(false);
+                                            return;
+                                        }
+
+                                        if (data.session) {
+                                            router.push('/guest');
+                                            router.refresh();
+                                        }
+                                    } catch (err) {
+                                        console.error('Manager login error:', err);
+                                        alert('Failed to authenticate manager. Please try again.');
+                                    } finally {
+                                        setLoading(false);
+                                    }
                                 } else if (key !== null) {
                                     alert('Invalid passkey');
                                 }
                             }}
-                            className="w-full py-3.5 bg-white hover:bg-slate-50 text-indigo-600 font-bold rounded-xl border-2 border-indigo-500 hover:border-indigo-600 transition-all flex items-center justify-center gap-2"
+                            disabled={loading}
+                            className="w-full py-3.5 bg-white hover:bg-slate-50 text-indigo-600 font-bold rounded-xl border-2 border-indigo-500 hover:border-indigo-600 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             <Users size={20} />
                             Login as a Manager
