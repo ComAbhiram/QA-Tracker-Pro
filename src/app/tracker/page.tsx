@@ -143,27 +143,16 @@ export default function Tracker() {
             team_id: taskData.teamId,
         };
 
-        // Helper to get session token
-        const { data: { session } } = await supabase.auth.getSession();
-        const token = session?.access_token;
-
-        if (!token) {
-            toastError("You must be logged in to modify tasks.");
-            return;
-        }
-
-        const headers = {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-        };
-
         if (editingTask) {
             const { team_id, ...updatePayload } = dbPayload;
 
             // Use API to bypass RLS for Super Admins in Manager Mode
+            // API uses cookie-based authentication, no need for Authorization header
             const response = await fetch('/api/tasks/update', {
                 method: 'PUT',
-                headers,
+                headers: {
+                    'Content-Type': 'application/json',
+                },
                 body: JSON.stringify({ id: editingTask.id, ...updatePayload })
             });
 
@@ -194,15 +183,11 @@ export default function Tracker() {
     };
 
     const handleDeleteTask = async (taskId: number) => {
-        const { data: { session } } = await supabase.auth.getSession();
-        const token = session?.access_token;
-
-        if (!token) return;
-
+        // API uses cookie-based authentication, no need for Authorization header
         const response = await fetch(`/api/tasks/delete?id=${taskId}`, {
             method: 'DELETE',
             headers: {
-                'Authorization': `Bearer ${token}`
+                'Content-Type': 'application/json',
             }
         });
 
