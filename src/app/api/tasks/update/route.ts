@@ -78,10 +78,10 @@ export async function PUT(request: NextRequest) {
             profile = profileData;
         }
 
-        // 2. Get Task details (to check ownership/team)
+        // 2. Get Task details (to check ownership/team and for email notifications)
         const { data: task } = await supabaseServer
             .from('tasks')
-            .select('team_id')
+            .select('*, teams(name), user_profiles(full_name)')
             .eq('id', id)
             .single();
 
@@ -104,6 +104,10 @@ export async function PUT(request: NextRequest) {
             }
         }
 
+        // Check if start_date or end_date changed
+        const startDateChanged = updates.start_date !== undefined && updates.start_date !== task.start_date;
+        const endDateChanged = updates.end_date !== undefined && updates.end_date !== task.end_date;
+
         // Perform Update using Admin Client (Bypass RLS)
         const { error: updateError } = await supabaseServer
             .from('tasks')
@@ -113,6 +117,38 @@ export async function PUT(request: NextRequest) {
         if (updateError) {
             console.error('Update Error:', updateError);
             return NextResponse.json({ error: updateError.message }, { status: 500 });
+        }
+
+        // Send email notification if date changed
+        if (startDateChanged || endDateChanged) {
+            try {
+                const emailPayload = {
+                    taskId: id,
+                    taskName: task.phase || 'N/A',
+                    projectName: task.project_name,
+                    assignee: task.user_profiles?.full_name || task.assignee || 'Unassigned',
+                    teamName: task.teams?.name || 'Unknown Team',
+                    dateField: startDateChanged ? 'start_date' : 'end_date',
+                    oldDate: startDateChanged ? task.start_date : task.end_date,
+                    newDate: startDateChanged ? updates.start_date : updates.end_date,
+                    status: updates.status || task.status,
+                    priority: task.priority,
+                    phase: task.phase,
+                    pc: task.pc
+                };
+
+                // Send email asynchronously (don't wait for it)
+                fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/send-date-change-email`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(emailPayload)
+                }).catch(err => console.error('[Email] Failed to send notification:', err));
+
+                console.log('[API Update] Email notification triggered for date change');
+            } catch (emailError) {
+                console.error('[API Update] Error preparing email:', emailError);
+                // Don't fail the update if email fails
+            }
         }
 
         return NextResponse.json({ success: true });
