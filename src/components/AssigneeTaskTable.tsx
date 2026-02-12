@@ -246,14 +246,17 @@ export default function AssigneeTaskTable({ assignee, tasks, leaves, onEditTask,
 
                                 {/* End Date - Inline Edit via DatePicker */}
                                 <td
-                                    className={`px-2 py-2 truncate border-r border-slate-900 text-slate-700 hover:bg-slate-100 transition-colors p-0 ${isTaskOverdue(task) ? 'bg-red-100' : ''
+                                    className={`px-2 py-2 truncate border-r border-slate-900 transition-colors p-0 ${isTaskOverdue(task)
+                                            ? 'bg-red-600 text-white font-bold hover:bg-red-700'
+                                            : 'text-slate-700 hover:bg-slate-100'
                                         }`}
                                     onClick={(e) => e.stopPropagation()} // Prevent row click
                                 >
                                     <DatePicker
                                         date={task.endDate ? new Date(task.endDate) : undefined}
                                         setDate={(d) => handleDateChange(d, task.id, 'end_date')}
-                                        className="w-full h-full border-none shadow-none bg-transparent hover:bg-slate-100 rounded-none justify-start px-0 text-xs font-normal"
+                                        className={`w-full h-full border-none shadow-none bg-transparent rounded-none justify-start px-0 text-xs font-normal ${isTaskOverdue(task) ? 'text-white hover:bg-red-700' : 'hover:bg-slate-100'
+                                            }`}
                                         placeholder="-"
                                     />
                                 </td>
