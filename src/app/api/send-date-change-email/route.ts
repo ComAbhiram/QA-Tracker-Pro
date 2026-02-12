@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
         .detail-row { display: flex; padding: 8px 0; border-bottom: 1px solid #e5e7eb; }
         .detail-label { font-weight: bold; width: 150px; color: #6b7280; }
         .detail-value { flex: 1; color: #111827; }
-        .button { display: inline-block; background-color: #4F46E5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin-top: 20px; }
+        .button { display: inline-block; background-color: #4F46E5; color: #ffffff !important; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin-top: 20px; font-weight: 600; font-size: 16px; }
         .footer { text-align: center; color: #6b7280; font-size: 12px; margin-top: 20px; }
     </style>
 </head>
