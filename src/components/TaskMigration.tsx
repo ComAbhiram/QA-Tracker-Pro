@@ -43,16 +43,27 @@ export default function TaskMigration() {
 
             const blob = await response.blob();
             const url = window.URL.createObjectURL(blob);
+
+            // Create link
             const a = document.createElement('a');
+            a.style.display = 'none';
             a.href = url;
             const date = new Date().toISOString().split('T')[0];
             a.download = `team_migration_${date}.json`;
-            document.body.appendChild(a);
-            a.click();
-            window.URL.revokeObjectURL(url);
-            document.body.removeChild(a);
 
-            toastSuccess('Team data (Projects & Tasks) exported successfully!');
+            // Append to body effectively but safely
+            document.body.appendChild(a);
+
+            // Trigger click
+            a.click();
+
+            // Cleanup after a small delay to ensure click registered and prevent React conflicts
+            setTimeout(() => {
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+            }, 100);
+
+            toastSuccess('Team data exported successfully!');
         } catch (error) {
             console.error('Export error:', error);
             toastError('Failed to export data.');
@@ -237,11 +248,13 @@ export default function TaskMigration() {
 
             <button
                 onClick={handleExport}
-                disabled={isImporting || isExporting}
+                disabled={isExporting}
                 className="flex items-center gap-2 px-3 py-2 bg-white border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50 hover:text-indigo-600 transition-colors disabled:opacity-50 text-sm font-medium"
                 title="Backup Team Data (JSON)"
             >
-                {isExporting ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
+                <span className="flex items-center justify-center w-4 h-4">
+                    {isExporting ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
+                </span>
                 Backup
             </button>
 
