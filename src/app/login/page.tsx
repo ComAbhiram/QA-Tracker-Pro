@@ -40,11 +40,30 @@ export default function LoginPage() {
         }
     };
 
-    const handleManagerLogin = () => {
+    const handleManagerLogin = async () => {
         if (managerPassword === 'inter223') {
-            setShowManagerModal(false);
-            setManagerPassword('');
-            router.push('/guest');
+            try {
+                // Call server-side API to set manager session
+                const response = await fetch('/api/auth/manager-login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ passkey: managerPassword }),
+                });
+
+                if (!response.ok) {
+                    setError('Failed to authenticate manager');
+                    return;
+                }
+
+                setShowManagerModal(false);
+                setManagerPassword('');
+                router.push('/guest');
+            } catch (err) {
+                console.error('Manager login error:', err);
+                setError('Failed to authenticate manager');
+            }
         } else {
             setError('Invalid manager passkey');
         }

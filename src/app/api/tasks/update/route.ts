@@ -35,15 +35,17 @@ export async function PUT(request: NextRequest) {
             }
         );
 
-        // Get authenticated user from session OR check for guest token
+        // Get authenticated user from session OR check for manager session
         const { data: { user }, error: authError } = await supabase.auth.getUser();
 
-        // Check for guest token (manager mode)
+        // Check for manager session (server-side set cookie)
+        const managerSession = cookieStore.get('manager_session')?.value;
         const guestToken = cookieStore.get('guest_token')?.value;
-        const isManagerMode = guestToken === 'manager_access_token_2026';
+        const isManagerMode = managerSession === 'active' || guestToken === 'manager_access_token_2026';
 
         console.log('[API Update] Auth check:', {
             hasUser: !!user,
+            managerSession,
             guestToken,
             isManagerMode,
             allCookies: Array.from(cookieStore.getAll()).map(c => c.name)
