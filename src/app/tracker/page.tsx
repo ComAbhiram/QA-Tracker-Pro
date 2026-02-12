@@ -10,13 +10,16 @@ import { useGuestMode } from '@/contexts/GuestContext';
 import { calculateAvailability } from '@/lib/availability';
 import { useToast } from '@/contexts/ToastContext';
 
+import { DatePicker } from '@/components/DatePicker';
+// ... existing imports
+
 export default function Tracker() {
     const { isGuest, selectedTeamId, isLoading: isGuestLoading } = useGuestMode();
     const [tasks, setTasks] = useState<Task[]>([]);
     const [leaves, setLeaves] = useState<Leave[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
-    const [dateFilter, setDateFilter] = useState('');
+    const [dateFilter, setDateFilter] = useState<Date | undefined>(undefined);
     const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
     const [editingTask, setEditingTask] = useState<Task | null>(null);
 
@@ -330,12 +333,12 @@ export default function Tracker() {
                         />
                     </div>
 
-                    {/* Date Filter - Compact */}
-                    <input
-                        type="date"
-                        value={dateFilter}
-                        onChange={(e) => setDateFilter(e.target.value)}
-                        className="w-[130px] bg-white text-slate-700 px-3 py-2 border border-slate-200 rounded-md focus:outline-none focus:ring-1 focus:ring-slate-300 text-xs shadow-sm"
+                    {/* Date Filter - Custom DatePicker */}
+                    <DatePicker
+                        date={dateFilter}
+                        setDate={setDateFilter}
+                        className="w-[140px] bg-white text-slate-700 border-slate-200 h-[34px] px-3 text-xs shadow-sm hover:bg-slate-50"
+                        placeholder="Filter by date"
                     />
 
                     <div className="h-6 w-px bg-slate-200 mx-1 hidden md:block"></div>

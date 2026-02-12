@@ -34,7 +34,6 @@ type SortKey = 'projectName' | 'projectType' | 'priority' | 'subPhase' | 'pc' | 
 export default function AssigneeTaskTable({ assignee, tasks, leaves, onEditTask, onDateUpdate }: AssigneeTaskTableProps) {
     const [currentPage, setCurrentPage] = useState(1);
     const [sortConfig, setSortConfig] = useState<{ key: SortKey; direction: 'asc' | 'desc' } | null>(null);
-    const [editingCell, setEditingCell] = useState<{ taskId: number, field: 'start_date' | 'end_date' } | null>(null);
     const itemsPerPage = 10;
 
     // ... (existing column resizing hook) ...
@@ -87,15 +86,10 @@ export default function AssigneeTaskTable({ assignee, tasks, leaves, onEditTask,
         return sortConfig.direction === 'asc' ? <ArrowUp size={12} className="ml-1 text-slate-600" /> : <ArrowDown size={12} className="ml-1 text-slate-600" />;
     };
 
-    const handleDateClick = (e: React.MouseEvent, taskId: number, field: 'start_date' | 'end_date') => {
-        e.stopPropagation(); // Prevent opening task modal
-        setEditingCell({ taskId, field });
-    };
-
-    const handleDateChange = async (e: React.ChangeEvent<HTMLInputElement>, taskId: number, field: 'start_date' | 'end_date') => {
-        const newDate = e.target.value;
-        await onDateUpdate(taskId, field, newDate);
-        setEditingCell(null);
+    const handleDateChange = async (date: Date | undefined, taskId: number, field: 'start_date' | 'end_date') => {
+        // Convert Date to string YYYY-MM-DD for DB
+        const newDateStr = date ? format(date, 'yyyy-MM-dd') : '';
+        await onDateUpdate(taskId, field, newDateStr);
     };
 
     const getStatusDisplay = (status: string) => {
@@ -236,44 +230,30 @@ export default function AssigneeTaskTable({ assignee, tasks, leaves, onEditTask,
                                     </div>
                                 </td>
 
-                                {/* Start Date - Inline Edit */}
+                                {/* Start Date - Inline Edit via DatePicker */}
                                 <td
-                                    className="px-2 py-2 truncate border-r border-slate-900 text-slate-700 hover:bg-slate-100 transition-colors"
-                                    onClick={(e) => handleDateClick(e, task.id, 'start_date')}
+                                    className="px-2 py-2 truncate border-r border-slate-900 text-slate-700 hover:bg-slate-100 transition-colors p-0"
+                                    onClick={(e) => e.stopPropagation()} // Prevent row click
                                 >
-                                    {editingCell?.taskId === task.id && editingCell?.field === 'start_date' ? (
-                                        <input
-                                            type="date"
-                                            className="w-full text-xs p-1 border rounded"
-                                            value={task.startDate ? new Date(task.startDate).toISOString().split('T')[0] : ''}
-                                            onChange={(e) => handleDateChange(e, task.id, 'start_date')}
-                                            onBlur={() => setEditingCell(null)}
-                                            autoFocus
-                                            onClick={(e) => e.stopPropagation()}
-                                        />
-                                    ) : (
-                                        task.startDate ? format(new Date(task.startDate), 'MMM d') : '-'
-                                    )}
+                                    <DatePicker
+                                        date={task.startDate ? new Date(task.startDate) : undefined}
+                                        setDate={(d) => handleDateChange(d, task.id, 'start_date')}
+                                        className="w-full h-full border-none shadow-none bg-transparent hover:bg-slate-100 rounded-none justify-start px-0 text-xs font-normal"
+                                        placeholder="-"
+                                    />
                                 </td>
 
-                                {/* End Date - Inline Edit */}
+                                {/* End Date - Inline Edit via DatePicker */}
                                 <td
-                                    className="px-2 py-2 truncate border-r border-slate-900 text-slate-700 hover:bg-slate-100 transition-colors"
-                                    onClick={(e) => handleDateClick(e, task.id, 'end_date')}
+                                    className="px-2 py-2 truncate border-r border-slate-900 text-slate-700 hover:bg-slate-100 transition-colors p-0"
+                                    onClick={(e) => e.stopPropagation()} // Prevent row click
                                 >
-                                    {editingCell?.taskId === task.id && editingCell?.field === 'end_date' ? (
-                                        <input
-                                            type="date"
-                                            className="w-full text-xs p-1 border rounded"
-                                            value={task.endDate ? new Date(task.endDate).toISOString().split('T')[0] : ''}
-                                            onChange={(e) => handleDateChange(e, task.id, 'end_date')}
-                                            onBlur={() => setEditingCell(null)}
-                                            autoFocus
-                                            onClick={(e) => e.stopPropagation()}
-                                        />
-                                    ) : (
-                                        task.endDate ? format(new Date(task.endDate), 'MMM d') : '-'
-                                    )}
+                                    <DatePicker
+                                        date={task.endDate ? new Date(task.endDate) : undefined}
+                                        setDate={(d) => handleDateChange(d, task.id, 'end_date')}
+                                        className="w-full h-full border-none shadow-none bg-transparent hover:bg-slate-100 rounded-none justify-start px-0 text-xs font-normal"
+                                        placeholder="-"
+                                    />
                                 </td>
 
                                 <td className="px-2 py-2 truncate border-r border-slate-900 text-slate-700">{task.actualCompletionDate ? format(new Date(task.actualCompletionDate), 'MMM d') : '-'}</td>
