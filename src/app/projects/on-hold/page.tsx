@@ -12,7 +12,7 @@ import { useToast } from '@/contexts/ToastContext';
 export default function OnHoldProjects() {
     const [tasks, setTasks] = useState<Task[]>([]);
     const [loading, setLoading] = useState(true);
-    const [viewMode, setViewMode] = useState<'box' | 'table'>('box');
+    const [viewMode, setViewMode] = useState<'box' | 'table'>('table');
 
     // Modal State
     const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);

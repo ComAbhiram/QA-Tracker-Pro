@@ -10,7 +10,7 @@ import { format } from 'date-fns';
 export default function RejectedProjects() {
     const [tasks, setTasks] = useState<Task[]>([]);
     const [loading, setLoading] = useState(true);
-    const [viewMode, setViewMode] = useState<'box' | 'table'>('box');
+    const [viewMode, setViewMode] = useState<'box' | 'table'>('table');
 
     useEffect(() => {
         fetchRejectedTasks();

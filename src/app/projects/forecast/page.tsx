@@ -15,7 +15,7 @@ export default function ForecastProjects() {
     const [loading, setLoading] = useState(true);
     const [selectedTask, setSelectedTask] = useState<Task | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [viewMode, setViewMode] = useState<'box' | 'table'>('box');
+    const [viewMode, setViewMode] = useState<'box' | 'table'>('table');
 
     useEffect(() => {
         if (!isGuestLoading) {

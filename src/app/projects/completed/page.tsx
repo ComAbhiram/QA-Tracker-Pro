@@ -11,7 +11,7 @@ export default function CompletedProjects() {
     const [tasks, setTasks] = useState<Task[]>([]);
     const [loading, setLoading] = useState(true);
     const [isQATeam, setIsQATeam] = useState(false);
-    const [viewMode, setViewMode] = useState<'box' | 'table'>('box');
+    const [viewMode, setViewMode] = useState<'box' | 'table'>('table');
 
     useEffect(() => {
         fetchCompletedTasks();
