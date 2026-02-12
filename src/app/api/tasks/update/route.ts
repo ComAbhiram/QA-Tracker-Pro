@@ -160,10 +160,15 @@ export async function PUT(request: NextRequest) {
                     pc: task.pc
                 };
 
+                // Construct absolute URL for email API (required in serverless environment)
+                const protocol = request.headers.get('x-forwarded-proto') || 'https';
+                const host = request.headers.get('host') || 'qa-tracker-pro.vercel.app';
+                const emailApiUrl = `${protocol}://${host}/api/send-date-change-email`;
+
                 // Send email synchronously (await to ensure it completes in serverless environment)
-                console.log('[API Update] Sending email notification for date change');
+                console.log('[API Update] Sending email notification to:', emailApiUrl);
                 try {
-                    const emailResponse = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/send-date-change-email`, {
+                    const emailResponse = await fetch(emailApiUrl, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(emailPayload)
