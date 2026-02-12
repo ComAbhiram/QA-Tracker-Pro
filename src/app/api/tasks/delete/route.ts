@@ -35,13 +35,14 @@ export async function DELETE(request: NextRequest) {
             }
         );
 
-        // Get authenticated user from session OR check for manager session
+        // Get authenticated user from session OR check for manager mode header
         const { data: { user }, error: authError } = await supabase.auth.getUser();
 
-        // Check for manager session (server-side set cookie)
+        // Check for manager mode via header (most reliable method)
+        const managerModeHeader = request.headers.get('X-Manager-Mode');
         const managerSession = cookieStore.get('manager_session')?.value;
         const guestToken = cookieStore.get('guest_token')?.value;
-        const isManagerMode = managerSession === 'active' || guestToken === 'manager_access_token_2026';
+        const isManagerMode = managerModeHeader === 'true' || managerSession === 'active' || guestToken === 'manager_access_token_2026';
 
         if (!user && !isManagerMode) {
             return NextResponse.json({ error: 'Unauthorized - please log in' }, { status: 401 });

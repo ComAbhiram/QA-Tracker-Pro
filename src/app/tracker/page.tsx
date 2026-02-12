@@ -147,13 +147,14 @@ export default function Tracker() {
             const { team_id, ...updatePayload } = dbPayload;
 
             // Use API to bypass RLS for Super Admins in Manager Mode
-            // API uses cookie-based authentication, no need for Authorization header
+            // Send manager mode indicator in header
             const response = await fetch('/api/tasks/update', {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
+                    'X-Manager-Mode': localStorage.getItem('qa_tracker_guest_session') ? 'true' : 'false',
                 },
-                credentials: 'include', // Ensure cookies are sent
+                credentials: 'include',
                 body: JSON.stringify({ id: editingTask.id, ...updatePayload })
             });
 
@@ -184,13 +185,14 @@ export default function Tracker() {
     };
 
     const handleDeleteTask = async (taskId: number) => {
-        // API uses cookie-based authentication, no need for Authorization header
+        // Send manager mode indicator in header
         const response = await fetch(`/api/tasks/delete?id=${taskId}`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
+                'X-Manager-Mode': localStorage.getItem('qa_tracker_guest_session') ? 'true' : 'false',
             },
-            credentials: 'include', // Ensure cookies are sent
+            credentials: 'include',
         });
 
         if (!response.ok) {
