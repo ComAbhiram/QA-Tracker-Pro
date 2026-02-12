@@ -160,14 +160,24 @@ export async function PUT(request: NextRequest) {
                     pc: task.pc
                 };
 
-                // Send email asynchronously (don't wait for it)
-                fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/send-date-change-email`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(emailPayload)
-                }).catch(err => console.error('[Email] Failed to send notification:', err));
+                // Send email synchronously (await to ensure it completes in serverless environment)
+                console.log('[API Update] Sending email notification for date change');
+                try {
+                    const emailResponse = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/send-date-change-email`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(emailPayload)
+                    });
 
-                console.log('[API Update] Email notification triggered for date change');
+                    if (emailResponse.ok) {
+                        console.log('[API Update] Email notification sent successfully');
+                    } else {
+                        const errorData = await emailResponse.json();
+                        console.error('[API Update] Email API error:', errorData);
+                    }
+                } catch (fetchError) {
+                    console.error('[API Update] Failed to call email API:', fetchError);
+                }
             } catch (emailError) {
                 console.error('[API Update] Error preparing email:', emailError);
                 // Don't fail the update if email fails
