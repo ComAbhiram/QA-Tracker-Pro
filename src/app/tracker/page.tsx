@@ -200,8 +200,52 @@ export default function Tracker() {
         }
     };
 
-    // Group by assignee (using ALL fetched tasks)
-    const groupedTasks = tasks.reduce((acc, task) => {
+    const [viewMode, setViewMode] = useState<'active' | 'forecast'>('active');
+
+    // ... (existing state)
+
+    // ... (fetchData effect remains same, it fetches all active tasks)
+
+    // Filter and Sort Tasks
+    const processedTasks = tasks
+        // 1. Filter by View Mode
+        .filter(task => {
+            if (viewMode === 'forecast') {
+                return task.status === 'Forecast';
+            }
+            // 'active' mode shows all fetched (which are already filtered for non-completed/rejected in fetchData)
+            return true;
+        })
+        // 2. Sort by Custom Status Order
+        .sort((a, b) => {
+            const statusOrder: Record<string, number> = {
+                'In Progress': 1,
+                'Forecast': 2,
+                'On Hold': 3,
+                'Yet to Start': 4,
+                'Being Developed': 5,
+                'Ready for QA': 6,
+                'Assigned to QA': 7,
+                'Review': 8
+            };
+
+            const orderA = statusOrder[a.status] || 99;
+            const orderB = statusOrder[b.status] || 99;
+
+            if (orderA !== orderB) return orderA - orderB;
+
+            // Secondary Sort: Start Date (as per original logic, though original was descending)
+            // Let's keep it consistent: Sort by Date desc as secondary
+            const dateA = new Date(a.startDate || 0).getTime();
+            const dateB = new Date(b.startDate || 0).getTime();
+            return dateA - dateB; // Ascending or Descending? User didn't specify, but usually earliest first for schedule? 
+            // Original query was 'start_date', { ascending: false }. Let's stick to that if status is same.
+            // return dateB - dateA; 
+        });
+
+
+    // Group by assignee (using processed tasks)
+    const groupedTasks = processedTasks.reduce((acc, task) => {
         const assignee = task.assignedTo || 'Unassigned';
         if (!acc[assignee]) acc[assignee] = [];
         acc[assignee].push(task);
@@ -272,11 +316,32 @@ export default function Tracker() {
                     <p className="text-slate-500">Track all active QA tasks by assignee</p>
                 </div>
                 <div className="flex gap-2">
+                    <div className="bg-slate-100 p-1 rounded-lg flex items-center mr-2 border border-slate-200">
+                        <button
+                            onClick={() => setViewMode('active')}
+                            className={`px-3 py-1.5 text-sm font-medium rounded-md transition-all ${viewMode === 'active'
+                                    ? 'bg-white text-slate-800 shadow-sm'
+                                    : 'text-slate-500 hover:text-slate-700'
+                                }`}
+                        >
+                            All Active
+                        </button>
+                        <button
+                            onClick={() => setViewMode('forecast')}
+                            className={`px-3 py-1.5 text-sm font-medium rounded-md transition-all ${viewMode === 'forecast'
+                                    ? 'bg-white text-purple-700 shadow-sm'
+                                    : 'text-slate-500 hover:text-slate-700'
+                                }`}
+                        >
+                            Forecast
+                        </button>
+                    </div>
+
                     <button
                         onClick={() => { setIsAvailabilityCheckOpen(true); setHasChecked(false); setCheckDate(''); setAvailableMembers([]); }}
                         className="btn bg-indigo-600 hover:bg-indigo-700 text-white flex items-center gap-2 shadow-lg shadow-indigo-200"
                     >
-                        <CalendarClock size={18} /> Check Resource Availability
+                        <CalendarClock size={18} /> Check Availability
                     </button>
                     <button
                         onClick={exportCSV}

@@ -82,20 +82,54 @@ export default function AssigneeTaskTable({ assignee, tasks, leaves, onEditTask 
     // Styling constants matching Daily Reports image
     const headerStyle = "bg-[#1e293b] text-white";
 
+    // Dynamic Header Color Logic
+    const getHeaderColor = (name: string) => {
+        const colors = [
+            'bg-slate-100 border-slate-200 text-slate-800',
+            'bg-red-50 border-red-200 text-red-800',
+            'bg-orange-50 border-orange-200 text-orange-800',
+            'bg-amber-50 border-amber-200 text-amber-800',
+            'bg-yellow-50 border-yellow-200 text-yellow-800',
+            'bg-lime-50 border-lime-200 text-lime-800',
+            'bg-green-50 border-green-200 text-green-800',
+            'bg-emerald-50 border-emerald-200 text-emerald-800',
+            'bg-teal-50 border-teal-200 text-teal-800',
+            'bg-cyan-50 border-cyan-200 text-cyan-800',
+            'bg-sky-50 border-sky-200 text-sky-800',
+            'bg-blue-50 border-blue-200 text-blue-800',
+            'bg-indigo-50 border-indigo-200 text-indigo-800',
+            'bg-violet-50 border-violet-200 text-violet-800',
+            'bg-purple-50 border-purple-200 text-purple-800',
+            'bg-fuchsia-50 border-fuchsia-200 text-fuchsia-800',
+            'bg-pink-50 border-pink-200 text-pink-800',
+            'bg-rose-50 border-rose-200 text-rose-800',
+        ];
+
+        let hash = 0;
+        for (let i = 0; i < name.length; i++) {
+            hash = name.charCodeAt(i) + ((hash << 5) - hash);
+        }
+
+        const index = Math.abs(hash) % colors.length;
+        return colors[index];
+    };
+
+    const headerColorClass = getHeaderColor(assignee);
+
     const availabilityDate = calculateAvailability(tasks, leaves);
     const activeLeaves = leaves.filter(l => new Date(l.leave_date) >= new Date());
 
     return (
         <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden mb-6">
             {/* Header Section */}
-            <div className="bg-yellow-500 p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className={`p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b ${headerColorClass}`}>
                 <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center text-white font-bold text-xl shadow-lg">
+                    <div className="w-12 h-12 rounded-full bg-white/60 backdrop-blur-sm border border-black/5 flex items-center justify-center font-bold text-xl shadow-sm">
                         {assignee.charAt(0)}
                     </div>
                     <div>
-                        <h3 className="font-extrabold text-slate-900 text-lg leading-tight">{assignee}</h3>
-                        <p className="text-slate-800 text-sm font-medium">{totalItems} active task{totalItems !== 1 ? 's' : ''}</p>
+                        <h3 className="font-extrabold text-lg leading-tight opacity-90">{assignee}</h3>
+                        <p className="text-sm font-medium opacity-75">{totalItems} active task{totalItems !== 1 ? 's' : ''}</p>
                     </div>
                 </div>
 
