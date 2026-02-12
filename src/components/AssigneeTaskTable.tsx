@@ -35,19 +35,19 @@ export default function AssigneeTaskTable({ assignee, tasks, leaves, onEditTask 
 
     // Column Widths State
     const [columnWidths, setColumnWidths] = useState<Record<string, number>>({
-        projectName: 250,
-        projectType: 120,
-        priority: 100,
-        subPhase: 140,
-        pc: 120,
-        assignees: 120,
-        status: 160, // Widened slightly for text + icon
-        startDate: 100,
-        endDate: 100,
-        actualCompletionDate: 100,
-        comments: 200,
-        deviation: 200,
-        sprint: 80
+        projectName: 300,        // Project name is widest
+        projectType: 60,         // Type is very narrow
+        priority: 70,            // Priority is narrow
+        subPhase: 120,           // Phase is medium
+        pc: 80,                 // PC is narrow
+        assignees: 80,          // Assignees is narrow
+        status: 120,            // Status is medium
+        startDate: 80,          // Dates are narrow
+        endDate: 80,
+        actualCompletionDate: 80,
+        comments: 150,          // Comments slightly wider
+        deviation: 100,         // Deviation medium
+        sprint: 60              // Sprint very narrow
     });
 
     const resizingRef = useRef<{ key: string; startX: number; startWidth: number } | null>(null);
