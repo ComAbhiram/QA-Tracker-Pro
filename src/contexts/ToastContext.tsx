@@ -70,37 +70,58 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
 };
 
 const ToastContainer = ({ toasts, removeToast }: { toasts: Toast[]; removeToast: (id: string) => void }) => {
+    console.log('[ToastContainer] Rendering with toasts:', toasts);
+
     return (
-        <div className="fixed bottom-4 right-4 z-[9999] flex flex-col gap-2 pointer-events-none">
-            {toasts.map((toast) => (
-                <div
-                    key={toast.id}
-                    className={`
-                        pointer-events-auto
-                        flex items-center gap-3 px-4 py-3 rounded-xl shadow-lg border backdrop-blur-sm
-                        animate-in slide-in-from-right-full fade-in duration-300
-                        ${toast.type === 'success' ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : ''}
-                        ${toast.type === 'error' ? 'bg-rose-50 border-rose-200 text-rose-800' : ''}
-                        ${toast.type === 'warning' ? 'bg-amber-50 border-amber-200 text-amber-800' : ''}
-                        ${toast.type === 'info' ? 'bg-indigo-50 border-indigo-200 text-indigo-800' : ''}
-                        min-w-[300px] max-w-md
-                    `}
-                >
-                    <div className="flex-shrink-0">
-                        {toast.type === 'success' && <CheckCircle size={20} className="text-emerald-500" />}
-                        {toast.type === 'error' && <AlertCircle size={20} className="text-rose-500" />}
-                        {toast.type === 'warning' && <AlertTriangle size={20} className="text-amber-500" />}
-                        {toast.type === 'info' && <Info size={20} className="text-indigo-500" />}
-                    </div>
-                    <p className="text-sm font-medium flex-1">{toast.message}</p>
-                    <button
-                        onClick={() => removeToast(toast.id)}
-                        className="p-1 rounded-full hover:bg-black/5 transition-colors text-current opacity-60 hover:opacity-100"
+        <div
+            className="fixed bottom-4 right-4 z-[99999] flex flex-col gap-2"
+            style={{
+                position: 'fixed',
+                bottom: '16px',
+                right: '16px',
+                zIndex: 99999,
+                pointerEvents: 'none'
+            }}
+        >
+            {toasts.map((toast) => {
+                console.log('[ToastContainer] Rendering toast:', toast);
+                return (
+                    <div
+                        key={toast.id}
+                        className={`
+                            pointer-events-auto
+                            flex items-center gap-3 px-4 py-3 rounded-xl shadow-lg border backdrop-blur-sm
+                            ${toast.type === 'success' ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : ''}
+                            ${toast.type === 'error' ? 'bg-rose-50 border-rose-200 text-rose-800' : ''}
+                            ${toast.type === 'warning' ? 'bg-amber-50 border-amber-200 text-amber-800' : ''}
+                            ${toast.type === 'info' ? 'bg-indigo-50 border-indigo-200 text-indigo-800' : ''}
+                            min-w-[300px] max-w-md
+                        `}
+                        style={{
+                            pointerEvents: 'auto',
+                            backgroundColor: toast.type === 'success' ? '#d1fae5' : '#fecaca',
+                            border: '2px solid #000',
+                            padding: '12px 16px',
+                            borderRadius: '12px',
+                            minWidth: '300px'
+                        }}
                     >
-                        <X size={16} />
-                    </button>
-                </div>
-            ))}
+                        <div className="flex-shrink-0">
+                            {toast.type === 'success' && <CheckCircle size={20} className="text-emerald-500" />}
+                            {toast.type === 'error' && <AlertCircle size={20} className="text-rose-500" />}
+                            {toast.type === 'warning' && <AlertTriangle size={20} className="text-amber-500" />}
+                            {toast.type === 'info' && <Info size={20} className="text-indigo-500" />}
+                        </div>
+                        <p className="text-sm font-medium flex-1">{toast.message}</p>
+                        <button
+                            onClick={() => removeToast(toast.id)}
+                            className="p-1 rounded-full hover:bg-black/5 transition-colors text-current opacity-60 hover:opacity-100"
+                        >
+                            <X size={16} />
+                        </button>
+                    </div>
+                );
+            })}
         </div>
     );
 };
