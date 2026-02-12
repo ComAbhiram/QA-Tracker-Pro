@@ -9,9 +9,11 @@ import DailyReportsModal from '@/components/DailyReportsModal';
 import TaskModal from '@/components/TaskModal';
 import Pagination from '@/components/Pagination';
 import GlobalAvailabilityModal from '@/components/GlobalAvailabilityModal';
-import { Plus, FileText, Layers, Edit2, Search, CalendarClock } from 'lucide-react';
+import { Plus, FileText, Layers, Edit2, Search, CalendarClock, Loader2, CheckCircle2, Circle, Cloud, PauseCircle, Clock, XCircle } from 'lucide-react';
 import { useGuestMode } from '@/contexts/GuestContext';
 import TaskMigration from '@/components/TaskMigration';
+import ResizableHeader from '@/components/ui/ResizableHeader';
+import useColumnResizing from '@/hooks/useColumnResizing';
 
 export default function Home() {
   // Table Data State
@@ -38,6 +40,15 @@ export default function Home() {
   const [editingTask, setEditingTask] = useState<Task | null>(null);
 
   const { isGuest, selectedTeamId, isLoading: isGuestLoading } = useGuestMode();
+
+  // Column Resizing
+  const { columnWidths, handleResizeStart } = useColumnResizing({
+    projectName: 250,
+    phase: 150,
+    status: 140,
+    assignees: 100,
+    timeline: 160
+  });
 
   // 1. Fetch Stats Data (Global logic for Charts & Stats Cards)
   // Fetches lightweight data for ALL tasks to populate charts/stats consistently
@@ -398,6 +409,8 @@ export default function Home() {
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
         {/* Main Task List - Powered by Paginated Fetch */}
+
+        {/* Main Task List - Powered by Paginated Fetch */}
         <div className="xl:col-span-2 bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden flex flex-col">
           <div className="p-6 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <h3 className="font-bold text-lg text-slate-800 flex items-center gap-2">
@@ -422,64 +435,115 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-transparent">
             <table className="w-full text-left text-sm text-slate-600 border-collapse">
-              <thead className="bg-slate-50 border border-slate-400">
+              <thead className="bg-slate-50 border-b border-slate-200">
                 <tr>
-                  <th className="px-6 py-4 font-semibold text-slate-600 border border-slate-400">Project</th>
-                  <th className="px-6 py-4 font-semibold text-slate-600 border border-slate-400">Phase</th>
-                  <th className="px-6 py-4 font-semibold text-slate-600 border border-slate-400">Status</th>
-                  <th className="px-6 py-4 font-semibold text-slate-600 border border-slate-400">Assignees</th>
-                  <th className="px-6 py-4 font-semibold text-slate-600 border border-slate-400">Timeline</th>
-                  <th className="px-6 py-4 font-semibold text-slate-600 text-right">Action</th>
+                  <ResizableHeader
+                    label="Project"
+                    width={columnWidths.projectName}
+                    widthKey="projectName"
+                    onResizeStart={handleResizeStart}
+                    className="text-xs font-semibold text-slate-600 uppercase tracking-wider border-r border-slate-200"
+                  />
+                  <ResizableHeader
+                    label="Phase"
+                    width={columnWidths.phase}
+                    widthKey="phase"
+                    onResizeStart={handleResizeStart}
+                    className="text-xs font-semibold text-slate-600 uppercase tracking-wider border-r border-slate-200"
+                  />
+                  <ResizableHeader
+                    label="Status"
+                    width={columnWidths.status}
+                    widthKey="status"
+                    onResizeStart={handleResizeStart}
+                    className="text-xs font-semibold text-slate-600 uppercase tracking-wider border-r border-slate-200"
+                  />
+                  <ResizableHeader
+                    label="Assignees"
+                    width={columnWidths.assignees}
+                    widthKey="assignees"
+                    onResizeStart={handleResizeStart}
+                    className="text-xs font-semibold text-slate-600 uppercase tracking-wider border-r border-slate-200"
+                  />
+                  <ResizableHeader
+                    label="Timeline"
+                    width={columnWidths.timeline}
+                    widthKey="timeline"
+                    onResizeStart={handleResizeStart}
+                    className="text-xs font-semibold text-slate-600 uppercase tracking-wider border-r border-slate-200"
+                  />
+                  <th className="px-3 py-2 text-xs font-semibold text-slate-600 uppercase tracking-wider text-right bg-slate-50 border-b border-slate-200">
+                    Action
+                  </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-50">
+              <tbody className="divide-y divide-slate-100">
                 {loadingTasks ? (
-                  <tr><td colSpan={6} className="p-8 text-center">Loading tasks...</td></tr>
+                  <tr><td colSpan={6} className="p-8 text-center text-sm">Loading tasks...</td></tr>
                 ) : tasks.length === 0 ? (
-                  <tr><td colSpan={6} className="p-8 text-center text-slate-400">No tasks found</td></tr>
+                  <tr><td colSpan={6} className="p-8 text-center text-slate-400 text-sm">No tasks found</td></tr>
                 ) : (
                   tasks.map(task => (
-                    <tr key={task.id} className="border-b border-slate-400 hover:bg-slate-50/50 transition-colors group">
-                      <td className="px-6 py-4 font-medium text-slate-800 border border-slate-400">
-                        <div className="flex flex-col">
-                          <span>{task.projectName}</span>
-                          <span className="text-xs text-slate-500 font-normal">{task.projectType}</span>
+                    <tr key={task.id} className="border-b border-slate-100 hover:bg-slate-50/50 transition-colors group">
+                      <td className="px-3 py-2 font-medium text-slate-800 border-r border-slate-100 truncate max-w-[200px]" title={task.projectName}>
+                        <div className="flex flex-col truncate">
+                          <span className="truncate text-xs font-semibold">{task.projectName}</span>
+                          <span className="text-[10px] text-slate-400 font-normal truncate">{task.projectType}</span>
                         </div>
                       </td>
-                      <td className="px-6 py-4 border border-slate-400">{task.subPhase || '-'}</td>
-                      <td className="px-6 py-4 border border-slate-400">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${statusColors[task.status] || 'bg-slate-100 text-slate-600 border-slate-200'
-                          }`}>
-                          {task.status}
-                        </span>
+                      <td className="px-3 py-2 border-r border-slate-100 text-xs truncate max-w-[150px]" title={task.subPhase || ''}>
+                        {task.subPhase || '-'}
                       </td>
-                      <td className="px-6 py-4 border border-slate-400">
-                        <div className="flex -space-x-2">
-                          {task.assignedTo && <div className="w-8 h-8 rounded-full bg-sky-100 border-2 border-white flex items-center justify-center text-xs font-bold text-sky-600 shadow-sm" title={task.assignedTo}>{task.assignedTo.charAt(0)}</div>}
-                          {task.assignedTo2 && <div className="w-8 h-8 rounded-full bg-indigo-100 border-2 border-white flex items-center justify-center text-xs font-bold text-indigo-600 shadow-sm" title={task.assignedTo2}>{task.assignedTo2.charAt(0)}</div>}
+                      <td className="px-3 py-2 border-r border-slate-100">
+                        {(() => {
+                          switch (task.status) {
+                            case 'In Progress': return <div className="flex items-center gap-1.5 text-blue-700 font-medium text-xs"><Loader2 size={12} className="animate-spin" /> In Progress</div>;
+                            case 'Completed': return <div className="flex items-center gap-1.5 text-emerald-700 font-medium text-xs"><CheckCircle2 size={12} /> Completed</div>;
+                            case 'Yet to Start': return <div className="flex items-center gap-1.5 text-slate-500 font-medium text-xs"><Circle size={12} /> Yet to Start</div>;
+                            case 'Forecast': return <div className="flex items-center gap-1.5 text-violet-600 font-medium text-xs"><Cloud size={12} /> Forecast</div>;
+                            case 'On Hold': return <div className="flex items-center gap-1.5 text-amber-600 font-medium text-xs"><PauseCircle size={12} /> On Hold</div>;
+                            case 'Ready for QA': return <div className="flex items-center gap-1.5 text-pink-600 font-medium text-xs"><Clock size={12} /> Ready for QA</div>;
+                            case 'Assigned to QA': return <div className="flex items-center gap-1.5 text-cyan-600 font-medium text-xs"><Clock size={12} /> Assigned to QA</div>;
+                            case 'Rejected': return <div className="flex items-center gap-1.5 text-red-600 font-medium text-xs"><XCircle size={12} /> Rejected</div>;
+                            default: return <div className="text-slate-600 text-xs">{task.status}</div>;
+                          }
+                        })()}
+                      </td>
+                      <td className="px-3 py-2 border-r border-slate-100">
+                        <div className="flex -space-x-1.5 overflow-hidden">
+                          {task.assignedTo && (
+                            <div className="w-6 h-6 rounded-full bg-sky-100 border border-white flex items-center justify-center text-[10px] font-bold text-sky-700 shadow-sm" title={task.assignedTo}>
+                              {task.assignedTo.charAt(0)}
+                            </div>
+                          )}
+                          {task.assignedTo2 && (
+                            <div className="w-6 h-6 rounded-full bg-indigo-100 border border-white flex items-center justify-center text-[10px] font-bold text-indigo-700 shadow-sm" title={task.assignedTo2}>
+                              {task.assignedTo2.charAt(0)}
+                            </div>
+                          )}
                         </div>
                       </td>
-                      <td className="px-6 py-4 border border-slate-400">
+                      <td className="px-3 py-2 border-r border-slate-100 text-xs">
                         {task.startDate ? (
-                          <span>
-                            {new Date(task.startDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                          <span className="truncate block max-w-[120px]" title={`${new Date(task.startDate).toLocaleDateString()} - ${task.endDate ? new Date(task.endDate).toLocaleDateString() : '...'}`}>
+                            {new Date(task.startDate).toLocaleDateString(undefined, { month: '2-digit', day: '2-digit' })}
                             {' - '}
-                            {task.endDate ? new Date(task.endDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : '...'}
+                            {task.endDate ? new Date(task.endDate).toLocaleDateString(undefined, { month: '2-digit', day: '2-digit' }) : '...'}
                           </span>
                         ) : (
-                          <span className="text-slate-300 italic">No timeline</span>
+                          <span className="text-slate-300 italic text-[10px]">No timeline</span>
                         )}
                       </td>
-                      <td className="px-6 py-4 text-right">
+                      <td className="px-3 py-2 text-right">
                         {!isGuest && (
                           <button
                             onClick={() => handleEditTask(task)}
-                            className="text-slate-400 hover:text-sky-600 hover:bg-sky-50 p-2 rounded-lg transition-all"
+                            className="text-slate-400 hover:text-sky-600 hover:bg-sky-50 p-1.5 rounded-lg transition-all"
                             title="Edit Task"
                           >
-                            <Edit2 size={16} />
+                            <Edit2 size={14} />
                           </button>
                         )}
                       </td>
