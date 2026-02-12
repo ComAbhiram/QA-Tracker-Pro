@@ -250,9 +250,8 @@ export default function LoginPage() {
                     <div className="relative z-10">
                         <blockquote className="space-y-2">
                             <p className="text-lg font-medium leading-relaxed">
-                                &ldquo;This library has saved me countless hours of work and helped me deliver stunning designs to my clients faster than ever before.&rdquo;
+                                &ldquo;Great teams don&rsquo;t just work &mdash; they track, improve, and succeed.&rdquo;
                             </p>
-                            <footer className="text-sm font-medium text-zinc-400">Sofia Davis</footer>
                         </blockquote>
                     </div>
                 </div>
