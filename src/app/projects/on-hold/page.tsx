@@ -171,16 +171,6 @@ export default function OnHoldProjects() {
                 {/* View Toggle */}
                 <div className="flex gap-2 bg-white border border-slate-200 rounded-xl p-1">
                     <button
-                        onClick={() => toggleView('box')}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${viewMode === 'box'
-                            ? 'bg-amber-50 text-amber-700 font-semibold'
-                            : 'text-slate-600 hover:bg-slate-50'
-                            }`}
-                    >
-                        <Grid3x3 size={18} />
-                        <span className="text-sm">Box View</span>
-                    </button>
-                    <button
                         onClick={() => toggleView('table')}
                         className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${viewMode === 'table'
                             ? 'bg-amber-50 text-amber-700 font-semibold'
@@ -189,6 +179,16 @@ export default function OnHoldProjects() {
                     >
                         <Table2 size={18} />
                         <span className="text-sm">Table View</span>
+                    </button>
+                    <button
+                        onClick={() => toggleView('box')}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${viewMode === 'box'
+                            ? 'bg-amber-50 text-amber-700 font-semibold'
+                            : 'text-slate-600 hover:bg-slate-50'
+                            }`}
+                    >
+                        <Grid3x3 size={18} />
+                        <span className="text-sm">Box View</span>
                     </button>
                 </div>
             </div>
