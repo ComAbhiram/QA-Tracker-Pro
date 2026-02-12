@@ -246,7 +246,8 @@ export default function AssigneeTaskTable({ assignee, tasks, leaves, onEditTask,
 
                                 {/* End Date - Inline Edit via DatePicker */}
                                 <td
-                                    className="px-2 py-2 truncate border-r border-slate-900 text-slate-700 hover:bg-slate-100 transition-colors p-0"
+                                    className={`px-2 py-2 truncate border-r border-slate-900 text-slate-700 hover:bg-slate-100 transition-colors p-0 ${isTaskOverdue(task) ? 'bg-red-100' : ''
+                                        }`}
                                     onClick={(e) => e.stopPropagation()} // Prevent row click
                                 >
                                     <DatePicker
