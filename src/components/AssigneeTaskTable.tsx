@@ -119,7 +119,7 @@ export default function AssigneeTaskTable({ assignee, tasks, leaves, onEditTask 
     const ResizableHeader = ({ label, sortKey, widthKey, isSortable = true }: { label: string, sortKey?: SortKey, widthKey: string, isSortable?: boolean }) => (
         <th
             style={{ width: columnWidths[widthKey] }}
-            className={`relative px-2 py-2 text-xs font-semibold text-left border-r border-slate-300 bg-slate-50 text-slate-700 select-none group ${isSortable ? 'cursor-pointer hover:bg-slate-100' : ''}`}
+            className={`relative px-2 py-2 text-xs font-semibold text-left border-r border-slate-900 bg-slate-50 text-slate-900 select-none group ${isSortable ? 'cursor-pointer hover:bg-slate-200' : ''}`}
             onClick={() => isSortable && sortKey && requestSort(sortKey)}
         >
             <div className="flex items-center justify-between truncate">
@@ -202,9 +202,9 @@ export default function AssigneeTaskTable({ assignee, tasks, leaves, onEditTask 
 
             {/* Table (Compact & Resizable) */}
             <div className="overflow-x-auto">
-                <table className="w-full text-xs text-slate-600 border-collapse table-fixed">
+                <table className="w-full text-xs text-slate-800 border-collapse table-fixed border border-slate-900">
                     <thead>
-                        <tr className="border-b border-slate-300">
+                        <tr className="border-b border-black">
                             <ResizableHeader label="Project" sortKey="projectName" widthKey="projectName" />
                             <ResizableHeader label="Type" sortKey="projectType" widthKey="projectType" />
                             <ResizableHeader label="Priority" sortKey="priority" widthKey="priority" />
@@ -226,47 +226,47 @@ export default function AssigneeTaskTable({ assignee, tasks, leaves, onEditTask 
                             <tr
                                 key={task.id}
                                 onClick={() => onEditTask(task)}
-                                className="border-b border-slate-100 hover:bg-slate-50 cursor-pointer transition-colors group"
+                                className="border-b border-slate-900 hover:bg-slate-50 cursor-pointer transition-colors group"
                             >
-                                <td className="px-2 py-2 truncate border-r border-slate-100 font-medium text-slate-800" title={task.projectName}>{task.projectName}</td>
-                                <td className="px-2 py-2 truncate border-r border-slate-100">{task.projectType || '-'}</td>
-                                <td className="px-2 py-2 truncate border-r border-slate-100">
+                                <td className="px-2 py-2 truncate border-r border-slate-900 font-bold text-slate-900" title={task.projectName}>{task.projectName}</td>
+                                <td className="px-2 py-2 truncate border-r border-slate-900">{task.projectType || '-'}</td>
+                                <td className="px-2 py-2 truncate border-r border-slate-900">
                                     {task.priority && (
-                                        <span className={`font-bold ${task.priority === 'High' ? 'text-orange-600' :
-                                            task.priority === 'Urgent' ? 'text-red-700' :
-                                                task.priority === 'Medium' ? 'text-amber-600' :
-                                                    'text-green-600'
+                                        <span className={`font-bold ${task.priority === 'High' ? 'text-orange-700' :
+                                            task.priority === 'Urgent' ? 'text-red-800' :
+                                                task.priority === 'Medium' ? 'text-amber-700' :
+                                                    'text-green-700'
                                             }`}>
                                             {task.priority}
                                         </span>
                                     )}
                                 </td>
-                                <td className="px-2 py-2 truncate border-r border-slate-100">{task.subPhase || '-'}</td>
-                                <td className="px-2 py-2 truncate border-r border-slate-100">{task.pc || '-'}</td>
-                                <td className="px-2 py-2 border-r border-slate-100">
+                                <td className="px-2 py-2 truncate border-r border-slate-900">{task.subPhase || '-'}</td>
+                                <td className="px-2 py-2 truncate border-r border-slate-900">{task.pc || '-'}</td>
+                                <td className="px-2 py-2 border-r border-slate-900">
                                     <div className="flex -space-x-1.5 overflow-hidden">
-                                        {task.assignedTo && <div className="w-6 h-6 rounded-full bg-indigo-100 border border-white flex items-center justify-center text-[9px] font-bold text-indigo-600" title={task.assignedTo}>{task.assignedTo.charAt(0)}</div>}
-                                        {task.assignedTo2 && <div className="w-6 h-6 rounded-full bg-yellow-100 border border-white flex items-center justify-center text-[9px] font-bold text-yellow-600" title={task.assignedTo2}>{task.assignedTo2.charAt(0)}</div>}
+                                        {task.assignedTo && <div className="w-6 h-6 rounded-full bg-indigo-100 border border-slate-900 flex items-center justify-center text-[9px] font-bold text-indigo-800" title={task.assignedTo}>{task.assignedTo.charAt(0)}</div>}
+                                        {task.assignedTo2 && <div className="w-6 h-6 rounded-full bg-yellow-100 border border-slate-900 flex items-center justify-center text-[9px] font-bold text-yellow-800" title={task.assignedTo2}>{task.assignedTo2.charAt(0)}</div>}
                                     </div>
                                 </td>
-                                <td className="px-2 py-2 border-r border-slate-100">
+                                <td className="px-2 py-2 border-r border-slate-900">
                                     <div className="flex items-center gap-2">
                                         {getStatusDisplay(task.status)}
                                         {isTaskOverdue(task) && (
-                                            <span className="flex items-center gap-0.5 text-red-600 font-bold text-[10px]" title={`${getOverdueDays(task)} days overdue`}>
+                                            <span className="flex items-center gap-0.5 text-red-700 font-bold text-[10px]" title={`${getOverdueDays(task)} days overdue`}>
                                                 <AlertCircle size={10} /> {getOverdueDays(task)}d
                                             </span>
                                         )}
                                     </div>
                                 </td>
-                                <td className="px-2 py-2 truncate border-r border-slate-100 text-slate-500">{task.startDate ? format(new Date(task.startDate), 'MMM d') : '-'}</td>
-                                <td className="px-2 py-2 truncate border-r border-slate-100 text-slate-500">{task.endDate ? format(new Date(task.endDate), 'MMM d') : '-'}</td>
-                                <td className="px-2 py-2 truncate border-r border-slate-100 text-slate-500">{task.actualCompletionDate ? format(new Date(task.actualCompletionDate), 'MMM d') : '-'}</td>
-                                <td className="px-2 py-2 truncate border-r border-slate-100 text-slate-500 max-w-[200px]" title={task.comments || ''}>{task.comments || '-'}</td>
-                                <td className="px-2 py-2 truncate border-r border-slate-100 text-slate-500 max-w-[200px]" title={String(task.deviation || '')}>{task.deviation || '-'}</td>
-                                <td className="px-2 py-2 truncate text-slate-500 text-center">
+                                <td className="px-2 py-2 truncate border-r border-slate-900 text-slate-700">{task.startDate ? format(new Date(task.startDate), 'MMM d') : '-'}</td>
+                                <td className="px-2 py-2 truncate border-r border-slate-900 text-slate-700">{task.endDate ? format(new Date(task.endDate), 'MMM d') : '-'}</td>
+                                <td className="px-2 py-2 truncate border-r border-slate-900 text-slate-700">{task.actualCompletionDate ? format(new Date(task.actualCompletionDate), 'MMM d') : '-'}</td>
+                                <td className="px-2 py-2 truncate border-r border-slate-900 text-slate-700 max-w-[200px]" title={task.comments || ''}>{task.comments || '-'}</td>
+                                <td className="px-2 py-2 truncate border-r border-slate-900 text-slate-700 max-w-[200px]" title={String(task.deviation || '')}>{task.deviation || '-'}</td>
+                                <td className="px-2 py-2 truncate text-slate-700 text-center">
                                     {task.sprintLink ? (
-                                        <a href={task.sprintLink} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline" onClick={e => e.stopPropagation()}>
+                                        <a href={task.sprintLink} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline" onClick={e => e.stopPropagation()}>
                                             Link
                                         </a>
                                     ) : '-'}
