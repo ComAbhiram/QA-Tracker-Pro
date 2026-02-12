@@ -407,8 +407,6 @@ export default function Schedule() {
 
     return (
         <div className="max-w-[1600px] mx-auto space-y-6">
-
-            {/* Header Controls */}
             <header className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-6">
 
                 {/* Row 1: Title & Status Guide */}
@@ -487,6 +485,7 @@ export default function Schedule() {
                             <Plus size={18} /> New
                         </button>
                     </div>
+                </div>
             </header>
 
             {/* Content Area */}
