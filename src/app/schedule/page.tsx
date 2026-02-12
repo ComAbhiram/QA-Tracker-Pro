@@ -7,10 +7,39 @@ import { supabase } from '@/lib/supabase';
 import { mapTaskFromDB, Task, isTaskOverdue, getOverdueDays } from '@/lib/types';
 import { getEffectiveStatus } from '@/utils/taskUtils';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, isToday, isWeekend, addMonths, subMonths, addDays, subDays } from 'date-fns';
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, List, Clock, User, AlertCircle, Plus, Table2, LayoutGrid } from 'lucide-react';
+import {
+    ChevronLeft, ChevronRight, Calendar as CalendarIcon, List, Clock, User, AlertCircle, Plus, Table2, LayoutGrid,
+    Loader2, CheckCircle2, Circle, PauseCircle, Cloud, XCircle
+} from 'lucide-react';
 import TaskModal from '@/components/TaskModal';
 
 import { useGuestMode } from '@/contexts/GuestContext';
+
+// Helper for Status Icons (consistent with AssigneeTaskTable)
+const getStatusIcon = (status: string, size: number = 14) => {
+    switch (status) {
+        case 'In Progress': return <Loader2 size={size} className="animate-spin text-blue-600" />;
+        case 'Completed': return <CheckCircle2 size={size} className="text-emerald-600" />;
+        case 'Yet to Start': return <Circle size={size} className="text-slate-500" />;
+        case 'Forecast': return <Cloud size={size} className="text-violet-600" />;
+        case 'On Hold': return <PauseCircle size={size} className="text-amber-600" />;
+        case 'Ready for QA': return <Clock size={size} className="text-pink-600" />;
+        case 'Assigned to QA': return <Clock size={size} className="text-cyan-600" />;
+        case 'Rejected': return <XCircle size={size} className="text-red-600" />;
+        default: return <Circle size={size} className="text-slate-400" />;
+    }
+};
+
+const StatusLegend = () => (
+    <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-[10px] text-slate-600 bg-slate-50 px-3 py-2 rounded-lg border border-slate-200 mt-2 md:mt-0">
+        <span className="font-bold text-slate-700 mr-1">Status Guide:</span>
+        <div className="flex items-center gap-1"><Loader2 size={12} className="text-blue-600" /> In Progress</div>
+        <div className="flex items-center gap-1"><Cloud size={12} className="text-violet-600" /> Forecast</div>
+        <div className="flex items-center gap-1"><CheckCircle2 size={12} className="text-emerald-600" /> Completed</div>
+        <div className="flex items-center gap-1"><Clock size={12} className="text-pink-600" /> Ready for QA</div>
+        <div className="flex items-center gap-1"><AlertCircle size={12} className="text-rose-600" /> Overdue</div>
+    </div>
+);
 
 export default function Schedule() {
     const { isGuest, selectedTeamId, isLoading: isGuestLoading } = useGuestMode();
@@ -374,9 +403,12 @@ export default function Schedule() {
 
             {/* Header Controls */}
             <header className="flex flex-col xl:flex-row xl:items-center justify-between gap-4 bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                <div>
-                    <h1 className="text-3xl font-bold text-slate-800">Work Schedule</h1>
-                    <p className="text-slate-500">Manage project timelines and daily tasks</p>
+                <div className="flex flex-col gap-2">
+                    <div>
+                        <h1 className="text-3xl font-bold text-slate-800">Work Schedule</h1>
+                        <p className="text-slate-500">Manage project timelines and daily tasks</p>
+                    </div>
+                    <StatusLegend />
                 </div>
 
                 <div className="flex flex-col md:flex-row items-center gap-4">
@@ -537,8 +569,18 @@ export default function Schedule() {
                                                 const borderClass = getTaskBorderColor(task, day);
 
                                                 return (
-                                                    <div key={task.id} className={`text-[11px] px-2 py-1.5 rounded-md border text-slate-700 truncate font-semibold mb-1 transition-all hover:scale-[1.02] ${borderClass}`}>
-                                                        {task.projectName} {statusInfo.overdueDays > 0 ? `(+${statusInfo.overdueDays}d)` : ''}
+                                                    <div key={task.id} className={`text-[10px] px-2 py-1.5 rounded-md border text-slate-700 truncate font-semibold mb-1 transition-all hover:scale-[1.02] ${borderClass} flex items-center gap-1`}>
+                                                        {/* Status Icon for Grid View */}
+                                                        <span className="flex-shrink-0 opacity-70">
+                                                            {statusInfo.status === 'In Progress' && <Loader2 size={10} className="animate-spin" />}
+                                                            {statusInfo.status === 'Completed' && <CheckCircle2 size={10} />}
+                                                            {statusInfo.status === 'Forecast' && <Cloud size={10} />}
+                                                            {statusInfo.status === 'Overdue' && <AlertCircle size={10} />}
+                                                            {statusInfo.status.includes('QA') && <Clock size={10} />}
+                                                            {(statusInfo.status === 'On Hold' || statusInfo.status === 'Yet to Start') && <Circle size={10} />}
+                                                        </span>
+                                                        <span className="truncate">{task.projectName}</span>
+                                                        {statusInfo.overdueDays > 0 && <span className="opacity-80">+{statusInfo.overdueDays}d</span>}
                                                     </div>
                                                 );
                                             })}
@@ -691,8 +733,23 @@ export default function Schedule() {
                                         >
                                             <div className="flex justify-between items-start mb-4">
                                                 <div className="flex items-center gap-2">
-                                                    <span className={`text-[11px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-lg bg-black/20 text-white ${isLateCompletion ? 'ring-2 ring-rose-400' : ''}`}>
-                                                        {isLateCompletion ? `Completed (Overdue ${statusInfo.overdueDays}d)` : statusInfo.status}
+                                                    <span className={`text-[11px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-lg bg-black/20 text-white flex items-center gap-1.5 ${isLateCompletion ? 'ring-2 ring-rose-400' : ''}`}>
+                                                        {isLateCompletion ? (
+                                                            <>
+                                                                <CheckCircle2 size={12} className="text-white" />
+                                                                Completed (+{statusInfo.overdueDays}d late)
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                {/* Map status to white icon for badge */}
+                                                                {statusInfo.status === 'In Progress' && <Loader2 size={12} className="animate-spin text-white" />}
+                                                                {statusInfo.status === 'Forecast' && <Cloud size={12} className="text-white" />}
+                                                                {statusInfo.status === 'Completed' && <CheckCircle2 size={12} className="text-white" />}
+                                                                {statusInfo.status.includes('QA') && <Clock size={12} className="text-white" />}
+                                                                {statusInfo.status === 'Overdue' && <AlertCircle size={12} className="text-white" />}
+                                                                {statusInfo.status}
+                                                            </>
+                                                        )}
                                                     </span>
                                                     {isOverdue && (
                                                         <span className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold bg-red-100 text-red-700 border border-red-200">

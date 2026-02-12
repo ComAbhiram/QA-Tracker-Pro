@@ -807,7 +807,14 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                                         <td style="padding: 16px; color: #0f172a; font-weight: 600; font-size: 15px; vertical-align: middle; border-right: 1px solid #cbd5e1;">
                                             <div style="margin-bottom: 4px;">${task.projectName}</div>
                                             <div style="color: #475569; font-size: 13px; font-weight: 500;">${task.projectType || '-'}</div>
-                                            ${task.priority ? `<div style="margin-top:6px; display:inline-block; padding:4px 8px; background:#e2e8f0; border-radius:4px; font-size:12px; font-weight: 600; color: #334155;">${task.priority}</div>` : ''}
+                                            ${(() => {
+                                if (!task.priority) return '';
+                                let pColor = '#64748b';
+                                if (task.priority === 'High') pColor = '#dc2626';
+                                else if (task.priority === 'Medium') pColor = '#ea580c';
+                                else if (task.priority === 'Low') pColor = '#16a34a';
+                                return `<div style="margin-top:4px; font-size: 11px; font-weight: 700; color: ${pColor}; text-transform: uppercase; letter-spacing: 0.5px;">${task.priority}</div>`;
+                            })()}
                                         </td>
                                         <td style="padding: 16px; color: #334155; font-size: 15px; vertical-align: middle; border-right: 1px solid #cbd5e1;">
                                             <div style="font-weight: 500;">${task.subPhase || '-'}</div>

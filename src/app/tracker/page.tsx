@@ -43,7 +43,8 @@ export default function Tracker() {
                 .order('start_date', { ascending: false });
 
             if (searchTerm) {
-                taskQuery = taskQuery.or(`project_name.ilike.%${searchTerm}%,assigned_to.ilike.%${searchTerm}%,sub_phase.ilike.%${searchTerm}%`);
+                // Expanded search to include Priority, Status, Comments
+                taskQuery = taskQuery.or(`project_name.ilike.%${searchTerm}%,assigned_to.ilike.%${searchTerm}%,sub_phase.ilike.%${searchTerm}%,status.ilike.%${searchTerm}%,priority.ilike.%${searchTerm}%,comments.ilike.%${searchTerm}%`);
             }
 
             // Manager/Guest Mode Filtering
@@ -320,8 +321,8 @@ export default function Tracker() {
                         <button
                             onClick={() => setViewMode('active')}
                             className={`px-4 py-2 text-sm font-bold rounded-md transition-all ${viewMode === 'active'
-                                    ? 'bg-slate-800 text-white shadow-md'
-                                    : 'text-slate-600 hover:bg-slate-100'
+                                ? 'bg-slate-800 text-white shadow-md'
+                                : 'text-slate-600 hover:bg-slate-100'
                                 }`}
                         >
                             Active
@@ -329,8 +330,8 @@ export default function Tracker() {
                         <button
                             onClick={() => setViewMode('forecast')}
                             className={`px-4 py-2 text-sm font-bold rounded-md transition-all ${viewMode === 'forecast'
-                                    ? 'bg-purple-600 text-white shadow-md'
-                                    : 'text-slate-600 hover:bg-slate-100'
+                                ? 'bg-purple-600 text-white shadow-md'
+                                : 'text-slate-600 hover:bg-slate-100'
                                 }`}
                         >
                             Forecast
