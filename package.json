@@ -29,6 +29,7 @@
     "@types/node": "^20.0.0",
     "@types/react": "^18.3.1",
     "@types/react-dom": "^18.3.1",
+    "@types/xlsx": "^0.0.35",
     "autoprefixer": "^10.4.23",
     "eslint": "^8.57.0",
     "eslint-config-next": "14.2.3",

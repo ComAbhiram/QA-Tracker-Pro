@@ -1,7 +1,6 @@
-'use client';
-
 import { useState, useRef } from 'react';
-import { Upload, Download, Loader2 } from 'lucide-react';
+import { Upload, Download, Loader2, FileSpreadsheet } from 'lucide-react';
+import * as XLSX from 'xlsx';
 import { useToast } from '@/contexts/ToastContext';
 import { useGuestMode } from '@/contexts/GuestContext';
 
@@ -9,6 +8,7 @@ export default function TaskMigration() {
     const [isExporting, setIsExporting] = useState(false);
     const [isImporting, setIsImporting] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const projectFileInputRef = useRef<HTMLInputElement>(null);
     const { success: toastSuccess, error: toastError } = useToast();
     const { isGuest, selectedTeamId } = useGuestMode();
     const [userTeamId, setUserTeamId] = useState<string | null>(null);
@@ -122,8 +122,90 @@ export default function TaskMigration() {
         }
     };
 
+    const handleProjectImportClick = () => {
+        projectFileInputRef.current?.click();
+    };
+
+    const handleProjectFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        const teamId = await getEffectiveTeamId();
+        if (!teamId) {
+            toastError('Could not determine target team for import.');
+            return;
+        }
+
+        if (!confirm(`Importing Projects from CSV/Excel:\n\n1. Reads "Name", "Description", "Status" columns\n2. Skips duplicates (by name)\n3. Creates new projects\n\nProceed?`)) {
+            if (projectFileInputRef.current) projectFileInputRef.current.value = '';
+            return;
+        }
+
+        setIsImporting(true);
+        try {
+            const data = await file.arrayBuffer();
+            const workbook = XLSX.read(data);
+            const sheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[sheetName];
+            const jsonData: any[] = XLSX.utils.sheet_to_json(worksheet);
+
+            if (!jsonData || jsonData.length === 0) {
+                throw new Error('No data found in file');
+            }
+
+            // Map CSV columns to Project object
+            // Expected columns: Name, Description, Status
+            const projects = jsonData.map(row => {
+                // Try to find Name column (case insensitive)
+                const keys = Object.keys(row);
+                const nameKey = keys.find(k => k.toLowerCase() === 'name' || k.toLowerCase() === 'project name');
+                const descKey = keys.find(k => k.toLowerCase() === 'description');
+                const statusKey = keys.find(k => k.toLowerCase() === 'status');
+
+                if (!nameKey || !row[nameKey]) return null; // Skip if no name
+
+                return {
+                    name: row[nameKey],
+                    description: descKey ? row[descKey] : '',
+                    status: statusKey ? row[statusKey]?.toLowerCase() : 'active'
+                };
+            }).filter(p => p !== null);
+
+            if (projects.length === 0) {
+                throw new Error('No valid projects found. Please check columns: Name, Description, Status.');
+            }
+
+            // Send to existing import API
+            const response = await fetch('/api/migration/import', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    teamId,
+                    data: { projects, tasks: [] } // Only projects
+                })
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                throw new Error(result.error || 'Import failed');
+            }
+
+            toastSuccess(`Project Import: ${result.details.projectsCreated} Created, ${result.details.projectsSkipped} Skipped.`);
+            window.location.reload();
+
+        } catch (error: any) {
+            console.error('Project Import error:', error);
+            toastError(error.message || 'Failed to import projects.');
+        } finally {
+            setIsImporting(false);
+            if (projectFileInputRef.current) projectFileInputRef.current.value = '';
+        }
+    };
+
     return (
         <div className="flex items-center gap-2">
+            {/* JSON Migration Input */}
             <input
                 type="file"
                 ref={fileInputRef}
@@ -131,25 +213,45 @@ export default function TaskMigration() {
                 accept=".json"
                 className="hidden"
             />
+            {/* CSV/Excel Project Input */}
+            <input
+                type="file"
+                ref={projectFileInputRef}
+                onChange={handleProjectFileChange}
+                accept=".csv, .xlsx, .xls"
+                className="hidden"
+            />
+
+            <button
+                onClick={handleProjectImportClick}
+                disabled={isImporting || isExporting}
+                className="flex items-center gap-2 px-3 py-2 bg-white border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50 hover:text-emerald-600 transition-colors disabled:opacity-50 text-sm font-medium"
+                title="Import Projects from CSV/Excel"
+            >
+                {isImporting ? <Loader2 size={16} className="animate-spin" /> : <FileSpreadsheet size={16} />}
+                Import CSV
+            </button>
+
+            <div className="w-px h-4 bg-slate-300 mx-1"></div>
 
             <button
                 onClick={handleImportClick}
                 disabled={isImporting || isExporting}
                 className="flex items-center gap-2 px-3 py-2 bg-white border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50 hover:text-indigo-600 transition-colors disabled:opacity-50 text-sm font-medium"
-                title="Import Tasks from JSON"
+                title="Import Full Migration (JSON)"
             >
                 {isImporting ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}
-                Import
+                Import JSON
             </button>
 
             <button
                 onClick={handleExport}
                 disabled={isImporting || isExporting}
                 className="flex items-center gap-2 px-3 py-2 bg-white border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50 hover:text-indigo-600 transition-colors disabled:opacity-50 text-sm font-medium"
-                title="Export Tasks for Migration"
+                title="Export Full Migration (JSON)"
             >
                 {isExporting ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
-                Export
+                Export JSON
             </button>
         </div>
     );
