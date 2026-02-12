@@ -1,22 +1,39 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseServer } from '@/lib/supabase-server';
-import { createServerClient } from '@supabase/ssr';
+import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 
 export async function DELETE(request: NextRequest) {
     try {
-        // Create Supabase client with cookies for proper session handling
         const cookieStore = cookies();
         const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
         const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
-        const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
-            cookies: {
-                get(name: string) {
-                    return cookieStore.get(name)?.value;
+        const supabase = createServerClient(
+            supabaseUrl,
+            supabaseAnonKey,
+            {
+                cookies: {
+                    get(name: string) {
+                        return cookieStore.get(name)?.value;
+                    },
+                    set(name: string, value: string, options: CookieOptions) {
+                        try {
+                            cookieStore.set({ name, value, ...options });
+                        } catch (error) {
+                            // Handle cookie setting errors
+                        }
+                    },
+                    remove(name: string, options: CookieOptions) {
+                        try {
+                            cookieStore.set({ name, value: '', ...options });
+                        } catch (error) {
+                            // Handle cookie removal errors
+                        }
+                    },
                 },
-            },
-        });
+            }
+        );
 
         // Get authenticated user from session
         const { data: { user }, error: authError } = await supabase.auth.getUser();
