@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase';
 import { Task, mapTaskFromDB } from '@/lib/types';
 import { TrendingUp, User, Activity, Calendar, Edit, Grid3x3, Table2, ExternalLink } from 'lucide-react';
 import { format } from 'date-fns';
+import { StandardTableStyles } from '@/components/ui/standard/TableStyles';
 import TaskModal from '@/components/TaskModal';
 
 import { useGuestMode } from '@/contexts/GuestContext';
@@ -253,77 +254,25 @@ export default function ForecastProjects() {
                         ))}
                     </div>
                 ) : (
-                    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-sm text-slate-600">
-                                <thead className="bg-yellow-50 border-b-2 border-slate-400">
-                                    <tr>
-                                        <th className="px-5 py-4 font-semibold text-slate-700 text-left border-r border-slate-400">Project</th>
-                                        <th className="px-4 py-4 font-semibold text-slate-700 text-left border-r border-slate-400">Phase/Task</th>
-                                        <th className="px-4 py-4 font-semibold text-slate-700 text-left border-r border-slate-400">Type</th>
-                                        <th className="px-4 py-4 font-semibold text-slate-700 text-left border-r border-slate-400">Priority</th>
-                                        <th className="px-4 py-4 font-semibold text-slate-700 text-left border-r border-slate-400">PC</th>
-                                        <th className="px-4 py-4 font-semibold text-slate-700 text-left border-r border-slate-400">Assignee 1</th>
-                                        <th className="px-4 py-4 font-semibold text-slate-700 text-left border-r border-slate-400">Assignee 2</th>
-                                        <th className="px-4 py-4 font-semibold text-slate-700 text-left border-r border-slate-400">Start Date</th>
-                                        <th className="px-4 py-4 font-semibold text-slate-700 text-left border-r border-slate-400">Comments</th>
-                                        <th className="px-4 py-4 font-semibold text-slate-700 text-left">Sprint Link</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {tasks.map((task) => (
-                                        <tr
-                                            key={task.id}
-                                            onClick={() => handleTaskClick(task)}
-                                            className="border-b border-slate-400 hover:bg-yellow-50/30 transition-all cursor-pointer"
-                                        >
-                                            <td className="px-5 py-4 font-semibold text-slate-800 border-r border-slate-400">{task.projectName}</td>
-                                            <td className="px-4 py-4 font-medium text-slate-600 border-r border-slate-400">{task.subPhase || '-'}</td>
-                                            <td className="px-4 py-4 text-slate-600 border-r border-slate-400">{task.projectType || '-'}</td>
-                                            <td className="px-4 py-4 text-slate-600 border-r border-slate-400">{task.priority || '-'}</td>
-                                            <td className="px-4 py-4 text-slate-600 border-r border-slate-400">{task.pc || '-'}</td>
-                                            <td className="px-4 py-4 text-slate-600 border-r border-slate-400">{task.assignedTo || '-'}</td>
-                                            <td className="px-4 py-4 text-slate-600 border-r border-slate-400">{task.assignedTo2 || '-'}</td>
-                                            <td className="px-4 py-4 text-slate-500 font-medium border-r border-slate-400">
-                                                {task.startDate ? format(new Date(task.startDate), 'MMM d, yyyy') : '-'}
-                                            </td>
-                                            <td className="px-4 py-4 text-sm text-slate-500 max-w-md border-r border-slate-400" title={task.comments || ''}>
-                                                {task.comments || '-'}
-                                            </td>
-                                            <td className="px-4 py-4 text-sm text-slate-500">
-                                                {task.sprintLink ? (
-                                                    <a
-                                                        href={task.sprintLink}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        className="text-blue-600 hover:text-blue-800 hover:underline flex items-center gap-1"
-                                                        onClick={(e) => e.stopPropagation()}
-                                                    >
-                                                        <ExternalLink size={14} />
-                                                        Link
-                                                    </a>
-                                                ) : '-'}
-                                            </td>
-                                        </tr>
-                                    ))}
                                 </tbody>
-                            </table>
-                        </div>
-                    </div>
-                )}
-            </div>
+        </table >
+                        </div >
+                    </div >
+                )
+}
+            </div >
 
-            {/* Task Edit Modal */}
-            <TaskModal
-                isOpen={isModalOpen}
-                onClose={() => {
-                    setIsModalOpen(false);
-                    setSelectedTask(null);
-                }}
-                task={selectedTask}
-                onSave={handleSaveTask}
-                onDelete={handleDeleteTask}
-            />
+    {/* Task Edit Modal */ }
+    < TaskModal
+isOpen = { isModalOpen }
+onClose = {() => {
+    setIsModalOpen(false);
+    setSelectedTask(null);
+}}
+task = { selectedTask }
+onSave = { handleSaveTask }
+onDelete = { handleDeleteTask }
+    />
         </>
     );
 }

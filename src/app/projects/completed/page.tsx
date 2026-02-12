@@ -6,6 +6,7 @@ import { supabase } from '@/lib/supabase';
 import { Task, mapTaskFromDB } from '@/lib/types';
 import { CheckCircle2, User, Activity, Calendar, Grid3x3, Table2, Edit2, ExternalLink } from 'lucide-react';
 import { format } from 'date-fns';
+import { StandardTableStyles } from '@/components/ui/standard/TableStyles';
 
 export default function CompletedProjects() {
     const [tasks, setTasks] = useState<Task[]>([]);
@@ -176,62 +177,60 @@ export default function CompletedProjects() {
                     ))}
                 </div>
             ) : (
-                <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-sm text-slate-600">
-                            <thead className="bg-emerald-50 border-b-2 border-slate-400">
-                                <tr>
-                                    <th className="px-5 py-4 font-semibold text-slate-700 text-left border-r border-slate-400">Project</th>
-                                    <th className="px-4 py-4 font-semibold text-slate-700 text-left border-r border-slate-400">Phase/Task</th>
-                                    <th className="px-4 py-4 font-semibold text-slate-700 text-left border-r border-slate-400">PC</th>
-                                    <th className="px-4 py-4 font-semibold text-slate-700 text-left border-r border-slate-400">Assignee 1</th>
-                                    <th className="px-4 py-4 font-semibold text-slate-700 text-left border-r border-slate-400">Assignee 2</th>
-                                    <th className="px-4 py-4 font-semibold text-slate-700 text-left border-r border-slate-400">End Date</th>
-                                    <th className="px-4 py-4 font-semibold text-slate-700 text-left border-r border-slate-400">Actual Completion</th>
-                                    {isQATeam && <th className="px-4 py-4 font-semibold text-slate-700 text-left border-r border-slate-400">Bugs</th>}
-                                    <th className="px-4 py-4 font-semibold text-slate-700 text-left border-r border-slate-400">Comments</th>
-                                    <th className="px-4 py-4 font-semibold text-slate-700 text-left border-r border-slate-400">Deviation Reason</th>
-                                    <th className="px-4 py-4 font-semibold text-slate-700 text-left">Sprint Link</th>
+                <div className={StandardTableStyles.container}>
+                    <table className="w-full">
+                        <thead className={StandardTableStyles.header}>
+                            <tr>
+                                <th className={StandardTableStyles.headerCell}>Project</th>
+                                <th className={StandardTableStyles.headerCell}>Phase/Task</th>
+                                <th className={StandardTableStyles.headerCell}>PC</th>
+                                <th className={StandardTableStyles.headerCell}>Assignee 1</th>
+                                <th className={StandardTableStyles.headerCell}>Assignee 2</th>
+                                <th className={StandardTableStyles.headerCell}>End Date</th>
+                                <th className={StandardTableStyles.headerCell}>Actual Completion</th>
+                                {isQATeam && <th className={StandardTableStyles.headerCell}>Bugs</th>}
+                                <th className={StandardTableStyles.headerCell}>Comments</th>
+                                <th className={StandardTableStyles.headerCell}>Deviation Reason</th>
+                                <th className={StandardTableStyles.headerCell}>Sprint Link</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {tasks.map((task) => (
+                                <tr key={task.id} className={StandardTableStyles.row}>
+                                    <td className={`${StandardTableStyles.cell} font-bold`}>{task.projectName}</td>
+                                    <td className={StandardTableStyles.cell}>{task.subPhase || '-'}</td>
+                                    <td className={StandardTableStyles.cell}>{task.pc || '-'}</td>
+                                    <td className={StandardTableStyles.cell}>{task.assignedTo || '-'}</td>
+                                    <td className={StandardTableStyles.cell}>{task.assignedTo2 || '-'}</td>
+                                    <td className={StandardTableStyles.cell}>
+                                        {task.endDate ? format(new Date(task.endDate), 'MMM d, yyyy') : '-'}
+                                    </td>
+                                    <td className={`${StandardTableStyles.cell} text-emerald-600 font-medium`}>
+                                        {task.actualCompletionDate ? format(new Date(task.actualCompletionDate), 'MMM d, yyyy') : '-'}
+                                    </td>
+                                    {isQATeam && (
+                                        <td className={`${StandardTableStyles.cell} text-center font-mono`}>
+                                            {task.bugCount || 0}
+                                        </td>
+                                    )}
+                                    <td className={StandardTableStyles.cell} title={task.comments || ''}>
+                                        <div className="truncate max-w-xs">{task.comments || '-'}</div>
+                                    </td>
+                                    <td className={StandardTableStyles.cell} title={task.deviationReason || ''}>
+                                        <div className="truncate max-w-xs">{task.deviationReason || '-'}</div>
+                                    </td>
+                                    <td className={StandardTableStyles.cell}>
+                                        {task.sprintLink ? (
+                                            <a href={task.sprintLink} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 hover:underline flex items-center gap-1">
+                                                <ExternalLink size={14} />
+                                                Link
+                                            </a>
+                                        ) : '-'}
+                                    </td>
                                 </tr>
-                            </thead>
-                            <tbody>
-                                {tasks.map((task) => (
-                                    <tr key={task.id} className="border-b border-slate-400 hover:bg-emerald-50/30 transition-all">
-                                        <td className="px-5 py-4 font-semibold text-slate-800 border-r border-slate-400">{task.projectName}</td>
-                                        <td className="px-4 py-4 font-medium text-slate-600 border-r border-slate-400">{task.subPhase || '-'}</td>
-                                        <td className="px-4 py-4 text-slate-600 border-r border-slate-400">{task.pc || '-'}</td>
-                                        <td className="px-4 py-4 text-slate-600 border-r border-slate-400">{task.assignedTo || '-'}</td>
-                                        <td className="px-4 py-4 text-slate-600 border-r border-slate-400">{task.assignedTo2 || '-'}</td>
-                                        <td className="px-4 py-4 text-slate-500 font-medium border-r border-slate-400">
-                                            {task.endDate ? format(new Date(task.endDate), 'MMM d, yyyy') : '-'}
-                                        </td>
-                                        <td className="px-4 py-4 text-emerald-600 font-medium border-r border-slate-400">
-                                            {task.actualCompletionDate ? format(new Date(task.actualCompletionDate), 'MMM d, yyyy') : '-'}
-                                        </td>
-                                        {isQATeam && (
-                                            <td className="px-4 py-4 text-center font-mono text-slate-600 border-r border-slate-400">
-                                                {task.bugCount || 0}
-                                            </td>
-                                        )}
-                                        <td className="px-4 py-4 text-sm text-slate-500 max-w-xs truncate border-r border-slate-400" title={task.comments || ''}>
-                                            {task.comments || '-'}
-                                        </td>
-                                        <td className="px-4 py-4 text-sm text-slate-500 max-w-xs truncate border-r border-slate-400" title={task.deviationReason || ''}>
-                                            {task.deviationReason || '-'}
-                                        </td>
-                                        <td className="px-4 py-4 text-sm text-slate-500 max-w-xs truncate">
-                                            {task.sprintLink ? (
-                                                <a href={task.sprintLink} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 hover:underline flex items-center gap-1">
-                                                    <ExternalLink size={14} />
-                                                    Link
-                                                </a>
-                                            ) : '-'}
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
+                            ))}
+                        </tbody>
+                    </table>
                 </div>
             )}
         </div>

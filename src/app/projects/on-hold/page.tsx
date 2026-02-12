@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase';
 import { Task, mapTaskFromDB } from '@/lib/types';
 import { PauseCircle, User, Activity, Grid3x3, Table2, ExternalLink, Pencil } from 'lucide-react';
 import { format } from 'date-fns';
+import { StandardTableStyles } from '@/components/ui/standard/TableStyles';
 import TaskModal from '@/components/TaskModal';
 import TaskDetailsModal from '@/components/TaskDetailsModal';
 import { useToast } from '@/contexts/ToastContext';
@@ -267,60 +268,60 @@ export default function OnHoldProjects() {
                     ))}
                 </div>
             ) : (
-                <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-sm text-slate-600">
-                            <thead className="bg-amber-50 border-b-2 border-slate-400">
-                                <tr>
-                                    <th className="px-5 py-4 font-semibold text-slate-700 text-left border-r border-slate-400">Project</th>
-                                    <th className="px-4 py-4 font-semibold text-slate-700 text-left border-r border-slate-400">Phase/Task</th>
-                                    <th className="px-4 py-4 font-semibold text-slate-700 text-left border-r border-slate-400">PC</th>
-                                    <th className="px-4 py-4 font-semibold text-slate-700 text-left border-r border-slate-400">Assignee 1</th>
-                                    <th className="px-4 py-4 font-semibold text-slate-700 text-left border-r border-slate-400">Assignee 2</th>
-                                    <th className="px-4 py-4 font-semibold text-slate-700 text-left border-r border-slate-400">Date</th>
-                                    <th className="px-4 py-4 font-semibold text-slate-700 text-left border-r border-slate-400">Updates</th>
-                                    <th className="px-4 py-4 font-semibold text-slate-700 text-left border-r border-slate-400">Sprint Link</th>
-                                    <th className="px-4 py-4 font-semibold text-slate-700 text-center">Actions</th>
+                <div className={StandardTableStyles.container}>
+                    <table className="w-full">
+                        <thead className={StandardTableStyles.header}>
+                            <tr>
+                                <th className={StandardTableStyles.headerCell}>Project</th>
+                                <th className={StandardTableStyles.headerCell}>Phase/Task</th>
+                                <th className={StandardTableStyles.headerCell}>PC</th>
+                                <th className={StandardTableStyles.headerCell}>Assignee 1</th>
+                                <th className={StandardTableStyles.headerCell}>Assignee 2</th>
+                                <th className={StandardTableStyles.headerCell}>Status</th>
+                                <th className={StandardTableStyles.headerCell}>Created Date</th>
+                                <th className={StandardTableStyles.headerCell}>Updates/Comments</th>
+                                <th className={StandardTableStyles.headerCell}>Details</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {tasks.map((task) => (
+                                <tr key={task.id} className={StandardTableStyles.row}>
+                                    <td className={`${StandardTableStyles.cell} font-bold`}>{task.projectName}</td>
+                                    <td className={StandardTableStyles.cell}>{task.subPhase || '-'}</td>
+                                    <td className={StandardTableStyles.cell}>{task.pc || '-'}</td>
+                                    <td className={StandardTableStyles.cell}>{task.assignedTo || '-'}</td>
+                                    <td className={StandardTableStyles.cell}>{task.assignedTo2 || '-'}</td>
+                                    <td className={StandardTableStyles.cell}>
+                                        <span className="bg-amber-100 text-amber-700 text-xs font-bold px-2 py-0.5 rounded-full inline-block">
+                                            On Hold
+                                        </span>
+                                    </td>
+                                    <td className={StandardTableStyles.cell}>
+                                        {task.createdAt ? format(new Date(task.createdAt), 'MMM d, yyyy') : '-'}
+                                    </td>
+                                    <td className={StandardTableStyles.cell} title={task.currentUpdates || task.comments || ''}>
+                                        <div className="truncate max-w-xs">{task.currentUpdates || task.comments || '-'}</div>
+                                    </td>
+                                    <td className={StandardTableStyles.actionCell}>
+                                        <button
+                                            onClick={() => handleEditTask(task)}
+                                            className="text-slate-400 hover:text-indigo-600 transition-colors"
+                                            title="Edit Task"
+                                        >
+                                            <Pencil size={14} />
+                                        </button>
+                                        <button
+                                            onClick={() => handleViewDetails(task)}
+                                            className="text-slate-400 hover:text-indigo-600 transition-colors"
+                                            title="View Details"
+                                        >
+                                            <ExternalLink size={14} />
+                                        </button>
+                                    </td>
                                 </tr>
-                            </thead>
-                            <tbody>
-                                {tasks.map((task) => (
-                                    <tr key={task.id} className="border-b border-slate-400 hover:bg-amber-50/20 transition-all cursor-pointer" onClick={() => handleViewDetails(task)}>
-                                        <td className="px-5 py-4 font-semibold text-slate-800 border-r border-slate-400">{task.projectName}</td>
-                                        <td className="px-4 py-4 font-medium text-slate-600 border-r border-slate-400">{task.subPhase || '-'}</td>
-                                        <td className="px-4 py-4 text-slate-600 border-r border-slate-400">{task.pc || '-'}</td>
-                                        <td className="px-4 py-4 text-slate-600 border-r border-slate-400">{task.assignedTo || '-'}</td>
-                                        <td className="px-4 py-4 text-slate-600 border-r border-slate-400">{task.assignedTo2 || '-'}</td>
-                                        <td className="px-4 py-4 text-slate-500 font-medium border-r border-slate-400">
-                                            {task.endDate ? format(new Date(task.endDate), 'MMM d, yyyy') : '-'}
-                                        </td>
-                                        <td className="px-4 py-4 text-sm text-slate-600 max-w-md border-r border-slate-400 truncate" title={task.currentUpdates || task.comments || ''}>
-                                            {task.currentUpdates || task.comments || '-'}
-                                        </td>
-                                        <td className="px-4 py-4 text-sm text-slate-500 border-r border-slate-400">
-                                            {task.sprintLink ? (
-                                                <a href={task.sprintLink} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 hover:underline flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
-                                                    <ExternalLink size={14} />
-                                                    Link
-                                                </a>
-                                            ) : '-'}
-                                        </td>
-                                        <td className="px-4 py-4 text-center">
-                                            <button
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleEditTask(task);
-                                                }}
-                                                className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-slate-100 rounded-lg transition-colors"
-                                            >
-                                                <Pencil size={16} />
-                                            </button>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
+                            ))}
+                        </tbody>
+                    </table>
                 </div>
             )}
 

@@ -1183,25 +1183,39 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                         )}
                     </div>
 
-                    {/* Forecast Projects - Simple Button */}
-                    <button
-                        onClick={generateForecastImage}
-                        disabled={loading}
-                        className="w-full flex items-center gap-4 p-4 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition-all duration-200 group text-left"
-                    >
-                        <div className="w-12 h-12 rounded-full bg-purple-500 flex items-center justify-center flex-shrink-0">
-                            {loading ? (
-                                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                            ) : (
+                    {/* Forecast Projects - Expandable */}
+                    <div className="border border-slate-200 rounded-xl overflow-hidden">
+                        <button
+                            onClick={() => setExpandedSection(expandedSection === 'forecast' ? null : 'forecast')}
+                            className="w-full flex items-center gap-4 p-4 bg-white hover:bg-slate-50 transition-all duration-200 group text-left"
+                        >
+                            <div className="w-12 h-12 rounded-full bg-purple-500 flex items-center justify-center flex-shrink-0">
                                 <Calendar className="text-white" size={20} />
-                            )}
-                        </div>
-                        <div className="flex-1">
-                            <h3 className="font-semibold text-slate-800">Forecast Projects</h3>
-                            <p className="text-sm text-slate-500">Generate an image showing all forecast projects</p>
-                        </div>
-                        <ChevronRight className="text-slate-400 group-hover:text-sky-500 transition-all" size={20} />
-                    </button>
+                            </div>
+                            <div className="flex-1">
+                                <h3 className="font-semibold text-slate-800">Forecast Projects</h3>
+                                <p className="text-sm text-slate-500">Generate an image showing all forecast projects</p>
+                            </div>
+                            <ChevronRight className={`text-slate-400 group-hover:text-sky-500 transition-all ${expandedSection === 'forecast' ? 'rotate-90' : ''}`} size={20} />
+                        </button>
+
+                        {expandedSection === 'forecast' && (
+                            <div className="border-t border-slate-200 bg-slate-50 p-3 space-y-2">
+                                <button
+                                    onClick={generateForecastImage}
+                                    disabled={loading}
+                                    className="w-full flex items-center gap-3 p-3 bg-white hover:bg-sky-50 border border-slate-200 hover:border-sky-300 rounded-lg transition-all text-left"
+                                >
+                                    {loading ? (
+                                        <div className="w-4 h-4 border-2 border-sky-600 border-t-transparent rounded-full animate-spin"></div>
+                                    ) : (
+                                        <Camera className="text-sky-600" size={18} />
+                                    )}
+                                    <span className="text-sm font-medium text-slate-700">{loading ? 'Generating...' : 'Download as Image'}</span>
+                                </button>
+                            </div>
+                        )}
+                    </div>
 
                     {/* QA Work Status - Expandable */}
                     <div className="border border-slate-200 rounded-xl overflow-hidden">
