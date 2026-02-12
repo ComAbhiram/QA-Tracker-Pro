@@ -459,29 +459,35 @@ export default function Tracker() {
                         <p className="text-sm text-slate-500">Try adjusting your search or filters</p>
                     </div>
                 ) : (
-                    Object.keys(groupedTasks).map(assignee => (
-                        <AssigneeTaskTable
-                            key={assignee}
-                            assignee={assignee}
-                            tasks={groupedTasks[assignee]}
-                            leaves={leaves}
-                            onEditTask={handleEditTask}
-                            onDateUpdate={async (taskId, field, date) => {
-                                const { error } = await supabase
-                                    .from('tasks')
-                                    .update({ [field]: date || null })
-                                    .eq('id', taskId);
+                    Object.keys(groupedTasks)
+                        .sort((a, b) => {
+                            if (a === 'Unassigned') return 1;
+                            if (b === 'Unassigned') return -1;
+                            return a.localeCompare(b);
+                        })
+                        .map(assignee => (
+                            <AssigneeTaskTable
+                                key={assignee}
+                                assignee={assignee}
+                                tasks={groupedTasks[assignee]}
+                                leaves={leaves}
+                                onEditTask={handleEditTask}
+                                onDateUpdate={async (taskId, field, date) => {
+                                    const { error } = await supabase
+                                        .from('tasks')
+                                        .update({ [field]: date || null })
+                                        .eq('id', taskId);
 
-                                if (error) {
-                                    console.error('Error updating date:', error);
-                                    toastError('Failed to update date');
-                                } else {
-                                    success('Date has been changed successfully.');
-                                    refreshTasks();
-                                }
-                            }}
-                        />
-                    ))
+                                    if (error) {
+                                        console.error('Error updating date:', error);
+                                        toastError('Failed to update date');
+                                    } else {
+                                        success('Date has been changed successfully.');
+                                        refreshTasks();
+                                    }
+                                }}
+                            />
+                        ))
                 )}
             </div>
 
