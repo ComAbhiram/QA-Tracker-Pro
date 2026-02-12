@@ -14,6 +14,9 @@ import {
 import TaskModal from '@/components/TaskModal';
 
 import { useGuestMode } from '@/contexts/GuestContext';
+import { StatusBadge } from "@/components/ui/standard/StatusBadge";
+import { PriorityBadge } from "@/components/ui/standard/PriorityBadge";
+import { StandardTableStyles } from "@/components/ui/standard/TableStyles";
 
 // Helper for Status Icons (consistent with AssigneeTaskTable)
 const getStatusIcon = (status: string, size: number = 14) => {
@@ -417,16 +420,16 @@ export default function Schedule() {
 
                 <div className="flex flex-col md:flex-row items-center gap-4">
 
-                    <div className="flex items-center gap-3 bg-slate-100 p-1 rounded-xl">
+                    <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-lg">
                         <button
                             onClick={() => { setViewMode('calendar'); setShowTableView(false); }}
-                            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${viewMode === 'calendar' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                            className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-all ${viewMode === 'calendar' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
                         >
                             <CalendarIcon size={16} /> Monthly
                         </button>
                         <button
                             onClick={() => { setViewMode('day'); setShowTableView(false); }}
-                            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${viewMode === 'day' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                            className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-all ${viewMode === 'day' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
                         >
                             <List size={16} /> Daily
                         </button>
@@ -435,16 +438,16 @@ export default function Schedule() {
                     <div className="h-8 w-px bg-slate-200 hidden md:block"></div>
 
                     {/* View Type Toggle (Grid vs Table) */}
-                    <div className="flex bg-slate-100 p-1 rounded-xl">
+                    <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-lg">
                         <button
                             onClick={() => setShowTableView(false)}
-                            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${!showTableView ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                            className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-all ${!showTableView ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
                         >
                             <LayoutGrid size={16} /> Grid
                         </button>
                         <button
                             onClick={() => setShowTableView(true)}
-                            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${showTableView ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                            className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-all ${showTableView ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
                         >
                             <Table2 size={16} /> List
                         </button>
@@ -646,22 +649,23 @@ export default function Schedule() {
                             <h2 className="text-xl font-bold text-slate-800">Tasks for {format(currentDate, 'MMMM yyyy')}</h2>
                             <p className="text-slate-500">{tasks.length} total tasks</p>
                         </div>
-                        <div className="overflow-hidden border border-slate-200 rounded-xl">
+                        <div className={StandardTableStyles.container}>
                             <table className="w-full">
-                                <thead className="bg-slate-50 border-b border-slate-200">
+                                <thead className={StandardTableStyles.header}>
                                     <tr>
-                                        <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">Project Name</th>
-                                        <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">Phase/Task</th>
-                                        <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">Assignees</th>
-                                        <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">Start Date</th>
-                                        <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">End Date</th>
-                                        <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">Status</th>
+                                        <th className={StandardTableStyles.headerCell}>Project Name</th>
+                                        <th className={StandardTableStyles.headerCell}>Phase/Task</th>
+                                        <th className={StandardTableStyles.headerCell}>Assignees</th>
+                                        <th className={StandardTableStyles.headerCell}>Start Date</th>
+                                        <th className={StandardTableStyles.headerCell}>End Date</th>
+                                        <th className={StandardTableStyles.headerCell}>Priority</th>
+                                        <th className={StandardTableStyles.headerCell}>Status</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-slate-100">
+                                <tbody>
                                     {tasks.length === 0 ? (
                                         <tr>
-                                            <td colSpan={6} className="px-6 py-12 text-center text-slate-400">
+                                            <td colSpan={7} className="px-6 py-12 text-center text-slate-400">
                                                 <div className="flex flex-col items-center">
                                                     <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4 text-3xl">📅</div>
                                                     <p className="text-lg font-medium text-slate-600">No tasks for this month</p>
@@ -669,36 +673,32 @@ export default function Schedule() {
                                             </td>
                                         </tr>
                                     ) : (
-                                        tasks.map((task) => {
-                                            const statusInfo = getStatusOnDate(task, currentDate);
-                                            const badgeClass = getStatusBadgeColor(task);
-
-                                            return (
-                                                <tr
-                                                    key={task.id}
-                                                    onClick={() => handleTaskClick(task)}
-                                                    className="hover:bg-slate-50 cursor-pointer transition-colors"
-                                                >
-                                                    <td className="px-6 py-4 text-sm font-semibold text-slate-800">{task.projectName}</td>
-                                                    <td className="px-6 py-4 text-sm text-slate-600">{task.subPhase || '-'}</td>
-                                                    <td className="px-6 py-4 text-sm text-slate-600">
-                                                        {task.assignedTo || 'Unassigned'}
-                                                        {task.assignedTo2 && `, ${task.assignedTo2}`}
-                                                    </td>
-                                                    <td className="px-6 py-4 text-sm text-slate-600">
-                                                        {task.startDate ? format(new Date(task.startDate), 'MMM d, yyyy') : '-'}
-                                                    </td>
-                                                    <td className="px-6 py-4 text-sm text-slate-600">
-                                                        {task.endDate ? format(new Date(task.endDate), 'MMM d, yyyy') : '-'}
-                                                    </td>
-                                                    <td className="px-6 py-4">
-                                                        <span className={`inline-flex px-3 py-1 text-xs font-bold rounded-lg ${badgeClass}`}>
-                                                            {statusInfo.status}
-                                                        </span>
-                                                    </td>
-                                                </tr>
-                                            );
-                                        })
+                                        tasks.map((task) => (
+                                            <tr
+                                                key={task.id}
+                                                onClick={() => handleTaskClick(task)}
+                                                className={StandardTableStyles.row}
+                                            >
+                                                <td className={`${StandardTableStyles.cell} font-bold`}>{task.projectName}</td>
+                                                <td className={StandardTableStyles.cell}>{task.subPhase || '-'}</td>
+                                                <td className={StandardTableStyles.cell}>
+                                                    {task.assignedTo || 'Unassigned'}
+                                                    {task.assignedTo2 && `, ${task.assignedTo2}`}
+                                                </td>
+                                                <td className={StandardTableStyles.cell}>
+                                                    {task.startDate ? format(new Date(task.startDate), 'MMM d, yyyy') : '-'}
+                                                </td>
+                                                <td className={StandardTableStyles.cell}>
+                                                    {task.endDate ? format(new Date(task.endDate), 'MMM d, yyyy') : '-'}
+                                                </td>
+                                                <td className={StandardTableStyles.cell}>
+                                                    <PriorityBadge priority={task.priority} />
+                                                </td>
+                                                <td className={StandardTableStyles.cell}>
+                                                    <StatusBadge status={task.status} />
+                                                </td>
+                                            </tr>
+                                        ))
                                     )}
                                 </tbody>
                             </table>
@@ -806,49 +806,46 @@ export default function Schedule() {
                                 <p className="text-sm">Enjoy your free time!</p>
                             </div>
                         ) : (
-                            <div className="overflow-hidden border border-slate-200 rounded-xl">
+                            <div className={StandardTableStyles.container}>
                                 <table className="w-full">
-                                    <thead className="bg-slate-50 border-b border-slate-200">
+                                    <thead className={StandardTableStyles.header}>
                                         <tr>
-                                            <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">Project Name</th>
-                                            <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">Phase/Task</th>
-                                            <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">Assignees</th>
-                                            <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">Start Date</th>
-                                            <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">End Date</th>
-                                            <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">Status</th>
+                                            <th className={StandardTableStyles.headerCell}>Project Name</th>
+                                            <th className={StandardTableStyles.headerCell}>Phase/Task</th>
+                                            <th className={StandardTableStyles.headerCell}>Assignees</th>
+                                            <th className={StandardTableStyles.headerCell}>Start Date</th>
+                                            <th className={StandardTableStyles.headerCell}>End Date</th>
+                                            <th className={StandardTableStyles.headerCell}>Priority</th>
+                                            <th className={StandardTableStyles.headerCell}>Status</th>
                                         </tr>
                                     </thead>
-                                    <tbody className="divide-y divide-slate-100">
-                                        {dayViewTasks.map((task) => {
-                                            const statusInfo = getStatusOnDate(task, currentDate);
-                                            const badgeClass = getStatusBadgeColor(task);
-
-                                            return (
-                                                <tr
-                                                    key={task.id}
-                                                    onClick={() => handleTaskClick(task)}
-                                                    className="hover:bg-slate-50 cursor-pointer transition-colors"
-                                                >
-                                                    <td className="px-6 py-4 text-sm font-semibold text-slate-800">{task.projectName}</td>
-                                                    <td className="px-6 py-4 text-sm text-slate-600">{task.subPhase || '-'}</td>
-                                                    <td className="px-6 py-4 text-sm text-slate-600">
-                                                        {task.assignedTo || 'Unassigned'}
-                                                        {task.assignedTo2 && `, ${task.assignedTo2}`}
-                                                    </td>
-                                                    <td className="px-6 py-4 text-sm text-slate-600">
-                                                        {task.startDate ? format(new Date(task.startDate), 'MMM d, yyyy') : '-'}
-                                                    </td>
-                                                    <td className="px-6 py-4 text-sm text-slate-600">
-                                                        {task.endDate ? format(new Date(task.endDate), 'MMM d, yyyy') : '-'}
-                                                    </td>
-                                                    <td className="px-6 py-4">
-                                                        <span className={`inline-flex px-3 py-1 text-xs font-bold rounded-lg ${badgeClass}`}>
-                                                            {statusInfo.status}
-                                                        </span>
-                                                    </td>
-                                                </tr>
-                                            );
-                                        })}
+                                    <tbody>
+                                        {dayViewTasks.map((task) => (
+                                            <tr
+                                                key={task.id}
+                                                onClick={() => handleTaskClick(task)}
+                                                className={StandardTableStyles.row}
+                                            >
+                                                <td className={`${StandardTableStyles.cell} font-bold`}>{task.projectName}</td>
+                                                <td className={StandardTableStyles.cell}>{task.subPhase || '-'}</td>
+                                                <td className={StandardTableStyles.cell}>
+                                                    {task.assignedTo || 'Unassigned'}
+                                                    {task.assignedTo2 && `, ${task.assignedTo2}`}
+                                                </td>
+                                                <td className={StandardTableStyles.cell}>
+                                                    {task.startDate ? format(new Date(task.startDate), 'MMM d, yyyy') : '-'}
+                                                </td>
+                                                <td className={StandardTableStyles.cell}>
+                                                    {task.endDate ? format(new Date(task.endDate), 'MMM d, yyyy') : '-'}
+                                                </td>
+                                                <td className={StandardTableStyles.cell}>
+                                                    <PriorityBadge priority={task.priority} />
+                                                </td>
+                                                <td className={StandardTableStyles.cell}>
+                                                    <StatusBadge status={task.status} />
+                                                </td>
+                                            </tr>
+                                        ))}
                                     </tbody>
                                 </table>
                             </div>

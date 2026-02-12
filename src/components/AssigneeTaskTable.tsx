@@ -21,6 +21,8 @@ import { calculateAvailability } from '@/lib/availability';
 import ResizableHeader from '@/components/ui/ResizableHeader';
 import { DatePicker } from '@/components/DatePicker';
 import useColumnResizing from '@/hooks/useColumnResizing';
+import { StatusBadge } from '@/components/ui/standard/StatusBadge';
+import { PriorityBadge } from '@/components/ui/standard/PriorityBadge';
 
 interface AssigneeTaskTableProps {
     assignee: string;
@@ -93,19 +95,7 @@ export default function AssigneeTaskTable({ assignee, tasks, leaves, onEditTask,
         await onDateUpdate(taskId, field, newDateStr);
     };
 
-    const getStatusDisplay = (status: string) => {
-        switch (status) {
-            case 'In Progress': return <div className="flex items-center gap-1.5 text-blue-700 font-medium"><Loader2 size={13} className="animate-spin" /> In Progress</div>;
-            case 'Completed': return <div className="flex items-center gap-1.5 text-emerald-700 font-medium"><CheckCircle2 size={13} /> Completed</div>;
-            case 'Yet to Start': return <div className="flex items-center gap-1.5 text-slate-500 font-medium"><Circle size={13} /> Yet to Start</div>;
-            case 'Forecast': return <div className="flex items-center gap-1.5 text-violet-600 font-medium"><Cloud size={13} /> Forecast</div>;
-            case 'On Hold': return <div className="flex items-center gap-1.5 text-amber-600 font-medium"><PauseCircle size={13} /> On Hold</div>;
-            case 'Ready for QA': return <div className="flex items-center gap-1.5 text-pink-600 font-medium"><Clock size={13} /> Ready for QA</div>;
-            case 'Assigned to QA': return <div className="flex items-center gap-1.5 text-cyan-600 font-medium"><Clock size={13} /> Assigned to QA</div>;
-            case 'Rejected': return <div className="flex items-center gap-1.5 text-red-600 font-medium"><XCircle size={13} /> Rejected</div>;
-            default: return <div className="text-slate-600">{status}</div>;
-        }
-    };
+
 
     const getHeaderColor = (name: string) => {
         const colors = [
@@ -208,21 +198,13 @@ export default function AssigneeTaskTable({ assignee, tasks, leaves, onEditTask,
                                 <td className="px-2 py-2 truncate border-r border-slate-900 font-bold text-slate-900" title={task.projectName}>{task.projectName}</td>
                                 <td className="px-2 py-2 truncate border-r border-slate-900">{task.projectType || '-'}</td>
                                 <td className="px-2 py-2 truncate border-r border-slate-900">
-                                    {task.priority && (
-                                        <span className={`font-bold ${task.priority === 'High' ? 'text-orange-700' :
-                                            task.priority === 'Urgent' ? 'text-red-800' :
-                                                task.priority === 'Medium' ? 'text-amber-700' :
-                                                    'text-green-700'
-                                            }`}>
-                                            {task.priority}
-                                        </span>
-                                    )}
+                                    <PriorityBadge priority={task.priority} />
                                 </td>
                                 <td className="px-2 py-2 truncate border-r border-slate-900">{task.subPhase || '-'}</td>
                                 <td className="px-2 py-2 truncate border-r border-slate-900">{task.pc || '-'}</td>
                                 <td className="px-2 py-2 border-r border-slate-900">
                                     <div className="flex items-center gap-2">
-                                        {getStatusDisplay(task.status)}
+                                        <StatusBadge status={task.status} />
                                         {isTaskOverdue(task) && (
                                             <span className="flex items-center gap-0.5 text-red-700 font-bold text-[10px]" title={`${getOverdueDays(task)} days overdue`}>
                                                 <AlertCircle size={10} /> {getOverdueDays(task)}d
@@ -247,8 +229,8 @@ export default function AssigneeTaskTable({ assignee, tasks, leaves, onEditTask,
                                 {/* End Date - Inline Edit via DatePicker */}
                                 <td
                                     className={`px-2 py-2 truncate border-r border-slate-900 transition-colors p-0 ${isTaskOverdue(task)
-                                            ? 'bg-red-600 text-white font-bold hover:bg-red-700'
-                                            : 'text-slate-700 hover:bg-slate-100'
+                                        ? 'bg-red-600 text-white font-bold hover:bg-red-700'
+                                        : 'text-slate-700 hover:bg-slate-100'
                                         }`}
                                     onClick={(e) => e.stopPropagation()} // Prevent row click
                                 >
