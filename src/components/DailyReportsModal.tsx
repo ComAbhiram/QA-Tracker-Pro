@@ -909,6 +909,141 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
         alert('Work Schedule Text copied to clipboard!');
     };
 
+    const generateForecastImage = async () => {
+        setLoading(true);
+        try {
+            // Filter forecast tasks
+            const forecastTasks = tasks.filter(t => t.status === 'Forecast');
+
+            // Sort by priority and project name
+            const sortedTasks = forecastTasks.sort((a, b) => {
+                const priorityOrder: Record<string, number> = {
+                    'High': 1,
+                    'Medium': 2,
+                    'Low': 3
+                };
+                const aPriority = priorityOrder[a.priority || ''] || 999;
+                const bPriority = priorityOrder[b.priority || ''] || 999;
+
+                if (aPriority !== bPriority) return aPriority - bPriority;
+                return (a.projectName || '').localeCompare(b.projectName || '');
+            });
+
+            const formatDate = (dateStr: string) => {
+                const d = new Date(dateStr);
+                const day = String(d.getDate()).padStart(2, '0');
+                const month = d.toLocaleString('en-US', { month: 'short' });
+                const year = d.getFullYear();
+                return `${day} ${month} ${year}`;
+            };
+
+            const currentDate = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+            // Create container
+            const container = document.createElement('div');
+            container.style.cssText = 'position: absolute; left: -9999px; top: -9999px; background: white; padding: 30px;';
+
+            container.innerHTML = `
+                <div style="font-family: Arial, sans-serif; max-width: 1400px; padding: 40px; background: white;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; border-bottom: 3px solid #cbd5e1; padding-bottom: 24px;">
+                        <div>
+                            <h1 style="color: #0f172a; font-size: 36px; margin-bottom: 12px; font-weight: 800; display: block; font-family: Arial, sans-serif;">
+                                <span style="display: inline-block; margin-right: 10px;">Forecast</span><span style="display: inline-block; margin-right: 10px;">Projects</span><span style="display: inline-block; margin-right: 10px;">-</span><span style="display: inline-block;">${teamName}</span>
+                            </h1>
+                            <p style="color: #334155; font-size: 18px; margin: 0; font-weight: 500;">${currentDate}</p>
+                        </div>
+                        <div style="text-align: right;">
+                             <p style="color: #475569; font-size: 16px; margin: 0; font-weight: 500;">Total Forecast Projects</p>
+                             <p style="color: #0f172a; font-size: 28px; font-weight: 700; margin: 0;">${sortedTasks.length}</p>
+                        </div>
+                    </div>
+
+                    <table style="width: 100%; border-collapse: separate; border-spacing: 0; background: white; border: 1px solid #64748b; border-radius: 12px; overflow: hidden;">
+                        <thead>
+                            <tr style="background: #0f172a;">
+                                <th style="padding: 16px; text-align: left; color: white; font-weight: 700; font-size: 15px; width: 22%; border-right: 1px solid #334155;">Project</th>
+                                <th style="padding: 16px; text-align: left; color: white; font-weight: 700; font-size: 15px; width: 10%; border-right: 1px solid #334155;">Type</th>
+                                <th style="padding: 16px; text-align: center; color: white; font-weight: 700; font-size: 15px; width: 8%; border-right: 1px solid #334155;">Priority</th>
+                                <th style="padding: 16px; text-align: left; color: white; font-weight: 700; font-size: 15px; width: 15%; border-right: 1px solid #334155;">Phase</th>
+                                <th style="padding: 16px; text-align: left; color: white; font-weight: 700; font-size: 15px; width: 10%; border-right: 1px solid #334155;">PC</th>
+                                <th style="padding: 16px; text-align: center; color: white; font-weight: 700; font-size: 15px; width: 10%; border-right: 1px solid #334155;">Status</th>
+                                <th style="padding: 16px; text-align: left; color: white; font-weight: 700; font-size: 15px;">Timeline</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${sortedTasks.length === 0 ?
+                    '<tr><td colspan="7" style="padding: 40px; text-align: center; color: #64748b; font-size: 18px; font-weight: 500;">No forecast projects found</td></tr>' :
+                    sortedTasks.map((task, index) => {
+                        return `
+                                    <tr style="border-bottom: 1px solid #cbd5e1; ${index % 2 === 0 ? 'background: #f8fafc;' : 'background: white;'}">
+                                < td style = "padding: 16px; color: #0f172a; font-weight: 600; font-size: 15px; vertical-align: middle; border-right: 1px solid #cbd5e1;" >
+                                    ${task.projectName || '-'}
+                                        </td >
+                                        <td style="padding: 16px; color: #334155; font-size: 14px; vertical-align: middle; border-right: 1px solid #cbd5e1; font-weight: 500;">
+                                            ${task.projectType || '-'}
+                                        </td>
+                                        <td style="padding: 16px; text-align: center; vertical-align: middle; border-right: 1px solid #cbd5e1;">
+                                            ${(() => {
+                                if (!task.priority) return '<span style="color: #64748b; font-size: 14px;">-</span>';
+                                let pColor = '#64748b';
+                                if (task.priority === 'High') pColor = '#dc2626';
+                                else if (task.priority === 'Medium') pColor = '#ea580c';
+                                else if (task.priority === 'Low') pColor = '#16a34a';
+                                return `<span style="font-size: 13px; font-weight: 700; color: ${pColor}; text-transform: uppercase; letter-spacing: 0.5px;">${task.priority}</span>`;
+                            })()}
+                                        </td>
+                                        <td style="padding: 16px; color: #334155; font-size: 14px; vertical-align: middle; border-right: 1px solid #cbd5e1; font-weight: 500;">
+                                            ${task.subPhase || '-'}
+                                        </td>
+                                        <td style="padding: 16px; color: #334155; font-size: 14px; vertical-align: middle; border-right: 1px solid #cbd5e1; font-weight: 500;">
+                                            ${task.pc || '-'}
+                                        </td>
+                                        <td style="padding: 16px; text-align: center; vertical-align: middle; border-right: 1px solid #cbd5e1;">
+                                            <span style="font-size: 14px; font-weight: 800; color: #7c3aed;">
+                                                Forecast
+                                            </span>
+                                        </td>
+                                        <td style="padding: 16px; color: #334155; font-size: 14px; vertical-align: middle;">${task.startDate ? formatDate(task.startDate) : 'TBD'} - ${task.endDate ? formatDate(task.endDate) : 'TBD'}</td>
+                                    </tr >
+        `;
+                    }).join('')
+                }
+                        </tbody>
+                    </table>
+                </div>
+            `;
+
+            document.body.appendChild(container);
+
+            const html2canvas = (await import('html2canvas')).default;
+            const canvas = await html2canvas(container, {
+                backgroundColor: '#ffffff',
+                scale: 4,
+                logging: false,
+            });
+
+            document.body.removeChild(container);
+
+            canvas.toBlob((blob) => {
+                if (blob) {
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = `Forecast_Projects_${new Date().toISOString().split('T')[0]}.png`;
+                    link.click();
+                    URL.revokeObjectURL(url);
+                    alert('Forecast Projects image downloaded successfully!');
+                }
+            }, 'image/png');
+
+        } catch (error) {
+            console.error('Failed to generate forecast image:', error);
+            alert('Failed to generate forecast image');
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200 p-4">
             <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[85dvh] overflow-y-auto custom-scrollbar animate-in zoom-in-95 duration-200">
@@ -1049,6 +1184,26 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                             </div>
                         )}
                     </div>
+
+                    {/* Forecast Projects - Simple Button */}
+                    <button
+                        onClick={generateForecastImage}
+                        disabled={loading}
+                        className="w-full flex items-center gap-4 p-4 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition-all duration-200 group text-left"
+                    >
+                        <div className="w-12 h-12 rounded-full bg-purple-500 flex items-center justify-center flex-shrink-0">
+                            {loading ? (
+                                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                            ) : (
+                                <Calendar className="text-white" size={20} />
+                            )}
+                        </div>
+                        <div className="flex-1">
+                            <h3 className="font-semibold text-slate-800">Forecast Projects</h3>
+                            <p className="text-sm text-slate-500">Generate an image showing all forecast projects</p>
+                        </div>
+                        <ChevronRight className="text-slate-400 group-hover:text-sky-500 transition-all" size={20} />
+                    </button>
 
                     {/* QA Work Status - Expandable */}
                     <div className="border border-slate-200 rounded-xl overflow-hidden">
