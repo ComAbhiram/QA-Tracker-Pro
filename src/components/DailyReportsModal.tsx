@@ -976,9 +976,9 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                     sortedTasks.map((task, index) => {
                         return `
                                     <tr style="border-bottom: 1px solid #cbd5e1; ${index % 2 === 0 ? 'background: #f8fafc;' : 'background: white;'}">
-                                < td style = "padding: 16px; color: #0f172a; font-weight: 600; font-size: 15px; vertical-align: middle; border-right: 1px solid #cbd5e1;" >
-                                    ${task.projectName || '-'}
-                                        </td >
+                                        <td style="padding: 16px; color: #0f172a; font-weight: 600; font-size: 15px; vertical-align: middle; border-right: 1px solid #cbd5e1;">
+                                            ${task.projectName || '-'}
+                                        </td>
                                         <td style="padding: 16px; color: #334155; font-size: 14px; vertical-align: middle; border-right: 1px solid #cbd5e1; font-weight: 500;">
                                             ${task.projectType || '-'}
                                         </td>
@@ -1004,7 +1004,7 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                                             </span>
                                         </td>
                                         <td style="padding: 16px; color: #334155; font-size: 14px; vertical-align: middle;">${task.startDate ? formatDate(task.startDate) : 'TBD'} - ${task.endDate ? formatDate(task.endDate) : 'TBD'}</td>
-                                    </tr >
+                                    </tr>
         `;
                     }).join('')
                 }
