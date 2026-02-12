@@ -34,14 +34,25 @@ export async function GET(request: NextRequest) {
             throw new Error(`Tasks Export Failed: ${tasksError.message}`);
         }
 
+        // 3. Fetch sub-phases
+        const { data: subphases, error: subphasesError } = await supabase
+            .from('team_subphases')
+            .select('*')
+            .eq('team_id', teamId);
+
+        if (subphasesError) {
+            return new NextResponse(JSON.stringify({ error: subphasesError.message }), { status: 500 });
+        }
+
         const exportData = {
             metadata: {
-                teamId,
+                version: '1.0',
                 exportedAt: new Date().toISOString(),
-                version: '1.0'
+                teamId: teamId
             },
             projects: projects || [],
-            tasks: tasks || []
+            tasks: tasks || [],
+            subphases: subphases || []
         };
 
         // Return as JSON file download

@@ -18,13 +18,51 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'No data to import' }, { status: 400 });
         }
 
-        const projects = data.projects || [];
-        const tasks = data.tasks || [];
+        const { projects = [], tasks = [], subphases = [] } = data;
         const results = {
+            subphasesCreated: 0,
             projectsCreated: 0,
             projectsSkipped: 0,
             tasksCreated: 0
         };
+
+        // --- STEP 0: Import Sub-phases ---
+        // Strategy: Insert if not exists (by name)
+        if (subphases.length > 0) {
+            const { data: existingSubphases, error: fetchSubphasesError } = await supabase
+                .from('team_subphases')
+                .select('name')
+                .eq('team_id', teamId);
+
+            if (fetchSubphasesError) throw fetchSubphasesError;
+
+            const existingPhaseNames = new Set(existingSubphases?.map(p => p.name.toLowerCase()) || []);
+
+            const phasesToInsert = subphases
+                .filter((p: any) => {
+                    const normalizedName = (p.name || '').trim().toLowerCase();
+                    return normalizedName && !existingPhaseNames.has(normalizedName);
+                })
+                .map((p: any) => ({
+                    team_id: teamId,
+                    name: (p.name || '').trim(),
+                    created_at: new Date().toISOString()
+                }));
+
+            if (phasesToInsert.length > 0) {
+                const { data: insertedPhases, error: phaseError } = await supabase
+                    .from('team_subphases')
+                    .insert(phasesToInsert)
+                    .select('id');
+
+                if (phaseError) {
+                    console.error('Error importing sub-phases:', phaseError);
+                    // Continue with other imports, but log the error
+                } else {
+                    results.subphasesCreated = insertedPhases?.length || 0;
+                }
+            }
+        }
 
         // --- STEP 1: Import Projects ---
         // Strategy: Iterate and INSERT IF NOT EXISTS (by name)

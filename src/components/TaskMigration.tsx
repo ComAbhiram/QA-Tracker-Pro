@@ -75,7 +75,7 @@ export default function TaskMigration() {
             return;
         }
 
-        if (!confirm(`Importing will:\n1. Create missing Projects\n2. Create copies of all Tasks\n\nAre you sure you want to proceed?`)) {
+        if (!confirm('Importing will add Projects, Tasks, and Configuration (Phases) from the file to the current team.\n\nUse this to migrate data from another team.\n\nProceed?')) {
             if (fileInputRef.current) fileInputRef.current.value = '';
             return;
         }
@@ -110,7 +110,7 @@ export default function TaskMigration() {
                 throw new Error(result.error || 'Import failed');
             }
 
-            toastSuccess(`Migration Complete: ${result.details.projectsCreated} Projects, ${result.details.tasksCreated} Tasks imported.`);
+            toastSuccess(`Import complete: ${result.details.projectsCreated} Projects, ${result.details.tasksCreated} Tasks, ${result.details.subphasesCreated || 0} Phases.`);
             // Optional: Trigger refresh
             window.location.reload();
         } catch (error: any) {
