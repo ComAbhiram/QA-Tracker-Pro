@@ -18,6 +18,8 @@ import {
 } from 'lucide-react';
 import Pagination from '@/components/Pagination';
 import { calculateAvailability } from '@/lib/availability';
+import ResizableHeader from '@/components/ui/ResizableHeader';
+import useColumnResizing from '@/hooks/useColumnResizing';
 
 interface AssigneeTaskTableProps {
     assignee: string;
@@ -33,49 +35,22 @@ export default function AssigneeTaskTable({ assignee, tasks, leaves, onEditTask 
     const [sortConfig, setSortConfig] = useState<{ key: SortKey; direction: 'asc' | 'desc' } | null>(null);
     const itemsPerPage = 10; // Increased items per page since it's more compact
 
-    // Column Widths State
-    const [columnWidths, setColumnWidths] = useState<Record<string, number>>({
-        projectName: 300,        // Project name is widest
-        projectType: 60,         // Type is very narrow
-        priority: 70,            // Priority is narrow
-        subPhase: 120,           // Phase is medium
-        pc: 80,                 // PC is narrow
-        assignees: 80,          // Assignees is narrow
-        status: 120,            // Status is medium
-        startDate: 80,          // Dates are narrow
+    // Column Widths State via Hook
+    const { columnWidths, startResizing } = useColumnResizing({
+        projectName: 300,
+        projectType: 60,
+        priority: 70,
+        subPhase: 120,
+        pc: 80,
+        assignees: 80,
+        status: 120,
+        startDate: 80,
         endDate: 80,
         actualCompletionDate: 80,
-        comments: 150,          // Comments slightly wider
-        deviation: 100,         // Deviation medium
-        sprint: 60              // Sprint very narrow
+        comments: 150,
+        deviation: 100,
+        sprint: 60
     });
-
-    const resizingRef = useRef<{ key: string; startX: number; startWidth: number } | null>(null);
-
-    // Resizing Logic
-    const startResizing = (key: string, e: React.MouseEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
-        resizingRef.current = { key, startX: e.clientX, startWidth: columnWidths[key] || 100 };
-        document.addEventListener('mousemove', handleMouseMove);
-        document.addEventListener('mouseup', handleMouseUp);
-    };
-
-    const handleMouseMove = useCallback((e: MouseEvent) => {
-        if (!resizingRef.current) return;
-        const { key, startX, startWidth } = resizingRef.current;
-        const diff = e.clientX - startX;
-        setColumnWidths(prev => ({
-            ...prev,
-            [key]: Math.max(50, startWidth + diff) // Min width 50px
-        }));
-    }, []);
-
-    const handleMouseUp = useCallback(() => {
-        resizingRef.current = null;
-        document.removeEventListener('mousemove', handleMouseMove);
-        document.removeEventListener('mouseup', handleMouseUp);
-    }, [handleMouseMove]);
 
 
     // Sorting Logic
@@ -115,27 +90,8 @@ export default function AssigneeTaskTable({ assignee, tasks, leaves, onEditTask 
         return sortConfig.direction === 'asc' ? <ArrowUp size={12} className="ml-1 text-slate-600" /> : <ArrowDown size={12} className="ml-1 text-slate-600" />;
     };
 
-    // Helper for table headers
-    const ResizableHeader = ({ label, sortKey, widthKey, isSortable = true }: { label: string, sortKey?: SortKey, widthKey: string, isSortable?: boolean }) => (
-        <th
-            style={{ width: columnWidths[widthKey] }}
-            className={`relative px-2 py-2 text-xs font-semibold text-left border-r border-slate-900 bg-slate-50 text-slate-900 select-none group ${isSortable ? 'cursor-pointer hover:bg-slate-200' : ''}`}
-            onClick={() => isSortable && sortKey && requestSort(sortKey)}
-        >
-            <div className="flex items-center justify-between truncate">
-                <div className="flex items-center gap-1 truncate">
-                    {label}
-                    {isSortable && sortKey && getSortIcon(sortKey)}
-                </div>
-            </div>
-            {/* Resize Handle */}
-            <div
-                className="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-blue-400 z-10"
-                onMouseDown={(e) => startResizing(widthKey, e)}
-                onClick={(e) => e.stopPropagation()} // Prevent sort when resizing
-            />
-        </th>
-    );
+    // Helper for table headers - REPLACED BY SHARED COMPONENT
+    // const ResizableHeader = ...
 
     // Status Icon Helper
     const getStatusDisplay = (status: string) => {
@@ -205,20 +161,46 @@ export default function AssigneeTaskTable({ assignee, tasks, leaves, onEditTask 
                 <table className="w-full text-xs text-slate-800 border-collapse table-fixed border border-slate-900">
                     <thead>
                         <tr className="border-b border-black">
-                            <ResizableHeader label="Project" sortKey="projectName" widthKey="projectName" />
-                            <ResizableHeader label="Type" sortKey="projectType" widthKey="projectType" />
-                            <ResizableHeader label="Priority" sortKey="priority" widthKey="priority" />
-                            <ResizableHeader label="Phase" sortKey="subPhase" widthKey="subPhase" />
-                            <ResizableHeader label="PC" sortKey="pc" widthKey="pc" />
-                            <ResizableHeader label="Assignees" widthKey="assignees" isSortable={false} />
-                            <ResizableHeader label="Status" sortKey="status" widthKey="status" />
-                            <ResizableHeader label="Start" sortKey="startDate" widthKey="startDate" />
-                            <ResizableHeader label="End" sortKey="endDate" widthKey="endDate" />
-                            <ResizableHeader label="Actual End" sortKey="actualCompletionDate" widthKey="actualCompletionDate" />
-                            {/* REMOVED BUG COLUMN */}
-                            <ResizableHeader label="Comments" widthKey="comments" isSortable={false} />
-                            <ResizableHeader label="Deviation" sortKey="deviation" widthKey="deviation" />
-                            <ResizableHeader label="Sprint" widthKey="sprint" isSortable={false} />
+                            <ResizableHeader
+                                label="Project"
+                                sortKey="projectName"
+                                widthKey="projectName"
+                                width={columnWidths.projectName}
+                                currentSortKey={sortConfig?.key}
+                                sortDirection={sortConfig?.direction}
+                                onSort={(k) => requestSort(k as SortKey)}
+                                onResizeStart={startResizing}
+                            />
+                            <ResizableHeader
+                                label="Type"
+                                sortKey="projectType"
+                                widthKey="projectType"
+                                width={columnWidths.projectType}
+                                currentSortKey={sortConfig?.key}
+                                sortDirection={sortConfig?.direction}
+                                onSort={(k) => requestSort(k as SortKey)}
+                                onResizeStart={startResizing}
+                            />
+                            <ResizableHeader
+                                label="Priority"
+                                sortKey="priority"
+                                widthKey="priority"
+                                width={columnWidths.priority}
+                                currentSortKey={sortConfig?.key}
+                                sortDirection={sortConfig?.direction}
+                                onSort={(k) => requestSort(k as SortKey)}
+                                onResizeStart={startResizing}
+                            />
+                            <ResizableHeader label="Phase" sortKey="subPhase" widthKey="subPhase" width={columnWidths.subPhase} currentSortKey={sortConfig?.key} sortDirection={sortConfig?.direction} onSort={(k) => requestSort(k as SortKey)} onResizeStart={startResizing} />
+                            <ResizableHeader label="PC" sortKey="pc" widthKey="pc" width={columnWidths.pc} currentSortKey={sortConfig?.key} sortDirection={sortConfig?.direction} onSort={(k) => requestSort(k as SortKey)} onResizeStart={startResizing} />
+                            <ResizableHeader label="Assignees" widthKey="assignees" width={columnWidths.assignees} isSortable={false} onResizeStart={startResizing} />
+                            <ResizableHeader label="Status" sortKey="status" widthKey="status" width={columnWidths.status} currentSortKey={sortConfig?.key} sortDirection={sortConfig?.direction} onSort={(k) => requestSort(k as SortKey)} onResizeStart={startResizing} />
+                            <ResizableHeader label="Start" sortKey="startDate" widthKey="startDate" width={columnWidths.startDate} currentSortKey={sortConfig?.key} sortDirection={sortConfig?.direction} onSort={(k) => requestSort(k as SortKey)} onResizeStart={startResizing} />
+                            <ResizableHeader label="End" sortKey="endDate" widthKey="endDate" width={columnWidths.endDate} currentSortKey={sortConfig?.key} sortDirection={sortConfig?.direction} onSort={(k) => requestSort(k as SortKey)} onResizeStart={startResizing} />
+                            <ResizableHeader label="Actual End" sortKey="actualCompletionDate" widthKey="actualCompletionDate" width={columnWidths.actualCompletionDate} currentSortKey={sortConfig?.key} sortDirection={sortConfig?.direction} onSort={(k) => requestSort(k as SortKey)} onResizeStart={startResizing} />
+                            <ResizableHeader label="Comments" widthKey="comments" width={columnWidths.comments} isSortable={false} onResizeStart={startResizing} />
+                            <ResizableHeader label="Deviation" sortKey="deviation" widthKey="deviation" width={columnWidths.deviation} currentSortKey={sortConfig?.key} sortDirection={sortConfig?.direction} onSort={(k) => requestSort(k as SortKey)} onResizeStart={startResizing} />
+                            <ResizableHeader label="Sprint" widthKey="sprint" width={columnWidths.sprint} isSortable={false} onResizeStart={startResizing} />
                         </tr>
                     </thead>
                     <tbody>

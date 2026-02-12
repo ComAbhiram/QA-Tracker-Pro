@@ -24,9 +24,26 @@ interface ProjectTableProps {
     onDelete: (projectId: string) => void;
 }
 
+import ResizableHeader from '@/components/ui/ResizableHeader';
+import useColumnResizing from '@/hooks/useColumnResizing';
+
 export default function ProjectTable({ projects, onEdit, onDelete }: ProjectTableProps) {
     const [sortField, setSortField] = useState<string>('project_name');
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+
+    // Column Resizing Hook
+    const { columnWidths, startResizing } = useColumnResizing({
+        project_name: 250,
+        resources: 200,
+        activity_percentage: 100,
+        pc: 80,
+        hs_time_taken_days: 100,
+        allotted_time_days_calc: 100,
+        deviation_calc: 100,
+        tl_confirmed_effort_days: 100,
+        blockers: 150,
+        actions: 100
+    });
 
     const handleSort = (field: string) => {
         if (sortField === field) {
@@ -41,8 +58,6 @@ export default function ProjectTable({ projects, onEdit, onDelete }: ProjectTabl
         let aVal: any = a[sortField as keyof typeof a];
         let bVal: any = b[sortField as keyof typeof b];
 
-        // Specific handling for calculated fields if they are nested or named differently, 
-        // but here they are top - level on the project object now.
         if (sortField === 'allotted_time_days') aVal = a.allotted_time_days_calc || 0;
         if (sortField === 'allotted_time_days') bVal = b.allotted_time_days_calc || 0;
 
@@ -72,46 +87,21 @@ export default function ProjectTable({ projects, onEdit, onDelete }: ProjectTabl
     };
 
     return (
-        <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
-            <div className="overflow-x-auto">
-                <table className="w-full border-collapse">
-                    <thead className="bg-slate-50 text-slate-700">
-                        <tr>
-                            <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider cursor-pointer hover:bg-slate-100 border border-slate-400" onClick={() => handleSort('project_name')}>
-                                <div className="flex items-center gap-2">
-                                    Project Name
-                                    <ArrowUpDown size={12} />
-                                </div>
-                            </th>
-                            <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider border border-slate-400">Resources</th>
-                            <th className="px-4 py-3 text-center text-xs font-bold uppercase tracking-wider cursor-pointer hover:bg-slate-100 border border-slate-400" onClick={() => handleSort('activity_percentage')}>
-                                <div className="flex items-center justify-center gap-2">
-                                    Activity %
-                                    <ArrowUpDown size={12} />
-                                </div>
-                            </th>
-                            <th className="px-4 py-3 text-center text-xs font-bold uppercase tracking-wider border border-slate-400">PC</th>
-                            <th className="px-4 py-3 text-center text-xs font-bold uppercase tracking-wider cursor-pointer hover:bg-slate-100 border border-slate-400" onClick={() => handleSort('hs_time_taken_days')}>
-                                <div className="flex items-center justify-center gap-2">
-                                    HS Time (Days)
-                                    <ArrowUpDown size={12} />
-                                </div>
-                            </th>
-                            <th className="px-4 py-3 text-center text-xs font-bold uppercase tracking-wider cursor-pointer hover:bg-slate-100 border border-slate-400" onClick={() => handleSort('allotted_time_days_calc')}>
-                                <div className="flex items-center justify-center gap-2">
-                                    Allotted
-                                    <ArrowUpDown size={12} />
-                                </div>
-                            </th>
-                            <th className="px-4 py-3 text-center text-xs font-bold uppercase tracking-wider border border-slate-400">Deviation</th>
-                            <th className="px-4 py-3 text-center text-xs font-bold uppercase tracking-wider cursor-pointer hover:bg-slate-100 border border-slate-400" onClick={() => handleSort('tl_confirmed_effort_days')}>
-                                <div className="flex items-center justify-center gap-2">
-                                    TL Effort
-                                    <ArrowUpDown size={12} />
-                                </div>
-                            </th>
-                            <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider border border-slate-400">Blockers</th>
-                            <th className="px-4 py-3 text-center text-xs font-bold uppercase tracking-wider border border-slate-400">Actions</th>
+        <div className="bg-white rounded-lg border border-slate-200 overflow-hidden shadow-sm">
+            <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-transparent">
+                <table className="w-full text-xs text-slate-800 border-collapse table-fixed border border-slate-400">
+                    <thead className="bg-slate-50 text-slate-900">
+                        <tr className="border-b border-slate-500">
+                            <ResizableHeader label="Project Name" sortKey="project_name" widthKey="project_name" width={columnWidths.project_name} currentSortKey={sortField} sortDirection={sortDirection} onSort={handleSort} onResizeStart={startResizing} />
+                            <ResizableHeader label="Resources" widthKey="resources" width={columnWidths.resources} isSortable={false} onResizeStart={startResizing} />
+                            <ResizableHeader label="Activity %" sortKey="activity_percentage" widthKey="activity_percentage" width={columnWidths.activity_percentage} currentSortKey={sortField} sortDirection={sortDirection} onSort={handleSort} onResizeStart={startResizing} className="text-center" />
+                            <ResizableHeader label="PC" sortKey="pc" widthKey="pc" width={columnWidths.pc} currentSortKey={sortField} sortDirection={sortDirection} onSort={handleSort} onResizeStart={startResizing} className="text-center" />
+                            <ResizableHeader label="HS Time (Days)" sortKey="hs_time_taken_days" widthKey="hs_time_taken_days" width={columnWidths.hs_time_taken_days} currentSortKey={sortField} sortDirection={sortDirection} onSort={handleSort} onResizeStart={startResizing} className="text-center" />
+                            <ResizableHeader label="Allotted" sortKey="allotted_time_days_calc" widthKey="allotted_time_days_calc" width={columnWidths.allotted_time_days_calc} currentSortKey={sortField} sortDirection={sortDirection} onSort={handleSort} onResizeStart={startResizing} className="text-center" />
+                            <ResizableHeader label="Deviation" widthKey="deviation_calc" width={columnWidths.deviation_calc} isSortable={false} onResizeStart={startResizing} className="text-center" />
+                            <ResizableHeader label="TL Effort" sortKey="tl_confirmed_effort_days" widthKey="tl_confirmed_effort_days" width={columnWidths.tl_confirmed_effort_days} currentSortKey={sortField} sortDirection={sortDirection} onSort={handleSort} onResizeStart={startResizing} className="text-center" />
+                            <ResizableHeader label="Blockers" widthKey="blockers" width={columnWidths.blockers} isSortable={false} onResizeStart={startResizing} />
+                            <ResizableHeader label="Actions" widthKey="actions" width={columnWidths.actions} isSortable={false} onResizeStart={startResizing} className="text-center" />
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
@@ -121,62 +111,62 @@ export default function ProjectTable({ projects, onEdit, onDelete }: ProjectTabl
                             return (
                                 <tr
                                     key={`${project.id}-${index}`}
-                                    className={`hover:bg-slate-50 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-slate-50/30'}`}
+                                    className={`hover:bg-slate-50 transition-colors border-b border-slate-400 ${index % 2 === 0 ? 'bg-white' : 'bg-slate-50/30'}`}
                                 >
-                                    <td className="px-4 py-3 text-sm font-semibold text-slate-800 border border-slate-400">
+                                    <td className="px-2 py-2 truncate font-bold text-slate-900 border-r border-slate-400" title={project.project_name}>
                                         {project.project_name}
                                     </td>
-                                    <td className="px-4 py-3 text-sm text-slate-600 border border-slate-400">
-                                        <div className="max-w-[200px] truncate" title={project.resources || ''}>
+                                    <td className="px-2 py-2 truncate text-slate-800 border-r border-slate-400">
+                                        <div className="truncate" title={project.resources || ''}>
                                             {project.resources || '-'}
                                         </div>
                                     </td>
-                                    <td className="px-4 py-3 text-sm text-center border border-slate-400">
-                                        <span className="inline-flex items-center justify-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                    <td className="px-2 py-2 text-center border-r border-slate-400">
+                                        <span className="inline-flex items-center justify-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-green-100 text-green-800 border border-green-200">
                                             {project.activity_percentage != null ? `${project.activity_percentage}%` : '-'}
                                         </span>
                                     </td>
-                                    <td className="px-4 py-3 text-sm text-center text-slate-600 border border-slate-400">
+                                    <td className="px-2 py-2 text-center text-slate-800 border-r border-slate-400">
                                         {project.pc || '-'}
                                     </td>
-                                    <td className="px-4 py-3 text-sm text-center font-medium text-slate-700 border border-slate-400">
+                                    <td className="px-2 py-2 text-center font-medium text-slate-800 border-r border-slate-400">
                                         {project.hs_time_taken_days != null ? project.hs_time_taken_days.toFixed(2) : '0.00'}
                                     </td>
-                                    <td className="px-4 py-3 text-sm text-center font-medium text-slate-700 border border-slate-400">
+                                    <td className="px-2 py-2 text-center font-medium text-slate-800 border-r border-slate-400">
                                         {project.allotted_time_days_calc != null ? project.allotted_time_days_calc.toFixed(2) : '-'}
                                     </td>
-                                    <td className="px-4 py-3 text-sm text-center font-bold border border-slate-400">
+                                    <td className="px-2 py-2 text-center font-bold border-r border-slate-400">
                                         <span className={
                                             deviation === null || deviation === undefined ? 'text-slate-400' :
-                                                deviation > 0 ? 'text-red-600' :
-                                                    deviation < 0 ? 'text-red-600' : 'text-green-600'
+                                                deviation > 0 ? 'text-red-700' :
+                                                    deviation < 0 ? 'text-red-700' : 'text-green-700'
                                         }>
                                             {deviation !== null && deviation !== undefined ? deviation.toFixed(2) : '-'}
                                         </span>
                                     </td>
-                                    <td className="px-4 py-3 text-sm text-center font-medium text-slate-700 border border-slate-300">
+                                    <td className="px-2 py-2 text-center font-medium text-slate-800 border-r border-slate-400">
                                         {project.tl_confirmed_effort_days != null ? project.tl_confirmed_effort_days.toFixed(1) : '-'}
                                     </td>
-                                    <td className="px-4 py-3 text-sm text-slate-600 border border-slate-300">
-                                        <div className="max-w-[150px] truncate" title={project.blockers || ''}>
+                                    <td className="px-2 py-2 truncate text-slate-800 border-r border-slate-400">
+                                        <div className="truncate" title={project.blockers || ''}>
                                             {project.blockers || '-'}
                                         </div>
                                     </td>
-                                    <td className="px-4 py-3 text-center border border-slate-300">
-                                        <div className="flex items-center justify-center gap-2">
+                                    <td className="px-2 py-2 text-center">
+                                        <div className="flex items-center justify-center gap-1">
                                             <button
                                                 onClick={() => onEdit(project)}
-                                                className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded transition-colors"
+                                                className="p-1 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded transition-colors"
                                                 title="Edit"
                                             >
-                                                <Edit size={16} />
+                                                <Edit size={14} />
                                             </button>
                                             <button
                                                 onClick={() => onDelete(project.id)}
-                                                className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
+                                                className="p-1 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
                                                 title="Delete"
                                             >
-                                                <Trash2 size={16} />
+                                                <Trash2 size={14} />
                                             </button>
                                         </div>
                                     </td>
@@ -189,26 +179,26 @@ export default function ProjectTable({ projects, onEdit, onDelete }: ProjectTabl
 
             {/* Pagination */}
             <div className="px-4 py-3 border-t border-slate-200 bg-slate-50 flex items-center justify-between">
-                <div className="text-sm text-slate-500">
+                <div className="text-xs text-slate-500">
                     Showing <span className="font-medium">{startIndex + 1}</span> to <span className="font-medium">{Math.min(startIndex + itemsPerPage, projects.length)}</span> of <span className="font-medium">{projects.length}</span> results
                 </div>
                 <div className="flex items-center gap-2">
                     <button
                         onClick={() => handlePageChange(currentPage - 1)}
                         disabled={currentPage === 1}
-                        className="p-2 border border-slate-300 rounded-lg bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        className="p-1.5 border border-slate-300 rounded-lg bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     >
-                        <ChevronLeft size={16} />
+                        <ChevronLeft size={14} />
                     </button>
-                    <span className="text-sm font-medium text-slate-600 min-w-[3rem] text-center">
+                    <span className="text-xs font-medium text-slate-600 min-w-[3rem] text-center">
                         Page {currentPage} of {totalPages}
                     </span>
                     <button
                         onClick={() => handlePageChange(currentPage + 1)}
                         disabled={currentPage === totalPages}
-                        className="p-2 border border-slate-300 rounded-lg bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        className="p-1.5 border border-slate-300 rounded-lg bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     >
-                        <ChevronRight size={16} />
+                        <ChevronRight size={14} />
                     </button>
                 </div>
             </div>
