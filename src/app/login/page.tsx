@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
-import { Lock, Mail, Loader2, LayoutDashboard, Users } from 'lucide-react';
+import { Lock, Mail, Loader2, LayoutDashboard, Users, X } from 'lucide-react';
 import Image from 'next/image';
 
 export default function LoginPage() {
@@ -11,6 +11,8 @@ export default function LoginPage() {
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [showManagerModal, setShowManagerModal] = useState(false);
+    const [managerPassword, setManagerPassword] = useState('');
     const router = useRouter();
 
     const handleLogin = async (e: React.FormEvent) => {
@@ -38,8 +40,72 @@ export default function LoginPage() {
         }
     };
 
+    const handleManagerLogin = () => {
+        if (managerPassword === 'inter223') {
+            setShowManagerModal(false);
+            setManagerPassword('');
+            router.push('/guest');
+        } else {
+            setError('Invalid manager passkey');
+        }
+    };
+
     return (
         <div className="h-screen flex overflow-hidden">
+            {/* Manager Password Modal */}
+            {showManagerModal && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 relative">
+                        <button
+                            onClick={() => {
+                                setShowManagerModal(false);
+                                setManagerPassword('');
+                                setError(null);
+                            }}
+                            className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition-colors"
+                        >
+                            <X size={24} />
+                        </button>
+
+                        <div className="text-center mb-6">
+                            <div className="bg-gradient-to-br from-indigo-600 to-purple-700 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                                <Users className="text-white" size={32} />
+                            </div>
+                            <h2 className="text-2xl font-bold text-slate-800 mb-2">Manager Access</h2>
+                            <p className="text-slate-600">Enter the manager passkey to continue</p>
+                        </div>
+
+                        {error && (
+                            <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl">
+                                {error}
+                            </div>
+                        )}
+
+                        <div className="space-y-4">
+                            <div className="relative">
+                                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+                                <input
+                                    type="password"
+                                    value={managerPassword}
+                                    onChange={(e) => setManagerPassword(e.target.value)}
+                                    onKeyPress={(e) => e.key === 'Enter' && handleManagerLogin()}
+                                    placeholder="Enter passkey"
+                                    autoFocus
+                                    className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 outline-none transition-all text-slate-700"
+                                />
+                            </div>
+
+                            <button
+                                onClick={handleManagerLogin}
+                                className="w-full py-3.5 bg-gradient-to-r from-indigo-600 to-purple-700 hover:from-indigo-700 hover:to-purple-800 text-white font-bold rounded-xl shadow-md hover:shadow-lg transition-all"
+                            >
+                                Continue
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Left Side - Login Form */}
             <div className="w-full lg:w-1/2 flex items-center justify-start pl-8 pr-8 md:pr-12 lg:pr-16 py-8 bg-white overflow-y-auto">
                 <div className="w-full max-w-lg">
@@ -62,7 +128,7 @@ export default function LoginPage() {
 
                     {/* Form */}
                     <form onSubmit={handleLogin} className="space-y-5">
-                        {error && (
+                        {error && !showManagerModal && (
                             <div className="p-4 bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl flex items-center gap-2">
                                 <Lock size={16} />
                                 {error}
@@ -114,40 +180,11 @@ export default function LoginPage() {
                         {/* Manager Login Button */}
                         <button
                             type="button"
-                            onClick={async () => {
-                                const key = prompt("Enter Manager Passkey:");
-                                if (key === 'inter223') {
-                                    setLoading(true);
-                                    try {
-                                        // Authenticate as manager user
-                                        const { data, error } = await supabase.auth.signInWithPassword({
-                                            email: 'manager@intersmart.in',
-                                            password: 'inter223',
-                                        });
-
-                                        if (error) {
-                                            console.error('Manager login error:', error);
-                                            alert('Failed to authenticate manager. Please try again.');
-                                            setLoading(false);
-                                            return;
-                                        }
-
-                                        if (data.session) {
-                                            router.push('/guest');
-                                            router.refresh();
-                                        }
-                                    } catch (err) {
-                                        console.error('Manager login error:', err);
-                                        alert('Failed to authenticate manager. Please try again.');
-                                    } finally {
-                                        setLoading(false);
-                                    }
-                                } else if (key !== null) {
-                                    alert('Invalid passkey');
-                                }
+                            onClick={() => {
+                                setShowManagerModal(true);
+                                setError(null);
                             }}
-                            disabled={loading}
-                            className="w-full py-3.5 bg-white hover:bg-slate-50 text-indigo-600 font-bold rounded-xl border-2 border-indigo-500 hover:border-indigo-600 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="w-full py-3.5 bg-white hover:bg-slate-50 text-indigo-600 font-bold rounded-xl border-2 border-indigo-500 hover:border-indigo-600 transition-all flex items-center justify-center gap-2"
                         >
                             <Users size={20} />
                             Login as a Manager
