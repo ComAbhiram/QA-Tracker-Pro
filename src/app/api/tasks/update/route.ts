@@ -70,9 +70,11 @@ export async function PUT(request: NextRequest) {
         }
 
         const isSuperAdmin = profile?.role === 'super_admin';
+        const isManager = profile?.role === 'manager';
         const isTeamOwner = profile?.team_id === task.team_id;
 
-        if (!isSuperAdmin && !isTeamOwner) {
+        // Allow super_admin, manager, or team owners to edit
+        if (!isSuperAdmin && !isManager && !isTeamOwner) {
             return NextResponse.json({ error: 'Unauthorized to edit this task' }, { status: 403 });
         }
 
