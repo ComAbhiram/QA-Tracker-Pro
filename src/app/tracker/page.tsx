@@ -446,16 +446,32 @@ export default function Tracker() {
                 {loading ? (
                     <div className="text-center py-12 text-slate-500">Loading tasks...</div>
                 ) : Object.keys(groupedTasks).length === 0 ? (
-                    <div className="text-center py-12 text-slate-400">No tasks found</div>
+                    <div className="text-center py-12 bg-white rounded-xl shadow-sm border border-slate-200">
+                        <div className="text-slate-400 mb-2">No tasks found</div>
+                        <p className="text-sm text-slate-500">Try adjusting your search or filters</p>
+                    </div>
                 ) : (
-                    // Sort authors alphabetically and exclude "Unassigned"
-                    Object.keys(groupedTasks).filter(key => key !== 'Unassigned').sort().map((assignee) => (
+                    Object.keys(groupedTasks).map(assignee => (
                         <AssigneeTaskTable
                             key={assignee}
                             assignee={assignee}
                             tasks={groupedTasks[assignee]}
-                            leaves={leaves.filter(l => l.team_member_name === assignee)}
+                            leaves={leaves}
                             onEditTask={handleEditTask}
+                            onDateUpdate={async (taskId, field, date) => {
+                                const { error } = await supabase
+                                    .from('tasks')
+                                    .update({ [field]: date || null })
+                                    .eq('id', taskId);
+
+                                if (error) {
+                                    console.error('Error updating date:', error);
+                                    toastError('Failed to update date');
+                                } else {
+                                    success('Date has been changed successfully.');
+                                    refreshTasks();
+                                }
+                            }}
                         />
                     ))
                 )}

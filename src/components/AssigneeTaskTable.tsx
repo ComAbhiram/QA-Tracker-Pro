@@ -26,16 +26,16 @@ interface AssigneeTaskTableProps {
     tasks: Task[];
     leaves: Leave[];
     onEditTask: (task: Task) => void;
+    onDateUpdate: (taskId: number, field: 'start_date' | 'end_date', date: string) => Promise<void>;
 }
 
-type SortKey = 'projectName' | 'projectType' | 'priority' | 'subPhase' | 'pc' | 'status' | 'startDate' | 'endDate' | 'actualCompletionDate' | 'deviation';
-
-export default function AssigneeTaskTable({ assignee, tasks, leaves, onEditTask }: AssigneeTaskTableProps) {
+export default function AssigneeTaskTable({ assignee, tasks, leaves, onEditTask, onDateUpdate }: AssigneeTaskTableProps) {
     const [currentPage, setCurrentPage] = useState(1);
     const [sortConfig, setSortConfig] = useState<{ key: SortKey; direction: 'asc' | 'desc' } | null>(null);
-    const itemsPerPage = 10; // Increased items per page since it's more compact
+    const [editingCell, setEditingCell] = useState<{ taskId: number, field: 'start_date' | 'end_date' } | null>(null);
+    const itemsPerPage = 10;
 
-    // Column Widths State via Hook
+    // ... (existing column resizing hook) ...
     const { columnWidths, startResizing } = useColumnResizing({
         projectName: 300,
         projectType: 60,
@@ -43,16 +43,15 @@ export default function AssigneeTaskTable({ assignee, tasks, leaves, onEditTask 
         subPhase: 120,
         pc: 80,
         status: 120,
-        startDate: 80,
-        endDate: 80,
+        startDate: 100, // Slightly wider for date input
+        endDate: 100,   // Slightly wider for date input
         actualCompletionDate: 80,
         comments: 150,
         deviation: 100,
         sprint: 60
     });
 
-
-    // Sorting Logic
+    // ... (existing sorting logic) ...
     const sortedTasks = useMemo(() => {
         let sortableTasks = [...tasks];
         if (sortConfig !== null) {
@@ -69,9 +68,7 @@ export default function AssigneeTaskTable({ assignee, tasks, leaves, onEditTask 
     }, [tasks, sortConfig]);
 
     const totalItems = sortedTasks.length;
-    // Simple pagination logic (no component for now to save space or reuse generic if needed)
-    // For now assuming all items show or simple slice
-    const paginatedTasks = sortedTasks; // Show all for "sheet-like" feel, or limit if performance issues. Keeping simple.
+    const paginatedTasks = sortedTasks;
 
     const requestSort = (key: SortKey) => {
         let direction: 'asc' | 'desc' = 'asc';
@@ -83,16 +80,22 @@ export default function AssigneeTaskTable({ assignee, tasks, leaves, onEditTask 
 
     const getSortIcon = (key: SortKey) => {
         if (!sortConfig || sortConfig.key !== key) {
-            // Minimal arrow on hover
             return <ArrowUpDown size={12} className="ml-1 text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity" />;
         }
         return sortConfig.direction === 'asc' ? <ArrowUp size={12} className="ml-1 text-slate-600" /> : <ArrowDown size={12} className="ml-1 text-slate-600" />;
     };
 
-    // Helper for table headers - REPLACED BY SHARED COMPONENT
-    // const ResizableHeader = ...
+    const handleDateClick = (e: React.MouseEvent, taskId: number, field: 'start_date' | 'end_date') => {
+        e.stopPropagation(); // Prevent opening task modal
+        setEditingCell({ taskId, field });
+    };
 
-    // Status Icon Helper
+    const handleDateChange = async (e: React.ChangeEvent<HTMLInputElement>, taskId: number, field: 'start_date' | 'end_date') => {
+        const newDate = e.target.value;
+        await onDateUpdate(taskId, field, newDate);
+        setEditingCell(null);
+    };
+
     const getStatusDisplay = (status: string) => {
         switch (status) {
             case 'In Progress': return <div className="flex items-center gap-1.5 text-blue-700 font-medium"><Loader2 size={13} className="animate-spin" /> In Progress</div>;
@@ -107,8 +110,6 @@ export default function AssigneeTaskTable({ assignee, tasks, leaves, onEditTask 
         }
     };
 
-    // Styling constants
-    // Dynamic Header Color Logic (kept from previous implementation)
     const getHeaderColor = (name: string) => {
         const colors = [
             'bg-slate-100 border-slate-200 text-slate-800', 'bg-red-50 border-red-200 text-red-800',
@@ -232,8 +233,47 @@ export default function AssigneeTaskTable({ assignee, tasks, leaves, onEditTask 
                                         )}
                                     </div>
                                 </td>
-                                <td className="px-2 py-2 truncate border-r border-slate-900 text-slate-700">{task.startDate ? format(new Date(task.startDate), 'MMM d') : '-'}</td>
-                                <td className="px-2 py-2 truncate border-r border-slate-900 text-slate-700">{task.endDate ? format(new Date(task.endDate), 'MMM d') : '-'}</td>
+
+                                {/* Start Date - Inline Edit */}
+                                <td
+                                    className="px-2 py-2 truncate border-r border-slate-900 text-slate-700 hover:bg-slate-100 transition-colors"
+                                    onClick={(e) => handleDateClick(e, task.id, 'start_date')}
+                                >
+                                    {editingCell?.taskId === task.id && editingCell?.field === 'start_date' ? (
+                                        <input
+                                            type="date"
+                                            className="w-full text-xs p-1 border rounded"
+                                            value={task.startDate ? new Date(task.startDate).toISOString().split('T')[0] : ''}
+                                            onChange={(e) => handleDateChange(e, task.id, 'start_date')}
+                                            onBlur={() => setEditingCell(null)}
+                                            autoFocus
+                                            onClick={(e) => e.stopPropagation()}
+                                        />
+                                    ) : (
+                                        task.startDate ? format(new Date(task.startDate), 'MMM d') : '-'
+                                    )}
+                                </td>
+
+                                {/* End Date - Inline Edit */}
+                                <td
+                                    className="px-2 py-2 truncate border-r border-slate-900 text-slate-700 hover:bg-slate-100 transition-colors"
+                                    onClick={(e) => handleDateClick(e, task.id, 'end_date')}
+                                >
+                                    {editingCell?.taskId === task.id && editingCell?.field === 'end_date' ? (
+                                        <input
+                                            type="date"
+                                            className="w-full text-xs p-1 border rounded"
+                                            value={task.endDate ? new Date(task.endDate).toISOString().split('T')[0] : ''}
+                                            onChange={(e) => handleDateChange(e, task.id, 'end_date')}
+                                            onBlur={() => setEditingCell(null)}
+                                            autoFocus
+                                            onClick={(e) => e.stopPropagation()}
+                                        />
+                                    ) : (
+                                        task.endDate ? format(new Date(task.endDate), 'MMM d') : '-'
+                                    )}
+                                </td>
+
                                 <td className="px-2 py-2 truncate border-r border-slate-900 text-slate-700">{task.actualCompletionDate ? format(new Date(task.actualCompletionDate), 'MMM d') : '-'}</td>
                                 <td className="px-2 py-2 truncate border-r border-slate-900 text-slate-700 max-w-[200px]" title={task.comments || ''}>{task.comments || '-'}</td>
                                 <td className="px-2 py-2 truncate border-r border-slate-900 text-slate-700 max-w-[200px]" title={String(task.deviation || '')}>{task.deviation || '-'}</td>
