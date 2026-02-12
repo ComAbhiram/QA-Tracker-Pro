@@ -222,6 +222,7 @@ export default function TaskMigration() {
                 className="hidden"
             />
 
+            {/* CSV Import Hidden as per request
             <button
                 onClick={handleProjectImportClick}
                 disabled={isImporting || isExporting}
@@ -231,27 +232,27 @@ export default function TaskMigration() {
                 {isImporting ? <Loader2 size={16} className="animate-spin" /> : <FileSpreadsheet size={16} />}
                 Import CSV
             </button>
-
             <div className="w-px h-4 bg-slate-300 mx-1"></div>
-
-            <button
-                onClick={handleImportClick}
-                disabled={isImporting || isExporting}
-                className="flex items-center gap-2 px-3 py-2 bg-white border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50 hover:text-indigo-600 transition-colors disabled:opacity-50 text-sm font-medium"
-                title="Import Full Migration (JSON)"
-            >
-                {isImporting ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}
-                Import JSON
-            </button>
+            */}
 
             <button
                 onClick={handleExport}
                 disabled={isImporting || isExporting}
                 className="flex items-center gap-2 px-3 py-2 bg-white border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50 hover:text-indigo-600 transition-colors disabled:opacity-50 text-sm font-medium"
-                title="Export Full Migration (JSON)"
+                title="Backup Team Data (JSON)"
             >
                 {isExporting ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
-                Export JSON
+                Backup
+            </button>
+
+            <button
+                onClick={handleImportClick}
+                disabled={isImporting || isExporting}
+                className="flex items-center gap-2 px-3 py-2 bg-white border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50 hover:text-emerald-600 transition-colors disabled:opacity-50 text-sm font-medium"
+                title="Restore Team Data (JSON)"
+            >
+                {isImporting ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}
+                Restore
             </button>
         </div>
     );
