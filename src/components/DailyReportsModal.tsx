@@ -636,7 +636,6 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                                             </td>
                                             <td style="padding: 12px 16px; vertical-align: top;">
                                                 <div style="color: #475569; font-size: 12px; line-height: 1.4;">${task.comments || '-'}</div>
-                                                ${task.sprintLink ? `<div style="color:#2563eb; font-size: 11px; margin-top: 4px;">Link Available</div>` : ''}
                                             </td>
                                         </tr>
                                     `;
