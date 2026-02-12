@@ -38,7 +38,7 @@ export function DatePicker({ date, setDate, className, placeholder = "Pick a dat
                     <ChevronDownIcon className="ml-2 h-4 w-4 opacity-50" />
                 </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
+            <PopoverContent className="w-auto p-0 z-[300]" align="start">
                 <Calendar
                     mode="single"
                     selected={date}
