@@ -450,7 +450,7 @@ export default function Tracker() {
 
 
             {/* Grouped Tasks - No global pagination, but each assignee table is paginated */}
-            <div className="space-y-6">
+            <div className="space-y-2">
                 {loading ? (
                     <div className="text-center py-12 text-slate-500">Loading tasks...</div>
                 ) : Object.keys(groupedTasks).length === 0 ? (

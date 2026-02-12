@@ -80,13 +80,26 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
 
                 const { data, error } = await query.order('name', { ascending: true });
 
-                if (!error && data) {
+                if (!error && data && data.length > 0) {
                     setProjects(data.map((p: any) => ({
                         id: p.name,
                         label: p.name
                     })));
                 } else {
-                    console.error('[TaskModal] Failed to fetch projects from DB:', error);
+                    console.warn('[TaskModal] No team projects found, fetching ALL active projects as fallback.');
+                    // Fallback: Fetch ALL active projects
+                    const { data: allProjects } = await supabase
+                        .from('projects')
+                        .select('name')
+                        .eq('status', 'active')
+                        .order('name', { ascending: true });
+
+                    if (allProjects) {
+                        setProjects(allProjects.map((p: any) => ({
+                            id: p.name,
+                            label: p.name
+                        })));
+                    }
                 }
             } catch (error) {
                 console.error('[TaskModal] Error fetching projects:', error);
@@ -105,56 +118,54 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
         const fetchUsers = async () => {
             setLoadingHubstaffUsers(true);
             try {
+                // Helper function to fetch from API
+                const fetchFromAPI = async () => {
+                    console.log('[TaskModal] Fetching Hubstaff Users via API (Fallback/Global)...');
+                    const response = await fetch('/api/hubstaff/users');
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.members) {
+                            return data.members.map((u: any) => ({
+                                id: u.name,
+                                name: u.name
+                            }));
+                        }
+                    }
+                    return [];
+                };
+
                 const { getCurrentUserTeam } = await import('@/utils/userUtils');
                 const userTeam = await getCurrentUserTeam();
                 const isSuperAdmin = userTeam?.role === 'super_admin';
                 const isQATeamGlobal = effectiveTeamId === 'ba60298b-8635-4cca-bcd5-7e470fad60e6';
 
-                console.log('[TaskModal] Debug Fetch Users:', { isGuest, effectiveTeamId, isSuperAdmin, isQATeamGlobal });
+                // 1. Try fetching from Team Members DB first (unless Global/SuperAdmin)
+                let users: any[] = [];
 
-                // Use 'isGuest' from context to override super admin fetching behavior
-                // BUT if it's QA Team (which is Global), we want to fetch all users too
-                if ((isSuperAdmin && !isGuest) || (isGuest && isQATeamGlobal)) {
-                    console.log('[TaskModal] Fetching Hubstaff Users via API...');
-                    // Fetch Hubstaff Users via API
-                    const response = await fetch('/api/hubstaff/users');
-                    if (response.ok) {
-                        const data = await response.json();
-                        if (data.members) {
-                            const formattedUsers = data.members.map((u: any) => ({
-                                id: u.name,
-                                label: u.name
-                            }));
-                            setHubstaffUsers(formattedUsers);
-                        }
-                    } else {
-                        console.error('[TaskModal] Hubstaff API failed with status:', response.status);
-                        if (response.status === 429) {
-                            toastError('Hubstaff API Rate Limit Reached. Please wait a moment and try again.');
-                        } else {
-                            toastError('Failed to load Hubstaff users. Please check configuration.');
-                        }
-                    }
-                } else {
-                    // Fetch Team Members via Supabase Client
-                    if (!effectiveTeamId) return;
-
+                if (!isSuperAdmin && !isGuest && !isQATeamGlobal && effectiveTeamId) {
                     const { data, error } = await supabase
                         .from('team_members')
                         .select('name')
                         .eq('team_id', effectiveTeamId)
                         .order('name');
 
-                    if (!error && data) {
-                        const formattedUsers = data.map((u: any) => ({
-                            id: u.name,
-                            label: u.name
-                        }));
-                        setHubstaffUsers(formattedUsers);
-                    } else {
-                        console.error('[TaskModal] Failed to fetch team members:', error);
+                    if (data && data.length > 0) {
+                        users = data;
                     }
                 }
+
+                // 2. Fallback or Global Logic
+                if (users.length === 0) {
+                    // If no DB members or we are Global/SuperAdmin, use API
+                    users = await fetchFromAPI();
+                }
+
+                const formattedUsers = users.map((u: any) => ({
+                    id: u.name,
+                    label: u.name
+                }));
+                setHubstaffUsers(formattedUsers);
+
             } catch (error) {
                 console.error('[TaskModal] Error fetching users:', error);
             } finally {
