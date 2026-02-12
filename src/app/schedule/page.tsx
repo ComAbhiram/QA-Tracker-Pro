@@ -31,13 +31,17 @@ const getStatusIcon = (status: string, size: number = 14) => {
 };
 
 const StatusLegend = () => (
-    <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-[10px] text-slate-600 bg-slate-50 px-3 py-2 rounded-lg border border-slate-200 mt-2 md:mt-0">
-        <span className="font-bold text-slate-700 mr-1">Status Guide:</span>
-        <div className="flex items-center gap-1"><Loader2 size={12} className="text-blue-600" /> In Progress</div>
-        <div className="flex items-center gap-1"><Cloud size={12} className="text-violet-600" /> Forecast</div>
-        <div className="flex items-center gap-1"><CheckCircle2 size={12} className="text-emerald-600" /> Completed</div>
-        <div className="flex items-center gap-1"><Clock size={12} className="text-pink-600" /> Ready for QA</div>
-        <div className="flex items-center gap-1"><AlertCircle size={12} className="text-rose-600" /> Overdue</div>
+    <div className="flex items-center gap-3 text-[10px] text-slate-600 bg-slate-50 px-3 py-2 rounded-lg border border-slate-200 mt-2 xl:mt-0 overflow-x-auto whitespace-nowrap max-w-full no-scrollbar">
+        <span className="font-bold text-slate-700">Status Guide:</span>
+        <div className="flex items-center gap-1.5 px-2 border-r border-slate-200 last:border-0"><Circle size={10} className="text-amber-500 fill-amber-500/20" /> Yet to Start</div>
+        <div className="flex items-center gap-1.5 px-2 border-r border-slate-200 last:border-0"><Loader2 size={10} className="text-blue-600" /> Being Developed</div>
+        <div className="flex items-center gap-1.5 px-2 border-r border-slate-200 last:border-0"><Clock size={10} className="text-pink-600" /> Ready for QA</div>
+        <div className="flex items-center gap-1.5 px-2 border-r border-slate-200 last:border-0"><Clock size={10} className="text-cyan-600" /> Assigned to QA</div>
+        <div className="flex items-center gap-1.5 px-2 border-r border-slate-200 last:border-0"><Loader2 size={10} className="text-blue-600 animate-spin" /> In Progress</div>
+        <div className="flex items-center gap-1.5 px-2 border-r border-slate-200 last:border-0"><PauseCircle size={10} className="text-slate-600" /> On Hold</div>
+        <div className="flex items-center gap-1.5 px-2 border-r border-slate-200 last:border-0"><CheckCircle2 size={10} className="text-emerald-600" /> Completed</div>
+        <div className="flex items-center gap-1.5 px-2 border-r border-slate-200 last:border-0"><Cloud size={10} className="text-violet-600" /> Forecast</div>
+        <div className="flex items-center gap-1.5 px-2"><XCircle size={10} className="text-red-600" /> Rejected</div>
     </div>
 );
 
@@ -403,7 +407,7 @@ export default function Schedule() {
 
             {/* Header Controls */}
             <header className="flex flex-col xl:flex-row xl:items-center justify-between gap-4 bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-col xl:flex-row xl:items-center gap-4 w-full xl:w-auto">
                     <div>
                         <h1 className="text-3xl font-bold text-slate-800">Work Schedule</h1>
                         <p className="text-slate-500">Manage project timelines and daily tasks</p>
