@@ -1,18 +1,35 @@
-
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Task, mapTaskFromDB } from '@/lib/types';
 import { CheckCircle2, User, Activity, Calendar, Grid3x3, Table2, Edit2, ExternalLink } from 'lucide-react';
 import { format } from 'date-fns';
 import { StandardTableStyles } from '@/components/ui/standard/TableStyles';
+import ResizableHeader from '@/components/ui/ResizableHeader';
+import useColumnResizing from '@/hooks/useColumnResizing';
+import { PriorityBadge } from '@/components/ui/standard/PriorityBadge';
 
 export default function CompletedProjects() {
     const [tasks, setTasks] = useState<Task[]>([]);
     const [loading, setLoading] = useState(true);
     const [isQATeam, setIsQATeam] = useState(false);
     const [viewMode, setViewMode] = useState<'box' | 'table'>('table');
+    const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(null);
+
+    const { columnWidths, startResizing } = useColumnResizing({
+        projectName: 300,
+        subPhase: 150,
+        projectType: 120,
+        priority: 100,
+        pc: 100,
+        assignedTo: 120,
+        assignedTo2: 120,
+        startDate: 100,
+        endDate: 100,
+        comments: 200,
+        sprintLink: 80
+    });
 
     useEffect(() => {
         fetchCompletedTasks();
@@ -59,6 +76,29 @@ export default function CompletedProjects() {
         setViewMode(mode);
         localStorage.setItem('completedViewMode', mode);
     };
+
+    const requestSort = (key: string) => {
+        let direction: 'asc' | 'desc' = 'asc';
+        if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') {
+            direction = 'desc';
+        }
+        setSortConfig({ key, direction });
+    };
+
+    const sortedTasks = useMemo(() => {
+        let sortableTasks = [...tasks];
+        if (sortConfig !== null) {
+            sortableTasks.sort((a, b) => {
+                let aValue: any = a[sortConfig.key as keyof Task];
+                let bValue: any = b[sortConfig.key as keyof Task];
+
+                if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
+                if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
+                return 0;
+            });
+        }
+        return sortableTasks;
+    }, [tasks, sortConfig]);
 
     if (loading) {
         return (
@@ -114,123 +154,201 @@ export default function CompletedProjects() {
             {tasks.length === 0 ? (
                 <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-slate-200">
                     <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <CheckCircle2 className="text-slate-300" size={32} />
+                        <CheckCircle2 className="text-slate-400" size={32} />
                     </div>
-                    <h3 className="text-lg font-semibold text-slate-700">No Completed Projects Yet</h3>
-                    <p className="text-slate-500">Keep working hard! Completed projects will appear here.</p>
+                    <h3 className="text-lg font-bold text-slate-800">No Completed Projects</h3>
+                    <p className="text-slate-500">Completed projects will appear here.</p>
                 </div>
             ) : viewMode === 'box' ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {tasks.map((task) => (
-                        <div
-                            key={task.id}
-                            className="bg-white rounded-2xl border border-slate-400 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden group"
-                        >
-                            {/* Header */}
-                            <div className="p-6 pb-4 border-b border-emerald-50 bg-emerald-50/30">
-                                <div className="flex justify-between items-start mb-2">
-                                    <span className="bg-emerald-100 text-emerald-700 text-[10px] uppercase font-bold px-2 py-1 rounded-full tracking-wide">
-                                        Completed
-                                    </span>
-                                    <span className="text-slate-400 text-xs flex items-center gap-1">
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                    {sortedTasks.map((task) => (
+                        <div key={task.id} className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 hover:shadow-md transition-all group">
+                            <div className="flex justify-between items-start mb-4">
+                                <span className={`px-3 py-1 rounded-full text-xs font-bold ${task.priority === 'High' ? 'bg-orange-100 text-orange-700' :
+                                        task.priority === 'Urgent' ? 'bg-red-100 text-red-700' :
+                                            task.priority === 'Medium' ? 'bg-amber-100 text-amber-700' :
+                                                'bg-green-100 text-green-700'
+                                    }`}>
+                                    {task.priority || 'Normal'}
+                                </span>
+                                {task.endDate && (
+                                    <div className="flex items-center gap-1.5 text-slate-500 text-xs font-medium bg-slate-50 px-2 py-1 rounded-lg">
                                         <Calendar size={12} />
-                                        {task.endDate ? format(new Date(task.endDate), 'MMM d, yyyy') : 'No date'}
-                                    </span>
-                                </div>
-                                <h3 className="text-xl font-bold text-slate-800 mb-1 group-hover:text-emerald-700 transition-colors">
-                                    {task.projectName}
-                                </h3>
-                                <div className="flex items-center gap-2 text-sm text-slate-500 font-medium">
-                                    <Activity size={14} className="text-slate-400" />
-                                    {task.subPhase}
-                                </div>
-                            </div>
-
-                            {/* Body */}
-                            <div className="p-6 space-y-4">
-                                {isQATeam && (
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="bg-slate-50 rounded-xl p-3 border border-slate-400">
-                                            <div className="text-xs text-slate-500 font-semibold uppercase mb-1">HTML Bugs</div>
-                                            <div className="text-lg font-mono font-bold text-slate-700">{task.htmlBugs || 0}</div>
-                                        </div>
-                                        <div className="bg-slate-50 rounded-xl p-3 border border-slate-400">
-                                            <div className="text-xs text-slate-500 font-semibold uppercase mb-1">Func. Bugs</div>
-                                            <div className="text-lg font-mono font-bold text-slate-700">{task.functionalBugs || 0}</div>
-                                        </div>
+                                        {format(new Date(task.endDate), 'MMM d, yyyy')}
                                     </div>
                                 )}
+                            </div>
 
-                                <div className="pt-4 border-t border-slate-400 flex items-center justify-between text-sm">
-                                    <div className="flex items-center gap-2 text-slate-600">
-                                        <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500">
+                            <h3 className="font-bold text-lg text-slate-800 mb-2 line-clamp-1 group-hover:text-emerald-600 transition-colors">{task.projectName}</h3>
+                            <div className="flex items-center gap-2 text-slate-500 text-sm mb-4">
+                                <Activity size={14} />
+                                <span>{task.subPhase || 'No phase'}</span>
+                                <span className="text-slate-300">•</span>
+                                <span>{task.projectType || 'General'}</span>
+                            </div>
+
+                            <div className="flex items-center justify-between pt-4 border-t border-slate-100">
+                                <div className="flex -space-x-2">
+                                    {task.assignedTo && (
+                                        <div className="w-8 h-8 rounded-full bg-indigo-100 border-2 border-white flex items-center justify-center text-indigo-700 font-bold text-xs" title={`Assigned: ${task.assignedTo}`}>
+                                            {task.assignedTo.charAt(0)}
+                                        </div>
+                                    )}
+                                    {task.assignedTo2 && (
+                                        <div className="w-8 h-8 rounded-full bg-pink-100 border-2 border-white flex items-center justify-center text-pink-700 font-bold text-xs" title={`Assigned: ${task.assignedTo2}`}>
+                                            {task.assignedTo2.charAt(0)}
+                                        </div>
+                                    )}
+                                    {(!task.assignedTo && !task.assignedTo2) && (
+                                        <div className="w-8 h-8 rounded-full bg-slate-100 border-2 border-white flex items-center justify-center text-slate-400">
                                             <User size={14} />
                                         </div>
-                                        <div className="flex flex-col">
-                                            <span className="text-xs text-slate-400 font-medium">Assignee</span>
-                                            <span className="font-medium text-slate-700">{task.assignedTo || 'Unassigned'}</span>
-                                        </div>
-                                    </div>
+                                    )}
+                                </div>
+                                <div className="text-right">
+                                    <p className="text-xs text-slate-400">PC</p>
+                                    <p className="text-sm font-semibold text-slate-700">{task.pc || '-'}</p>
                                 </div>
                             </div>
                         </div>
                     ))}
                 </div>
             ) : (
-                <div className={StandardTableStyles.container}>
-                    <table className="w-full">
-                        <thead className={StandardTableStyles.header}>
-                            <tr>
-                                <th className={StandardTableStyles.headerCell}>Project</th>
-                                <th className={StandardTableStyles.headerCell}>Phase/Task</th>
-                                <th className={StandardTableStyles.headerCell}>PC</th>
-                                <th className={StandardTableStyles.headerCell}>Assignee 1</th>
-                                <th className={StandardTableStyles.headerCell}>Assignee 2</th>
-                                <th className={StandardTableStyles.headerCell}>End Date</th>
-                                <th className={StandardTableStyles.headerCell}>Actual Completion</th>
-                                {isQATeam && <th className={StandardTableStyles.headerCell}>Bugs</th>}
-                                <th className={StandardTableStyles.headerCell}>Comments</th>
-                                <th className={StandardTableStyles.headerCell}>Deviation Reason</th>
-                                <th className={StandardTableStyles.headerCell}>Sprint Link</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {tasks.map((task) => (
-                                <tr key={task.id} className={StandardTableStyles.row}>
-                                    <td className={`${StandardTableStyles.cell} font-bold`}>{task.projectName}</td>
-                                    <td className={StandardTableStyles.cell}>{task.subPhase || '-'}</td>
-                                    <td className={StandardTableStyles.cell}>{task.pc || '-'}</td>
-                                    <td className={StandardTableStyles.cell}>{task.assignedTo || '-'}</td>
-                                    <td className={StandardTableStyles.cell}>{task.assignedTo2 || '-'}</td>
-                                    <td className={StandardTableStyles.cell}>
-                                        {task.endDate ? format(new Date(task.endDate), 'MMM d, yyyy') : '-'}
-                                    </td>
-                                    <td className={`${StandardTableStyles.cell} text-emerald-600 font-medium`}>
-                                        {task.actualCompletionDate ? format(new Date(task.actualCompletionDate), 'MMM d, yyyy') : '-'}
-                                    </td>
-                                    {isQATeam && (
-                                        <td className={`${StandardTableStyles.cell} text-center font-mono`}>
-                                            {task.bugCount || 0}
-                                        </td>
-                                    )}
-                                    <td className={StandardTableStyles.cell} title={task.comments || ''}>
-                                        <div className="truncate max-w-xs">{task.comments || '-'}</div>
-                                    </td>
-                                    <td className={StandardTableStyles.cell} title={task.deviationReason || ''}>
-                                        <div className="truncate max-w-xs">{task.deviationReason || '-'}</div>
-                                    </td>
-                                    <td className={StandardTableStyles.cell}>
-                                        {task.sprintLink ? (
-                                            <a href={task.sprintLink} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 hover:underline flex items-center gap-1">
-                                                <ExternalLink size={14} />
-                                                Link
-                                            </a>
-                                        ) : '-'}
-                                    </td>
+                <div className="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
+                    <div className="overflow-x-auto custom-scrollbar">
+                        <table className="w-full text-xs text-slate-800 border-collapse table-fixed border border-slate-900">
+                            <thead>
+                                <tr className="border-b border-black bg-slate-50">
+                                    <ResizableHeader
+                                        label="Project"
+                                        sortKey="projectName"
+                                        widthKey="projectName"
+                                        width={columnWidths.projectName}
+                                        currentSortKey={sortConfig?.key}
+                                        sortDirection={sortConfig?.direction}
+                                        onSort={requestSort}
+                                        onResizeStart={startResizing}
+                                    />
+                                    <ResizableHeader
+                                        label="Phase/Task"
+                                        sortKey="subPhase"
+                                        widthKey="subPhase"
+                                        width={columnWidths.subPhase}
+                                        currentSortKey={sortConfig?.key}
+                                        sortDirection={sortConfig?.direction}
+                                        onSort={requestSort}
+                                        onResizeStart={startResizing}
+                                    />
+                                    <ResizableHeader
+                                        label="Type"
+                                        sortKey="projectType"
+                                        widthKey="projectType"
+                                        width={columnWidths.projectType}
+                                        currentSortKey={sortConfig?.key}
+                                        sortDirection={sortConfig?.direction}
+                                        onSort={requestSort}
+                                        onResizeStart={startResizing}
+                                    />
+                                    <ResizableHeader
+                                        label="Priority"
+                                        sortKey="priority"
+                                        widthKey="priority"
+                                        width={columnWidths.priority}
+                                        currentSortKey={sortConfig?.key}
+                                        sortDirection={sortConfig?.direction}
+                                        onSort={requestSort}
+                                        onResizeStart={startResizing}
+                                    />
+                                    <ResizableHeader
+                                        label="PC"
+                                        sortKey="pc"
+                                        widthKey="pc"
+                                        width={columnWidths.pc}
+                                        currentSortKey={sortConfig?.key}
+                                        sortDirection={sortConfig?.direction}
+                                        onSort={requestSort}
+                                        onResizeStart={startResizing}
+                                    />
+                                    <ResizableHeader
+                                        label="Assignee 1"
+                                        sortKey="assignedTo"
+                                        widthKey="assignedTo"
+                                        width={columnWidths.assignedTo}
+                                        currentSortKey={sortConfig?.key}
+                                        sortDirection={sortConfig?.direction}
+                                        onSort={requestSort}
+                                        onResizeStart={startResizing}
+                                    />
+                                    <ResizableHeader
+                                        label="Assignee 2"
+                                        sortKey="assignedTo2"
+                                        widthKey="assignedTo2"
+                                        width={columnWidths.assignedTo2}
+                                        currentSortKey={sortConfig?.key}
+                                        sortDirection={sortConfig?.direction}
+                                        onSort={requestSort}
+                                        onResizeStart={startResizing}
+                                    />
+                                    <ResizableHeader
+                                        label="End Date"
+                                        sortKey="endDate"
+                                        widthKey="endDate"
+                                        width={columnWidths.endDate}
+                                        currentSortKey={sortConfig?.key}
+                                        sortDirection={sortConfig?.direction}
+                                        onSort={requestSort}
+                                        onResizeStart={startResizing}
+                                    />
+                                    <ResizableHeader
+                                        label="Comments"
+                                        widthKey="comments"
+                                        width={columnWidths.comments}
+                                        isSortable={false}
+                                        onResizeStart={startResizing}
+                                    />
+                                    <ResizableHeader
+                                        label="Sprint Link"
+                                        widthKey="sprintLink"
+                                        width={columnWidths.sprintLink}
+                                        isSortable={false}
+                                        onResizeStart={startResizing}
+                                    />
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                {sortedTasks.map((task) => (
+                                    <tr
+                                        key={task.id}
+                                        className="border-b border-slate-900 hover:bg-slate-50 transition-colors group"
+                                    >
+                                        <td className="px-2 py-2 truncate border-r border-slate-900 font-bold text-slate-900" title={task.projectName}>{task.projectName}</td>
+                                        <td className="px-2 py-2 truncate border-r border-slate-900">{task.subPhase || '-'}</td>
+                                        <td className="px-2 py-2 truncate border-r border-slate-900">{task.projectType || '-'}</td>
+                                        <td className="px-2 py-2 truncate border-r border-slate-900">
+                                            <PriorityBadge priority={task.priority} />
+                                        </td>
+                                        <td className="px-2 py-2 truncate border-r border-slate-900">{task.pc || '-'}</td>
+                                        <td className="px-2 py-2 truncate border-r border-slate-900">{task.assignedTo || '-'}</td>
+                                        <td className="px-2 py-2 truncate border-r border-slate-900">{task.assignedTo2 || '-'}</td>
+                                        <td className="px-2 py-2 truncate border-r border-slate-900">
+                                            {task.endDate ? format(new Date(task.endDate), 'MMM d, yyyy') : '-'}
+                                        </td>
+                                        <td className="px-2 py-2 truncate border-r border-slate-900" title={task.comments || ''}>
+                                            {task.comments || '-'}
+                                        </td>
+                                        <td className="px-2 py-2 truncate text-center">
+                                            {task.sprintLink ? (
+                                                <a href={task.sprintLink} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 hover:underline flex items-center justify-center gap-1">
+                                                    <ExternalLink size={14} />
+                                                    Link
+                                                </a>
+                                            ) : '-'}
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             )}
         </div>

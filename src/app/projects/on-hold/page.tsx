@@ -1,19 +1,23 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Task, mapTaskFromDB } from '@/lib/types';
-import { PauseCircle, User, Activity, Grid3x3, Table2, ExternalLink, Pencil } from 'lucide-react';
+import { PauseCircle, User, Activity, Grid3x3, Table2, ExternalLink, Pencil, Calendar } from 'lucide-react';
 import { format } from 'date-fns';
 import { StandardTableStyles } from '@/components/ui/standard/TableStyles';
 import TaskModal from '@/components/TaskModal';
 import TaskDetailsModal from '@/components/TaskDetailsModal';
 import { useToast } from '@/contexts/ToastContext';
+import ResizableHeader from '@/components/ui/ResizableHeader';
+import useColumnResizing from '@/hooks/useColumnResizing';
+import { PriorityBadge } from '@/components/ui/standard/PriorityBadge';
 
 export default function OnHoldProjects() {
     const [tasks, setTasks] = useState<Task[]>([]);
     const [loading, setLoading] = useState(true);
     const [viewMode, setViewMode] = useState<'box' | 'table'>('table');
+    const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(null);
 
     // Modal State
     const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
@@ -22,6 +26,19 @@ export default function OnHoldProjects() {
     const [editingTask, setEditingTask] = useState<Task | null>(null); // For edit view
 
     const { success, error: toastError } = useToast();
+
+    const { columnWidths, startResizing } = useColumnResizing({
+        projectName: 300,
+        subPhase: 150,
+        projectType: 120,
+        priority: 100,
+        pc: 100,
+        assignedTo: 120,
+        assignedTo2: 120,
+        startDate: 100,
+        comments: 200,
+        sprintLink: 80
+    });
 
     useEffect(() => {
         fetchOnHoldTasks();
@@ -98,55 +115,78 @@ export default function OnHoldProjects() {
             include_saturday: taskData.includeSaturday || false,
             include_sunday: taskData.includeSunday || false,
             team_id: taskData.teamId,
+            project_type: taskData.projectType,
+            priority: taskData.priority
         };
 
-        if (editingTask) {
-            const { team_id, ...updatePayload } = dbPayload;
-            const { error } = await supabase
-                .from('tasks')
-                .update(updatePayload)
-                .eq('id', editingTask.id);
+        try {
+            if (editingTask) {
+                const { error } = await supabase
+                    .from('tasks')
+                    .update(dbPayload)
+                    .eq('id', editingTask.id);
 
-            if (error) {
-                console.error('Error updating task:', error);
-                toastError(`Failed to save task: ${error.message}`);
-                return;
+                if (error) throw error;
+                success('Task updated successfully');
+
+                // If status changed from On Hold, remove it from list
+                if (taskData.status !== 'On Hold') {
+                    setTasks(prev => prev.filter(t => t.id !== editingTask.id));
+                } else {
+                    // Update local state
+                    setTasks(prev => prev.map(t => t.id === editingTask.id ? { ...t, ...taskData } : t));
+                }
             }
-            success('Task updated successfully');
+            setIsTaskModalOpen(false);
+            setEditingTask(null);
+        } catch (error: any) {
+            console.error('Error saving task:', error);
+            toastError(error.message || 'Failed to save task');
         }
-
-        // Refresh tasks
-        await fetchOnHoldTasks();
-        setIsTaskModalOpen(false);
-        setEditingTask(null);
     };
 
-    const handleDeleteTask = async (taskId: number) => {
-        // We will keep the confirm dialog for deletion as it's a critical action, 
-        // or we could replace it with a custom modal later if requested.
-        // For now, replacing alert failure with toast.
+    const deleteTask = async (taskId: number) => {
         if (!confirm('Are you sure you want to delete this task?')) return;
 
-        const { error } = await supabase
-            .from('tasks')
-            .delete()
-            .eq('id', taskId);
-
-        if (error) {
-            console.error('Error deleting task:', error);
-            toastError('Failed to delete task');
-        } else {
+        try {
+            const { error } = await supabase.from('tasks').delete().eq('id', taskId);
+            if (error) throw error;
             success('Task deleted successfully');
-            await fetchOnHoldTasks();
+            setTasks(prev => prev.filter(t => t.id !== taskId));
             setIsTaskModalOpen(false);
+        } catch (error: any) {
+            console.error('Error deleting task:', error);
+            toastError(error.message || 'Failed to delete task');
         }
     };
 
+    const requestSort = (key: string) => {
+        let direction: 'asc' | 'desc' = 'asc';
+        if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') {
+            direction = 'desc';
+        }
+        setSortConfig({ key, direction });
+    };
+
+    const sortedTasks = useMemo(() => {
+        let sortableTasks = [...tasks];
+        if (sortConfig !== null) {
+            sortableTasks.sort((a, b) => {
+                let aValue: any = a[sortConfig.key as keyof Task];
+                let bValue: any = b[sortConfig.key as keyof Task];
+
+                if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
+                if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
+                return 0;
+            });
+        }
+        return sortableTasks;
+    }, [tasks, sortConfig]);
 
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-[60vh]">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-600"></div>
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-500"></div>
             </div>
         );
     }
@@ -165,7 +205,7 @@ export default function OnHoldProjects() {
                                 {tasks.length} {tasks.length === 1 ? 'task' : 'tasks'}
                             </span>
                         </div>
-                        <p className="text-slate-500 font-medium">Projects currently paused or awaiting action</p>
+                        <p className="text-slate-500 font-medium">Projects temporarily paused or awaiting action</p>
                     </div>
                 </div>
 
@@ -197,149 +237,231 @@ export default function OnHoldProjects() {
             {tasks.length === 0 ? (
                 <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-slate-200">
                     <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <PauseCircle className="text-slate-300" size={32} />
+                        <PauseCircle className="text-slate-400" size={32} />
                     </div>
-                    <h3 className="text-lg font-semibold text-slate-700">No On Hold Projects</h3>
-                    <p className="text-slate-500">All projects are active or completed.</p>
+                    <h3 className="text-lg font-bold text-slate-800">No Projects On Hold</h3>
+                    <p className="text-slate-500">There are no projects currently on hold.</p>
                 </div>
             ) : viewMode === 'box' ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {tasks.map((task) => (
-                        <div
-                            key={task.id}
-                            className="bg-white rounded-2xl border border-slate-400 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden group flex flex-col cursor-pointer"
-                            onClick={() => handleViewDetails(task)}
-                        >
-                            {/* Header */}
-                            <div className="p-6 pb-4 border-b border-amber-50 bg-amber-50/30 relative">
-                                <div className="flex justify-between items-start mb-2">
-                                    <span className="bg-amber-100 text-amber-700 text-[10px] uppercase font-bold px-2 py-1 rounded-full tracking-wide">
-                                        On Hold
-                                    </span>
-                                    <span className="text-slate-400 text-xs flex items-center gap-1">
-                                        {task.endDate ? format(new Date(task.endDate), 'MMM d, yyyy') : 'No date'}
-                                    </span>
-                                </div>
-                                <h3 className="text-xl font-bold text-slate-800 mb-1 group-hover:text-amber-700 transition-colors">
-                                    {task.projectName}
-                                </h3>
-                                <div className="flex items-center gap-2 text-sm text-slate-500 font-medium">
-                                    <Activity size={14} className="text-slate-400" />
-                                    {task.subPhase}
-                                </div>
-
-                                {/* Edit Button Overlay */}
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                    {sortedTasks.map((task) => (
+                        <div key={task.id} className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 hover:shadow-md transition-all group relative">
+                            <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
                                 <button
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleEditTask(task);
-                                    }}
-                                    className="absolute top-4 right-4 p-2 bg-white/80 hover:bg-white text-slate-400 hover:text-indigo-600 rounded-lg shadow-sm backdrop-blur-sm transition-all opacity-0 group-hover:opacity-100"
-                                    title="Edit Task"
+                                    onClick={(e) => { e.stopPropagation(); handleEditTask(task); }}
+                                    className="p-2 hover:bg-slate-100 rounded-full text-slate-400 hover:text-indigo-600"
                                 >
                                     <Pencil size={16} />
                                 </button>
                             </div>
 
-                            {/* Body */}
-                            <div className="p-6 space-y-4 flex-1">
-                                <div className="space-y-2">
-                                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
-                                        Current Updates/Comments
-                                    </label>
-                                    <div className="bg-slate-50 rounded-xl p-4 text-sm text-slate-700 leading-relaxed border border-slate-200 line-clamp-3">
-                                        {task.currentUpdates || task.comments || (
-                                            <span className="italic text-slate-400">No updates provided</span>
-                                        )}
+                            <div className="flex justify-between items-start mb-4">
+                                <span className={`px-3 py-1 rounded-full text-xs font-bold ${task.priority === 'High' ? 'bg-orange-100 text-orange-700' :
+                                    task.priority === 'Urgent' ? 'bg-red-100 text-red-700' :
+                                        task.priority === 'Medium' ? 'bg-amber-100 text-amber-700' :
+                                            'bg-green-100 text-green-700'
+                                    }`}>
+                                    {task.priority || 'Normal'}
+                                </span>
+                                {task.startDate && (
+                                    <div className="flex items-center gap-1.5 text-slate-500 text-xs font-medium bg-slate-50 px-2 py-1 rounded-lg">
+                                        <Calendar size={12} />
+                                        {format(new Date(task.startDate), 'MMM d, yyyy')}
                                     </div>
-                                </div>
+                                )}
                             </div>
 
-                            {/* Footer */}
-                            <div className="p-4 pt-4 border-t border-slate-400 flex items-center justify-between text-sm bg-slate-50/50 mt-auto">
-                                <div className="flex items-center gap-2 text-slate-600">
-                                    <div className="w-8 h-8 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-500">
-                                        <User size={14} />
+                            <div onClick={() => handleViewDetails(task)} className="cursor-pointer">
+                                <h3 className="font-bold text-lg text-slate-800 mb-2 line-clamp-1 group-hover:text-amber-600 transition-colors">{task.projectName}</h3>
+                                <div className="flex items-center gap-2 text-slate-500 text-sm mb-4">
+                                    <Activity size={14} />
+                                    <span>{task.subPhase || 'No phase'}</span>
+                                    <span className="text-slate-300">•</span>
+                                    <span>{task.projectType || 'General'}</span>
+                                </div>
+
+                                <div className="flex items-center justify-between pt-4 border-t border-slate-100">
+                                    <div className="flex -space-x-2">
+                                        {task.assignedTo && (
+                                            <div className="w-8 h-8 rounded-full bg-indigo-100 border-2 border-white flex items-center justify-center text-indigo-700 font-bold text-xs" title={`Assigned: ${task.assignedTo}`}>
+                                                {task.assignedTo.charAt(0)}
+                                            </div>
+                                        )}
+                                        {task.assignedTo2 && (
+                                            <div className="w-8 h-8 rounded-full bg-pink-100 border-2 border-white flex items-center justify-center text-pink-700 font-bold text-xs" title={`Assigned: ${task.assignedTo2}`}>
+                                                {task.assignedTo2.charAt(0)}
+                                            </div>
+                                        )}
+                                        {(!task.assignedTo && !task.assignedTo2) && (
+                                            <div className="w-8 h-8 rounded-full bg-slate-100 border-2 border-white flex items-center justify-center text-slate-400">
+                                                <User size={14} />
+                                            </div>
+                                        )}
                                     </div>
-                                    <span className="font-medium">{task.assignedTo || 'Unassigned'}</span>
+                                    <div className="text-right">
+                                        <p className="text-xs text-slate-400">PC</p>
+                                        <p className="text-sm font-semibold text-slate-700">{task.pc || '-'}</p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     ))}
                 </div>
             ) : (
-                <div className={StandardTableStyles.container}>
-                    <table className="w-full">
-                        <thead className={StandardTableStyles.header}>
-                            <tr>
-                                <th className={StandardTableStyles.headerCell}>Project</th>
-                                <th className={StandardTableStyles.headerCell}>Phase/Task</th>
-                                <th className={StandardTableStyles.headerCell}>PC</th>
-                                <th className={StandardTableStyles.headerCell}>Assignee 1</th>
-                                <th className={StandardTableStyles.headerCell}>Assignee 2</th>
-                                <th className={StandardTableStyles.headerCell}>Status</th>
-                                <th className={StandardTableStyles.headerCell}>Created Date</th>
-                                <th className={StandardTableStyles.headerCell}>Updates/Comments</th>
-                                <th className={StandardTableStyles.headerCell}>Details</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {tasks.map((task) => (
-                                <tr key={task.id} className={StandardTableStyles.row}>
-                                    <td className={`${StandardTableStyles.cell} font-bold`}>{task.projectName}</td>
-                                    <td className={StandardTableStyles.cell}>{task.subPhase || '-'}</td>
-                                    <td className={StandardTableStyles.cell}>{task.pc || '-'}</td>
-                                    <td className={StandardTableStyles.cell}>{task.assignedTo || '-'}</td>
-                                    <td className={StandardTableStyles.cell}>{task.assignedTo2 || '-'}</td>
-                                    <td className={StandardTableStyles.cell}>
-                                        <span className="bg-amber-100 text-amber-700 text-xs font-bold px-2 py-0.5 rounded-full inline-block">
-                                            On Hold
-                                        </span>
-                                    </td>
-                                    <td className={StandardTableStyles.cell}>
-                                        {task.createdAt ? format(new Date(task.createdAt), 'MMM d, yyyy') : '-'}
-                                    </td>
-                                    <td className={StandardTableStyles.cell} title={task.currentUpdates || task.comments || ''}>
-                                        <div className="truncate max-w-xs">{task.currentUpdates || task.comments || '-'}</div>
-                                    </td>
-                                    <td className={StandardTableStyles.actionCell}>
-                                        <button
-                                            onClick={() => handleEditTask(task)}
-                                            className="text-slate-400 hover:text-indigo-600 transition-colors"
-                                            title="Edit Task"
-                                        >
-                                            <Pencil size={14} />
-                                        </button>
-                                        <button
-                                            onClick={() => handleViewDetails(task)}
-                                            className="text-slate-400 hover:text-indigo-600 transition-colors"
-                                            title="View Details"
-                                        >
-                                            <ExternalLink size={14} />
-                                        </button>
-                                    </td>
+                <div className="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
+                    <div className="overflow-x-auto custom-scrollbar">
+                        <table className="w-full text-xs text-slate-800 border-collapse table-fixed border border-slate-900">
+                            <thead>
+                                <tr className="border-b border-black bg-slate-50">
+                                    <ResizableHeader
+                                        label="Project"
+                                        sortKey="projectName"
+                                        widthKey="projectName"
+                                        width={columnWidths.projectName}
+                                        currentSortKey={sortConfig?.key}
+                                        sortDirection={sortConfig?.direction}
+                                        onSort={requestSort}
+                                        onResizeStart={startResizing}
+                                    />
+                                    <ResizableHeader
+                                        label="Phase/Task"
+                                        sortKey="subPhase"
+                                        widthKey="subPhase"
+                                        width={columnWidths.subPhase}
+                                        currentSortKey={sortConfig?.key}
+                                        sortDirection={sortConfig?.direction}
+                                        onSort={requestSort}
+                                        onResizeStart={startResizing}
+                                    />
+                                    <ResizableHeader
+                                        label="Type"
+                                        sortKey="projectType"
+                                        widthKey="projectType"
+                                        width={columnWidths.projectType}
+                                        currentSortKey={sortConfig?.key}
+                                        sortDirection={sortConfig?.direction}
+                                        onSort={requestSort}
+                                        onResizeStart={startResizing}
+                                    />
+                                    <ResizableHeader
+                                        label="Priority"
+                                        sortKey="priority"
+                                        widthKey="priority"
+                                        width={columnWidths.priority}
+                                        currentSortKey={sortConfig?.key}
+                                        sortDirection={sortConfig?.direction}
+                                        onSort={requestSort}
+                                        onResizeStart={startResizing}
+                                    />
+                                    <ResizableHeader
+                                        label="PC"
+                                        sortKey="pc"
+                                        widthKey="pc"
+                                        width={columnWidths.pc}
+                                        currentSortKey={sortConfig?.key}
+                                        sortDirection={sortConfig?.direction}
+                                        onSort={requestSort}
+                                        onResizeStart={startResizing}
+                                    />
+                                    <ResizableHeader
+                                        label="Assignee 1"
+                                        sortKey="assignedTo"
+                                        widthKey="assignedTo"
+                                        width={columnWidths.assignedTo}
+                                        currentSortKey={sortConfig?.key}
+                                        sortDirection={sortConfig?.direction}
+                                        onSort={requestSort}
+                                        onResizeStart={startResizing}
+                                    />
+                                    <ResizableHeader
+                                        label="Assignee 2"
+                                        sortKey="assignedTo2"
+                                        widthKey="assignedTo2"
+                                        width={columnWidths.assignedTo2}
+                                        currentSortKey={sortConfig?.key}
+                                        sortDirection={sortConfig?.direction}
+                                        onSort={requestSort}
+                                        onResizeStart={startResizing}
+                                    />
+                                    <ResizableHeader
+                                        label="Start Date"
+                                        sortKey="startDate"
+                                        widthKey="startDate"
+                                        width={columnWidths.startDate}
+                                        currentSortKey={sortConfig?.key}
+                                        sortDirection={sortConfig?.direction}
+                                        onSort={requestSort}
+                                        onResizeStart={startResizing}
+                                    />
+                                    <ResizableHeader
+                                        label="Comments"
+                                        widthKey="comments"
+                                        width={columnWidths.comments}
+                                        isSortable={false}
+                                        onResizeStart={startResizing}
+                                    />
+                                    <ResizableHeader
+                                        label="Sprint Link"
+                                        widthKey="sprintLink"
+                                        width={columnWidths.sprintLink}
+                                        isSortable={false}
+                                        onResizeStart={startResizing}
+                                    />
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                {sortedTasks.map((task) => (
+                                    <tr
+                                        key={task.id}
+                                        className="border-b border-slate-900 hover:bg-slate-50 cursor-pointer transition-colors group"
+                                        onClick={() => handleViewDetails(task)}
+                                    >
+                                        <td className="px-2 py-2 truncate border-r border-slate-900 font-bold text-slate-900" title={task.projectName}>{task.projectName}</td>
+                                        <td className="px-2 py-2 truncate border-r border-slate-900">{task.subPhase || '-'}</td>
+                                        <td className="px-2 py-2 truncate border-r border-slate-900">{task.projectType || '-'}</td>
+                                        <td className="px-2 py-2 truncate border-r border-slate-900">
+                                            <PriorityBadge priority={task.priority} />
+                                        </td>
+                                        <td className="px-2 py-2 truncate border-r border-slate-900">{task.pc || '-'}</td>
+                                        <td className="px-2 py-2 truncate border-r border-slate-900">{task.assignedTo || '-'}</td>
+                                        <td className="px-2 py-2 truncate border-r border-slate-900">{task.assignedTo2 || '-'}</td>
+                                        <td className="px-2 py-2 truncate border-r border-slate-900">
+                                            {task.startDate ? format(new Date(task.startDate), 'MMM d, yyyy') : '-'}
+                                        </td>
+                                        <td className="px-2 py-2 truncate border-r border-slate-900" title={task.comments || ''}>
+                                            {task.comments || '-'}
+                                        </td>
+                                        <td className="px-2 py-2 truncate text-center">
+                                            {task.sprintLink ? (
+                                                <a href={task.sprintLink} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 hover:underline flex items-center justify-center gap-1" onClick={e => e.stopPropagation()}>
+                                                    <ExternalLink size={14} />
+                                                    Link
+                                                </a>
+                                            ) : '-'}
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             )}
 
-            {/* Task Details Modal */}
+            {/* Task Modal for Editing */}
+            <TaskModal
+                isOpen={isTaskModalOpen}
+                onClose={() => { setIsTaskModalOpen(false); setEditingTask(null); }}
+                task={editingTask}
+                onSave={saveTask}
+                onDelete={editingTask ? () => deleteTask(editingTask.id) : undefined}
+            />
+
+            {/* Read-Only Details Modal */}
             <TaskDetailsModal
                 isOpen={isDetailsModalOpen}
                 onClose={() => setIsDetailsModalOpen(false)}
                 task={selectedTask}
-                onEdit={handleEditTask}
-            />
-
-            {/* Edit Task Modal */}
-            <TaskModal
-                isOpen={isTaskModalOpen}
-                onClose={() => setIsTaskModalOpen(false)}
-                task={editingTask}
-                onSave={saveTask}
-                onDelete={handleDeleteTask}
+                onEdit={() => selectedTask && handleEditTask(selectedTask)}
             />
         </div>
     );

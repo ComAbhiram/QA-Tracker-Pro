@@ -1,17 +1,32 @@
-
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Task, mapTaskFromDB } from '@/lib/types';
 import { AlertCircle, User, Calendar, Activity, Grid3x3, Table2, ExternalLink } from 'lucide-react';
 import { format } from 'date-fns';
 import { StandardTableStyles } from '@/components/ui/standard/TableStyles';
+import ResizableHeader from '@/components/ui/ResizableHeader';
+import useColumnResizing from '@/hooks/useColumnResizing';
+import { PriorityBadge } from '@/components/ui/standard/PriorityBadge';
 
 export default function RejectedProjects() {
     const [tasks, setTasks] = useState<Task[]>([]);
     const [loading, setLoading] = useState(true);
     const [viewMode, setViewMode] = useState<'box' | 'table'>('table');
+    const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(null);
+
+    const { columnWidths, startResizing } = useColumnResizing({
+        projectName: 300,
+        subPhase: 150,
+        projectType: 120,
+        priority: 100,
+        pc: 100,
+        assignedTo: 120,
+        assignedTo2: 120,
+        startDate: 100,
+        comments: 200,
+    });
 
     useEffect(() => {
         fetchRejectedTasks();
@@ -44,6 +59,29 @@ export default function RejectedProjects() {
         setViewMode(mode);
         localStorage.setItem('rejectedViewMode', mode);
     };
+
+    const requestSort = (key: string) => {
+        let direction: 'asc' | 'desc' = 'asc';
+        if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') {
+            direction = 'desc';
+        }
+        setSortConfig({ key, direction });
+    };
+
+    const sortedTasks = useMemo(() => {
+        let sortableTasks = [...tasks];
+        if (sortConfig !== null) {
+            sortableTasks.sort((a, b) => {
+                let aValue: any = a[sortConfig.key as keyof Task];
+                let bValue: any = b[sortConfig.key as keyof Task];
+
+                if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
+                if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
+                return 0;
+            });
+        }
+        return sortableTasks;
+    }, [tasks, sortConfig]);
 
     if (loading) {
         return (
@@ -99,110 +137,193 @@ export default function RejectedProjects() {
             {tasks.length === 0 ? (
                 <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-slate-200">
                     <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <AlertCircle className="text-slate-300" size={32} />
+                        <AlertCircle className="text-slate-400" size={32} />
                     </div>
-                    <h3 className="text-lg font-semibold text-slate-700">No Rejected Projects</h3>
-                    <p className="text-slate-500">All projects are moving forward smoothly!</p>
+                    <h3 className="text-lg font-bold text-slate-800">No Rejected Projects</h3>
+                    <p className="text-slate-500">Rejected projects will appear here.</p>
                 </div>
             ) : viewMode === 'box' ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {tasks.map((task) => (
-                        <div
-                            key={task.id}
-                            className="bg-white rounded-2xl border border-slate-400 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden group"
-                        >
-                            {/* Header */}
-                            <div className="p-6 pb-4 border-b border-red-50 bg-red-50/30">
-                                <div className="flex justify-between items-start mb-2">
-                                    <span className="bg-red-100 text-red-700 text-[10px] uppercase font-bold px-2 py-1 rounded-full tracking-wide">
-                                        Rejected
-                                    </span>
-                                    <span className="text-slate-400 text-xs flex items-center gap-1">
-                                        {task.endDate ? format(new Date(task.endDate), 'MMM d, yyyy') : 'No date'}
-                                    </span>
-                                </div>
-                                <h3 className="text-xl font-bold text-slate-800 mb-1 group-hover:text-red-700 transition-colors">
-                                    {task.projectName}
-                                </h3>
-                                <div className="flex items-center gap-2 text-sm text-slate-500 font-medium">
-                                    <Activity size={14} className="text-slate-400" />
-                                    {task.subPhase}
-                                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                    {sortedTasks.map((task) => (
+                        <div key={task.id} className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 hover:shadow-md transition-all group">
+                            <div className="flex justify-between items-start mb-4">
+                                <span className={`px-3 py-1 rounded-full text-xs font-bold ${task.priority === 'High' ? 'bg-orange-100 text-orange-700' :
+                                        task.priority === 'Urgent' ? 'bg-red-100 text-red-700' :
+                                            task.priority === 'Medium' ? 'bg-amber-100 text-amber-700' :
+                                                'bg-green-100 text-green-700'
+                                    }`}>
+                                    {task.priority || 'Normal'}
+                                </span>
+                                {task.startDate && (
+                                    <div className="flex items-center gap-1.5 text-slate-500 text-xs font-medium bg-slate-50 px-2 py-1 rounded-lg">
+                                        <Calendar size={12} />
+                                        {format(new Date(task.startDate), 'MMM d, yyyy')}
+                                    </div>
+                                )}
                             </div>
 
-                            {/* Body */}
-                            <div className="p-6 space-y-4">
-                                <div className="space-y-2">
-                                    <label className="text-xs font-bold text-red-600 uppercase tracking-wider flex items-center gap-1.5">
-                                        <AlertCircle size={12} />
-                                        Reason for Rejection
-                                    </label>
-                                    <div className="bg-red-50 rounded-xl p-4 text-sm text-slate-700 leading-relaxed border border-slate-400/50">
-                                        {task.deviationReason || (
-                                            <span className="italic text-slate-400">No reason provided</span>
-                                        )}
-                                    </div>
-                                </div>
+                            <h3 className="font-bold text-lg text-slate-800 mb-2 line-clamp-1 group-hover:text-red-600 transition-colors">{task.projectName}</h3>
+                            <div className="flex items-center gap-2 text-slate-500 text-sm mb-4">
+                                <Activity size={14} />
+                                <span>{task.subPhase || 'No phase'}</span>
+                                <span className="text-slate-300">•</span>
+                                <span>{task.projectType || 'General'}</span>
+                            </div>
 
-                                <div className="pt-4 border-t border-slate-400 flex items-center justify-between text-sm">
-                                    <div className="flex items-center gap-2 text-slate-600">
-                                        <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500">
+                            {task.comments && (
+                                <div className="mb-4 p-3 bg-red-50 rounded-lg text-sm text-red-800 border border-red-100">
+                                    <span className="font-semibold block mb-1 text-xs uppercase tracking-wider text-red-600">Reason / Comment</span>
+                                    {task.comments}
+                                </div>
+                            )}
+
+                            <div className="flex items-center justify-between pt-4 border-t border-slate-100">
+                                <div className="flex -space-x-2">
+                                    {task.assignedTo && (
+                                        <div className="w-8 h-8 rounded-full bg-indigo-100 border-2 border-white flex items-center justify-center text-indigo-700 font-bold text-xs" title={`Assigned: ${task.assignedTo}`}>
+                                            {task.assignedTo.charAt(0)}
+                                        </div>
+                                    )}
+                                    {task.assignedTo2 && (
+                                        <div className="w-8 h-8 rounded-full bg-pink-100 border-2 border-white flex items-center justify-center text-pink-700 font-bold text-xs" title={`Assigned: ${task.assignedTo2}`}>
+                                            {task.assignedTo2.charAt(0)}
+                                        </div>
+                                    )}
+                                    {(!task.assignedTo && !task.assignedTo2) && (
+                                        <div className="w-8 h-8 rounded-full bg-slate-100 border-2 border-white flex items-center justify-center text-slate-400">
                                             <User size={14} />
                                         </div>
-                                        <span className="font-medium">{task.assignedTo || 'Unassigned'}</span>
-                                    </div>
+                                    )}
+                                </div>
+                                <div className="text-right">
+                                    <p className="text-xs text-slate-400">PC</p>
+                                    <p className="text-sm font-semibold text-slate-700">{task.pc || '-'}</p>
                                 </div>
                             </div>
                         </div>
                     ))}
                 </div>
             ) : (
-                <div className={StandardTableStyles.container}>
-                    <table className="w-full">
-                        <thead className={StandardTableStyles.header}>
-                            <tr>
-                                <th className={StandardTableStyles.headerCell}>Project</th>
-                                <th className={StandardTableStyles.headerCell}>Phase/Task</th>
-                                <th className={StandardTableStyles.headerCell}>PC</th>
-                                <th className={StandardTableStyles.headerCell}>Assignee 1</th>
-                                <th className={StandardTableStyles.headerCell}>Assignee 2</th>
-                                <th className={StandardTableStyles.headerCell}>Status</th>
-                                <th className={StandardTableStyles.headerCell}>Date</th>
-                                <th className={StandardTableStyles.headerCell}>Rejection Reason</th>
-                                <th className={StandardTableStyles.headerCell}>Sprint Link</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {tasks.map((task) => (
-                                <tr key={task.id} className={StandardTableStyles.row}>
-                                    <td className={`${StandardTableStyles.cell} font-bold`}>{task.projectName}</td>
-                                    <td className={StandardTableStyles.cell}>{task.subPhase || '-'}</td>
-                                    <td className={StandardTableStyles.cell}>{task.pc || '-'}</td>
-                                    <td className={StandardTableStyles.cell}>{task.assignedTo || '-'}</td>
-                                    <td className={StandardTableStyles.cell}>{task.assignedTo2 || '-'}</td>
-                                    <td className={StandardTableStyles.cell}>
-                                        <span className="bg-red-100 text-red-700 text-xs font-bold px-2 py-0.5 rounded-full inline-block">
-                                            Rejected
-                                        </span>
-                                    </td>
-                                    <td className={StandardTableStyles.cell}>
-                                        {task.endDate ? format(new Date(task.endDate), 'MMM d, yyyy') : '-'}
-                                    </td>
-                                    <td className={StandardTableStyles.cell} title={task.deviationReason || ''}>
-                                        <div className="truncate max-w-xs">{task.deviationReason || '-'}</div>
-                                    </td>
-                                    <td className={StandardTableStyles.cell}>
-                                        {task.sprintLink ? (
-                                            <a href={task.sprintLink} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 hover:underline flex items-center gap-1">
-                                                <ExternalLink size={14} />
-                                                Link
-                                            </a>
-                                        ) : '-'}
-                                    </td>
+                <div className="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
+                    <div className="overflow-x-auto custom-scrollbar">
+                        <table className="w-full text-xs text-slate-800 border-collapse table-fixed border border-slate-900">
+                            <thead>
+                                <tr className="border-b border-black bg-slate-50">
+                                    <ResizableHeader
+                                        label="Project"
+                                        sortKey="projectName"
+                                        widthKey="projectName"
+                                        width={columnWidths.projectName}
+                                        currentSortKey={sortConfig?.key}
+                                        sortDirection={sortConfig?.direction}
+                                        onSort={requestSort}
+                                        onResizeStart={startResizing}
+                                    />
+                                    <ResizableHeader
+                                        label="Phase/Task"
+                                        sortKey="subPhase"
+                                        widthKey="subPhase"
+                                        width={columnWidths.subPhase}
+                                        currentSortKey={sortConfig?.key}
+                                        sortDirection={sortConfig?.direction}
+                                        onSort={requestSort}
+                                        onResizeStart={startResizing}
+                                    />
+                                    <ResizableHeader
+                                        label="Type"
+                                        sortKey="projectType"
+                                        widthKey="projectType"
+                                        width={columnWidths.projectType}
+                                        currentSortKey={sortConfig?.key}
+                                        sortDirection={sortConfig?.direction}
+                                        onSort={requestSort}
+                                        onResizeStart={startResizing}
+                                    />
+                                    <ResizableHeader
+                                        label="Priority"
+                                        sortKey="priority"
+                                        widthKey="priority"
+                                        width={columnWidths.priority}
+                                        currentSortKey={sortConfig?.key}
+                                        sortDirection={sortConfig?.direction}
+                                        onSort={requestSort}
+                                        onResizeStart={startResizing}
+                                    />
+                                    <ResizableHeader
+                                        label="PC"
+                                        sortKey="pc"
+                                        widthKey="pc"
+                                        width={columnWidths.pc}
+                                        currentSortKey={sortConfig?.key}
+                                        sortDirection={sortConfig?.direction}
+                                        onSort={requestSort}
+                                        onResizeStart={startResizing}
+                                    />
+                                    <ResizableHeader
+                                        label="Assignee 1"
+                                        sortKey="assignedTo"
+                                        widthKey="assignedTo"
+                                        width={columnWidths.assignedTo}
+                                        currentSortKey={sortConfig?.key}
+                                        sortDirection={sortConfig?.direction}
+                                        onSort={requestSort}
+                                        onResizeStart={startResizing}
+                                    />
+                                    <ResizableHeader
+                                        label="Assignee 2"
+                                        sortKey="assignedTo2"
+                                        widthKey="assignedTo2"
+                                        width={columnWidths.assignedTo2}
+                                        currentSortKey={sortConfig?.key}
+                                        sortDirection={sortConfig?.direction}
+                                        onSort={requestSort}
+                                        onResizeStart={startResizing}
+                                    />
+                                    <ResizableHeader
+                                        label="Start Date"
+                                        sortKey="startDate"
+                                        widthKey="startDate"
+                                        width={columnWidths.startDate}
+                                        currentSortKey={sortConfig?.key}
+                                        sortDirection={sortConfig?.direction}
+                                        onSort={requestSort}
+                                        onResizeStart={startResizing}
+                                    />
+                                    <ResizableHeader
+                                        label="Comments"
+                                        widthKey="comments"
+                                        width={columnWidths.comments}
+                                        isSortable={false}
+                                        onResizeStart={startResizing}
+                                    />
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                {sortedTasks.map((task) => (
+                                    <tr
+                                        key={task.id}
+                                        className="border-b border-slate-900 hover:bg-slate-50 transition-colors group"
+                                    >
+                                        <td className="px-2 py-2 truncate border-r border-slate-900 font-bold text-slate-900" title={task.projectName}>{task.projectName}</td>
+                                        <td className="px-2 py-2 truncate border-r border-slate-900">{task.subPhase || '-'}</td>
+                                        <td className="px-2 py-2 truncate border-r border-slate-900">{task.projectType || '-'}</td>
+                                        <td className="px-2 py-2 truncate border-r border-slate-900">
+                                            <PriorityBadge priority={task.priority} />
+                                        </td>
+                                        <td className="px-2 py-2 truncate border-r border-slate-900">{task.pc || '-'}</td>
+                                        <td className="px-2 py-2 truncate border-r border-slate-900">{task.assignedTo || '-'}</td>
+                                        <td className="px-2 py-2 truncate border-r border-slate-900">{task.assignedTo2 || '-'}</td>
+                                        <td className="px-2 py-2 truncate border-r border-slate-900">
+                                            {task.startDate ? format(new Date(task.startDate), 'MMM d, yyyy') : '-'}
+                                        </td>
+                                        <td className="px-2 py-2 truncate border-r border-slate-900" title={task.comments || ''}>
+                                            {task.comments || '-'}
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             )}
         </div>
