@@ -217,11 +217,23 @@ export default function Tracker() {
     };
 
     const refreshTasks = async () => {
-        const { data } = await supabase
+        let taskQuery = supabase
             .from('tasks')
             .select('*')
             .not('status', 'in', '("Completed","Rejected")')
             .order('start_date', { ascending: false });
+
+        // Apply Manager Mode filtering
+        if (isGuest) {
+            if (selectedTeamId) {
+                taskQuery = taskQuery.eq('team_id', selectedTeamId);
+            } else {
+                console.warn('Manager Mode: selectedTeamId is missing during refresh.');
+                taskQuery = taskQuery.eq('id', '00000000-0000-0000-0000-000000000000');
+            }
+        }
+
+        const { data } = await taskQuery;
 
         if (data) {
             // Client-side fallback
