@@ -9,6 +9,7 @@ import { getHubstaffNameFromQA } from '@/lib/hubstaff-name-mapping';
 import { useGuestMode } from '@/contexts/GuestContext';
 import { useToast } from '@/contexts/ToastContext';
 import ConfirmationModal from './ConfirmationModal';
+import { format } from 'date-fns';
 import { DatePicker } from './DatePicker';
 import { Button } from './ui/button';
 
@@ -467,7 +468,7 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
     const handleDateChange = (field: 'startDate' | 'endDate' | 'actualCompletionDate', date?: Date) => {
         setFormData(prev => ({
             ...prev,
-            [field]: date ? date.toISOString().split('T')[0] : ''
+            [field]: date ? format(date, 'yyyy-MM-dd') : ''
         }));
     };
 
