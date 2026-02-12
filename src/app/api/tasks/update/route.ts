@@ -79,13 +79,14 @@ export async function PUT(request: NextRequest) {
         }
 
         // 2. Get Task details (to check ownership/team and for email notifications)
-        const { data: task } = await supabaseServer
+        const { data: task, error: taskError } = await supabaseServer
             .from('tasks')
-            .select('*, teams(name), user_profiles(full_name)')
+            .select('*')
             .eq('id', id)
             .single();
 
-        if (!task) {
+        if (taskError || !task) {
+            console.error('[API Update] Task fetch error:', taskError);
             return NextResponse.json({ error: 'Task not found' }, { status: 404 });
         }
 
@@ -122,12 +123,34 @@ export async function PUT(request: NextRequest) {
         // Send email notification if date changed
         if (startDateChanged || endDateChanged) {
             try {
+                // Fetch team name and assignee name separately
+                let teamName = 'Unknown Team';
+                let assigneeName = task.assignee || 'Unassigned';
+
+                if (task.team_id) {
+                    const { data: teamData } = await supabaseServer
+                        .from('teams')
+                        .select('name')
+                        .eq('id', task.team_id)
+                        .single();
+                    if (teamData) teamName = teamData.name;
+                }
+
+                if (task.assignee) {
+                    const { data: userData } = await supabaseServer
+                        .from('user_profiles')
+                        .select('full_name')
+                        .eq('email', task.assignee)
+                        .single();
+                    if (userData?.full_name) assigneeName = userData.full_name;
+                }
+
                 const emailPayload = {
                     taskId: id,
                     taskName: task.phase || 'N/A',
                     projectName: task.project_name,
-                    assignee: task.user_profiles?.full_name || task.assignee || 'Unassigned',
-                    teamName: task.teams?.name || 'Unknown Team',
+                    assignee: assigneeName,
+                    teamName: teamName,
                     dateField: startDateChanged ? 'start_date' : 'end_date',
                     oldDate: startDateChanged ? task.start_date : task.end_date,
                     newDate: startDateChanged ? updates.start_date : updates.end_date,
