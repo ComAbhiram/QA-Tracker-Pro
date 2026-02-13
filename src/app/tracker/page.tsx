@@ -37,19 +37,18 @@ export default function Tracker() {
 
     // Column Resizing (Lifted State)
     const { columnWidths, startResizing } = useColumnResizing({
-        projectName: 300,
-        currentUpdates: 200, // New Column
+        projectName: 240, // Reduced from 300
         projectType: 60,
-        priority: 70,
-        subPhase: 120,
-        pc: 80,
+        priority: 65,
+        subPhase: 110,
+        pc: 50,
         status: 120,
-        startDate: 100,
-        endDate: 100,
+        startDate: 95,
+        endDate: 95,
         actualCompletionDate: 80,
-        comments: 150,
-        deviation: 100,
-        sprint: 60
+        comments: 130,
+        deviation: 70,
+        sprint: 50
     });
 
     // Fetch ALL active tasks (no pagination in query)

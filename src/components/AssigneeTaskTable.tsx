@@ -172,7 +172,7 @@ const StatusSelectCell = ({ status, onSave }: { status: string, onSave: (val: st
     }
 
     return (
-        <div onClick={(e) => { e.stopPropagation(); setIsEditing(true); }} className="cursor-pointer hover:opacity-80 transition-opacity">
+        <div onClick={(e) => { e.stopPropagation(); setIsEditing(true); }} className="cursor-pointer hover:opacity-80 transition-opacity min-w-0 overflow-hidden">
             <StatusBadge status={status} />
         </div>
     );
@@ -323,8 +323,10 @@ export default function AssigneeTaskTable({ assignee, tasks, leaves, columnWidth
 
                                 {/* Status - Editable Select */}
                                 <td className="px-2 py-1 border-r border-slate-200" onClick={e => e.stopPropagation()}>
-                                    <div className="flex items-center gap-1.5">
-                                        <StatusSelectCell status={task.status} onSave={(val) => onFieldUpdate(task.id, 'status', val)} />
+                                    <div className="flex items-center gap-1.5 w-full min-w-0">
+                                        <div className="flex-1 min-w-0">
+                                            <StatusSelectCell status={task.status} onSave={(val) => onFieldUpdate(task.id, 'status', val)} />
+                                        </div>
                                         {isTaskOverdue(task) && (
                                             <span className="flex-shrink-0 flex items-center gap-0.5 text-red-600 font-bold text-[10px]" title={`${getOverdueDays(task)} days overdue`}>
                                                 <AlertCircle size={10} /> {getOverdueDays(task)}d

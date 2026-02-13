@@ -16,57 +16,32 @@ interface StatusBadgeProps {
 }
 
 export const StatusBadge = ({ status, className = "", size = 13 }: StatusBadgeProps) => {
+    const content = (icon: React.ReactNode, colorClass: string) => (
+        <div className={`flex items-center gap-1.5 font-medium min-w-0 ${colorClass} ${className}`}>
+            <span className="flex-shrink-0">{icon}</span>
+            <span className="truncate">{status}</span>
+        </div>
+    );
+
     switch (status) {
         case 'In Progress':
         case 'Being Developed':
-            return (
-                <div className={`flex items-center gap-1.5 text-blue-700 font-medium ${className}`}>
-                    <PlayCircle size={size} /> {status}
-                </div>
-            );
+            return content(<PlayCircle size={size} />, 'text-blue-700');
         case 'Completed':
-            return (
-                <div className={`flex items-center gap-1.5 text-emerald-700 font-medium ${className}`}>
-                    <CheckCircle2 size={size} /> {status}
-                </div>
-            );
+            return content(<CheckCircle2 size={size} />, 'text-emerald-700');
         case 'Yet to Start':
-            return (
-                <div className={`flex items-center gap-1.5 text-slate-500 font-medium ${className}`}>
-                    <Circle size={size} /> {status}
-                </div>
-            );
+            return content(<Circle size={size} />, 'text-slate-500');
         case 'Forecast':
-            return (
-                <div className={`flex items-center gap-1.5 text-violet-600 font-medium ${className}`}>
-                    <Cloud size={size} /> {status}
-                </div>
-            );
+            return content(<Cloud size={size} />, 'text-violet-600');
         case 'On Hold':
-            return (
-                <div className={`flex items-center gap-1.5 text-amber-600 font-medium ${className}`}>
-                    <PauseCircle size={size} /> {status}
-                </div>
-            );
+            return content(<PauseCircle size={size} />, 'text-amber-600');
         case 'Ready for QA':
-            return (
-                <div className={`flex items-center gap-1.5 text-pink-600 font-medium ${className}`}>
-                    <Clock size={size} /> {status}
-                </div>
-            );
+            return content(<Clock size={size} />, 'text-pink-600');
         case 'Assigned to QA':
-            return (
-                <div className={`flex items-center gap-1.5 text-cyan-600 font-medium ${className}`}>
-                    <Clock size={size} /> {status}
-                </div>
-            );
+            return content(<Clock size={size} />, 'text-cyan-600');
         case 'Rejected':
-            return (
-                <div className={`flex items-center gap-1.5 text-red-600 font-medium ${className}`}>
-                    <XCircle size={size} /> {status}
-                </div>
-            );
+            return content(<XCircle size={size} />, 'text-red-600');
         default:
-            return <div className={`text-slate-600 ${className}`}>{status}</div>;
+            return <div className={`text-slate-600 truncate ${className}`}>{status}</div>;
     }
 };
