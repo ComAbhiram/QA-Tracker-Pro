@@ -31,11 +31,13 @@ export default function LoginPage() {
             if (data.session) {
                 router.push('/');
                 router.refresh();
+                // Keep loading true while redirecting
+            } else {
+                setLoading(false);
             }
         } catch (err: any) {
             console.error('Login error:', err);
             setError(err.message || 'Failed to login');
-        } finally {
             setLoading(false);
         }
     };
