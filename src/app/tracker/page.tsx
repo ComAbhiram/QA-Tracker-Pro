@@ -310,10 +310,9 @@ export default function Tracker() {
 
             if (orderA !== orderB) return orderA - orderB;
 
-            // Secondary Sort: Start Date (as per original logic, though original was descending)
-            // Let's keep it consistent: Sort by Date desc as secondary
-            const dateA = new Date(a.startDate || 0).getTime();
-            const dateB = new Date(b.startDate || 0).getTime();
+            // Secondary Sort: Start Date (Ascending, Nulls Last)
+            const dateA = a.startDate ? new Date(a.startDate).getTime() : Number.MAX_SAFE_INTEGER;
+            const dateB = b.startDate ? new Date(b.startDate).getTime() : Number.MAX_SAFE_INTEGER;
             return dateA - dateB;
         });
 
