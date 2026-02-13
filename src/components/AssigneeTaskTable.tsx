@@ -29,7 +29,7 @@ interface AssigneeTaskTableProps {
     columnWidths: Record<string, number>;
     hideHeader?: boolean;
     onEditTask: (task: Task) => void;
-    onResizeStart?: (e: React.MouseEvent, key: string) => void;
+    onResizeStart?: (key: string, e: React.MouseEvent) => void;
     // Generalized update handler for inline edits
     onFieldUpdate: (taskId: number, field: string, value: any) => Promise<void>;
 }
