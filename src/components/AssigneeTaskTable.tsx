@@ -27,6 +27,7 @@ import { calculateAvailability } from '@/lib/availability';
 import { DatePicker } from '@/components/DatePicker';
 import { StatusBadge } from '@/components/ui/standard/StatusBadge';
 import { PriorityBadge } from '@/components/ui/standard/PriorityBadge';
+import Tooltip from '@/components/ui/Tooltip';
 
 interface AssigneeTaskTableProps {
     assignee: string;
@@ -287,15 +288,15 @@ export default function AssigneeTaskTable({ assignee, tasks, leaves, columnWidth
                                 onClick={() => onEditTask(task)}
                                 className="group hover:bg-slate-50 cursor-pointer transition-colors"
                             >
-                                <td className={`px-2 py-1 border-r border-slate-200 font-medium text-slate-700 ${cellClass}`} title={task.projectName}>
-                                    <div>{task.projectName}</div>
+                                <td className="px-2 py-1 border-r border-slate-200 font-medium text-slate-700">
+                                    <div className={cellClass} title={task.projectName}>{task.projectName}</div>
                                     {task.currentUpdates && (
-                                        <div
+                                        <Tooltip
+                                            content={task.currentUpdates}
                                             className="text-[10px] text-indigo-600 font-medium mt-0.5 cursor-help w-fit"
-                                            title={task.currentUpdates}
                                         >
                                             Current updates
-                                        </div>
+                                        </Tooltip>
                                     )}
                                 </td>
 

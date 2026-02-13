@@ -93,15 +93,40 @@
 
   /* Buttons */
   .btn {
-    @apply inline-flex items-center justify-center px-4 py-2 rounded-lg font-medium transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm shadow-sm;
+    @apply inline-flex items-center justify-center px-4 py-2 rounded-lg font-medium transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm shadow-sm btn-uiverse;
   }
 
   .btn-primary {
-    @apply bg-yellow-500 text-white hover:bg-yellow-600 border border-transparent;
+    /* Yellow Theme */
+    --uib-bg: #F59E0B;
+    /* Yellow-500 */
+    --uib-color: #ffffff;
+    --uib-wave: #d97706;
+    /* Yellow-600 */
+    --uib-hover-text: #ffffff;
+    --uib-border: #F59E0B;
+    --uib-shadow-1: #d97706;
+    /* Darker yellow shadow */
+    --uib-shadow-2: #fcd34d;
+    /* Lighter yellow highlight */
+
+    @apply border-transparent;
   }
 
   .btn-secondary {
-    @apply bg-white text-slate-600 hover:bg-slate-50 border border-slate-200;
+    /* Grey Theme */
+    --uib-bg: #f8fafc;
+    /* Slate-50 */
+    --uib-color: #475569;
+    /* Slate-600 */
+    --uib-wave: #F59E0B;
+    /* Yellow-500 */
+    --uib-hover-text: #ffffff;
+    --uib-border: #e2e8f0;
+    /* Slate-200 */
+    --uib-shadow-1: #cbd5e1;
+    /* Slate-300 */
+    --uib-shadow-2: #ffffff;
   }
 
   /* Tables */
@@ -418,4 +443,231 @@
 
 .close-btn-wrapper:hover .close-btn-inner {
   transform: scale(0.75);
+}
+
+/* Custom Tooltip Style */
+.tooltip-container {
+  --background: #333333;
+  --color: #e8e8e8;
+  position: relative;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+  font-weight: 600;
+  color: var(--color);
+  padding: 0.3em 0.8em;
+  /* Adjusted padding for compactness */
+  border-radius: 8px;
+  text-transform: uppercase;
+  display: inline-grid;
+  /* Changed from grid to inline-grid */
+  place-items: center;
+  border: 2px solid var(--color);
+}
+
+.tooltip-container .text {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  transform-origin: -100%;
+  transform: scale(1);
+  transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.tooltip-container span:last-child {
+  position: absolute;
+  top: 0%;
+  left: 100%;
+  width: 100%;
+  height: 100%;
+  border-radius: 8px;
+  opacity: 1;
+  background-color: var(--background);
+  z-index: -1;
+  border: 2px solid var(--background);
+  transform: scale(0);
+  transform-origin: 0;
+  transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+  display: grid;
+  place-items: center;
+}
+
+.tooltip-container .tooltip {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0.3em 0.6em;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+  background: var(--background);
+  z-index: 10;
+  border-radius: 8px;
+  scale: 0;
+  transform-origin: 0 0;
+  text-transform: none;
+  /* Allow normal case */
+  font-weight: 400;
+  font-size: 14px;
+  /* Reduced from 16px */
+  box-shadow: rgba(0, 0, 0, 0.25) 0 8px 15px;
+  white-space: nowrap;
+  /* Prevent wrapping initially */
+  min-width: max-content;
+}
+
+.tooltip-container .tooltip::before {
+  position: absolute;
+  content: "";
+  height: 0.6em;
+  width: 0.6em;
+  bottom: -0.2em;
+  left: 50%;
+  transform: translate(-50%) rotate(45deg);
+  background: var(--background);
+}
+
+.tooltip-container:hover .tooltip {
+  top: -120%;
+  /* Moved up slightly more */
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  scale: 1;
+  animation: shake 0.5s ease-in-out both;
+}
+
+.tooltip-container:hover {
+  box-shadow: rgba(0, 0, 0, 0.25) 0 8px 15px;
+  color: white;
+  border-color: transparent;
+}
+
+.tooltip-container:hover span:last-child {
+  transform: scale(1);
+  left: 0;
+}
+
+.tooltip-container:hover .text {
+  opacity: 0;
+  top: 0%;
+  left: 100%;
+  transform: scale(0);
+}
+
+@keyframes shake {
+  0% {
+    rotate: 0;
+  }
+
+  25% {
+    rotate: 7deg;
+  }
+
+  50% {
+    rotate: -7deg;
+  }
+
+  75% {
+    rotate: 1deg;
+  }
+
+  100% {
+    rotate: 0;
+  }
+}
+
+/* Uiverse Button Base Styles */
+.btn-uiverse {
+  /* Default variables (Grey Theme fallback) */
+  --uib-bg: #e8e8e8;
+  --uib-color: #090909;
+  --uib-wave: #F59E0B;
+  /* Yellow wave by default */
+  --uib-hover-text: #ffffff;
+  --uib-border: #e8e8e8;
+  --uib-shadow-1: #c5c5c5;
+  --uib-shadow-2: #ffffff;
+
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+  color: var(--uib-color);
+  background: var(--uib-bg);
+  border: 1px solid var(--uib-border);
+  box-shadow: 6px 6px 12px var(--uib-shadow-1), -6px -6px 12px var(--uib-shadow-2);
+  transition: all 0.2s ease-in;
+}
+
+.btn-uiverse:active {
+  color: #666;
+  box-shadow: inset 4px 4px 12px var(--uib-shadow-1), inset -4px -4px 12px var(--uib-shadow-2);
+}
+
+.btn-uiverse:before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%) scaleY(1) scaleX(1.25);
+  top: 100%;
+  width: 140%;
+  height: 180%;
+  background-color: rgba(0, 0, 0, 0.05);
+  border-radius: 50%;
+  display: block;
+  transition: all 0.5s 0.1s cubic-bezier(0.55, 0, 0.1, 1);
+  z-index: -1;
+}
+
+.btn-uiverse:after {
+  content: "";
+  position: absolute;
+  left: 55%;
+  transform: translateX(-50%) scaleY(1) scaleX(1.45);
+  top: 180%;
+  width: 160%;
+  height: 190%;
+  background-color: var(--uib-wave);
+  border-radius: 50%;
+  display: block;
+  transition: all 0.5s 0.1s cubic-bezier(0.55, 0, 0.1, 1);
+  z-index: -1;
+}
+
+.btn-uiverse:hover {
+  color: var(--uib-hover-text);
+  border-color: var(--uib-wave);
+}
+
+/* Fix for icons inside buttons getting lost */
+.btn-uiverse:hover svg {
+  color: var(--uib-hover-text);
+}
+
+.btn-uiverse:hover:before {
+  top: -35%;
+  background-color: var(--uib-wave);
+  transform: translateX(-50%) scaleY(1.3) scaleX(0.8);
+}
+
+.btn-uiverse:hover:after {
+  top: -45%;
+  background-color: var(--uib-wave);
+  transform: translateX(-50%) scaleY(1.3) scaleX(0.8);
+}
+/* Destructive Button (Red Theme) */
+.btn-destructive {
+  --uib-bg: #ef4444; /* Red-500 */
+  --uib-color: #ffffff;
+  --uib-wave: #b91c1c; /* Red-700 */
+  --uib-hover-text: #ffffff;
+  --uib-border: #ef4444;
+  --uib-shadow-1: #b91c1c;
+  --uib-shadow-2: #fca5a5;
+  
+  border-color: transparent;
 }
