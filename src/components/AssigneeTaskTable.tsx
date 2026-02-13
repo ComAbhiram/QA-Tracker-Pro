@@ -292,23 +292,6 @@ export default function AssigneeTaskTable({ assignee, tasks, leaves, columnWidth
                                 <td className="px-2 py-1 border-r border-slate-200 font-medium text-slate-700">
                                     <div className={cellClass} title={task.projectName}>{task.projectName}</div>
                                     {task.currentUpdates && (
-import SimpleTooltip from '@/components/ui/SimpleTooltip';
-
-                                    // ... (existing imports, but I need to be careful with replace_file_content context range)
-
-                                    // I will do two edits. One for import (if I can scope it), one for usage.
-                                    // Since I can't do multiple replace chunks easily if they are far apart in one call unless I match context?
-                                    // Actually I can do 2 separate calls or one large replace if I view the file again?
-                                    // I already viewed the file.
-                                    // The import is at line 30.
-                                    // The usage is at line 294.
-
-                                    // Let's do usage first. Check imports later or add to the top using a separate call.
-                                    // Wait, I need to add import.
-
-                                    // Usage change:
-                                    // Change line 294-300
-                                    {task.currentUpdates && (
                                         <SimpleTooltip
                                             content={task.currentUpdates}
                                             className="mt-0.5 cursor-help"
