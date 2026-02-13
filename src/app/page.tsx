@@ -9,7 +9,7 @@ import DailyReportsModal from '@/components/DailyReportsModal';
 import TaskModal from '@/components/TaskModal';
 import Pagination from '@/components/Pagination';
 import GlobalAvailabilityModal from '@/components/GlobalAvailabilityModal';
-import { Plus, FileText, Layers, Edit2, Search, CalendarClock, CheckCircle2, Circle, Cloud, PauseCircle, Clock, XCircle } from 'lucide-react';
+import { Plus, FileText, Layers, Edit2, Search, CalendarClock, CheckCircle2, Circle, Cloud, PauseCircle, Clock, XCircle, PlayCircle } from 'lucide-react';
 import { useGuestMode } from '@/contexts/GuestContext';
 import TaskMigration from '@/components/TaskMigration';
 import ResizableHeader from '@/components/ui/ResizableHeader';
@@ -500,7 +500,7 @@ export default function Home() {
                       <td className="px-3 py-2 border-r border-slate-100">
                         {(() => {
                           switch (task.status) {
-                            case 'In Progress': return <div className="flex items-center gap-1.5 text-blue-700 font-medium text-xs"><Loader size="xs" color="#1d4ed8" /> In Progress</div>;
+                            case 'In Progress': return <div className="flex items-center gap-1.5 text-blue-700 font-medium text-xs"><PlayCircle size={12} /> In Progress</div>;
                             case 'Completed': return <div className="flex items-center gap-1.5 text-emerald-700 font-medium text-xs"><CheckCircle2 size={12} /> Completed</div>;
                             case 'Yet to Start': return <div className="flex items-center gap-1.5 text-slate-500 font-medium text-xs"><Circle size={12} /> Yet to Start</div>;
                             case 'Forecast': return <div className="flex items-center gap-1.5 text-violet-600 font-medium text-xs"><Cloud size={12} /> Forecast</div>;
