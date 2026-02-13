@@ -265,19 +265,18 @@ export default function AssigneeTaskTable({ assignee, tasks, leaves, columnWidth
             {/* Table */}
             <div className="overflow-x-visible pb-0"> {/* Allow dropdowns to overflow if needed, but table-layout fixed handles most */}
                 <table className="w-full text-xs text-slate-800 border-collapse table-fixed border border-slate-200">
-                    <colgroup>
-
-                        <col style={{ width: columnWidths.priority }} />
-                        <col style={{ width: columnWidths.subPhase }} />
-                        <col style={{ width: columnWidths.pc }} />
-                        <col style={{ width: columnWidths.status }} />
-                        <col style={{ width: columnWidths.startDate }} />
-                        <col style={{ width: columnWidths.endDate }} />
-                        <col style={{ width: columnWidths.actualCompletionDate }} />
-                        <col style={{ width: columnWidths.comments }} />
-                        <col style={{ width: columnWidths.deviation }} />
-                        <col style={{ width: columnWidths.sprint }} />
-                    </colgroup>
+                    <col style={{ width: columnWidths.projectName }} />
+                    <col style={{ width: columnWidths.projectType }} />
+                    <col style={{ width: columnWidths.priority }} />
+                    <col style={{ width: columnWidths.subPhase }} />
+                    <col style={{ width: columnWidths.pc }} />
+                    <col style={{ width: columnWidths.status }} />
+                    <col style={{ width: columnWidths.startDate }} />
+                    <col style={{ width: columnWidths.endDate }} />
+                    <col style={{ width: columnWidths.actualCompletionDate }} />
+                    <col style={{ width: columnWidths.comments }} />
+                    <col style={{ width: columnWidths.deviation }} />
+                    <col style={{ width: columnWidths.sprint }} />
 
                     {!hideHeader && (
                         <thead>
