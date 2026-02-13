@@ -5,7 +5,8 @@ import {
     PauseCircle,
     Clock,
     XCircle,
-    PlayCircle
+    PlayCircle,
+    Code2
 } from 'lucide-react';
 import Loader from '@/components/ui/Loader';
 
@@ -25,8 +26,9 @@ export const StatusBadge = ({ status, className = "", size = 13 }: StatusBadgePr
 
     switch (status) {
         case 'In Progress':
-        case 'Being Developed':
             return content(<PlayCircle size={size} />, 'text-blue-700');
+        case 'Being Developed':
+            return content(<Code2 size={size} />, 'text-blue-700');
         case 'Completed':
             return content(<CheckCircle2 size={size} />, 'text-emerald-700');
         case 'Yet to Start':
