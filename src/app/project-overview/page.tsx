@@ -11,6 +11,7 @@ import { supabase } from '@/lib/supabase';
 import { mapTaskFromDB, Task } from '@/lib/types'; // Import types and mapper
 import { useGuestMode } from '@/contexts/GuestContext';
 import TaskMigration from '@/components/TaskMigration';
+import Checkbox from '@/components/ui/Checkbox';
 
 interface ProjectOverview {
     id: string;
@@ -450,13 +451,11 @@ export default function ProjectOverviewPage() {
 
                         <div className="flex items-center gap-2">
                             <label className="flex items-center gap-2 text-sm font-semibold text-slate-700 cursor-pointer select-none">
-                                <input
-                                    type="checkbox"
+                                <Checkbox
                                     checked={filterAssignedOnly}
-                                    onChange={(e) => setFilterAssignedOnly(e.target.checked)}
-                                    className="w-4 h-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500"
+                                    onChange={(checked) => setFilterAssignedOnly(checked)}
+                                    label="Assigned Only"
                                 />
-                                Assigned Only
                             </label>
                         </div>
 

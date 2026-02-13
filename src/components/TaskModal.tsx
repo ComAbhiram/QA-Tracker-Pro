@@ -5,6 +5,7 @@ import { X, Save, Calendar, User, Briefcase, Activity, Layers, Plus } from 'luci
 import { Task } from '@/lib/types';
 import { supabase } from '@/lib/supabase';
 import Combobox from './ui/Combobox';
+import Checkbox from './ui/Checkbox';
 import { getHubstaffNameFromQA } from '@/lib/hubstaff-name-mapping';
 import { useGuestMode } from '@/contexts/GuestContext';
 import { useToast } from '@/contexts/ToastContext';
@@ -721,26 +722,20 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
                         <div className="space-y-3">
                             <label className="text-sm font-semibold text-slate-700 block">Weekend Schedule</label>
                             <div className="flex gap-4">
-                                <label className="flex items-center gap-2 cursor-pointer bg-slate-50 px-4 py-3 rounded-xl border border-slate-200 hover:bg-slate-100 transition-colors flex-1 justify-center">
-                                    <input
-                                        type="checkbox"
-                                        name="includeSaturday"
+                                <div className="flex items-center gap-2 cursor-pointer bg-slate-50 px-4 py-3 rounded-xl border border-slate-200 hover:bg-slate-100 transition-colors flex-1 justify-center">
+                                    <Checkbox
                                         checked={formData.includeSaturday || false}
-                                        onChange={handleChange}
-                                        className="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500 border-gray-300"
+                                        onChange={(checked) => setFormData(prev => ({ ...prev, includeSaturday: checked }))}
+                                        label="Work Saturday"
                                     />
-                                    <span className="text-sm font-medium text-slate-700">Work Saturday</span>
-                                </label>
-                                <label className="flex items-center gap-2 cursor-pointer bg-slate-50 px-4 py-3 rounded-xl border border-slate-200 hover:bg-slate-100 transition-colors flex-1 justify-center">
-                                    <input
-                                        type="checkbox"
-                                        name="includeSunday"
+                                </div>
+                                <div className="flex items-center gap-2 cursor-pointer bg-slate-50 px-4 py-3 rounded-xl border border-slate-200 hover:bg-slate-100 transition-colors flex-1 justify-center">
+                                    <Checkbox
                                         checked={formData.includeSunday || false}
-                                        onChange={handleChange}
-                                        className="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500 border-gray-300"
+                                        onChange={(checked) => setFormData(prev => ({ ...prev, includeSunday: checked }))}
+                                        label="Work Sunday"
                                     />
-                                    <span className="text-sm font-medium text-slate-700">Work Sunday</span>
-                                </label>
+                                </div>
                             </div>
                         </div>
 
