@@ -437,7 +437,7 @@ export default function Tracker() {
 
                 {/* Manager Mode Team Selector */}
                 {isGuest && teams.length > 0 && (
-                    <div className="flex-1 flex justify-center order-last xl:order-none w-full xl:w-auto mt-4 xl:mt-0">
+                    <div className="flex-1 flex justify-center order-last xl:order-none w-full xl:w-auto mt-4 xl:mt-0 min-w-0 mx-4">
                         <TeamSelectorPill
                             teams={teams}
                             selectedTeamName={selectedTeamName}
@@ -446,7 +446,7 @@ export default function Tracker() {
                     </div>
                 )}
 
-                <div className="flex flex-wrap items-center gap-3">
+                <div className="flex items-center gap-3 flex-shrink-0">
                     {/* Search Box - Light Styling */}
                     <div className="relative">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
