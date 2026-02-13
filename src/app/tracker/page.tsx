@@ -407,7 +407,7 @@ export default function Tracker() {
                     <DatePicker
                         date={dateFilter}
                         setDate={setDateFilter}
-                        className="w-[140px] bg-white text-slate-700 border-slate-200 h-[34px] px-3 text-xs shadow-sm hover:bg-slate-50"
+                        className="w-[140px] bg-white text-slate-700 border border-slate-200 min-h-0 py-2 px-3 text-xs shadow-sm hover:bg-slate-50 rounded-md"
                         placeholder="Filter by date"
                     />
 
