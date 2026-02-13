@@ -422,10 +422,24 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
             };
 
             // Group tasks by assignee (primary assignee)
+            // Fix: Include second assignee and additional assignees
             const groupedTasks = todayTasks.reduce((acc, task) => {
-                const assignee = task.assignedTo || 'Unassigned';
-                if (!acc[assignee]) acc[assignee] = [];
-                acc[assignee].push(task);
+                const assignees = new Set<string>();
+                if (task.assignedTo) assignees.add(task.assignedTo);
+                if (task.assignedTo2) assignees.add(task.assignedTo2);
+                if (Array.isArray(task.additionalAssignees)) {
+                    task.additionalAssignees.forEach(a => { if (a) assignees.add(a); });
+                }
+
+                if (assignees.size === 0) {
+                    if (!acc['Unassigned']) acc['Unassigned'] = [];
+                    acc['Unassigned'].push(task);
+                } else {
+                    assignees.forEach(assignee => {
+                        if (!acc[assignee]) acc[assignee] = [];
+                        acc[assignee].push(task);
+                    });
+                }
                 return acc;
             }, {} as Record<string, typeof todayTasks>);
 
