@@ -29,7 +29,8 @@ import {
     Folder,
     FolderKanban,
     Users,
-    PauseCircle
+    PauseCircle,
+    Bug
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useGuestMode } from '@/contexts/GuestContext';
@@ -155,6 +156,10 @@ export function Sidebar() {
                 { label: 'Reports', icon: <BarChart3 size={18} />, href: '/reports' },
                 { label: 'Analytics', icon: <Search size={18} />, href: '/analytics' },
                 { label: 'Hubstaff', icon: <Calendar size={18} />, href: '/attendance' },
+                ...((isGuest && selectedTeamName === 'QA Team') || (!isGuest && sidebarTitle === 'QA Team')
+                    ? [{ label: 'Bugs Report', icon: <Bug size={18} />, href: '/analytics/bugs' }]
+                    : []
+                ),
             ]
         },
         requests: {
