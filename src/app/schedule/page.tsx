@@ -752,7 +752,7 @@ export default function Schedule() {
                                                         ) : (
                                                             <>
                                                                 {/* Map status to white icon for badge */}
-                                                                {statusInfo.status === 'In Progress' && <Loader size="xs" color="white" />}
+                                                                {(statusInfo.status === 'In Progress' || statusInfo.status === 'Being Developed') && <PlayCircle size={12} className="text-white" />}
                                                                 {statusInfo.status === 'Forecast' && <Cloud size={12} className="text-white" />}
                                                                 {statusInfo.status === 'Completed' && <CheckCircle2 size={12} className="text-white" />}
                                                                 {statusInfo.status.includes('QA') && <Clock size={12} className="text-white" />}
