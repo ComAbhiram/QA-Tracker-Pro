@@ -9,7 +9,7 @@ import { getEffectiveStatus } from '@/utils/taskUtils';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, isToday, isWeekend, addMonths, subMonths, addDays, subDays } from 'date-fns';
 import {
     ChevronLeft, ChevronRight, Calendar as CalendarIcon, List, Clock, User, AlertCircle, Plus, Table2, LayoutGrid,
-    CheckCircle2, Circle, PauseCircle, Cloud, XCircle
+    CheckCircle2, Circle, PauseCircle, Cloud, XCircle, PlayCircle
 } from 'lucide-react';
 import TaskModal from '@/components/TaskModal';
 import Loader from '@/components/ui/Loader';
