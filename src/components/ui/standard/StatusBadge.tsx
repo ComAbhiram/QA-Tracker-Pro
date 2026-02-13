@@ -4,7 +4,8 @@ import {
     Cloud,
     PauseCircle,
     Clock,
-    XCircle
+    XCircle,
+    PlayCircle
 } from 'lucide-react';
 import Loader from '@/components/ui/Loader';
 
@@ -20,7 +21,7 @@ export const StatusBadge = ({ status, className = "", size = 13 }: StatusBadgePr
         case 'Being Developed':
             return (
                 <div className={`flex items-center gap-1.5 text-blue-700 font-medium ${className}`}>
-                    <Loader size="xs" color="#1d4ed8" /> {status}
+                    <PlayCircle size={size} /> {status}
                 </div>
             );
         case 'Completed':

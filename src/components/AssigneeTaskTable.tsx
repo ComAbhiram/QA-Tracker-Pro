@@ -266,9 +266,7 @@ export default function AssigneeTaskTable({ assignee, tasks, leaves, columnWidth
             <div className="overflow-x-visible pb-0"> {/* Allow dropdowns to overflow if needed, but table-layout fixed handles most */}
                 <table className="w-full text-xs text-slate-800 border-collapse table-fixed border border-slate-200">
                     <colgroup>
-                        <col style={{ width: columnWidths.projectName }} />
-                        <col style={{ width: columnWidths.currentUpdates }} /> {/* Added Current Update Col */}
-                        <col style={{ width: columnWidths.projectType }} />
+
                         <col style={{ width: columnWidths.priority }} />
                         <col style={{ width: columnWidths.subPhase }} />
                         <col style={{ width: columnWidths.pc }} />
@@ -302,17 +300,10 @@ export default function AssigneeTaskTable({ assignee, tasks, leaves, columnWidth
                                 className="group hover:bg-slate-50 cursor-pointer transition-colors"
                             >
                                 <td className={`px-2 py-1 border-r border-slate-200 font-medium text-slate-700 ${cellClass}`} title={task.projectName}>
-                                    {task.projectName}
-                                </td>
-
-                                {/* Current Updates - Editable */}
-                                <td className={`px-2 py-1 border-r border-slate-200 text-slate-600 ${cellClass}`} title={task.currentUpdates || ''} onClick={e => e.stopPropagation()}>
-                                    <EditableCell
-                                        value={task.currentUpdates}
-                                        onSave={(val) => onFieldUpdate(task.id, 'current_updates', val)}
-                                        className="w-full"
-                                        isExpanded={isRowExpanded}
-                                    />
+                                    <div>{task.projectName}</div>
+                                    {task.currentUpdates && (
+                                        <div className="text-[10px] text-slate-500 font-normal mt-0.5 leading-tight">{task.currentUpdates}</div>
+                                    )}
                                 </td>
 
                                 <td className={`px-2 py-1 border-r border-slate-200 text-slate-500 ${cellClass}`}>{task.projectType || '-'}</td>
