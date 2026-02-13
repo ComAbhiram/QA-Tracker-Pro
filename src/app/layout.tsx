@@ -7,6 +7,7 @@ import { ToastProvider } from "@/contexts/ToastContext";
 import GuestBanner from "@/components/GuestBanner";
 import AIChatAssistant from "@/components/AIChatAssistant";
 import { Toaster } from "@/components/ui/sonner";
+import BackToTop from "@/components/ui/BackToTop";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -43,6 +44,7 @@ export default function RootLayout({
                 </footer>
               </main>
               <AIChatAssistant />
+              <BackToTop />
               <Toaster />
             </div>
           </ToastProvider>
