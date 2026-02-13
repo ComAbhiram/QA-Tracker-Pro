@@ -162,7 +162,7 @@ export default function ForecastProjects() {
                 let bValue: any = b[key];
 
                 // Special handling for dates to keep nulls last
-                if (key === 'startDate' || key === 'endDate' || key === 'created_at') {
+                if (key === 'startDate' || key === 'endDate' || key === 'createdAt') {
                     const dateA = aValue ? new Date(aValue).getTime() : (sortConfig.direction === 'asc' ? Number.MAX_SAFE_INTEGER : -1);
                     const dateB = bValue ? new Date(bValue).getTime() : (sortConfig.direction === 'asc' ? Number.MAX_SAFE_INTEGER : -1);
                     return sortConfig.direction === 'asc' ? dateA - dateB : dateB - dateA;
