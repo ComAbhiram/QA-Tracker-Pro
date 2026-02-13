@@ -28,6 +28,7 @@ interface AssigneeTaskTableProps {
     leaves: Leave[];
     columnWidths: Record<string, number>;
     hideHeader?: boolean;
+    isRowExpanded?: boolean;
     onEditTask: (task: Task) => void;
     onResizeStart?: (key: string, e: React.MouseEvent) => void;
     // Generalized update handler for inline edits
@@ -37,7 +38,7 @@ interface AssigneeTaskTableProps {
 type SortKey = 'projectName' | 'projectType' | 'priority' | 'subPhase' | 'pc' | 'status' | 'startDate' | 'endDate' | 'actualCompletionDate' | 'deviation';
 
 // Simple editable cell for inline text edits
-const EditableCell = ({ value, onSave, className, type = 'text', options = [] }: { value: string | number | null, onSave: (val: string) => void, className?: string, type?: 'text' | 'select' | 'textarea', options?: string[] }) => {
+const EditableCell = ({ value, onSave, className, type = 'text', options = [], isExpanded = false }: { value: string | number | null, onSave: (val: string) => void, className?: string, type?: 'text' | 'select' | 'textarea', options?: string[], isExpanded?: boolean }) => {
     const [isEditing, setIsEditing] = useState(false);
     const [tempValue, setTempValue] = useState(value?.toString() || '');
     const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>(null);
@@ -123,7 +124,7 @@ const EditableCell = ({ value, onSave, className, type = 'text', options = [] }:
                 e.stopPropagation();
                 setIsEditing(true);
             }}
-            className={`cursor-pointer hover:bg-slate-100 min-h-[20px] rounded px-1 py-0.5 truncate transition-colors border border-transparent hover:border-slate-200 ${className}`}
+            className={`cursor-pointer hover:bg-slate-100 min-h-[20px] rounded px-1 py-0.5 transition-colors border border-transparent hover:border-slate-200 ${isExpanded ? 'whitespace-normal break-words' : 'truncate'} ${className}`}
             title={value?.toString() || 'Click to edit'}
         >
             {value || <span className="opacity-0 group-hover:opacity-30">-</span>}
@@ -178,7 +179,7 @@ const StatusSelectCell = ({ status, onSave }: { status: string, onSave: (val: st
 };
 
 
-export default function AssigneeTaskTable({ assignee, tasks, leaves, columnWidths, hideHeader = false, onEditTask, onFieldUpdate, onResizeStart }: AssigneeTaskTableProps) {
+export default function AssigneeTaskTable({ assignee, tasks, leaves, columnWidths, hideHeader = false, isRowExpanded = false, onEditTask, onFieldUpdate, onResizeStart }: AssigneeTaskTableProps) {
     const [currentPage, setCurrentPage] = useState(1);
     const [sortConfig, setSortConfig] = useState<{ key: SortKey; direction: 'asc' | 'desc' } | null>(null);
     const itemsPerPage = 10;
@@ -234,6 +235,9 @@ export default function AssigneeTaskTable({ assignee, tasks, leaves, columnWidth
     };
     const headerColorClass = getHeaderColor(assignee);
     const availabilityDate = calculateAvailability(tasks, leaves);
+
+    // Dynamic Class for Cells
+    const cellClass = isRowExpanded ? "whitespace-normal break-words" : "truncate";
 
     return (
         <div className="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden mb-2">
@@ -297,20 +301,21 @@ export default function AssigneeTaskTable({ assignee, tasks, leaves, columnWidth
                                 onClick={() => onEditTask(task)}
                                 className="group hover:bg-slate-50 cursor-pointer transition-colors"
                             >
-                                <td className="px-2 py-1 truncate border-r border-slate-200 font-medium text-slate-700" title={task.projectName}>
+                                <td className={`px-2 py-1 border-r border-slate-200 font-medium text-slate-700 ${cellClass}`} title={task.projectName}>
                                     {task.projectName}
                                 </td>
 
                                 {/* Current Updates - Editable */}
-                                <td className="px-2 py-1 truncate border-r border-slate-200 text-slate-600" title={task.currentUpdates || ''} onClick={e => e.stopPropagation()}>
+                                <td className={`px-2 py-1 border-r border-slate-200 text-slate-600 ${cellClass}`} title={task.currentUpdates || ''} onClick={e => e.stopPropagation()}>
                                     <EditableCell
                                         value={task.currentUpdates}
                                         onSave={(val) => onFieldUpdate(task.id, 'current_updates', val)}
                                         className="w-full"
+                                        isExpanded={isRowExpanded}
                                     />
                                 </td>
 
-                                <td className="px-2 py-1 truncate border-r border-slate-200 text-slate-500">{task.projectType || '-'}</td>
+                                <td className={`px-2 py-1 border-r border-slate-200 text-slate-500 ${cellClass}`}>{task.projectType || '-'}</td>
 
                                 <td className="px-2 py-1 truncate border-r border-slate-200">
                                     <div className="transform scale-90 origin-left">
@@ -318,8 +323,8 @@ export default function AssigneeTaskTable({ assignee, tasks, leaves, columnWidth
                                     </div>
                                 </td>
 
-                                <td className="px-2 py-1 truncate border-r border-slate-200 text-slate-600" title={task.subPhase || ''}>{task.subPhase || '-'}</td>
-                                <td className="px-2 py-1 truncate border-r border-slate-200 text-slate-600">{task.pc || '-'}</td>
+                                <td className={`px-2 py-1 border-r border-slate-200 text-slate-600 ${cellClass}`} title={task.subPhase || ''}>{task.subPhase || '-'}</td>
+                                <td className={`px-2 py-1 border-r border-slate-200 text-slate-600 ${cellClass}`}>{task.pc || '-'}</td>
 
                                 {/* Status - Editable Select */}
                                 <td className="px-2 py-1 border-r border-slate-200" onClick={e => e.stopPropagation()}>
@@ -358,22 +363,25 @@ export default function AssigneeTaskTable({ assignee, tasks, leaves, columnWidth
                                 </td>
 
                                 {/* Comments - Editable */}
-                                <td className="px-2 py-1 truncate border-r border-slate-200 text-slate-600" title={task.comments || ''} onClick={e => e.stopPropagation()}>
+                                <td className={`px-2 py-1 border-r border-slate-200 text-slate-600 ${cellClass}`} title={task.comments || ''} onClick={e => e.stopPropagation()}>
                                     <EditableCell
                                         value={task.comments}
                                         onSave={(val) => onFieldUpdate(task.id, 'comments', val)}
                                         className="w-full"
+                                        isExpanded={isRowExpanded}
                                     />
                                 </td>
 
                                 {/* Deviation - Editable */}
-                                <td className="px-2 py-1 truncate border-r border-slate-200 text-slate-600" onClick={e => e.stopPropagation()}>
+                                <td className={`px-2 py-1 border-r border-slate-200 text-slate-600 ${cellClass}`} onClick={e => e.stopPropagation()}>
                                     <EditableCell
                                         value={task.deviation}
                                         onSave={(val) => onFieldUpdate(task.id, 'deviation', val)}
                                         className="w-full text-center"
+                                        isExpanded={isRowExpanded}
                                     />
                                 </td>
+
 
                                 <td className="px-2 py-1 truncate text-center text-slate-600">
                                     {task.sprintLink ? (
