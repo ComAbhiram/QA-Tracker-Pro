@@ -387,7 +387,7 @@ export default function Tracker() {
             <header className="flex flex-col xl:flex-row xl:items-center justify-between gap-6 mb-4">
                 <div>
                     <h1 className="text-3xl font-bold text-slate-800">Task Tracker</h1>
-                    <p className="text-slate-500">Track all active QA tasks by assignee</p>
+                    <p className="text-slate-500">Track all active tasks</p>
                 </div>
 
                 <div className="flex flex-wrap items-center gap-3">
