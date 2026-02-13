@@ -12,12 +12,11 @@ import { useToast } from '@/contexts/ToastContext';
 import { DatePicker } from '@/components/DatePicker';
 import useColumnResizing from '@/hooks/useColumnResizing';
 import ResizableHeader from '@/components/ui/ResizableHeader';
-
-// ... existing imports
 import CloseButton from '@/components/ui/CloseButton';
+import TeamSelectorPill from '@/components/ui/TeamSelectorPill';
 
 export default function Tracker() {
-    const { isGuest, selectedTeamId, isLoading: isGuestLoading } = useGuestMode();
+    const { isGuest, selectedTeamId, selectedTeamName, setGuestSession, isLoading: isGuestLoading } = useGuestMode();
     const [tasks, setTasks] = useState<Task[]>([]);
     const [leaves, setLeaves] = useState<Leave[]>([]);
     const [loading, setLoading] = useState(true);
@@ -34,7 +33,11 @@ export default function Tracker() {
 
     const { success, error: toastError } = useToast();
     const [viewMode, setViewMode] = useState<'active' | 'forecast'>('active');
-    const [isRowExpanded, setIsRowExpanded] = useState(false); // New State
+    const [isRowExpanded, setIsRowExpanded] = useState(false);
+
+    // Team Selector State (Manager Mode)
+    interface Team { id: string; name: string; }
+    const [teams, setTeams] = useState<Team[]>([]);
 
     // Column Resizing (Lifted State)
     const { columnWidths, startResizing } = useColumnResizing({
@@ -51,6 +54,47 @@ export default function Tracker() {
         deviation: 60,
         sprint: 50
     });
+
+    // Fetch Teams for Manager Mode
+    useEffect(() => {
+        if (isGuest) {
+            const fetchTeams = async () => {
+                try {
+                    const { data, error } = await supabase.from('teams').select('id, name').order('name');
+                    if (error) throw error;
+                    if (data) {
+                        const filteredTeams = data.filter(team =>
+                            !['cochin', 'dubai'].includes(team.name.toLowerCase())
+                        );
+                        setTeams(filteredTeams);
+                    }
+                } catch (error) {
+                    console.error('Error fetching teams:', error);
+                }
+            };
+            fetchTeams();
+        }
+    }, [isGuest]);
+
+    const handleTeamSelect = (newTeamName: string) => {
+        const selectedTeam = teams.find(t => t.name === newTeamName);
+
+        if (selectedTeam) {
+            let targetTeamId = selectedTeam.id;
+
+            // QA Team -> Super Admin mapping logic (Mirrors Sidebar logic)
+            if (newTeamName.toLowerCase() === 'qa team') {
+                const superAdminTeam = teams.find(t => t.name.toLowerCase() === 'super admin');
+                if (superAdminTeam) {
+                    targetTeamId = superAdminTeam.id;
+                }
+            }
+
+            setGuestSession(targetTeamId, newTeamName);
+            // Force reload to ensure context updates propogate clean
+            window.location.reload();
+        }
+    };
 
     // Fetch ALL active tasks (no pagination in query)
     useEffect(() => {
@@ -390,6 +434,17 @@ export default function Tracker() {
                     <h1 className="text-3xl font-bold text-slate-800">Task Tracker</h1>
                     <p className="text-slate-500">Track all active tasks</p>
                 </div>
+
+                {/* Manager Mode Team Selector */}
+                {isGuest && teams.length > 0 && (
+                    <div className="flex-1 flex justify-center order-last xl:order-none w-full xl:w-auto mt-4 xl:mt-0">
+                        <TeamSelectorPill
+                            teams={teams}
+                            selectedTeamName={selectedTeamName}
+                            onSelect={handleTeamSelect}
+                        />
+                    </div>
+                )}
 
                 <div className="flex flex-wrap items-center gap-3">
                     {/* Search Box - Light Styling */}
