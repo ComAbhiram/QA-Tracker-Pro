@@ -11,17 +11,16 @@ export default function Loader({ className, size = 'md', color }: LoaderProps) {
     // Use style to handle custom color if provided, otherwise default to CSS class color
     const style = color ? { color } : undefined;
 
-    // Map size prop to scale
-    // xs: ~15px (0.25)
-    // sm: ~30px (0.5)
-    // md: ~60px (1)
-    // lg: ~90px (1.5)
+    // Map size prop to width
+    // xs: 15px
+    // sm: 30px
+    // md: 60px
+    // lg: 90px
 
-    const scale = size === 'xs' ? 0.25 : size === 'sm' ? 0.5 : size === 'lg' ? 1.5 : 1;
+    const width = size === 'xs' ? '15px' : size === 'sm' ? '30px' : size === 'lg' ? '90px' : '60px';
     const sizeStyle = {
         ...style,
-        transform: `scale(${scale})`,
-        transformOrigin: 'center'
+        width,
     };
 
     return (
