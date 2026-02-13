@@ -145,7 +145,7 @@ export async function PUT(request: NextRequest) {
 
                 const emailPayload = {
                     taskId: id,
-                    taskName: task.phase || 'N/A',
+                    taskName: task.sub_phase || 'N/A',
                     projectName: task.project_name,
                     assignee: assigneeName,
                     teamName: teamName,
@@ -154,7 +154,7 @@ export async function PUT(request: NextRequest) {
                     newDate: startDateChanged ? updates.start_date : updates.end_date,
                     status: updates.status || task.status,
                     priority: task.priority,
-                    phase: task.phase,
+                    phase: task.sub_phase,
                     pc: task.pc
                 };
 
