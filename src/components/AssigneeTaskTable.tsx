@@ -301,7 +301,7 @@ export default function AssigneeTaskTable({ assignee, tasks, leaves, columnWidth
                                             </span>
                                         </SimpleTooltip>
                                     )}
-                                    )}
+
                                 </td>
 
                                 <td className={`px-2 py-1 border-r border-slate-200 text-slate-500 ${cellClass}`}>{task.projectType || '-'}</td>
