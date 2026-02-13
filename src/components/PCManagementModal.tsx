@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { X, Plus, Trash2, User, Loader2 } from 'lucide-react';
+import { X, Plus, Trash2, User } from 'lucide-react';
+import Loader from './ui/Loader';
 
 interface PC {
     id: number;
@@ -166,7 +167,7 @@ export default function PCManagementModal({ isOpen, onClose }: PCManagementModal
                             >
                                 {adding ? (
                                     <>
-                                        <Loader2 size={18} className="animate-spin" />
+                                        <Loader size="xs" color="white" />
                                         Adding...
                                     </>
                                 ) : (
@@ -187,7 +188,7 @@ export default function PCManagementModal({ isOpen, onClose }: PCManagementModal
 
                         {loading ? (
                             <div className="text-center py-8 text-slate-500">
-                                <Loader2 size={24} className="animate-spin mx-auto mb-2" />
+                                <div className="flex justify-center mb-2"><Loader size="md" /></div>
                                 Loading PCs...
                             </div>
                         ) : pcs.length === 0 ? (
@@ -214,7 +215,7 @@ export default function PCManagementModal({ isOpen, onClose }: PCManagementModal
                                         >
                                             {deleting === pc.id ? (
                                                 <>
-                                                    <Loader2 size={16} className="animate-spin" />
+                                                    <Loader size="xs" color="#dc2626" />
                                                     Deleting...
                                                 </>
                                             ) : (

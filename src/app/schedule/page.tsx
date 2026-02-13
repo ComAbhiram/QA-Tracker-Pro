@@ -9,9 +9,10 @@ import { getEffectiveStatus } from '@/utils/taskUtils';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, isToday, isWeekend, addMonths, subMonths, addDays, subDays } from 'date-fns';
 import {
     ChevronLeft, ChevronRight, Calendar as CalendarIcon, List, Clock, User, AlertCircle, Plus, Table2, LayoutGrid,
-    Loader2, CheckCircle2, Circle, PauseCircle, Cloud, XCircle
+    CheckCircle2, Circle, PauseCircle, Cloud, XCircle
 } from 'lucide-react';
 import TaskModal from '@/components/TaskModal';
+import Loader from '@/components/ui/Loader';
 
 import { useGuestMode } from '@/contexts/GuestContext';
 import { StatusBadge } from "@/components/ui/standard/StatusBadge";
@@ -21,7 +22,7 @@ import { StandardTableStyles } from "@/components/ui/standard/TableStyles";
 // Helper for Status Icons (consistent with AssigneeTaskTable)
 const getStatusIcon = (status: string, size: number = 14) => {
     switch (status) {
-        case 'In Progress': return <Loader2 size={size} className="animate-spin text-blue-600" />;
+        case 'In Progress': return <Loader size="xs" color="#2563eb" />;
         case 'Completed': return <CheckCircle2 size={size} className="text-emerald-600" />;
         case 'Yet to Start': return <Circle size={size} className="text-slate-500" />;
         case 'Forecast': return <Cloud size={size} className="text-violet-600" />;
@@ -37,10 +38,10 @@ const StatusLegend = () => (
     <div className="flex items-center gap-3 text-[10px] text-slate-600 bg-slate-50 px-3 py-2 rounded-lg border border-slate-200 mt-2 xl:mt-0 overflow-x-auto whitespace-nowrap max-w-full no-scrollbar">
         <span className="font-bold text-slate-700">Status Guide:</span>
         <div className="flex items-center gap-1.5 px-2 border-r border-slate-200 last:border-0"><Circle size={10} className="text-amber-500 fill-amber-500/20" /> Yet to Start</div>
-        <div className="flex items-center gap-1.5 px-2 border-r border-slate-200 last:border-0"><Loader2 size={10} className="text-blue-600" /> Being Developed</div>
+        <div className="flex items-center gap-1.5 px-2 border-r border-slate-200 last:border-0"><Loader size="xs" color="#2563eb" /> Being Developed</div>
         <div className="flex items-center gap-1.5 px-2 border-r border-slate-200 last:border-0"><Clock size={10} className="text-pink-600" /> Ready for QA</div>
         <div className="flex items-center gap-1.5 px-2 border-r border-slate-200 last:border-0"><Clock size={10} className="text-cyan-600" /> Assigned to QA</div>
-        <div className="flex items-center gap-1.5 px-2 border-r border-slate-200 last:border-0"><Loader2 size={10} className="text-blue-600 animate-spin" /> In Progress</div>
+        <div className="flex items-center gap-1.5 px-2 border-r border-slate-200 last:border-0"><Loader size="xs" color="#2563eb" /> In Progress</div>
         <div className="flex items-center gap-1.5 px-2 border-r border-slate-200 last:border-0"><PauseCircle size={10} className="text-slate-600" /> On Hold</div>
         <div className="flex items-center gap-1.5 px-2 border-r border-slate-200 last:border-0"><CheckCircle2 size={10} className="text-emerald-600" /> Completed</div>
         <div className="flex items-center gap-1.5 px-2 border-r border-slate-200 last:border-0"><Cloud size={10} className="text-violet-600" /> Forecast</div>
@@ -584,7 +585,7 @@ export default function Schedule() {
                                                     <div key={task.id} className={`text-[10px] px-2 py-1.5 rounded-md border text-slate-700 truncate font-semibold mb-1 transition-all hover:scale-[1.02] ${borderClass} flex items-center gap-1`}>
                                                         {/* Status Icon for Grid View */}
                                                         <span className="flex-shrink-0 opacity-70">
-                                                            {statusInfo.status === 'In Progress' && <Loader2 size={10} className="animate-spin" />}
+                                                            {statusInfo.status === 'In Progress' && <Loader size="xs" />}
                                                             {statusInfo.status === 'Completed' && <CheckCircle2 size={10} />}
                                                             {statusInfo.status === 'Forecast' && <Cloud size={10} />}
                                                             {statusInfo.status === 'Overdue' && <AlertCircle size={10} />}
@@ -751,7 +752,7 @@ export default function Schedule() {
                                                         ) : (
                                                             <>
                                                                 {/* Map status to white icon for badge */}
-                                                                {statusInfo.status === 'In Progress' && <Loader2 size={12} className="animate-spin text-white" />}
+                                                                {statusInfo.status === 'In Progress' && <Loader size="xs" color="white" />}
                                                                 {statusInfo.status === 'Forecast' && <Cloud size={12} className="text-white" />}
                                                                 {statusInfo.status === 'Completed' && <CheckCircle2 size={12} className="text-white" />}
                                                                 {statusInfo.status.includes('QA') && <Clock size={12} className="text-white" />}

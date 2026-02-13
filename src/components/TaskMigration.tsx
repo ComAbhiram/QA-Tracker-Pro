@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react';
-import { Upload, Download, Loader2, FileSpreadsheet } from 'lucide-react';
+import { Upload, Download, FileSpreadsheet } from 'lucide-react';
+import Loader from './ui/Loader';
 import * as XLSX from 'xlsx';
 import { useToast } from '@/contexts/ToastContext';
 import { useGuestMode } from '@/contexts/GuestContext';
@@ -240,7 +241,7 @@ export default function TaskMigration() {
                 className="flex items-center gap-2 px-3 py-2 bg-white border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50 hover:text-emerald-600 transition-colors disabled:opacity-50 text-sm font-medium"
                 title="Import Projects from CSV/Excel"
             >
-                {isImporting ? <Loader2 size={16} className="animate-spin" /> : <FileSpreadsheet size={16} />}
+                {isImporting ? <Loader size="xs" color="#16a34a" /> : <FileSpreadsheet size={16} />}
                 Import CSV
             </button>
             <div className="w-px h-4 bg-slate-300 mx-1"></div>
@@ -253,7 +254,7 @@ export default function TaskMigration() {
                 title="Backup Team Data (JSON)"
             >
                 <span className="flex items-center justify-center w-4 h-4">
-                    {isExporting ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
+                    {isExporting ? <Loader size="xs" /> : <Download size={16} />}
                 </span>
                 Backup
             </button>
@@ -264,7 +265,7 @@ export default function TaskMigration() {
                 className="flex items-center gap-2 px-3 py-2 bg-white border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50 hover:text-emerald-600 transition-colors disabled:opacity-50 text-sm font-medium"
                 title="Restore Team Data (JSON)"
             >
-                {isImporting ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}
+                {isImporting ? <Loader size="xs" /> : <Upload size={16} />}
                 Restore
             </button>
         </div>

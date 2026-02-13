@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useGuestMode } from '@/contexts/GuestContext';
-import { Users, Loader2 } from 'lucide-react';
+import { Users } from 'lucide-react';
+import Loader from '@/components/ui/Loader';
 
 import {
     Select,
@@ -89,7 +90,7 @@ export default function GuestTeamSelectionPage() {
                 {/* Loading State */}
                 {loading && (
                     <div className="flex items-center justify-center py-12">
-                        <Loader2 className="animate-spin text-indigo-600" size={40} />
+                        <Loader size="md" />
                     </div>
                 )}
 

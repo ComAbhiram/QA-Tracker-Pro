@@ -1,6 +1,7 @@
 'use client';
 
 import { X, AlertTriangle } from 'lucide-react';
+import Loader from './ui/Loader';
 
 interface ConfirmationModalProps {
     isOpen: boolean;
@@ -84,7 +85,7 @@ export default function ConfirmationModal({
                     >
                         {isLoading ? (
                             <>
-                                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                <Loader size="xs" color="white" />
                                 Processing...
                             </>
                         ) : confirmText}

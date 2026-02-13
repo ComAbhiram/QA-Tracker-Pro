@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Save, UserCog, Loader2, Check } from 'lucide-react';
+import { Save, UserCog, Check } from 'lucide-react';
+import Loader from '@/components/ui/Loader';
 
 interface HubstaffUser {
     id: number;
@@ -120,7 +121,7 @@ export default function QATeamSettings() {
                             disabled={saving || loading}
                             className="flex items-center gap-2 px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            {saving ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
+                            {saving ? <Loader size="xs" color="white" /> : <Save size={18} />}
                             Save Changes
                         </button>
                     </div>

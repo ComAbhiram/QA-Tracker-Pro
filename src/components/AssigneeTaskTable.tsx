@@ -1,26 +1,24 @@
-import { useState, useMemo, useRef, useEffect, useCallback } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { Task, isTaskOverdue, getOverdueDays, Leave } from '@/lib/types';
 import { format } from 'date-fns';
 import {
     AlertCircle,
     CalendarClock,
-    Palmtree,
     ArrowUpDown,
     ArrowUp,
     ArrowDown,
-    Loader2,
     CheckCircle2,
     Circle,
     PauseCircle,
     Clock,
     Cloud,
-    XCircle
+    XCircle,
+    Edit2
 } from 'lucide-react';
+import Loader from '@/components/ui/Loader';
 import Pagination from '@/components/Pagination';
 import { calculateAvailability } from '@/lib/availability';
-import ResizableHeader from '@/components/ui/ResizableHeader';
 import { DatePicker } from '@/components/DatePicker';
-import useColumnResizing from '@/hooks/useColumnResizing';
 import { StatusBadge } from '@/components/ui/standard/StatusBadge';
 import { PriorityBadge } from '@/components/ui/standard/PriorityBadge';
 
@@ -28,41 +26,170 @@ interface AssigneeTaskTableProps {
     assignee: string;
     tasks: Task[];
     leaves: Leave[];
+    columnWidths: Record<string, number>;
+    hideHeader?: boolean;
     onEditTask: (task: Task) => void;
-    onDateUpdate: (taskId: number, field: 'start_date' | 'end_date', date: string) => Promise<void>;
+    onResizeStart?: (e: React.MouseEvent, key: string) => void;
+    // Generalized update handler for inline edits
+    onFieldUpdate: (taskId: number, field: string, value: any) => Promise<void>;
 }
 
 type SortKey = 'projectName' | 'projectType' | 'priority' | 'subPhase' | 'pc' | 'status' | 'startDate' | 'endDate' | 'actualCompletionDate' | 'deviation';
 
-export default function AssigneeTaskTable({ assignee, tasks, leaves, onEditTask, onDateUpdate }: AssigneeTaskTableProps) {
+// Simple editable cell for inline text edits
+const EditableCell = ({ value, onSave, className, type = 'text', options = [] }: { value: string | number | null, onSave: (val: string) => void, className?: string, type?: 'text' | 'select' | 'textarea', options?: string[] }) => {
+    const [isEditing, setIsEditing] = useState(false);
+    const [tempValue, setTempValue] = useState(value?.toString() || '');
+    const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>(null);
+
+    useEffect(() => {
+        setTempValue(value?.toString() || '');
+    }, [value]);
+
+    useEffect(() => {
+        if (isEditing && inputRef.current) {
+            inputRef.current.focus();
+        }
+    }, [isEditing]);
+
+    const handleSave = () => {
+        setIsEditing(false);
+        if (tempValue !== (value?.toString() || '')) {
+            onSave(tempValue);
+        }
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault(); // Prevent newline in textarea/input
+            handleSave();
+        }
+        if (e.key === 'Escape') {
+            setIsEditing(false);
+            setTempValue(value?.toString() || '');
+        }
+    };
+
+    if (isEditing) {
+        if (type === 'select') {
+            return (
+                <select
+                    ref={inputRef as any}
+                    value={tempValue}
+                    onChange={(e) => setTempValue(e.target.value)}
+                    onBlur={handleSave}
+                    onKeyDown={handleKeyDown}
+                    onClick={(e) => e.stopPropagation()}
+                    className={`w-full bg-white border border-indigo-300 rounded px-1 py-0.5 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500 shadow-sm ${className}`}
+                >
+                    {options.map(opt => (
+                        <option key={opt} value={opt}>{opt}</option>
+                    ))}
+                </select>
+            );
+        }
+        if (type === 'textarea') {
+            return (
+                <textarea
+                    ref={inputRef as any}
+                    value={tempValue}
+                    onChange={(e) => setTempValue(e.target.value)}
+                    onBlur={handleSave}
+                    onKeyDown={handleKeyDown}
+                    onClick={(e) => e.stopPropagation()}
+                    rows={2} // slightly taller for multiline if needed, but keeping compact
+                    className={`w-full bg-white border border-indigo-300 rounded px-1 py-0.5 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500 shadow-sm resize-none overflow-hidden ${className}`}
+                    style={{ minHeight: '24px' }}
+                />
+            );
+        }
+        return (
+            <input
+                ref={inputRef as any}
+                type="text"
+                value={tempValue}
+                onChange={(e) => setTempValue(e.target.value)}
+                onBlur={handleSave}
+                onKeyDown={handleKeyDown}
+                onClick={(e) => e.stopPropagation()}
+                className={`w-full bg-white border border-indigo-300 rounded px-1 py-0.5 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500 shadow-sm ${className}`}
+            />
+        );
+    }
+
+    return (
+        <div
+            onClick={(e) => {
+                e.stopPropagation();
+                setIsEditing(true);
+            }}
+            className={`cursor-pointer hover:bg-slate-100 min-h-[20px] rounded px-1 py-0.5 truncate transition-colors border border-transparent hover:border-slate-200 ${className}`}
+            title={value?.toString() || 'Click to edit'}
+        >
+            {value || <span className="opacity-0 group-hover:opacity-30">-</span>}
+        </div>
+    );
+};
+
+// Status Select Cell (Specialized)
+const StatusSelectCell = ({ status, onSave }: { status: string, onSave: (val: string) => void }) => {
+    // Using a native select for simplicity and robustness in a table cell
+    // Styling it to look like a badge when not focused is tricky with native select.
+    // Instead, we switch between Badge and Select.
+    const [isEditing, setIsEditing] = useState(false);
+    const selectRef = useRef<HTMLSelectElement>(null);
+
+    const statusOptions = [
+        'Yet to Start', 'Being Developed', 'Ready for QA', 'Assigned to QA',
+        'In Progress', 'On Hold', 'Completed', 'Forecast', 'Rejected'
+    ];
+
+    useEffect(() => {
+        if (isEditing && selectRef.current) {
+            selectRef.current.focus();
+        }
+    }, [isEditing]);
+
+    const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        onSave(e.target.value);
+        setIsEditing(false);
+    };
+
+    if (isEditing) {
+        return (
+            <select
+                ref={selectRef}
+                value={status}
+                onChange={handleChange}
+                onBlur={() => setIsEditing(false)}
+                onClick={(e) => e.stopPropagation()}
+                className="w-full text-xs bg-white border border-indigo-300 rounded px-1 py-0.5 focus:outline-none shadow-sm"
+            >
+                {statusOptions.map(s => <option key={s} value={s}>{s}</option>)}
+            </select>
+        );
+    }
+
+    return (
+        <div onClick={(e) => { e.stopPropagation(); setIsEditing(true); }} className="cursor-pointer hover:opacity-80 transition-opacity">
+            <StatusBadge status={status} />
+        </div>
+    );
+};
+
+
+export default function AssigneeTaskTable({ assignee, tasks, leaves, columnWidths, hideHeader = false, onEditTask, onFieldUpdate, onResizeStart }: AssigneeTaskTableProps) {
     const [currentPage, setCurrentPage] = useState(1);
     const [sortConfig, setSortConfig] = useState<{ key: SortKey; direction: 'asc' | 'desc' } | null>(null);
     const itemsPerPage = 10;
 
-    // ... (existing column resizing hook) ...
-    const { columnWidths, startResizing } = useColumnResizing({
-        projectName: 300,
-        projectType: 60,
-        priority: 70,
-        subPhase: 120,
-        pc: 80,
-        status: 120,
-        startDate: 100, // Slightly wider for date input
-        endDate: 100,   // Slightly wider for date input
-        actualCompletionDate: 80,
-        comments: 150,
-        deviation: 100,
-        sprint: 60
-    });
-
-    // ... (existing sorting logic) ...
+    // Sorting Logic
     const sortedTasks = useMemo(() => {
         let sortableTasks = [...tasks];
         if (sortConfig !== null) {
             sortableTasks.sort((a, b) => {
                 let aValue: any = a[sortConfig.key];
                 let bValue: any = b[sortConfig.key];
-
                 if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
                 if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
                 return 0;
@@ -72,7 +199,8 @@ export default function AssigneeTaskTable({ assignee, tasks, leaves, onEditTask,
     }, [tasks, sortConfig]);
 
     const totalItems = sortedTasks.length;
-    const paginatedTasks = sortedTasks;
+    // Client-side pagination for this table
+    const paginatedTasks = sortedTasks.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
     const requestSort = (key: SortKey) => {
         let direction: 'asc' | 'desc' = 'asc';
@@ -82,20 +210,10 @@ export default function AssigneeTaskTable({ assignee, tasks, leaves, onEditTask,
         setSortConfig({ key, direction });
     };
 
-    const getSortIcon = (key: SortKey) => {
-        if (!sortConfig || sortConfig.key !== key) {
-            return <ArrowUpDown size={12} className="ml-1 text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity" />;
-        }
-        return sortConfig.direction === 'asc' ? <ArrowUp size={12} className="ml-1 text-slate-600" /> : <ArrowDown size={12} className="ml-1 text-slate-600" />;
-    };
-
     const handleDateChange = async (date: Date | undefined, taskId: number, field: 'start_date' | 'end_date') => {
-        // Convert Date to string YYYY-MM-DD for DB
-        const newDateStr = date ? format(date, 'yyyy-MM-dd') : '';
-        await onDateUpdate(taskId, field, newDateStr);
+        const newDateStr = date ? format(date, 'yyyy-MM-dd') : null; // Handle clear as null
+        await onFieldUpdate(taskId, field, newDateStr);
     };
-
-
 
     const getHeaderColor = (name: string) => {
         const colors = [
@@ -116,141 +234,150 @@ export default function AssigneeTaskTable({ assignee, tasks, leaves, onEditTask,
     };
     const headerColorClass = getHeaderColor(assignee);
     const availabilityDate = calculateAvailability(tasks, leaves);
-    const activeLeaves = leaves.filter(l => new Date(l.leave_date) >= new Date());
 
     return (
-        <div className="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden mb-4">
-            {/* Header Section (Compact) */}
-            <div className={`px-3 py-2 flex flex-col md:flex-row md:items-center justify-between gap-3 border-b ${headerColorClass}`}>
+        <div className="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden mb-2">
+            {/* Header Section (Compact) - Always visible per assignee table */}
+            <div className={`px-3 py-1.5 flex flex-col md:flex-row md:items-center justify-between gap-3 border-b ${headerColorClass}`}>
                 <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-white/60 backdrop-blur-sm border border-black/5 flex items-center justify-center font-bold text-sm shadow-sm">
+                    <div className="w-6 h-6 rounded-full bg-white/60 backdrop-blur-sm border border-black/5 flex items-center justify-center font-bold text-xs shadow-sm">
                         {assignee.charAt(0)}
                     </div>
                     <div>
-                        <h3 className="font-bold text-sm leading-tight opacity-90">{assignee}</h3>
+                        <h3 className="font-bold text-xs leading-tight opacity-90">{assignee}</h3>
                     </div>
                 </div>
 
-                {/* Availability Info (Compact & Single Line) */}
                 <div className="flex items-center gap-3 text-slate-700">
-                    <div className="flex items-center gap-2 bg-white/50 px-3 py-1 rounded-md border border-black/5">
-                        <CalendarClock size={14} className="text-red-600" />
-                        <span className="text-xs font-bold text-slate-700">
+                    <div className="flex items-center gap-2 bg-white/50 px-2 py-0.5 rounded-md border border-black/5">
+                        <CalendarClock size={12} className="text-red-600" />
+                        <span className="text-[10px] font-bold text-slate-700">
                             Available: {format(availabilityDate, 'MMM d')}
                         </span>
                     </div>
                 </div>
             </div>
 
-            {/* Table (Compact & Resizable) */}
-            <div className="overflow-x-auto pb-4 custom-scrollbar">
-                <table className="w-full text-xs text-slate-800 border-collapse table-fixed border border-slate-900">
-                    <thead>
-                        <tr className="border-b border-black">
-                            <ResizableHeader
-                                label="Project"
-                                sortKey="projectName"
-                                widthKey="projectName"
-                                width={columnWidths.projectName}
-                                currentSortKey={sortConfig?.key}
-                                sortDirection={sortConfig?.direction}
-                                onSort={(k) => requestSort(k as SortKey)}
-                                onResizeStart={startResizing}
-                            />
-                            <ResizableHeader
-                                label="Type"
-                                sortKey="projectType"
-                                widthKey="projectType"
-                                width={columnWidths.projectType}
-                                currentSortKey={sortConfig?.key}
-                                sortDirection={sortConfig?.direction}
-                                onSort={(k) => requestSort(k as SortKey)}
-                                onResizeStart={startResizing}
-                            />
-                            <ResizableHeader
-                                label="Priority"
-                                sortKey="priority"
-                                widthKey="priority"
-                                width={columnWidths.priority}
-                                currentSortKey={sortConfig?.key}
-                                sortDirection={sortConfig?.direction}
-                                onSort={(k) => requestSort(k as SortKey)}
-                                onResizeStart={startResizing}
-                            />
-                            <ResizableHeader label="Phase" sortKey="subPhase" widthKey="subPhase" width={columnWidths.subPhase} currentSortKey={sortConfig?.key} sortDirection={sortConfig?.direction} onSort={(k) => requestSort(k as SortKey)} onResizeStart={startResizing} />
-                            <ResizableHeader label="PC" sortKey="pc" widthKey="pc" width={columnWidths.pc} currentSortKey={sortConfig?.key} sortDirection={sortConfig?.direction} onSort={(k) => requestSort(k as SortKey)} onResizeStart={startResizing} />
-                            <ResizableHeader label="Status" sortKey="status" widthKey="status" width={columnWidths.status} currentSortKey={sortConfig?.key} sortDirection={sortConfig?.direction} onSort={(k) => requestSort(k as SortKey)} onResizeStart={startResizing} />
-                            <ResizableHeader label="Start" sortKey="startDate" widthKey="startDate" width={columnWidths.startDate} currentSortKey={sortConfig?.key} sortDirection={sortConfig?.direction} onSort={(k) => requestSort(k as SortKey)} onResizeStart={startResizing} />
-                            <ResizableHeader label="End" sortKey="endDate" widthKey="endDate" width={columnWidths.endDate} currentSortKey={sortConfig?.key} sortDirection={sortConfig?.direction} onSort={(k) => requestSort(k as SortKey)} onResizeStart={startResizing} />
-                            <ResizableHeader label="Actual End" sortKey="actualCompletionDate" widthKey="actualCompletionDate" width={columnWidths.actualCompletionDate} currentSortKey={sortConfig?.key} sortDirection={sortConfig?.direction} onSort={(k) => requestSort(k as SortKey)} onResizeStart={startResizing} />
-                            <ResizableHeader label="Comments" widthKey="comments" width={columnWidths.comments} isSortable={false} onResizeStart={startResizing} />
-                            <ResizableHeader label="Deviation" sortKey="deviation" widthKey="deviation" width={columnWidths.deviation} currentSortKey={sortConfig?.key} sortDirection={sortConfig?.direction} onSort={(k) => requestSort(k as SortKey)} onResizeStart={startResizing} />
-                            <ResizableHeader label="Sprint" widthKey="sprint" width={columnWidths.sprint} isSortable={false} onResizeStart={startResizing} />
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {tasks.map(task => (
+            {/* Table */}
+            <div className="overflow-x-visible pb-0"> {/* Allow dropdowns to overflow if needed, but table-layout fixed handles most */}
+                <table className="w-full text-xs text-slate-800 border-collapse table-fixed border border-slate-200">
+                    <colgroup>
+                        <col style={{ width: columnWidths.projectName }} />
+                        <col style={{ width: columnWidths.currentUpdates }} /> {/* Added Current Update Col */}
+                        <col style={{ width: columnWidths.projectType }} />
+                        <col style={{ width: columnWidths.priority }} />
+                        <col style={{ width: columnWidths.subPhase }} />
+                        <col style={{ width: columnWidths.pc }} />
+                        <col style={{ width: columnWidths.status }} />
+                        <col style={{ width: columnWidths.startDate }} />
+                        <col style={{ width: columnWidths.endDate }} />
+                        <col style={{ width: columnWidths.actualCompletionDate }} />
+                        <col style={{ width: columnWidths.comments }} />
+                        <col style={{ width: columnWidths.deviation }} />
+                        <col style={{ width: columnWidths.sprint }} />
+                    </colgroup>
+
+                    {!hideHeader && (
+                        <thead>
+                            <tr className="border-b border-slate-200 bg-slate-50 text-left font-semibold text-slate-600">
+                                {/* Only render THs if hideHeader is false. But normally we hide this if sticky header exists. */}
+                                {/* If we hide header, we rely on the sticky header above all tables. */}
+                                {/* If we DO show header (e.g. standalone), we would render Resizable headers here. */}
+                                {/* For now, assuming layout is controlled by parent, we might render empty here or just nothing. */}
+                                {/* The design implies we want ONE sticky header for ALL tables. */}
+                                {/* So if hideHeader is true, we render NOTHING here. */}
+                            </tr>
+                        </thead>
+                    )}
+
+                    <tbody className="divide-y divide-slate-100">
+                        {paginatedTasks.map(task => (
                             <tr
                                 key={task.id}
                                 onClick={() => onEditTask(task)}
-                                className="border-b border-slate-900 hover:bg-slate-50 cursor-pointer transition-colors group"
+                                className="group hover:bg-slate-50 cursor-pointer transition-colors"
                             >
-                                <td className="px-2 py-2 truncate border-r border-slate-900 font-bold text-slate-900" title={task.projectName}>{task.projectName}</td>
-                                <td className="px-2 py-2 truncate border-r border-slate-900">{task.projectType || '-'}</td>
-                                <td className="px-2 py-2 truncate border-r border-slate-900">
-                                    <PriorityBadge priority={task.priority} />
+                                <td className="px-2 py-1 truncate border-r border-slate-200 font-medium text-slate-700" title={task.projectName}>
+                                    {task.projectName}
                                 </td>
-                                <td className="px-2 py-2 truncate border-r border-slate-900">{task.subPhase || '-'}</td>
-                                <td className="px-2 py-2 truncate border-r border-slate-900">{task.pc || '-'}</td>
-                                <td className="px-2 py-2 border-r border-slate-900">
-                                    <div className="flex items-center gap-2">
-                                        <StatusBadge status={task.status} />
+
+                                {/* Current Updates - Editable */}
+                                <td className="px-2 py-1 truncate border-r border-slate-200 text-slate-600" title={task.currentUpdates || ''} onClick={e => e.stopPropagation()}>
+                                    <EditableCell
+                                        value={task.currentUpdates}
+                                        onSave={(val) => onFieldUpdate(task.id, 'current_updates', val)}
+                                        className="w-full"
+                                    />
+                                </td>
+
+                                <td className="px-2 py-1 truncate border-r border-slate-200 text-slate-500">{task.projectType || '-'}</td>
+
+                                <td className="px-2 py-1 truncate border-r border-slate-200">
+                                    <div className="transform scale-90 origin-left">
+                                        <PriorityBadge priority={task.priority} />
+                                    </div>
+                                </td>
+
+                                <td className="px-2 py-1 truncate border-r border-slate-200 text-slate-600" title={task.subPhase || ''}>{task.subPhase || '-'}</td>
+                                <td className="px-2 py-1 truncate border-r border-slate-200 text-slate-600">{task.pc || '-'}</td>
+
+                                {/* Status - Editable Select */}
+                                <td className="px-2 py-1 border-r border-slate-200" onClick={e => e.stopPropagation()}>
+                                    <div className="flex items-center gap-1.5">
+                                        <StatusSelectCell status={task.status} onSave={(val) => onFieldUpdate(task.id, 'status', val)} />
                                         {isTaskOverdue(task) && (
-                                            <span className="flex items-center gap-0.5 text-red-700 font-bold text-[10px]" title={`${getOverdueDays(task)} days overdue`}>
+                                            <span className="flex-shrink-0 flex items-center gap-0.5 text-red-600 font-bold text-[10px]" title={`${getOverdueDays(task)} days overdue`}>
                                                 <AlertCircle size={10} /> {getOverdueDays(task)}d
                                             </span>
                                         )}
                                     </div>
                                 </td>
 
-                                {/* Start Date - Inline Edit via DatePicker */}
-                                <td
-                                    className="px-2 py-2 truncate border-r border-slate-900 text-slate-700 hover:bg-slate-100 transition-colors p-0"
-                                    onClick={(e) => e.stopPropagation()} // Prevent row click
-                                >
+                                {/* Start Date - Inline Edit */}
+                                <td className="px-1 py-0.5 truncate border-r border-slate-200" onClick={(e) => e.stopPropagation()}>
                                     <DatePicker
                                         date={task.startDate ? new Date(task.startDate) : undefined}
                                         setDate={(d) => handleDateChange(d, task.id, 'start_date')}
-                                        className="w-full h-full border-none shadow-none bg-transparent hover:bg-slate-100 rounded-none justify-start px-0 text-xs font-normal"
+                                        className="w-full h-full border-none shadow-none bg-transparent hover:bg-slate-100 rounded px-1 text-[11px] font-normal min-h-[24px] py-0"
                                         placeholder="-"
                                     />
                                 </td>
 
-                                {/* End Date - Inline Edit via DatePicker */}
-                                <td
-                                    className={`px-2 py-2 truncate border-r border-slate-900 transition-colors p-0 ${isTaskOverdue(task)
-                                        ? 'bg-red-600 text-white font-bold hover:bg-red-700'
-                                        : 'text-slate-700 hover:bg-slate-100'
-                                        }`}
-                                    onClick={(e) => e.stopPropagation()} // Prevent row click
-                                >
+                                {/* End Date - Inline Edit */}
+                                <td className={`px-1 py-0.5 truncate border-r border-slate-200 transition-colors ${isTaskOverdue(task) ? 'bg-red-50' : ''}`} onClick={(e) => e.stopPropagation()}>
                                     <DatePicker
                                         date={task.endDate ? new Date(task.endDate) : undefined}
                                         setDate={(d) => handleDateChange(d, task.id, 'end_date')}
-                                        className={`w-full h-full border-none shadow-none bg-transparent rounded-none justify-start px-0 text-xs font-normal ${isTaskOverdue(task) ? 'text-white hover:bg-red-700' : 'hover:bg-slate-100'
-                                            }`}
+                                        className={`w-full h-full border-none shadow-none bg-transparent rounded px-1 text-[11px] font-normal min-h-[24px] py-0 ${isTaskOverdue(task) ? 'text-red-700 font-semibold' : 'hover:bg-slate-100'}`}
                                         placeholder="-"
                                     />
                                 </td>
 
-                                <td className="px-2 py-2 truncate border-r border-slate-900 text-slate-700">{task.actualCompletionDate ? format(new Date(task.actualCompletionDate), 'MMM d') : '-'}</td>
-                                <td className="px-2 py-2 truncate border-r border-slate-900 text-slate-700 max-w-[200px]" title={task.comments || ''}>{task.comments || '-'}</td>
-                                <td className="px-2 py-2 truncate border-r border-slate-900 text-slate-700 max-w-[200px]" title={String(task.deviation || '')}>{task.deviation || '-'}</td>
-                                <td className="px-2 py-2 truncate text-slate-700 text-center">
+                                <td className="px-2 py-1 truncate border-r border-slate-200 text-slate-600">
+                                    {task.actualCompletionDate ? format(new Date(task.actualCompletionDate), 'MMM d') : '-'}
+                                </td>
+
+                                {/* Comments - Editable */}
+                                <td className="px-2 py-1 truncate border-r border-slate-200 text-slate-600" title={task.comments || ''} onClick={e => e.stopPropagation()}>
+                                    <EditableCell
+                                        value={task.comments}
+                                        onSave={(val) => onFieldUpdate(task.id, 'comments', val)}
+                                        className="w-full"
+                                    />
+                                </td>
+
+                                {/* Deviation - Editable */}
+                                <td className="px-2 py-1 truncate border-r border-slate-200 text-slate-600" onClick={e => e.stopPropagation()}>
+                                    <EditableCell
+                                        value={task.deviation}
+                                        onSave={(val) => onFieldUpdate(task.id, 'deviation', val)}
+                                        className="w-full text-center"
+                                    />
+                                </td>
+
+                                <td className="px-2 py-1 truncate text-center text-slate-600">
                                     {task.sprintLink ? (
-                                        <a href={task.sprintLink} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline" onClick={e => e.stopPropagation()}>
-                                            Link
-                                        </a>
+                                        <a href={task.sprintLink} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline" onClick={e => e.stopPropagation()}>Link</a>
                                     ) : '-'}
                                 </td>
                             </tr>
@@ -258,9 +385,10 @@ export default function AssigneeTaskTable({ assignee, tasks, leaves, onEditTask,
                     </tbody>
                 </table>
             </div>
+
             {/* Per-Assignee Pagination */}
             {totalItems > itemsPerPage && (
-                <div className="mt-4 mb-4">
+                <div className="py-2 px-3 border-t border-slate-100">
                     <Pagination
                         currentPage={currentPage}
                         totalItems={totalItems}

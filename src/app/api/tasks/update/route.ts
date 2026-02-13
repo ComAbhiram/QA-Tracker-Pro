@@ -125,7 +125,13 @@ export async function PUT(request: NextRequest) {
             try {
                 // Fetch team name and assignee name separately
                 let teamName = 'Unknown Team';
-                let assigneeName = task.assignee || 'Unassigned';
+                // Determine assignee name (assigned_to stores the Name directly)
+                // Check updates first (in case it was changed), then fall back to existing task data
+                const currentAssignee = updates.assigned_to !== undefined
+                    ? updates.assigned_to
+                    : task.assigned_to;
+
+                const assigneeName = currentAssignee || 'Unassigned';
 
                 if (task.team_id) {
                     const { data: teamData } = await supabaseServer
@@ -136,14 +142,6 @@ export async function PUT(request: NextRequest) {
                     if (teamData) teamName = teamData.name;
                 }
 
-                if (task.assignee) {
-                    const { data: userData } = await supabaseServer
-                        .from('user_profiles')
-                        .select('full_name')
-                        .eq('email', task.assignee)
-                        .single();
-                    if (userData?.full_name) assigneeName = userData.full_name;
-                }
 
                 const emailPayload = {
                     taskId: id,

@@ -34,14 +34,27 @@ export function DatePicker({ date, setDate, className, placeholder = "Pick a dat
                         className
                     )}
                 >
-                    {date ? format(date, "PPP") : <span className="text-slate-400">{placeholder}</span>}
+                    {date ? format(date, "MMM d, yyyy") : <span className="text-slate-400">{placeholder}</span>}
                     <ChevronDownIcon className="ml-2 h-4 w-4 opacity-50" />
                 </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0 z-[300]" align="start">
+                <div className="p-2 border-b border-slate-100 flex justify-between items-center">
+                    <span className="text-xs font-medium text-slate-500">Pick a date</span>
+                    <button
+                        onClick={() => {
+                            setDate(undefined);
+                            setOpen(false);
+                        }}
+                        className="text-xs text-indigo-600 hover:text-indigo-700 font-medium hover:bg-indigo-50 px-2 py-1 rounded"
+                    >
+                        Clear date
+                    </button>
+                </div>
                 <Calendar
                     mode="single"
                     selected={date}
+                    defaultMonth={date}
                     onSelect={(d) => {
                         setDate(d);
                         setOpen(false);

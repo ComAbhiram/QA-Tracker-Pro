@@ -12,6 +12,7 @@ import ConfirmationModal from './ConfirmationModal';
 import { format } from 'date-fns';
 import { DatePicker } from './DatePicker';
 import { Button } from './ui/button';
+import Loader from './ui/Loader';
 
 interface TaskModalProps {
     isOpen: boolean;
@@ -943,7 +944,7 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
                             className="flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-700 hover:to-indigo-600 text-white font-bold rounded-xl transition-all shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed text-sm transform active:scale-95 duration-200"
                         >
                             <Save size={18} />
-                            {loading ? 'Saving...' : 'Save Task'}
+                            {loading ? <div className="flex items-center gap-2"><Loader size="xs" color="white" /> Saving...</div> : 'Save Task'}
                         </button>
                     </div>
 

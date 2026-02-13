@@ -1,5 +1,4 @@
 import {
-    Loader2,
     CheckCircle2,
     Circle,
     Cloud,
@@ -7,6 +6,7 @@ import {
     Clock,
     XCircle
 } from 'lucide-react';
+import Loader from '@/components/ui/Loader';
 
 interface StatusBadgeProps {
     status: string;
@@ -20,7 +20,7 @@ export const StatusBadge = ({ status, className = "", size = 13 }: StatusBadgePr
         case 'Being Developed':
             return (
                 <div className={`flex items-center gap-1.5 text-blue-700 font-medium ${className}`}>
-                    <Loader2 size={size} className="animate-spin" /> {status}
+                    <Loader size="xs" color="#1d4ed8" /> {status}
                 </div>
             );
         case 'Completed':

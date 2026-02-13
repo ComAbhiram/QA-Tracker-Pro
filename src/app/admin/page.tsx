@@ -3,8 +3,9 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
-import { Users, Plus, Shield, Loader2, Building, Layers, User } from 'lucide-react';
+import { Users, Plus, Shield, Building, Layers, User } from 'lucide-react';
 import PCManagementModal from '@/components/PCManagementModal';
+import Loader from '@/components/ui/Loader';
 
 interface Team {
     id: string;
@@ -89,7 +90,7 @@ export default function AdminDashboard() {
     if (loading) {
         return (
             <div className="min-h-screen flex items-center justify-center">
-                <Loader2 className="animate-spin text-indigo-600" size={32} />
+                <Loader size="lg" className="text-indigo-600" />
             </div>
         );
     }

@@ -3,14 +3,16 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { mapTaskFromDB, Task, Leave } from '@/lib/types';
-import { Search, Plus, Download, CalendarClock, X } from 'lucide-react';
+import { Search, Plus, Download, CalendarClock, X, ArrowUp, ArrowDown } from 'lucide-react';
 import TaskModal from '@/components/TaskModal';
 import AssigneeTaskTable from '@/components/AssigneeTaskTable';
 import { useGuestMode } from '@/contexts/GuestContext';
 import { calculateAvailability } from '@/lib/availability';
 import { useToast } from '@/contexts/ToastContext';
-
 import { DatePicker } from '@/components/DatePicker';
+import useColumnResizing from '@/hooks/useColumnResizing';
+import ResizableHeader from '@/components/ui/ResizableHeader';
+
 // ... existing imports
 
 export default function Tracker() {
@@ -30,6 +32,25 @@ export default function Tracker() {
     const [hasChecked, setHasChecked] = useState(false);
 
     const { success, error: toastError } = useToast();
+    const [viewMode, setViewMode] = useState<'active' | 'forecast'>('active');
+    const [isRowExpanded, setIsRowExpanded] = useState(false); // New State
+
+    // Column Resizing (Lifted State)
+    const { columnWidths, startResizing } = useColumnResizing({
+        projectName: 300,
+        currentUpdates: 200, // New Column
+        projectType: 60,
+        priority: 70,
+        subPhase: 120,
+        pc: 80,
+        status: 120,
+        startDate: 100,
+        endDate: 100,
+        actualCompletionDate: 80,
+        comments: 150,
+        deviation: 100,
+        sprint: 60
+    });
 
     // Fetch ALL active tasks (no pagination in query)
     useEffect(() => {
@@ -138,6 +159,7 @@ export default function Tracker() {
             deviation: Number(taskData.deviation) || 0,
             activity_percentage: Number(taskData.activityPercentage) || 0,
             comments: taskData.comments,
+            current_updates: taskData.currentUpdates, // Ensure this is saved
             include_saturday: taskData.includeSaturday || false,
             include_sunday: taskData.includeSunday || false,
             team_id: taskData.teamId,
@@ -231,11 +253,35 @@ export default function Tracker() {
         }
     };
 
-    const [viewMode, setViewMode] = useState<'active' | 'forecast'>('active');
+    // Generalized Field Update Handler for Inline Editing
+    const handleFieldUpdate = async (taskId: number, field: string, value: any) => {
+        console.log('[Field Update] Starting update:', { taskId, field, value });
 
-    // ... (existing state)
+        // Optimistic UI Update (optional but good for UX)
+        // For now, we wait for server response to be safe, but we could update local state immediately.
 
-    // ... (fetchData effect remains same, it fetches all active tasks)
+        const response = await fetch('/api/tasks/update', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Manager-Mode': localStorage.getItem('qa_tracker_guest_session') ? 'true' : 'false',
+            },
+            credentials: 'include',
+            body: JSON.stringify({
+                id: taskId,
+                [field]: value
+            })
+        });
+
+        if (!response.ok) {
+            const err = await response.json();
+            console.error('[Field Update] Error:', err);
+            toastError('Failed to update task');
+        } else {
+            success('Task updated successfully');
+            refreshTasks();
+        }
+    };
 
     // Filter and Sort Tasks
     const processedTasks = tasks
@@ -269,9 +315,7 @@ export default function Tracker() {
             // Let's keep it consistent: Sort by Date desc as secondary
             const dateA = new Date(a.startDate || 0).getTime();
             const dateB = new Date(b.startDate || 0).getTime();
-            return dateA - dateB; // Ascending or Descending? User didn't specify, but usually earliest first for schedule? 
-            // Original query was 'start_date', { ascending: false }. Let's stick to that if status is same.
-            // return dateB - dateA; 
+            return dateA - dateB;
         });
 
 
@@ -284,7 +328,7 @@ export default function Tracker() {
     }, {} as Record<string, Task[]>);
 
     const exportCSV = () => {
-        const headers = ['Project Name', 'Type', 'Priority', 'Phase', 'Status', 'Start Date', 'End Date', 'Actual End', 'Assignees', 'Bug Count', 'HTML Bugs', 'Functional Bugs', 'Comments'];
+        const headers = ['Project Name', 'Type', 'Priority', 'Phase', 'Status', 'Start Date', 'End Date', 'Actual End', 'Assignees', 'Bug Count', 'HTML Bugs', 'Functional Bugs', 'Comments', 'Current Updates'];
         const csvContent = [
             headers.join(','),
             ...tasks.map(t => [
@@ -300,7 +344,8 @@ export default function Tracker() {
                 t.bugCount || 0,
                 t.htmlBugs || 0,
                 t.functionalBugs || 0,
-                `"${t.comments || ''}"`
+                `"${t.comments || ''}"`,
+                `"${t.currentUpdates || ''}"`
             ].join(','))
         ].join('\n');
 
@@ -340,8 +385,8 @@ export default function Tracker() {
     };
 
     return (
-        <div className="max-w-[1800px] mx-auto">
-            <header className="flex flex-col xl:flex-row xl:items-center justify-between gap-6 mb-8">
+        <div className="max-w-[1920px] mx-auto pb-20"> {/* Extended max-width for extra columns */}
+            <header className="flex flex-col xl:flex-row xl:items-center justify-between gap-6 mb-4">
                 <div>
                     <h1 className="text-3xl font-bold text-slate-800">Task Tracker</h1>
                     <p className="text-slate-500">Track all active QA tasks by assignee</p>
@@ -391,6 +436,15 @@ export default function Tracker() {
                             Forecast
                         </button>
                     </div>
+
+                    {/* Row Expand Toggle */}
+                    <button
+                        onClick={() => setIsRowExpanded(!isRowExpanded)}
+                        className={`p-2 rounded-md border text-slate-600 transition-all ${isRowExpanded ? 'bg-indigo-50 border-indigo-200 text-indigo-600' : 'bg-white border-slate-200 hover:bg-slate-50'}`}
+                        title={isRowExpanded ? "Collapse Rows" : "Expand Rows"}
+                    >
+                        {isRowExpanded ? <ArrowUp size={16} /> : <ArrowDown size={16} />}
+                    </button>
 
                     {/* Actions */}
                     <button
@@ -475,9 +529,46 @@ export default function Tracker() {
             )}
 
 
+            {/* STICKY HEADER for All Tables */}
+            <div className="sticky top-0 z-40 bg-white shadow-md border-b border-slate-200 mb-2 rounded-t-lg overflow-hidden">
+                <table className="w-full text-xs text-slate-800 border-collapse table-fixed">
+                    <colgroup>
+                        <col style={{ width: columnWidths.projectName }} />
+                        <col style={{ width: columnWidths.currentUpdates }} />
+                        <col style={{ width: columnWidths.projectType }} />
+                        <col style={{ width: columnWidths.priority }} />
+                        <col style={{ width: columnWidths.subPhase }} />
+                        <col style={{ width: columnWidths.pc }} />
+                        <col style={{ width: columnWidths.status }} />
+                        <col style={{ width: columnWidths.startDate }} />
+                        <col style={{ width: columnWidths.endDate }} />
+                        <col style={{ width: columnWidths.actualCompletionDate }} />
+                        <col style={{ width: columnWidths.comments }} />
+                        <col style={{ width: columnWidths.deviation }} />
+                        <col style={{ width: columnWidths.sprint }} />
+                    </colgroup>
+                    <thead className="bg-slate-50 text-slate-600 font-bold uppercase tracking-wider">
+                        <tr>
+                            <ResizableHeader label="Project" widthKey="projectName" width={columnWidths.projectName} onResizeStart={startResizing} />
+                            <ResizableHeader label="Current Updates" widthKey="currentUpdates" width={columnWidths.currentUpdates} onResizeStart={startResizing} />
+                            <ResizableHeader label="Type" widthKey="projectType" width={columnWidths.projectType} onResizeStart={startResizing} />
+                            <ResizableHeader label="Priority" widthKey="priority" width={columnWidths.priority} onResizeStart={startResizing} />
+                            <ResizableHeader label="Phase" widthKey="subPhase" width={columnWidths.subPhase} onResizeStart={startResizing} />
+                            <ResizableHeader label="PC" widthKey="pc" width={columnWidths.pc} onResizeStart={startResizing} />
+                            <ResizableHeader label="Status" widthKey="status" width={columnWidths.status} onResizeStart={startResizing} />
+                            <ResizableHeader label="Start" widthKey="startDate" width={columnWidths.startDate} onResizeStart={startResizing} />
+                            <ResizableHeader label="End" widthKey="endDate" width={columnWidths.endDate} onResizeStart={startResizing} />
+                            <ResizableHeader label="Actual End" widthKey="actualCompletionDate" width={columnWidths.actualCompletionDate} onResizeStart={startResizing} />
+                            <ResizableHeader label="Comments" widthKey="comments" width={columnWidths.comments} isSortable={false} onResizeStart={startResizing} />
+                            <ResizableHeader label="Deviation" widthKey="deviation" width={columnWidths.deviation} onResizeStart={startResizing} />
+                            <ResizableHeader label="Sprint" widthKey="sprint" width={columnWidths.sprint} isSortable={false} onResizeStart={startResizing} />
+                        </tr>
+                    </thead>
+                </table>
+            </div>
 
             {/* Grouped Tasks - No global pagination, but each assignee table is paginated */}
-            <div className="space-y-2">
+            <div className="space-y-1"> {/* Reduced gap from space-y-2 to space-y-1 */}
                 {loading ? (
                     <div className="text-center py-12 text-slate-500">Loading tasks...</div>
                 ) : Object.keys(groupedTasks).length === 0 ? (
@@ -498,37 +589,12 @@ export default function Tracker() {
                                 assignee={assignee}
                                 tasks={groupedTasks[assignee]}
                                 leaves={leaves}
+                                columnWidths={columnWidths}
+                                hideHeader={true} // Hide individual headers since we have a sticky one
+                                isRowExpanded={isRowExpanded} // Pass Expand State
+                                onResizeStart={startResizing}
                                 onEditTask={handleEditTask}
-                                onDateUpdate={async (taskId, field, date) => {
-                                    console.log('[Date Update] Starting update:', { taskId, field, date });
-
-                                    // Use API route to support manager mode
-                                    const response = await fetch('/api/tasks/update', {
-                                        method: 'PUT',
-                                        headers: {
-                                            'Content-Type': 'application/json',
-                                            'X-Manager-Mode': localStorage.getItem('qa_tracker_guest_session') ? 'true' : 'false',
-                                        },
-                                        credentials: 'include',
-                                        body: JSON.stringify({
-                                            id: taskId,
-                                            [field]: date || null
-                                        })
-                                    });
-
-                                    console.log('[Date Update] Response status:', response.status);
-
-                                    if (!response.ok) {
-                                        const err = await response.json();
-                                        console.error('[Date Update] Error:', err);
-                                        console.log('[Date Update] Calling toastError...');
-                                        toastError('Failed to update date');
-                                    } else {
-                                        console.log('[Date Update] Success! Calling success toast...');
-                                        success('Date has been changed successfully.');
-                                        refreshTasks();
-                                    }
-                                }}
+                                onFieldUpdate={handleFieldUpdate}
                             />
                         ))
                 )}
