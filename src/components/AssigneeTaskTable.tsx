@@ -301,7 +301,12 @@ export default function AssigneeTaskTable({ assignee, tasks, leaves, columnWidth
                                 <td className={`px-2 py-1 border-r border-slate-200 font-medium text-slate-700 ${cellClass}`} title={task.projectName}>
                                     <div>{task.projectName}</div>
                                     {task.currentUpdates && (
-                                        <div className="text-[10px] text-slate-500 font-normal mt-0.5 leading-tight">{task.currentUpdates}</div>
+                                        <div
+                                            className="text-[10px] text-indigo-600 font-medium mt-0.5 cursor-help w-fit"
+                                            title={task.currentUpdates}
+                                        >
+                                            Current updates
+                                        </div>
                                     )}
                                 </td>
 
