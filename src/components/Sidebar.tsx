@@ -36,6 +36,7 @@ import { supabase } from '@/lib/supabase';
 import { useGuestMode } from '@/contexts/GuestContext';
 import ManageTeamModal from './ManageTeamModal';
 import { TeamSelector } from './TeamSelector';
+import CloseButton from './ui/CloseButton';
 
 interface NavItem {
     label: string;
@@ -223,13 +224,10 @@ export function Sidebar() {
                         ) : sidebarTitle}
                     </div>
                     {/* Close Button Inside Sidebar */}
-                    <button
+                    <CloseButton
                         onClick={() => setCollapsed(true)}
-                        className="text-slate-400 hover:text-slate-600 transition-colors lg:hidden ml-auto"
-                        aria-label="Close Sidebar"
-                    >
-                        <X size={20} />
-                    </button>
+                        className="lg:hidden ml-auto"
+                    />
                 </div>
 
                 <div className="sidebar-nav custom-scrollbar">

@@ -6,6 +6,7 @@ import { Task, Leave, mapTaskFromDB } from '@/lib/types';
 import { calculateAvailability } from '@/lib/availability';
 import { X, Calendar, Search, ChevronRight, User, Users, ArrowLeft } from 'lucide-react';
 import { format } from 'date-fns';
+import CloseButton from './ui/CloseButton';
 
 interface Team {
     id: string;
@@ -152,9 +153,7 @@ export default function GlobalAvailabilityModal({ isOpen, onClose }: GlobalAvail
                             {step === 'RESULTS' && 'Available Resources'}
                         </h3>
                     </div>
-                    <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-lg text-slate-500 transition-colors">
-                        <X size={20} />
-                    </button>
+                    <CloseButton onClick={onClose} />
                 </div>
 
                 {/* Content */}

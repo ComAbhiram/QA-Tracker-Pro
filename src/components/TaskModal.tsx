@@ -14,6 +14,7 @@ import { format } from 'date-fns';
 import { DatePicker } from './DatePicker';
 import { Button } from './ui/button';
 import Loader from './ui/Loader';
+import CloseButton from './ui/CloseButton';
 
 interface TaskModalProps {
     isOpen: boolean;
@@ -518,12 +519,7 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
                             <p className="text-sm text-slate-500 font-medium">{task ? 'Update task details below' : 'Kickoff a new project tracking item'}</p>
                         </div>
                     </div>
-                    <button
-                        onClick={onClose}
-                        className="text-slate-400 hover:text-slate-600 hover:bg-slate-100 p-2.5 rounded-full transition-all duration-200"
-                    >
-                        <X size={22} />
-                    </button>
+                    <CloseButton onClick={onClose} />
                 </div>
 
                 {/* Content */}
@@ -726,14 +722,14 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
                                     <Checkbox
                                         checked={formData.includeSaturday || false}
                                         onChange={(checked) => setFormData(prev => ({ ...prev, includeSaturday: checked }))}
-                                        label="Work Saturday"
+                                        label="Sat"
                                     />
                                 </div>
                                 <div className="flex items-center gap-2 cursor-pointer bg-slate-50 px-4 py-3 rounded-xl border border-slate-200 hover:bg-slate-100 transition-colors flex-1 justify-center">
                                     <Checkbox
                                         checked={formData.includeSunday || false}
                                         onChange={(checked) => setFormData(prev => ({ ...prev, includeSunday: checked }))}
-                                        label="Work Sunday"
+                                        label="Sun"
                                     />
                                 </div>
                             </div>

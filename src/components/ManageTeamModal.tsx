@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { X, UserPlus, Trash2, Users, Search, Plus } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import Combobox from './ui/Combobox';
+import CloseButton from './ui/CloseButton';
 import { mapHubstaffNameToQA } from '@/lib/hubstaff-name-mapping';
 
 interface ManageTeamModalProps {
@@ -158,9 +159,7 @@ export default function ManageTeamModal({ isOpen, onClose }: ManageTeamModalProp
                     <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
                         <Users size={20} className="text-indigo-600" /> Manage Team Members
                     </h2>
-                    <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-full text-slate-400 hover:text-slate-600 transition-colors">
-                        <X size={20} />
-                    </button>
+                    <CloseButton onClick={onClose} />
                 </div>
 
                 {/* Body */}
@@ -251,6 +250,6 @@ export default function ManageTeamModal({ isOpen, onClose }: ManageTeamModalProp
 
                 </div>
             </div>
-        </div>
+        </div >
     );
 }

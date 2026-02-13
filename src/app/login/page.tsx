@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { Lock, Mail, LayoutDashboard, Users, X, ArrowRight } from 'lucide-react';
 import Image from 'next/image';
 import Loader from '@/components/ui/Loader';
+import CloseButton from '@/components/ui/CloseButton';
 
 export default function LoginPage() {
     const [email, setEmail] = useState('');
@@ -77,16 +78,14 @@ export default function LoginPage() {
             {showManagerModal && (
                 <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
                     <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 relative animate-in zoom-in-95 duration-200">
-                        <button
+                        <CloseButton
                             onClick={() => {
                                 setShowManagerModal(false);
                                 setManagerPassword('');
                                 setError(null);
                             }}
-                            className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition-colors p-2 hover:bg-slate-100 rounded-full"
-                        >
-                            <X size={20} />
-                        </button>
+                            className="absolute top-4 right-4"
+                        />
 
                         <div className="text-center mb-6 pt-2">
                             <div className="bg-gradient-to-br from-indigo-500 to-indigo-700 w-14 h-14 rounded-2xl shadow-lg shadow-indigo-200 flex items-center justify-center mx-auto mb-4">

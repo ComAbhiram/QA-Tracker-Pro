@@ -14,6 +14,7 @@ import useColumnResizing from '@/hooks/useColumnResizing';
 import ResizableHeader from '@/components/ui/ResizableHeader';
 
 // ... existing imports
+import CloseButton from '@/components/ui/CloseButton';
 
 export default function Tracker() {
     const { isGuest, selectedTeamId, isLoading: isGuestLoading } = useGuestMode();
@@ -472,9 +473,7 @@ export default function Tracker() {
                     <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
                         <div className="flex items-center justify-between p-6 border-b border-slate-100 bg-slate-50/50">
                             <h3 className="text-xl font-bold text-slate-800">Check Availability</h3>
-                            <button onClick={() => setIsAvailabilityCheckOpen(false)} className="p-2 hover:bg-slate-100 rounded-lg text-slate-500 transition-colors">
-                                <X size={20} />
-                            </button>
+                            <CloseButton onClick={() => setIsAvailabilityCheckOpen(false)} />
                         </div>
 
                         <div className="p-6 space-y-6">

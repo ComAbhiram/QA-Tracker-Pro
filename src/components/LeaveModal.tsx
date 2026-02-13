@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { X, Calendar, User, FileText, Tag } from 'lucide-react';
 import Combobox from './ui/Combobox';
+import CloseButton from './ui/CloseButton';
 
 interface LeaveModalProps {
     isOpen: boolean;
@@ -120,12 +121,7 @@ export default function LeaveModal({ isOpen, onClose, onSave }: LeaveModalProps)
                         <h2 className="text-2xl font-bold text-slate-800">Add Leave or WFH</h2>
                         <p className="text-sm text-slate-500 mt-1">Submit a new leave or WFH request for a team member</p>
                     </div>
-                    <button
-                        onClick={onClose}
-                        className="p-2 hover:bg-white/80 rounded-lg transition-colors text-slate-600"
-                    >
-                        <X size={24} />
-                    </button>
+                    <CloseButton onClick={onClose} />
                 </div>
 
                 {/* Form */}

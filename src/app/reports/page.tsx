@@ -11,6 +11,7 @@ import TaskOverviewTable from '../project-overview/components/TaskOverviewTable'
 import TaskModal from '@/components/TaskModal';
 
 import { useGuestMode } from '@/contexts/GuestContext';
+import CloseButton from '@/components/ui/CloseButton';
 
 export default function Reports() {
     const { isGuest, selectedTeamId, isLoading: isGuestLoading } = useGuestMode();
@@ -550,12 +551,7 @@ export default function Reports() {
                         {/* Modal Header */}
                         <div className="flex items-center justify-between p-6 border-b border-slate-100">
                             <h2 className="text-2xl font-bold text-slate-800">{filteredModal.title}</h2>
-                            <button
-                                onClick={() => setFilteredModal(prev => ({ ...prev, isOpen: false }))}
-                                className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors"
-                            >
-                                <X size={24} />
-                            </button>
+                            <CloseButton onClick={() => setFilteredModal(prev => ({ ...prev, isOpen: false }))} />
                         </div>
 
                         {/* Modal Content */}

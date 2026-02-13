@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { X, Plus, Trash2, User } from 'lucide-react';
 import Loader from './ui/Loader';
+import CloseButton from './ui/CloseButton';
 
 interface PC {
     id: number;
@@ -131,12 +132,7 @@ export default function PCManagementModal({ isOpen, onClose }: PCManagementModal
                             <p className="text-sm text-slate-500 font-medium">Global PC list for all teams</p>
                         </div>
                     </div>
-                    <button
-                        onClick={onClose}
-                        className="text-slate-400 hover:text-slate-600 hover:bg-slate-100 p-2.5 rounded-full transition-all duration-200"
-                    >
-                        <X size={22} />
-                    </button>
+                    <CloseButton onClick={onClose} />
                 </div>
 
                 {/* Content */}

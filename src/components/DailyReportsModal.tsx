@@ -6,6 +6,7 @@ import { getEffectiveStatus } from '@/utils/taskUtils';
 import { X, Camera, FileText, Calendar, ClipboardList, ChevronRight, Download, Eye } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import Combobox from '@/components/ui/Combobox';
+import CloseButton from '@/components/ui/CloseButton';
 
 interface DailyReportsModalProps {
     isOpen: boolean;
@@ -1071,12 +1072,7 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                             <p className="text-sm text-slate-500">Choose a report type to generate and download</p>
                         </div>
                     </div>
-                    <button
-                        onClick={onClose}
-                        className="text-slate-400 hover:text-slate-600 hover:bg-slate-100 p-2 rounded-full transition-colors"
-                    >
-                        <X size={20} />
-                    </button>
+                    <CloseButton onClick={onClose} />
                 </div>
 
                 {/* Content - List Style */}
@@ -1314,7 +1310,7 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                     </button>
                 </div>
 
-            </div>
+            </div >
 
             {/* Hubstaff Confirmation Modal */}
             {
@@ -1354,55 +1350,52 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
             }
 
             {/* Image Preview Modal */}
-            {previewImage && (
-                <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/80 backdrop-blur-md animate-in fade-in duration-200 p-4">
-                    <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-5xl max-h-[90vh] flex flex-col animate-in zoom-in-95 duration-200">
-                        {/* Header */}
-                        <div className="flex items-center justify-between p-4 border-b border-slate-100">
-                            <h3 className="font-bold text-slate-800 text-lg flex items-center gap-2">
-                                <Eye className="text-sky-600" size={20} /> Preview Report
-                            </h3>
-                            <button
-                                onClick={() => {
+            {
+                previewImage && (
+                    <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/80 backdrop-blur-md animate-in fade-in duration-200 p-4">
+                        <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-5xl max-h-[90vh] flex flex-col animate-in zoom-in-95 duration-200">
+                            {/* Header */}
+                            <div className="flex items-center justify-between p-4 border-b border-slate-100">
+                                <h3 className="font-bold text-slate-800 text-lg flex items-center gap-2">
+                                    <Eye className="text-sky-600" size={20} /> Preview Report
+                                </h3>
+                                <CloseButton onClick={() => {
                                     setPreviewImage(null);
                                     if (previewImage) URL.revokeObjectURL(previewImage);
-                                }}
-                                className="p-2 hover:bg-slate-100 rounded-full text-slate-500 transition-colors"
-                            >
-                                <X size={24} />
-                            </button>
-                        </div>
+                                }} />
+                            </div>
 
-                        {/* Image Container */}
-                        <div className="flex-1 overflow-auto p-4 bg-slate-50 flex items-center justify-center custom-scrollbar">
-                            <img src={previewImage} alt="Report Preview" className="max-w-full h-auto shadow-lg rounded-lg border border-slate-200" />
-                        </div>
+                            {/* Image Container */}
+                            <div className="flex-1 overflow-auto p-4 bg-slate-50 flex items-center justify-center custom-scrollbar">
+                                <img src={previewImage} alt="Report Preview" className="max-w-full h-auto shadow-lg rounded-lg border border-slate-200" />
+                            </div>
 
-                        {/* Footer Actions */}
-                        <div className="p-4 border-t border-slate-100 flex justify-end gap-3 bg-white rounded-b-2xl">
-                            <button
-                                onClick={() => {
-                                    setPreviewImage(null);
-                                    if (previewImage) URL.revokeObjectURL(previewImage);
-                                }}
-                                className="px-5 py-2.5 text-slate-600 font-medium hover:bg-slate-100 rounded-xl transition-colors"
-                            >
-                                Close
-                            </button>
-                            <a
-                                href={previewImage}
-                                download={`${previewTitle || 'report'}.png`}
-                                className="px-5 py-2.5 bg-sky-600 text-white font-medium hover:bg-sky-700 rounded-xl shadow-lg shadow-sky-200 flex items-center gap-2 transition-all active:scale-95"
-                                onClick={() => {
-                                    // Optional: Close after download
-                                }}
-                            >
-                                <Download size={18} /> Download Image
-                            </a>
+                            {/* Footer Actions */}
+                            <div className="p-4 border-t border-slate-100 flex justify-end gap-3 bg-white rounded-b-2xl">
+                                <button
+                                    onClick={() => {
+                                        setPreviewImage(null);
+                                        if (previewImage) URL.revokeObjectURL(previewImage);
+                                    }}
+                                    className="px-5 py-2.5 text-slate-600 font-medium hover:bg-slate-100 rounded-xl transition-colors"
+                                >
+                                    Close
+                                </button>
+                                <a
+                                    href={previewImage}
+                                    download={`${previewTitle || 'report'}.png`}
+                                    className="px-5 py-2.5 bg-sky-600 text-white font-medium hover:bg-sky-700 rounded-xl shadow-lg shadow-sky-200 flex items-center gap-2 transition-all active:scale-95"
+                                    onClick={() => {
+                                        // Optional: Close after download
+                                    }}
+                                >
+                                    <Download size={18} /> Download Image
+                                </a>
+                            </div>
                         </div>
-                    </div>
-                </div>
-            )}
-        </div>
+                    </div >
+                )
+            }
+        </div >
     );
 }

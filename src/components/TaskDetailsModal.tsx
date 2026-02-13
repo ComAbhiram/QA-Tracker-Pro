@@ -1,6 +1,7 @@
 'use client';
 
 import { X, Calendar, User, Briefcase, Activity, Layers, Pencil, Link as LinkIcon, AlertCircle, Clock, Bug, Zap, FileText, ExternalLink } from 'lucide-react';
+import CloseButton from './ui/CloseButton';
 import { Task } from '@/lib/types';
 import { format } from 'date-fns';
 
@@ -57,12 +58,7 @@ export default function TaskDetailsModal({ isOpen, onClose, task, onEdit }: Task
                         >
                             <Pencil size={18} className="group-hover:scale-110 transition-transform" />
                         </button>
-                        <button
-                            onClick={onClose}
-                            className="p-2 bg-black/20 hover:bg-black/30 text-white rounded-lg backdrop-blur-sm transition-all shadow-sm"
-                        >
-                            <X size={18} />
-                        </button>
+                        <CloseButton onClick={onClose} />
                     </div>
                 </div>
 

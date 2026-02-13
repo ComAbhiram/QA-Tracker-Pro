@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { MessageCircle, X, Send, Bot, User } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import CloseButton from './ui/CloseButton';
 
 interface Message {
     role: 'user' | 'assistant';
@@ -80,12 +81,7 @@ export default function AIChatAssistant() {
                                 <p className="text-[10px] text-yellow-50">Crafted By : Abhiram P Mohan</p>
                             </div>
                         </div>
-                        <button
-                            onClick={() => setIsOpen(false)}
-                            className="text-yellow-50 hover:text-white transition-colors p-1"
-                        >
-                            <X size={18} />
-                        </button>
+                        <CloseButton onClick={() => setIsOpen(false)} />
                     </div>
 
                     {/* Messages Area */}

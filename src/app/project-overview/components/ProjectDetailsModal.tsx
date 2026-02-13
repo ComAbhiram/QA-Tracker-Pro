@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { X, Save } from 'lucide-react';
+import CloseButton from '@/components/ui/CloseButton';
 
 interface ProjectDetailsModalProps {
     isOpen: boolean;
@@ -134,12 +135,7 @@ export default function ProjectDetailsModal({ isOpen, onClose, project, onSave }
                             {project ? 'Update project details and metrics' : 'Add a new project to track'}
                         </p>
                     </div>
-                    <button
-                        onClick={onClose}
-                        className="p-2 hover:bg-white/80 rounded-lg transition-colors text-slate-600"
-                    >
-                        <X size={24} />
-                    </button>
+                    <CloseButton onClick={onClose} />
                 </div>
 
                 {/* Form */}
@@ -305,7 +301,7 @@ export default function ProjectDetailsModal({ isOpen, onClose, project, onSave }
                         {loading ? 'Saving...' : 'Save Project'}
                     </button>
                 </div>
-            </div>
-        </div>
+            </div >
+        </div >
     );
 }

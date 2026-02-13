@@ -2,6 +2,7 @@
 
 import { X, AlertTriangle } from 'lucide-react';
 import Loader from './ui/Loader';
+import CloseButton from './ui/CloseButton';
 
 interface ConfirmationModalProps {
     isOpen: boolean;
@@ -62,12 +63,7 @@ export default function ConfirmationModal({
                                 {message}
                             </div>
                         </div>
-                        <button
-                            onClick={onClose}
-                            className="text-slate-400 hover:text-slate-600 transition-colors"
-                        >
-                            <X size={20} />
-                        </button>
+                        <CloseButton onClick={onClose} />
                     </div>
                 </div>
                 <div className="bg-slate-50 p-4 flex items-center justify-end gap-3 border-t border-slate-100">
@@ -91,7 +87,7 @@ export default function ConfirmationModal({
                         ) : confirmText}
                     </button>
                 </div>
-            </div>
-        </div>
+            </div >
+        </div >
     );
 }
