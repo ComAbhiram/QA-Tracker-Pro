@@ -932,7 +932,7 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
                         <button
                             type="submit"
                             disabled={loading}
-                            className="flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-700 hover:to-indigo-600 text-white font-bold rounded-xl transition-all shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed text-sm transform active:scale-95 duration-200"
+                            className="btn btn-primary px-8 py-3 w-auto h-auto rounded-xl shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed text-sm active:scale-95 duration-200"
                         >
                             <Save size={18} />
                             {loading ? <div className="flex items-center gap-2"><Loader size="xs" color="white" /> Saving...</div> : 'Save Task'}

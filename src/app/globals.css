@@ -105,10 +105,10 @@
     /* Yellow-600 */
     --uib-hover-text: #ffffff;
     --uib-border: #F59E0B;
-    --uib-shadow-1: #d97706;
-    /* Darker yellow shadow */
-    --uib-shadow-2: #fcd34d;
-    /* Lighter yellow highlight */
+    --uib-shadow-1: rgba(0, 0, 0, 0.1);
+    /* Neutral shadow */
+    --uib-shadow-2: rgba(255, 255, 255, 0.2);
+    /* Neutral highlight */
 
     @apply border-transparent;
   }
@@ -659,15 +659,106 @@
   background-color: var(--uib-wave);
   transform: translateX(-50%) scaleY(1.3) scaleX(0.8);
 }
+
 /* Destructive Button (Red Theme) */
 .btn-destructive {
-  --uib-bg: #ef4444; /* Red-500 */
+  --uib-bg: #ef4444;
+  /* Red-500 */
   --uib-color: #ffffff;
-  --uib-wave: #b91c1c; /* Red-700 */
+  --uib-wave: #b91c1c;
+  /* Red-700 */
   --uib-hover-text: #ffffff;
   --uib-border: #ef4444;
   --uib-shadow-1: #b91c1c;
   --uib-shadow-2: #fca5a5;
-  
+
   border-color: transparent;
+}
+
+/* Metric Card - Uiverse Style */
+.card-metric {
+  --primary-clr: #1C204B;
+  /* Default, will be overridden */
+  --dot-clr: #BBC0FF;
+  --accent-clr: hsl(195, 74%, 62%);
+  /* Replaces --play */
+
+  width: 100%;
+  min-height: 170px;
+  border-radius: 10px;
+  font-family: inherit;
+  color: #fff;
+  display: grid;
+  cursor: pointer;
+  grid-template-rows: 50px 1fr;
+  transition: all 0.2s ease;
+}
+
+.card-metric:hover .img-section {
+  transform: translateY(1em);
+}
+
+.card-metric-desc {
+  border-radius: 10px;
+  padding: 15px;
+  position: relative;
+  top: -10px;
+  display: grid;
+  gap: 10px;
+  background: var(--primary-clr);
+}
+
+.card-metric-time {
+  font-size: 1.7em;
+  font-weight: 500;
+}
+
+.card-metric .img-section {
+  transition: 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+  background: var(--accent-clr);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+}
+
+.card-metric-header {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.card-metric-title {
+  flex: 1;
+  font-size: 0.9em;
+  font-weight: 500;
+}
+
+.card-metric-menu {
+  display: flex;
+  gap: 4px;
+  margin-inline: auto;
+}
+
+.card-metric .dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--dot-clr);
+}
+
+.card-metric .recent {
+  line-height: 0;
+  font-size: 0.8em;
+  opacity: 0.8;
+}
+
+/* Icons styling within card */
+.card-metric svg {
+  width: 2rem;
+  height: 2rem;
+  color: white;
+  stroke-width: 2px;
 }

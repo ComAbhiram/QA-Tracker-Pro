@@ -250,7 +250,7 @@ export default function TaskMigration() {
             <button
                 onClick={handleExport}
                 disabled={isExporting}
-                className="flex items-center gap-2 px-3 py-2 bg-white border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50 hover:text-indigo-600 transition-colors disabled:opacity-50 text-sm font-medium"
+                className="btn btn-secondary flex items-center gap-2 px-3 py-2 text-sm font-medium"
                 title="Backup Team Data (JSON)"
             >
                 <span className="flex items-center justify-center w-4 h-4">
@@ -262,7 +262,7 @@ export default function TaskMigration() {
             <button
                 onClick={handleImportClick}
                 disabled={isImporting || isExporting}
-                className="flex items-center gap-2 px-3 py-2 bg-white border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50 hover:text-emerald-600 transition-colors disabled:opacity-50 text-sm font-medium"
+                className="btn btn-secondary flex items-center gap-2 px-3 py-2 text-sm font-medium"
                 title="Restore Team Data (JSON)"
             >
                 {isImporting ? <Loader size="xs" /> : <Upload size={16} />}

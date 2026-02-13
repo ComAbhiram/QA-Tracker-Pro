@@ -448,19 +448,19 @@ export default function Tracker() {
                     {/* Actions */}
                     <button
                         onClick={() => { setIsAvailabilityCheckOpen(true); setHasChecked(false); setCheckDate(''); setAvailableMembers([]); }}
-                        className="px-3 py-2 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200 rounded-md flex items-center gap-2 text-xs font-semibold transition-colors"
+                        className="btn btn-secondary flex items-center gap-2"
                     >
                         <CalendarClock size={16} /> Check
                     </button>
                     <button
                         onClick={exportCSV}
-                        className="px-3 py-2 bg-white text-slate-700 hover:bg-slate-50 border border-slate-200 rounded-md flex items-center gap-2 text-xs font-semibold shadow-sm transition-colors"
+                        className="btn btn-secondary flex items-center gap-2"
                     >
                         <Download size={16} /> Export
                     </button>
                     <button
                         onClick={handleAddTask}
-                        className="px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md flex items-center gap-2 text-xs font-bold shadow-sm transition-colors"
+                        className="btn btn-primary flex items-center gap-2"
                     >
                         <Plus size={16} /> New Task
                     </button>

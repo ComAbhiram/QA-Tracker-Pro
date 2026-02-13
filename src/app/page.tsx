@@ -381,7 +381,7 @@ export default function Home() {
           </button>
           <button
             onClick={() => setIsAvailabilityModalOpen(true)}
-            className="btn bg-indigo-600 hover:bg-indigo-700 text-white flex items-center gap-2 shadow-lg shadow-indigo-200"
+            className="btn btn-secondary flex items-center gap-2"
           >
             <CalendarClock size={18} /> Check Availability
           </button>
