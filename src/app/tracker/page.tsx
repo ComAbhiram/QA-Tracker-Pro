@@ -533,7 +533,7 @@ export default function Tracker() {
                 <table className="w-full text-xs text-slate-800 border-collapse table-fixed">
                     <colgroup>
                         <col style={{ width: columnWidths.projectName }} />
-                        <col style={{ width: columnWidths.currentUpdates }} />
+
                         <col style={{ width: columnWidths.projectType }} />
                         <col style={{ width: columnWidths.priority }} />
                         <col style={{ width: columnWidths.subPhase }} />
@@ -549,7 +549,7 @@ export default function Tracker() {
                     <thead className="bg-slate-50 text-slate-600 font-bold uppercase tracking-wider">
                         <tr>
                             <ResizableHeader label="Project" widthKey="projectName" width={columnWidths.projectName} onResizeStart={startResizing} />
-                            <ResizableHeader label="Current Updates" widthKey="currentUpdates" width={columnWidths.currentUpdates} onResizeStart={startResizing} />
+
                             <ResizableHeader label="Type" widthKey="projectType" width={columnWidths.projectType} onResizeStart={startResizing} />
                             <ResizableHeader label="Priority" widthKey="priority" width={columnWidths.priority} onResizeStart={startResizing} />
                             <ResizableHeader label="Phase" widthKey="subPhase" width={columnWidths.subPhase} onResizeStart={startResizing} />
