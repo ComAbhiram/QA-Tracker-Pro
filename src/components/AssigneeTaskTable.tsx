@@ -1,5 +1,11 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { Task, isTaskOverdue, getOverdueDays, Leave } from '@/lib/types';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { format } from 'date-fns';
 import {
     AlertCircle,
@@ -134,47 +140,30 @@ const EditableCell = ({ value, onSave, className, type = 'text', options = [], i
 
 // Status Select Cell (Specialized)
 const StatusSelectCell = ({ status, onSave }: { status: string, onSave: (val: string) => void }) => {
-    // Using a native select for simplicity and robustness in a table cell
-    // Styling it to look like a badge when not focused is tricky with native select.
-    // Instead, we switch between Badge and Select.
-    const [isEditing, setIsEditing] = useState(false);
-    const selectRef = useRef<HTMLSelectElement>(null);
-
     const statusOptions = [
         'Yet to Start', 'Being Developed', 'Ready for QA', 'Assigned to QA',
         'In Progress', 'On Hold', 'Completed', 'Forecast', 'Rejected'
     ];
 
-    useEffect(() => {
-        if (isEditing && selectRef.current) {
-            selectRef.current.focus();
-        }
-    }, [isEditing]);
-
-    const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        onSave(e.target.value);
-        setIsEditing(false);
-    };
-
-    if (isEditing) {
-        return (
-            <select
-                ref={selectRef}
-                value={status}
-                onChange={handleChange}
-                onBlur={() => setIsEditing(false)}
-                onClick={(e) => e.stopPropagation()}
-                className="w-full text-xs bg-white border border-indigo-300 rounded px-1 py-0.5 focus:outline-none shadow-sm"
-            >
-                {statusOptions.map(s => <option key={s} value={s}>{s}</option>)}
-            </select>
-        );
-    }
-
     return (
-        <div onClick={(e) => { e.stopPropagation(); setIsEditing(true); }} className="cursor-pointer hover:opacity-80 transition-opacity min-w-0 overflow-hidden">
-            <StatusBadge status={status} />
-        </div>
+        <DropdownMenu>
+            <DropdownMenuTrigger className="outline-none w-full text-left focus:ring-0">
+                <div className="cursor-pointer hover:opacity-80 transition-opacity min-w-0 overflow-hidden">
+                    <StatusBadge status={status} />
+                </div>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-40 z-50">
+                {statusOptions.map((s) => (
+                    <DropdownMenuItem
+                        key={s}
+                        onClick={() => onSave(s)}
+                        className="text-xs cursor-pointer py-1.5 focus:bg-slate-100"
+                    >
+                        {s}
+                    </DropdownMenuItem>
+                ))}
+            </DropdownMenuContent>
+        </DropdownMenu>
     );
 };
 

@@ -37,17 +37,17 @@ export default function Tracker() {
 
     // Column Resizing (Lifted State)
     const { columnWidths, startResizing } = useColumnResizing({
-        projectName: 240, // Reduced from 300
+        projectName: 200,
         projectType: 60,
         priority: 65,
-        subPhase: 110,
+        subPhase: 100,
         pc: 50,
-        status: 120,
-        startDate: 95,
-        endDate: 95,
+        status: 110,
+        startDate: 90,
+        endDate: 90,
         actualCompletionDate: 80,
-        comments: 130,
-        deviation: 70,
+        comments: 120,
+        deviation: 60,
         sprint: 50
     });
 
