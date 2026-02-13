@@ -166,7 +166,7 @@ export function Sidebar() {
     };
 
     return (
-        <>
+        <div id="app-sidebar-container">
             {/* Floating Toggle Button (Visible only when collapsed on mobile) */}
             <button
                 onClick={() => setCollapsed(false)}
@@ -293,6 +293,6 @@ export function Sidebar() {
                     onClick={() => setCollapsed(true)}
                 />
             )}
-        </>
+        </div>
     );
 }
