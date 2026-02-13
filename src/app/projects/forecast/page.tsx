@@ -20,7 +20,7 @@ export default function ForecastProjects() {
     const [selectedTask, setSelectedTask] = useState<Task | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [viewMode, setViewMode] = useState<'box' | 'table'>('table');
-    const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(null);
+    const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>({ key: 'startDate', direction: 'asc' });
 
     const { columnWidths, startResizing } = useColumnResizing({
         projectName: 300,
@@ -157,8 +157,20 @@ export default function ForecastProjects() {
         let sortableTasks = [...tasks];
         if (sortConfig !== null) {
             sortableTasks.sort((a, b) => {
-                let aValue: any = a[sortConfig.key as keyof Task];
-                let bValue: any = b[sortConfig.key as keyof Task];
+                const key = sortConfig.key as keyof Task;
+                let aValue: any = a[key];
+                let bValue: any = b[key];
+
+                // Special handling for dates to keep nulls last
+                if (key === 'startDate' || key === 'endDate' || key === 'created_at') {
+                    const dateA = aValue ? new Date(aValue).getTime() : (sortConfig.direction === 'asc' ? Number.MAX_SAFE_INTEGER : -1);
+                    const dateB = bValue ? new Date(bValue).getTime() : (sortConfig.direction === 'asc' ? Number.MAX_SAFE_INTEGER : -1);
+                    return sortConfig.direction === 'asc' ? dateA - dateB : dateB - dateA;
+                }
+
+                if (aValue === bValue) return 0;
+                if (aValue === null || aValue === undefined) return 1;
+                if (bValue === null || bValue === undefined) return -1;
 
                 if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
                 if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
@@ -233,9 +245,9 @@ export default function ForecastProjects() {
                         <div key={task.id} onClick={() => handleTaskClick(task)} className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 hover:shadow-md transition-all cursor-pointer group">
                             <div className="flex justify-between items-start mb-4">
                                 <span className={`px-3 py-1 rounded-full text-xs font-bold ${task.priority === 'High' ? 'bg-orange-100 text-orange-700' :
-                                        task.priority === 'Urgent' ? 'bg-red-100 text-red-700' :
-                                            task.priority === 'Medium' ? 'bg-amber-100 text-amber-700' :
-                                                'bg-green-100 text-green-700'
+                                    task.priority === 'Urgent' ? 'bg-red-100 text-red-700' :
+                                        task.priority === 'Medium' ? 'bg-amber-100 text-amber-700' :
+                                            'bg-green-100 text-green-700'
                                     }`}>
                                     {task.priority || 'Normal'}
                                 </span>
