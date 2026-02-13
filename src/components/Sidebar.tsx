@@ -156,7 +156,7 @@ export function Sidebar() {
                 { label: 'Reports', icon: <BarChart3 size={18} />, href: '/reports' },
                 { label: 'Analytics', icon: <Search size={18} />, href: '/analytics' },
                 { label: 'Hubstaff', icon: <Calendar size={18} />, href: '/attendance' },
-                ...((isGuest && selectedTeamName === 'QA Team') || (!isGuest && sidebarTitle === 'QA Team')
+                ...((isGuest && selectedTeamName === 'QA Team') || (!isGuest && sidebarTitle === 'QA Team') || userRole === 'super_admin'
                     ? [{ label: 'Bugs Report', icon: <Bug size={18} />, href: '/analytics/bugs' }]
                     : []
                 ),
