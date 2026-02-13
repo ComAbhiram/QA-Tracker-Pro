@@ -429,15 +429,15 @@ export default function Tracker() {
 
     return (
         <div className="max-w-[1920px] mx-auto pb-20"> {/* Extended max-width for extra columns */}
-            <header className="flex flex-col xl:flex-row xl:items-center justify-between gap-6 mb-4">
+            <header className="flex flex-col gap-6 mb-6">
                 <div>
                     <h1 className="text-3xl font-bold text-slate-800">Task Tracker</h1>
                     <p className="text-slate-500">Track all active tasks</p>
                 </div>
 
-                {/* Manager Mode Team Selector */}
+                {/* Manager Mode Team Selector - Dedicated Row */}
                 {isGuest && teams.length > 0 && (
-                    <div className="flex-1 flex justify-center order-last xl:order-none w-full xl:w-auto mt-4 xl:mt-0 min-w-0 mx-4">
+                    <div className="w-full flex justify-center order-last xl:order-none min-w-0">
                         <TeamSelectorPill
                             teams={teams}
                             selectedTeamName={selectedTeamName}
@@ -446,79 +446,83 @@ export default function Tracker() {
                     </div>
                 )}
 
-                <div className="flex items-center gap-3 flex-shrink-0">
-                    {/* Search Box - Light Styling */}
-                    <div className="relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-                        <input
-                            type="text"
-                            placeholder="Filter tasks..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-[200px] bg-white text-slate-700 placeholder:text-slate-500 pl-9 pr-3 py-2 border border-slate-200 rounded-md focus:outline-none focus:ring-1 focus:ring-slate-300 text-xs transition-all shadow-sm"
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                        {/* Search Box - Light Styling */}
+                        <div className="relative">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                            <input
+                                type="text"
+                                placeholder="Filter tasks..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="w-[200px] bg-white text-slate-700 placeholder:text-slate-500 pl-9 pr-3 py-2 border border-slate-200 rounded-md focus:outline-none focus:ring-1 focus:ring-slate-300 text-xs transition-all shadow-sm"
+                            />
+                        </div>
+
+                        {/* Date Filter - Custom DatePicker */}
+                        <DatePicker
+                            date={dateFilter}
+                            setDate={setDateFilter}
+                            className="w-[140px] bg-white text-slate-700 border border-slate-200 min-h-0 py-2 px-3 text-xs shadow-sm hover:bg-slate-50 rounded-md"
+                            placeholder="Filter by date"
                         />
+
+                        <div className="h-6 w-px bg-slate-200 mx-1 hidden md:block"></div>
+
+                        {/* View Mode Toggle */}
+                        <div className="bg-slate-100 p-0.5 rounded-lg flex items-center border border-slate-200">
+                            <button
+                                onClick={() => setViewMode('active')}
+                                className={`px-3 py-1.5 text-xs font-bold rounded-md transition-all ${viewMode === 'active'
+                                    ? 'bg-white text-slate-800 shadow-sm'
+                                    : 'text-slate-500 hover:text-slate-700'
+                                    }`}
+                            >
+                                Active
+                            </button>
+                            <button
+                                onClick={() => setViewMode('forecast')}
+                                className={`px-3 py-1.5 text-xs font-bold rounded-md transition-all ${viewMode === 'forecast'
+                                    ? 'bg-white text-purple-600 shadow-sm'
+                                    : 'text-slate-500 hover:text-slate-700'
+                                    }`}
+                            >
+                                Forecast
+                            </button>
+                        </div>
                     </div>
 
-                    {/* Date Filter - Custom DatePicker */}
-                    <DatePicker
-                        date={dateFilter}
-                        setDate={setDateFilter}
-                        className="w-[140px] bg-white text-slate-700 border border-slate-200 min-h-0 py-2 px-3 text-xs shadow-sm hover:bg-slate-50 rounded-md"
-                        placeholder="Filter by date"
-                    />
-
-                    <div className="h-6 w-px bg-slate-200 mx-1 hidden md:block"></div>
-
-                    {/* View Mode Toggle */}
-                    <div className="bg-slate-100 p-0.5 rounded-lg flex items-center border border-slate-200">
+                    <div className="flex items-center gap-3">
+                        {/* Row Expand Toggle */}
                         <button
-                            onClick={() => setViewMode('active')}
-                            className={`px-3 py-1.5 text-xs font-bold rounded-md transition-all ${viewMode === 'active'
-                                ? 'bg-white text-slate-800 shadow-sm'
-                                : 'text-slate-500 hover:text-slate-700'
-                                }`}
+                            onClick={() => setIsRowExpanded(!isRowExpanded)}
+                            className={`p-2 rounded-md border text-slate-600 transition-all ${isRowExpanded ? 'bg-indigo-50 border-indigo-200 text-indigo-600' : 'bg-white border-slate-200 hover:bg-slate-50'}`}
+                            title={isRowExpanded ? "Collapse Rows" : "Expand Rows"}
                         >
-                            Active
+                            {isRowExpanded ? <ArrowUp size={16} /> : <ArrowDown size={16} />}
+                        </button>
+
+                        {/* Actions */}
+                        <button
+                            onClick={() => { setIsAvailabilityCheckOpen(true); setHasChecked(false); setCheckDate(''); setAvailableMembers([]); }}
+                            className="btn btn-secondary flex items-center gap-2"
+                        >
+                            <CalendarClock size={16} /> Check
                         </button>
                         <button
-                            onClick={() => setViewMode('forecast')}
-                            className={`px-3 py-1.5 text-xs font-bold rounded-md transition-all ${viewMode === 'forecast'
-                                ? 'bg-white text-purple-600 shadow-sm'
-                                : 'text-slate-500 hover:text-slate-700'
-                                }`}
+                            onClick={exportCSV}
+                            className="btn btn-secondary flex items-center gap-2"
                         >
-                            Forecast
+                            <Download size={16} /> Export
+                        </button>
+                        <button
+                            onClick={handleAddTask}
+                            className="btn btn-primary flex items-center gap-2"
+                        >
+                            <Plus size={16} /> New Task
                         </button>
                     </div>
-
-                    {/* Row Expand Toggle */}
-                    <button
-                        onClick={() => setIsRowExpanded(!isRowExpanded)}
-                        className={`p-2 rounded-md border text-slate-600 transition-all ${isRowExpanded ? 'bg-indigo-50 border-indigo-200 text-indigo-600' : 'bg-white border-slate-200 hover:bg-slate-50'}`}
-                        title={isRowExpanded ? "Collapse Rows" : "Expand Rows"}
-                    >
-                        {isRowExpanded ? <ArrowUp size={16} /> : <ArrowDown size={16} />}
-                    </button>
-
-                    {/* Actions */}
-                    <button
-                        onClick={() => { setIsAvailabilityCheckOpen(true); setHasChecked(false); setCheckDate(''); setAvailableMembers([]); }}
-                        className="btn btn-secondary flex items-center gap-2"
-                    >
-                        <CalendarClock size={16} /> Check
-                    </button>
-                    <button
-                        onClick={exportCSV}
-                        className="btn btn-secondary flex items-center gap-2"
-                    >
-                        <Download size={16} /> Export
-                    </button>
-                    <button
-                        onClick={handleAddTask}
-                        className="btn btn-primary flex items-center gap-2"
-                    >
-                        <Plus size={16} /> New Task
-                    </button>
                 </div>
             </header>
 
