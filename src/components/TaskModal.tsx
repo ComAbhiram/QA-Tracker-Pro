@@ -68,44 +68,30 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
     // Fetch projects on mount or when team changes
     useEffect(() => {
         const fetchProjects = async () => {
-            if (!effectiveTeamId) return;
-
             setIsFetchingProjects(true);
             try {
-                // Fetch from Supabase instead of Hubstaff API
-                let query = supabase
-                    .from('projects')
-                    .select('name')
-                    .eq('status', 'active');
+                // Use new API route to bypass RLS and ensure Managers get all projects
+                let url = '/api/projects';
 
-                // If NOT QA Team (Global), filter by team
-                // QA Team ID: ba60298b-8635-4cca-bcd5-7e470fad60e6
-                if (effectiveTeamId !== 'ba60298b-8635-4cca-bcd5-7e470fad60e6') {
-                    query = query.eq('team_id', effectiveTeamId);
+                // If NOT Manager Mode (isGuest) AND NOT QA Team (Global), filter by team
+                // This means Managers (isGuest=true) will NOT send team_id, thus fetching ALL projects (Super Admin privilege)
+                if (!isGuest && effectiveTeamId && effectiveTeamId !== 'ba60298b-8635-4cca-bcd5-7e470fad60e6') {
+                    url += `?team_id=${effectiveTeamId}`;
                 }
 
-                const { data, error } = await query.order('name', { ascending: true });
-
-                if (!error && data && data.length > 0) {
-                    setProjects(data.map((p: any) => ({
-                        id: p.name,
-                        label: p.name
-                    })));
-                } else {
-                    console.warn('[TaskModal] No team projects found, fetching ALL active projects as fallback.');
-                    // Fallback: Fetch ALL active projects
-                    const { data: allProjects } = await supabase
-                        .from('projects')
-                        .select('name')
-                        .eq('status', 'active')
-                        .order('name', { ascending: true });
-
-                    if (allProjects) {
-                        setProjects(allProjects.map((p: any) => ({
-                            id: p.name,
+                const response = await fetch(url);
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.projects) {
+                        setProjects(data.projects.map((p: any) => ({
+                            id: p.name, // Using name as ID based on existing logic
                             label: p.name
                         })));
                     }
+                } else {
+                    console.error('[TaskModal] Failed to fetch projects via API');
+                    // Fallback to empty or previous state
+                    setProjects([]);
                 }
             } catch (error) {
                 console.error('[TaskModal] Error fetching projects:', error);
@@ -117,7 +103,9 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
         if (isOpen) {
             fetchProjects();
         }
-    }, [isOpen, effectiveTeamId]);
+    }, [isOpen, effectiveTeamId, isGuest]);
+
+
 
     // Fetch Hubstaff users OR Team Members on open
     useEffect(() => {
