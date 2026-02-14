@@ -29,9 +29,9 @@ export default function DashboardStats({ tasks, onFilterChange, activeFilter }: 
             filter: 'All',
             icon: <Layers size={24} />,
             style: {
-                '--primary-clr': '#1e3a8a', // Blue-900
+                '--primary-clr': '#1e3a8a',
                 '--accent-clr': '#3b82f6',  // Matte Blue
-                '--dot-clr': '#bfdbfe'      // Blue-200
+                '--dot-clr': '#60a5fa'      // Blue-400 (Vibrant BG)
             }
         },
         {
@@ -40,9 +40,9 @@ export default function DashboardStats({ tasks, onFilterChange, activeFilter }: 
             filter: 'Active',
             icon: <PlayCircle size={24} />,
             style: {
-                '--primary-clr': '#14532d', // Green-900
+                '--primary-clr': '#14532d',
                 '--accent-clr': '#22c55e',  // Matte Green
-                '--dot-clr': '#bbf7d0'      // Green-200
+                '--dot-clr': '#a3e635'      // Lime-400 (Vibrant BG - Matching Ref)
             }
         },
         {
@@ -51,9 +51,9 @@ export default function DashboardStats({ tasks, onFilterChange, activeFilter }: 
             filter: 'Forecast',
             icon: <Cloud size={24} />,
             style: {
-                '--primary-clr': '#581c87', // Purple-900
+                '--primary-clr': '#581c87',
                 '--accent-clr': '#a855f7',  // Matte Purple
-                '--dot-clr': '#e9d5ff'      // Purple-200
+                '--dot-clr': '#c084fc'      // Purple-400 (Vibrant BG)
             }
         },
         {
@@ -62,9 +62,9 @@ export default function DashboardStats({ tasks, onFilterChange, activeFilter }: 
             filter: 'Completed',
             icon: <CheckCircle2 size={24} />,
             style: {
-                '--primary-clr': '#134e4a', // Teal-900
+                '--primary-clr': '#134e4a',
                 '--accent-clr': '#14b8a6',  // Matte Teal
-                '--dot-clr': '#ccfbf1'      // Teal-200
+                '--dot-clr': '#2dd4bf'      // Teal-400 (Vibrant BG)
             }
         },
         {
@@ -73,9 +73,9 @@ export default function DashboardStats({ tasks, onFilterChange, activeFilter }: 
             filter: 'Overdue',
             icon: <XCircle size={24} />,
             style: {
-                '--primary-clr': '#7f1d1d', // Red-900
+                '--primary-clr': '#7f1d1d',
                 '--accent-clr': '#ef4444',  // Matte Red
-                '--dot-clr': '#fecaca'      // Red-200
+                '--dot-clr': '#f87171'      // Red-400 (Vibrant BG)
             }
         }
     ];
