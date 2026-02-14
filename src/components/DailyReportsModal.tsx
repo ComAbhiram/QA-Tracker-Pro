@@ -7,6 +7,7 @@ import { X, Camera, FileText, Calendar, ClipboardList, ChevronRight, Download, E
 import html2canvas from 'html2canvas';
 import Combobox from '@/components/ui/Combobox';
 import CloseButton from '@/components/ui/CloseButton';
+import ReportActions from '@/components/ui/ReportActions';
 
 interface DailyReportsModalProps {
     isOpen: boolean;
@@ -1114,25 +1115,11 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
 
                         {expandedSection === 'today' && (
                             <div className="border-t border-slate-200 bg-slate-50 p-3 space-y-2">
-                                <button
-                                    onClick={handleGenerateTodayWorkStatusClick}
-                                    disabled={loading}
-                                    className="w-full flex items-center gap-3 p-3 bg-white hover:bg-sky-50 border border-slate-200 hover:border-sky-300 rounded-lg transition-all text-left"
-                                >
-                                    {loading ? (
-                                        <div className="w-4 h-4 border-2 border-sky-600 border-t-transparent rounded-full animate-spin"></div>
-                                    ) : (
-                                        <Camera className="text-sky-600" size={18} />
-                                    )}
-                                    <span className="text-sm font-medium text-slate-700">{loading ? 'Generating...' : 'Download as Image'}</span>
-                                </button>
-                                <button
-                                    onClick={generateTodayWorkStatusText}
-                                    className="w-full flex items-center gap-3 p-3 bg-white hover:bg-sky-50 border border-slate-200 hover:border-sky-300 rounded-lg transition-all text-left"
-                                >
-                                    <ClipboardList className="text-sky-600" size={18} />
-                                    <span className="text-sm font-medium text-slate-700">Copy as Text</span>
-                                </button>
+                                <ReportActions
+                                    onDownload={handleGenerateTodayWorkStatusClick}
+                                    onCopy={generateTodayWorkStatusText}
+                                    loading={loading}
+                                />
                             </div>
                         )}
                     </div>
@@ -1169,25 +1156,11 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                                 </div>
 
                                 <div className="space-y-2 pt-2">
-                                    <button
-                                        onClick={generateWorkScheduleImage}
-                                        disabled={loading}
-                                        className="w-full flex items-center gap-3 p-3 bg-white hover:bg-sky-50 border border-slate-200 hover:border-sky-300 rounded-lg transition-all text-left"
-                                    >
-                                        {loading ? (
-                                            <div className="w-4 h-4 border-2 border-sky-600 border-t-transparent rounded-full animate-spin"></div>
-                                        ) : (
-                                            <Camera className="text-sky-600" size={18} />
-                                        )}
-                                        <span className="text-sm font-medium text-slate-700">{loading ? 'Generating...' : 'Download as Image'}</span>
-                                    </button>
-                                    <button
-                                        onClick={generateWorkScheduleText}
-                                        className="w-full flex items-center gap-3 p-3 bg-white hover:bg-sky-50 border border-slate-200 hover:border-sky-300 rounded-lg transition-all text-left"
-                                    >
-                                        <ClipboardList className="text-sky-600" size={18} />
-                                        <span className="text-sm font-medium text-slate-700">Copy as Text</span>
-                                    </button>
+                                    <ReportActions
+                                        onDownload={generateWorkScheduleImage}
+                                        onCopy={generateWorkScheduleText}
+                                        loading={loading}
+                                    />
                                 </div>
                             </div>
                         )}
@@ -1277,22 +1250,12 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
 
                                 {/* Action Buttons */}
                                 <div className="space-y-2 pt-2">
-                                    <button
-                                        onClick={generateQAWorkStatusImage}
-                                        disabled={loading || !selectedQA}
-                                        className="w-full flex items-center gap-3 p-3 bg-white hover:bg-sky-50 border border-slate-200 hover:border-sky-300 rounded-lg transition-all text-left disabled:opacity-50 disabled:cursor-not-allowed"
-                                    >
-                                        <Camera className="text-sky-600" size={18} />
-                                        <span className="text-sm font-medium text-slate-700">Download as Image</span>
-                                    </button>
-                                    <button
-                                        onClick={generateQAWorkStatusText}
-                                        disabled={loading || !selectedQA}
-                                        className="w-full flex items-center gap-3 p-3 bg-white hover:bg-sky-50 border border-slate-200 hover:border-sky-300 rounded-lg transition-all text-left disabled:opacity-50 disabled:cursor-not-allowed"
-                                    >
-                                        <ClipboardList className="text-sky-600" size={18} />
-                                        <span className="text-sm font-medium text-slate-700">Copy as Text</span>
-                                    </button>
+                                    <ReportActions
+                                        onDownload={generateQAWorkStatusImage}
+                                        onCopy={generateQAWorkStatusText}
+                                        loading={loading}
+                                        disabled={!selectedQA}
+                                    />
                                 </div>
                             </div>
                         )}
