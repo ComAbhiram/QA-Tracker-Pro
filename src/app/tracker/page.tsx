@@ -432,21 +432,23 @@ export default function Tracker() {
     return (
         <div className="max-w-[1920px] mx-auto pb-20"> {/* Extended max-width for extra columns */}
             <header className="flex flex-col gap-6 mb-6">
-                <div>
-                    <h1 className="text-3xl font-bold text-slate-800">Task Tracker</h1>
-                    <p className="text-slate-500">Track all active tasks</p>
-                </div>
-
-                {/* Manager Mode Team Selector - Dedicated Row */}
-                {isGuest && teams.length > 0 && (
-                    <div className="w-full flex justify-center order-last xl:order-none min-w-0">
-                        <TeamSelectorPill
-                            teams={teams}
-                            selectedTeamName={selectedTeamName}
-                            onSelect={handleTeamSelect}
-                        />
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <h1 className="text-3xl font-bold text-slate-800">Task Tracker</h1>
+                        <p className="text-slate-500">Track all active tasks</p>
                     </div>
-                )}
+
+                    {/* Manager Mode Team Selector - Aligned with Title */}
+                    {isGuest && teams.length > 0 && (
+                        <div className="flex-1 max-w-3xl flex justify-center">
+                            <TeamSelectorPill
+                                teams={teams}
+                                selectedTeamName={selectedTeamName}
+                                onSelect={handleTeamSelect}
+                            />
+                        </div>
+                    )}
+                </div>
 
                 <div className="flex flex-wrap items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
