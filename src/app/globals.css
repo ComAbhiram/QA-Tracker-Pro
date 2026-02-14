@@ -789,6 +789,12 @@
   -webkit-user-select: none;
   transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
   will-change: transform;
+  /* Safari Smoothness Fixes */
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+  -webkit-font-smoothing: subpixel-antialiased;
+
   border: 1px solid #e2e8f0;
   /* Light grey border */
   cursor: pointer;
