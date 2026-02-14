@@ -367,15 +367,15 @@ export default function Home() {
   };
 
   return (
-    <div className="max-w-[1600px] mx-auto space-y-8 animate-in fade-in duration-500">
+    <div className="max-w-[1600px] mx-auto space-y-8 animate-in fade-in duration-500 pb-24">
 
       {/* Header & Actions */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pl-16 lg:pl-0">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-slate-800">Team Tracker</h1>
           <p className="text-slate-500">Overview of all active team projects</p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-3">
           <button
             onClick={() => setIsReportModalOpen(true)}
             className="btn btn-secondary flex items-center gap-2"
