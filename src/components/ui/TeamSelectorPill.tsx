@@ -43,7 +43,7 @@ export const TeamSelectorPill = ({ teams, selectedTeamName, onSelect }: TeamSele
                         <label
                             key={team.id}
                             ref={el => { tabsRef.current[index] = el; }}
-                            className={`relative px-4 py-2 rounded-[3rem] cursor-pointer font-semibold transition-colors duration-300 z-10 select-none text-center whitespace-nowrap text-sm ${selectedTeamName === team.name ? 'text-white' : 'text-[#ddd] hover:text-[#ff6ec4]'
+                            className={`relative px-3 py-1.5 rounded-[3rem] cursor-pointer font-semibold transition-colors duration-300 z-10 select-none text-center whitespace-nowrap text-xs ${selectedTeamName === team.name ? 'text-white' : 'text-[#ddd] hover:text-[#ff6ec4]'
                                 }`}
                             onClick={() => onSelect(team.name)}
                         >

@@ -440,7 +440,7 @@ export default function Tracker() {
 
                     {/* Manager Mode Team Selector - Aligned with Title */}
                     {isGuest && teams.length > 0 && (
-                        <div className="flex-1 max-w-3xl flex justify-center">
+                        <div className="flex-1 flex justify-end min-w-0 overflow-x-auto no-scrollbar ml-4">
                             <TeamSelectorPill
                                 teams={teams}
                                 selectedTeamName={selectedTeamName}
