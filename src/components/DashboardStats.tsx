@@ -30,19 +30,19 @@ export default function DashboardStats({ tasks, onFilterChange, activeFilter }: 
             icon: <Layers size={24} />,
             style: {
                 '--primary-clr': '#1e3a8a', // Blue-900
-                '--accent-clr': '#3b82f6',  // Blue-500
+                '--accent-clr': '#3b82f6',  // Matte Blue
                 '--dot-clr': '#bfdbfe'      // Blue-200
             }
         },
         {
             title: 'Active Tasks',
             value: stats.active,
-            filter: 'active',
+            filter: 'Active',
             icon: <PlayCircle size={24} />,
             style: {
-                '--primary-clr': '#78350f', // Amber-900
-                '--accent-clr': '#f59e0b',  // Amber-500
-                '--dot-clr': '#fde68a'      // Amber-200
+                '--primary-clr': '#14532d', // Green-900
+                '--accent-clr': '#22c55e',  // Matte Green
+                '--dot-clr': '#bbf7d0'      // Green-200
             }
         },
         {
@@ -51,9 +51,9 @@ export default function DashboardStats({ tasks, onFilterChange, activeFilter }: 
             filter: 'Forecast',
             icon: <Cloud size={24} />,
             style: {
-                '--primary-clr': '#4c1d95', // Violet-900
-                '--accent-clr': '#8b5cf6',  // Violet-500
-                '--dot-clr': '#ddd6fe'      // Violet-200
+                '--primary-clr': '#581c87', // Purple-900
+                '--accent-clr': '#a855f7',  // Matte Purple
+                '--dot-clr': '#e9d5ff'      // Purple-200
             }
         },
         {
@@ -62,9 +62,9 @@ export default function DashboardStats({ tasks, onFilterChange, activeFilter }: 
             filter: 'Completed',
             icon: <CheckCircle2 size={24} />,
             style: {
-                '--primary-clr': '#064e3b', // Emerald-900
-                '--accent-clr': '#10b981',  // Emerald-500
-                '--dot-clr': '#a7f3d0'      // Emerald-200
+                '--primary-clr': '#134e4a', // Teal-900
+                '--accent-clr': '#14b8a6',  // Matte Teal
+                '--dot-clr': '#ccfbf1'      // Teal-200
             }
         },
         {
@@ -74,7 +74,7 @@ export default function DashboardStats({ tasks, onFilterChange, activeFilter }: 
             icon: <XCircle size={24} />,
             style: {
                 '--primary-clr': '#7f1d1d', // Red-900
-                '--accent-clr': '#ef4444',  // Red-500
+                '--accent-clr': '#ef4444',  // Matte Red
                 '--dot-clr': '#fecaca'      // Red-200
             }
         }
