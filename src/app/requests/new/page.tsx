@@ -168,9 +168,10 @@ export default function LeavePage() {
 
                 <div className="flex flex-wrap items-center gap-4">
                     {/* Add Leave Button */}
+                    {/* Add Leave Button */}
                     <button
                         onClick={() => setIsLeaveModalOpen(true)}
-                        className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200"
+                        className="btn btn-primary flex items-center gap-2 shadow-lg shadow-orange-200"
                     >
                         <PlusCircle size={18} />
                         Add Leave

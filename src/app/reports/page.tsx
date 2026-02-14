@@ -352,7 +352,7 @@ export default function Reports() {
                 </div>
                 <button
                     onClick={exportReport}
-                    className="flex items-center gap-2 px-4 py-2 bg-sky-500 text-white rounded-lg hover:bg-sky-600 transition-colors shadow-sm"
+                    className="btn btn-info flex items-center gap-2"
                 >
                     <Download size={18} />
                     Export Report
@@ -406,13 +406,13 @@ export default function Reports() {
                     </div>
                     <button
                         onClick={() => { setDateRange({ start: '', end: '' }); setSelectedQA(''); setSelectedProject(''); }}
-                        className="px-4 py-2 text-slate-500 hover:text-slate-700 hover:bg-slate-50 rounded-lg text-sm transition-colors"
+                        className="btn btn-secondary text-sm"
                     >
                         Reset
                     </button>
                     <button
                         onClick={exportReport}
-                        className="flex items-center gap-2 px-4 py-2 bg-sky-500 text-white rounded-lg hover:bg-sky-600 transition-colors shadow-sm whitespace-nowrap"
+                        className="btn btn-info flex items-center gap-2 whitespace-nowrap"
                     >
                         <Download size={18} />
                         Export CSV

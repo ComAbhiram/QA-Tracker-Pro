@@ -325,14 +325,14 @@ export default function SuperAdminPage() {
                             )}
                             <Link
                                 href="/admin"
-                                className="flex items-center gap-2 px-4 py-2 bg-slate-800 text-white rounded-lg hover:bg-slate-900 transition-colors shadow-sm"
+                                className="btn btn-secondary flex items-center gap-2"
                             >
                                 <Users size={18} />
                                 Manage Teams
                             </Link>
                             <button
                                 onClick={fetchAllProjects}
-                                className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors shadow-sm"
+                                className="btn btn-secondary flex items-center gap-2"
                             >
                                 <RefreshCw size={18} />
                                 Refresh

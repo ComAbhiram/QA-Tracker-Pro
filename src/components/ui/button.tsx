@@ -11,7 +11,7 @@ const buttonVariants = cva(
             variant: {
                 default: "btn-uiverse btn-primary",
                 destructive:
-                    "btn-uiverse btn-destructive",
+                    "btn-uiverse btn-danger",
                 outline:
                     "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
                 secondary:

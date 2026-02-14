@@ -1301,7 +1301,7 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                                 <button
                                     onClick={() => generateTodayWorkStatus(true)}
                                     disabled={hubstaffLoadingState !== null}
-                                    className="flex-1 px-4 py-2 bg-sky-500 text-white font-medium rounded-lg hover:bg-sky-600 transition-colors shadow-sm flex justify-center items-center gap-2 disabled:opacity-50"
+                                    className="btn btn-info flex-1 flex justify-center items-center gap-2 disabled:opacity-50"
                                 >
                                     {hubstaffLoadingState === 'show' && <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>}
                                     Yes, Show

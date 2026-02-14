@@ -897,7 +897,7 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
                         <button
                             type="button"
                             onClick={onClose}
-                            className="px-6 py-3 text-slate-600 font-bold hover:bg-slate-50 rounded-xl transition-colors text-sm"
+                            className="btn btn-secondary px-6 py-3 rounded-xl text-sm h-auto"
                         >
                             Cancel
                         </button>
@@ -912,7 +912,7 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
                                         setLoading(false);
                                     }
                                 }}
-                                className="px-6 py-3 rounded-xl shadow-none"
+                                className="btn btn-danger px-6 py-3 rounded-xl shadow-none h-auto"
                             >
                                 Delete
                             </Button>

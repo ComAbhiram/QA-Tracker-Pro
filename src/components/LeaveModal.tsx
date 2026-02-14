@@ -203,16 +203,17 @@ export default function LeaveModal({ isOpen, onClose, onSave }: LeaveModalProps)
                     <button
                         type="button"
                         onClick={onClose}
-                        className="px-6 py-2.5 text-slate-700 hover:bg-slate-200 rounded-xl font-medium transition-colors"
+                        className="btn btn-secondary"
+                        disabled={loading}
                     >
                         Cancel
                     </button>
                     <button
-                        onClick={handleSubmit}
+                        type="submit"
+                        className="btn btn-primary shadow-lg shadow-indigo-200"
                         disabled={loading}
-                        className="px-6 py-2.5 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 disabled:bg-slate-400 disabled:cursor-not-allowed transition-colors shadow-lg shadow-indigo-200"
                     >
-                        {loading ? 'Saving...' : 'Submit Leave Request'}
+                        {loading ? 'Saving...' : 'Submit Request'}
                     </button>
                 </div>
             </div>
