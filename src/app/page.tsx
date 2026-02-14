@@ -61,8 +61,11 @@ export default function Home() {
       .select('id, status, end_date, assigned_to, project_name, sub_phase', { count: 'exact' });
 
     // Apply Team Filter if Guest
-    if (isGuest && selectedTeamId) {
-      query = query.eq('team_id', selectedTeamId);
+    if (isGuest) {
+      const isQATeamGlobal = selectedTeamId === 'ba60298b-8635-4cca-bcd5-7e470fad60e6';
+      if (selectedTeamId && !isQATeamGlobal) {
+        query = query.eq('team_id', selectedTeamId);
+      }
     }
 
     const { data, error } = await query;
@@ -126,12 +129,12 @@ export default function Home() {
 
     // Apply Team Filter
     if (isGuest) {
-      if (selectedTeamId) {
+      const isQATeamGlobal = selectedTeamId === 'ba60298b-8635-4cca-bcd5-7e470fad60e6';
+
+      if (selectedTeamId && !isQATeamGlobal) {
         query = query.eq('team_id', selectedTeamId);
-      } else {
+      } else if (!selectedTeamId) {
         // Critical Fix: If in Guest/Manager mode but no Team ID is present, DO NOT return all data.
-        // Return an empty result instead to prevent data leakage.
-        // We can achieve this by filtering on an impossible condition.
         console.warn('Manager Mode: selectedTeamId is missing, blocking data fetch.');
         query = query.eq('id', '00000000-0000-0000-0000-000000000000');
       }

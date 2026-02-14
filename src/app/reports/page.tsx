@@ -149,9 +149,12 @@ export default function Reports() {
 
         // Manager/Guest Mode Filtering
         if (isGuest) {
-            if (selectedTeamId) {
+            // Global QA Team ID - If selected, show ALL tasks (Super Admin behavior)
+            const isQATeamGlobal = selectedTeamId === 'ba60298b-8635-4cca-bcd5-7e470fad60e6';
+
+            if (selectedTeamId && !isQATeamGlobal) {
                 query = query.eq('team_id', selectedTeamId);
-            } else {
+            } else if (!selectedTeamId) {
                 console.warn('Manager Mode: selectedTeamId is missing, blocking data fetch.');
                 query = query.eq('id', '00000000-0000-0000-0000-000000000000');
             }

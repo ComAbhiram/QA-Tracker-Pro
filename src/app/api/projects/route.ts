@@ -38,3 +38,33 @@ export async function GET(request: Request) {
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }
 }
+
+export async function POST(request: Request) {
+    try {
+        const body = await request.json();
+        const { name, status, description, team_id, hubstaff_id } = body;
+
+        // Use supabaseAdmin to bypass RLS
+        const { data, error } = await supabaseAdmin
+            .from('projects')
+            .insert([{
+                name,
+                status,
+                description,
+                team_id,
+                hubstaff_id
+            }])
+            .select()
+            .single();
+
+        if (error) {
+            console.error('Error creating project:', error);
+            return NextResponse.json({ error: error.message }, { status: 500 });
+        }
+
+        return NextResponse.json({ project: data });
+    } catch (error) {
+        console.error('Internal server error:', error);
+        return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    }
+}

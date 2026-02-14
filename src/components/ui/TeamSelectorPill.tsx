@@ -12,13 +12,20 @@ interface TeamSelectorPillProps {
 }
 
 export const TeamSelectorPill = ({ teams, selectedTeamName, onSelect }: TeamSelectorPillProps) => {
-    const [currentIndex, setCurrentIndex] = useState(0);
+    const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0 });
+    const tabsRef = useRef<(HTMLLabelElement | null)[]>([]);
 
     useEffect(() => {
         if (selectedTeamName && teams.length > 0) {
             const index = teams.findIndex(t => t.name === selectedTeamName);
-            if (index !== -1) {
-                setCurrentIndex(index);
+            if (index !== -1 && tabsRef.current[index]) {
+                const currentTab = tabsRef.current[index];
+                if (currentTab) {
+                    setIndicatorStyle({
+                        left: currentTab.offsetLeft,
+                        width: currentTab.offsetWidth
+                    });
+                }
             }
         }
     }, [selectedTeamName, teams]);
@@ -31,16 +38,12 @@ export const TeamSelectorPill = ({ teams, selectedTeamName, onSelect }: TeamSele
                 {/* Pill Container - Uiverse Style */}
                 <div
                     className="relative flex items-center bg-[#1a1a1a] rounded-[3rem] p-1 gap-0 shadow-[inset_0_0_20px_#000] min-w-fit"
-                    style={{
-                        '--total-options': teams.length,
-                        '--main-color': '#ff6ec4',
-                        '--secondary-color': '#7873f5'
-                    } as React.CSSProperties}
                 >
                     {teams.map((team, index) => (
                         <label
                             key={team.id}
-                            className={`relative px-4 py-2 rounded-[3rem] cursor-pointer font-semibold transition-colors duration-300 z-10 select-none text-center flex-1 whitespace-nowrap text-sm ${selectedTeamName === team.name ? 'text-white' : 'text-[#ddd] hover:text-[#ff6ec4]'
+                            ref={el => { tabsRef.current[index] = el; }}
+                            className={`relative px-4 py-2 rounded-[3rem] cursor-pointer font-semibold transition-colors duration-300 z-10 select-none text-center whitespace-nowrap text-sm ${selectedTeamName === team.name ? 'text-white' : 'text-[#ddd] hover:text-[#ff6ec4]'
                                 }`}
                             onClick={() => onSelect(team.name)}
                         >
@@ -50,10 +53,10 @@ export const TeamSelectorPill = ({ teams, selectedTeamName, onSelect }: TeamSele
 
                     {/* Sliding Indicator */}
                     <div
-                        className="absolute bottom-[5px] left-0 h-[4px] bg-gradient-to-r from-[#ff6ec4] to-[#7873f5] rounded-[2px] transition-transform duration-300 z-0 ease-[cubic-bezier(0.25,0.8,0.25,1)]"
+                        className="absolute bottom-[5px] h-[4px] bg-gradient-to-r from-[#ff6ec4] to-[#7873f5] rounded-[2px] transition-all duration-300 z-0 ease-[cubic-bezier(0.25,0.8,0.25,1)]"
                         style={{
-                            width: `calc(100% / ${teams.length})`,
-                            transform: `translateX(${currentIndex * 100}%)`
+                            left: indicatorStyle.left,
+                            width: indicatorStyle.width
                         }}
                     />
                 </div>

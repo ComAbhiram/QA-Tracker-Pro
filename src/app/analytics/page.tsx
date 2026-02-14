@@ -32,9 +32,11 @@ export default function AnalyticsPage() {
 
             // Manager/Guest Mode Filtering
             if (isGuest) {
-                if (selectedTeamId) {
+                const isQATeamGlobal = selectedTeamId === 'ba60298b-8635-4cca-bcd5-7e470fad60e6';
+
+                if (selectedTeamId && !isQATeamGlobal) {
                     url += `?teamId=${selectedTeamId}`;
-                } else {
+                } else if (!selectedTeamId) {
                     console.warn('Manager Mode: selectedTeamId is missing, blocking API call.');
                     setTasks([]);
                     setLoading(false);

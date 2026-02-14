@@ -136,7 +136,7 @@ export function Sidebar() {
                 { label: 'Dashboard', icon: <LayoutDashboard size={18} />, href: '/' },
                 { label: 'Task Tracker', icon: <ClipboardList size={18} />, href: '/tracker' },
                 { label: 'Schedule', icon: <CalendarDays size={18} />, href: '/schedule' },
-                ...(userRole === 'super_admin' ? [{ label: 'Super Admin', icon: <Shield size={18} />, href: '/super-admin' }] : []),
+                ...(userRole === 'super_admin' || isGuest ? [{ label: 'Super Admin', icon: <Shield size={18} />, href: '/super-admin' }] : []),
             ]
         },
         projects: {
@@ -157,7 +157,8 @@ export function Sidebar() {
                 { label: 'Reports', icon: <BarChart3 size={18} />, href: '/reports' },
                 { label: 'Analytics', icon: <Search size={18} />, href: '/analytics' },
                 { label: 'Hubstaff', icon: <Calendar size={18} />, href: '/attendance' },
-                ...((isGuest && selectedTeamName === 'QA Team') || (!isGuest && sidebarTitle === 'QA Team') || userRole === 'super_admin'
+                // Enable Bugs Report for Super Admin AND Managers (isGuest) regardless of team
+                ...((isGuest) || (sidebarTitle === 'QA Team') || userRole === 'super_admin'
                     ? [{ label: 'Bugs Report', icon: <Bug size={18} />, href: '/analytics/bugs' }]
                     : []
                 ),
@@ -262,7 +263,8 @@ export function Sidebar() {
                 </div>
 
                 <div className="mt-auto border-t border-slate-100 p-4 space-y-2">
-                    {userRole !== 'super_admin' && !isGuest && (
+                    {/* Allow Manage Team for Super Admin AND Managers (isGuest) */}
+                    {(userRole !== 'super_admin' || isGuest) && (
                         <button
                             onClick={() => setShowManageTeam(true)}
                             className={`flex items-center gap-3 w-full p-3 rounded-xl text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 transition-all ${collapsed ? 'justify-center' : ''}`}

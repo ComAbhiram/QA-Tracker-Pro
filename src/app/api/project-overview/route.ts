@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
+import { supabaseAdmin } from '@/lib/supabase-admin';
 
 // GET: Fetch all project overviews with aggregated task stats
 export async function GET(request: NextRequest) {
@@ -43,15 +44,17 @@ export async function GET(request: NextRequest) {
         const searchParams = request.nextUrl.searchParams;
         const requestedTeamId = searchParams.get('teamId');
 
+        const isGuestMode = cookieStore.get('guest_mode')?.value === 'true';
+
         // 1. Fetch Project Manual Overviews
         let projectsQuery = supabase
             .from('project_overview')
             .select('*');
 
-        if (profile.role !== 'super_admin') {
+        if (profile.role !== 'super_admin' && !isGuestMode) {
             projectsQuery = projectsQuery.eq('team_id', profile.team_id);
         } else if (requestedTeamId) {
-            // If Super Admin (or allowed context) requests a specific team, filter by it
+            // If Super Admin (or allowed context like Guest Mode) requests a specific team, filter by it
             // This supports the Manager Mode view
             projectsQuery = projectsQuery.eq('team_id', requestedTeamId);
         }
@@ -69,7 +72,7 @@ export async function GET(request: NextRequest) {
             .from('tasks')
             .select('*');
 
-        if (profile.role !== 'super_admin') {
+        if (profile.role !== 'super_admin' && !isGuestMode) {
             tasksQuery = tasksQuery.eq('team_id', profile.team_id);
         } else if (requestedTeamId) {
             tasksQuery = tasksQuery.eq('team_id', requestedTeamId);
@@ -328,15 +331,25 @@ export async function PUT(request: NextRequest) {
 
         console.log(`[ProjectOverview] Updating project ${id} with:`, cleanUpdateData);
 
+        const isGuestMode = cookieStore.get('guest_mode')?.value === 'true';
+
+        // Choose client based on privileges
+        // If Super Admin (role check handled by RLS typically, but we want to be sure) OR Guest Mode (Manager -> Super Admin)
+        // we use regular client for normal users, but for Guest Mode bypassing RLS might be needed if they are editing other team's projects.
+        // However, user.role is 'admin', RLS might block 'project_overview' update for other teams.
+        // So safe bet: Use supabaseAdmin if isGuestMode.
+
+        const dbClient = isGuestMode ? supabaseAdmin : supabase;
+
         // Fetch current project to check for name change
-        const { data: currentProject } = await supabase
+        const { data: currentProject } = await dbClient
             .from('project_overview')
             .select('project_name, team_id')
             .eq('id', id)
             .single();
 
         // Update project overview
-        const { data: updatedProject, error } = await supabase
+        const { data: updatedProject, error } = await dbClient
             .from('project_overview')
             .update(cleanUpdateData)
             .eq('id', id)
@@ -414,8 +427,11 @@ export async function DELETE(request: NextRequest) {
             );
         }
 
+        const isGuestMode = cookieStore.get('guest_mode')?.value === 'true';
+        const dbClient = isGuestMode ? supabaseAdmin : supabase;
+
         // Delete project overview
-        const { error } = await supabase
+        const { error } = await dbClient
             .from('project_overview')
             .delete()
             .eq('id', id);

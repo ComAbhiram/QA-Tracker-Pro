@@ -40,17 +40,21 @@ export default function ProjectsPage() {
 
     const fetchProjects = async () => {
         setLoading(true);
-        const { data, error } = await supabase
-            .from('projects')
-            .select('*')
-            .order('name', { ascending: true });
+        try {
+            // Use API to fetch projects (bypasses RLS for Managers)
+            const response = await fetch('/api/projects');
+            const data = await response.json();
 
-        if (error) {
+            if (data.projects) {
+                setProjects(data.projects.map(mapProjectFromDB));
+            } else if (data.error) {
+                console.error('Error fetching projects:', data.error);
+            }
+        } catch (error) {
             console.error('Error fetching projects:', error);
-        } else {
-            setProjects((data || []).map(mapProjectFromDB));
+        } finally {
+            setLoading(false);
         }
-        setLoading(false);
     };
 
     const [importingAll, setImportingAll] = useState(false);
@@ -98,17 +102,24 @@ export default function ProjectsPage() {
                 const exists = projects.find(p => p.hubstaffId === hp.id || p.name === hp.name);
                 if (exists) continue;
 
-                const { error } = await supabase.from('projects').insert([{
-                    name: hp.name,
-                    hubstaff_id: hp.id,
-                    status: 'active',
-                    description: hp.description || '',
-                    team_id: userTeamId
-                }]);
+                const response = await fetch('/api/projects', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name: hp.name,
+                        hubstaff_id: hp.id,
+                        status: 'active',
+                        description: hp.description || '',
+                        team_id: userTeamId
+                    })
+                });
 
-                if (error) {
-                    console.error(`Failed to import ${hp.name}:`, error);
-                    lastErrorMsg = error.message;
+                const result = await response.json();
+
+                if (!response.ok || result.error) {
+                    const errorMsg = result.error || 'Unknown error';
+                    console.error(`Failed to import ${hp.name}:`, errorMsg);
+                    lastErrorMsg = errorMsg;
                     failedCount++;
                 } else {
                     importedCount++;
@@ -151,15 +162,24 @@ export default function ProjectsPage() {
                 return;
             }
 
-            const { error } = await supabase.from('projects').insert([{
-                name: hubstaffProject.name,
-                hubstaff_id: hubstaffProject.id,
-                status: 'active',
-                description: hubstaffProject.description || '',
-                team_id: userTeamId
-            }]);
+            const response = await fetch('/api/projects', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: hubstaffProject.name,
+                    hubstaff_id: hubstaffProject.id,
+                    status: 'active',
+                    description: hubstaffProject.description || '',
+                    team_id: userTeamId
+                })
+            });
 
-            if (error) throw error;
+            const result = await response.json();
+
+            if (!response.ok || result.error) {
+                throw new Error(result.error || 'Failed to import project');
+            }
+
             await fetchProjects();
             alert('Project imported successfully!'); // Success can still be an alert
         } catch (error: any) {
@@ -191,14 +211,23 @@ export default function ProjectsPage() {
                 return;
             }
 
-            const { error } = await supabase.from('projects').insert([{
-                name: newProjectName.trim(),
-                status: 'active',
-                description: 'Manually created',
-                team_id: userTeamId
-            }]);
+            const response = await fetch('/api/projects', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: newProjectName.trim(),
+                    status: 'active',
+                    description: 'Manually created',
+                    team_id: userTeamId
+                })
+            });
 
-            if (error) throw error;
+            const result = await response.json();
+
+            if (!response.ok || result.error) {
+                throw new Error(result.error || 'Failed to create project');
+            }
+
             setNewProjectName('');
             await fetchProjects();
             setActiveTab('list');

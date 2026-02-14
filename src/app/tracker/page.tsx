@@ -117,9 +117,11 @@ export default function Tracker() {
 
             // Manager/Guest Mode Filtering
             if (isGuest) {
-                if (selectedTeamId) {
+                const isQATeamGlobal = selectedTeamId === 'ba60298b-8635-4cca-bcd5-7e470fad60e6';
+
+                if (selectedTeamId && !isQATeamGlobal) {
                     taskQuery = taskQuery.eq('team_id', selectedTeamId);
-                } else {
+                } else if (!selectedTeamId) {
                     console.warn('Manager Mode: selectedTeamId is missing, blocking data fetch.');
                     taskQuery = taskQuery.eq('id', '00000000-0000-0000-0000-000000000000');
                 }
