@@ -778,10 +778,9 @@
   background-color: #222533;
   color: #fbebe2;
   padding: 20px;
-  width: 100%;
-  /* Responsive width */
+  width: 240px;
+  /* Fixed width for box look */
   min-height: 200px;
-  /* Fixed height from request, but min-height for safety */
   border-radius: 26px;
   user-select: none;
   -moz-user-select: none;
@@ -789,6 +788,8 @@
   transition: all 0.3s ease-in-out;
   border: transparent 1px solid;
   cursor: pointer;
+  flex-shrink: 0;
+  /* Prevent shrinking */
 }
 
 .status span {
