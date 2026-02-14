@@ -762,3 +762,77 @@
   color: white;
   stroke-width: 2px;
 }
+
+/* --- New Dashboard Status Cards (User Requested Style) --- */
+.status-container {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.status {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background-color: #222533;
+  color: #fbebe2;
+  padding: 20px;
+  width: 100%;
+  /* Responsive width */
+  min-height: 200px;
+  /* Fixed height from request, but min-height for safety */
+  border-radius: 26px;
+  user-select: none;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  transition: all 0.3s ease-in-out;
+  border: transparent 1px solid;
+  cursor: pointer;
+}
+
+.status span {
+  font-size: 3.5rem;
+  font-weight: 900;
+  transition: all 0.3s ease-in-out;
+  line-height: 1;
+}
+
+.status p {
+  font-size: 14px;
+  /* Increased base size slightly for readbility */
+  transition: all 0.3s ease-in-out;
+  margin-top: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.status:hover {
+  background-color: #1d1d1d;
+  transform: scale(1.03);
+  border: var(--card-hover-color) 1px solid;
+}
+
+.status:hover p {
+  font-size: 15px;
+  font-weight: 500;
+  color: #b1cbf6;
+}
+
+.status:hover span {
+  font-size: 4rem;
+  color: var(--card-hover-color);
+}
+
+.mac-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 15px;
+  height: 12px;
+}
+
+/* Hide dots as requested */
+.mac-header span {
+  display: none;
+}

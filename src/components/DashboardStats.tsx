@@ -81,29 +81,18 @@ export default function DashboardStats({ tasks, onFilterChange, activeFilter }: 
     ];
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8 px-4 lg:px-0">
+        <div className="status-container mb-8 px-4 lg:px-0">
             {cards.map((card, index) => (
                 <div
                     key={index}
-                    className={`card-metric ${activeFilter === card.filter ? 'ring-2 ring-offset-2 ring-slate-400' : ''}`}
-                    style={card.style as React.CSSProperties}
+                    className={`status ${activeFilter === card.filter ? 'ring-2 ring-offset-2 ring-slate-400' : ''}`}
+                    style={{ '--card-hover-color': card.style['--accent-clr'] } as React.CSSProperties}
                     onClick={() => onFilterChange(card.filter)}
                 >
-                    <div className="img-section">
-                        {card.icon}
+                    <div className="mac-header">
                     </div>
-                    <div className="card-metric-desc">
-                        <div className="card-metric-header">
-                            <div className="card-metric-title">{card.title}</div>
-                            <div className="card-metric-menu">
-                                <div className="dot"></div>
-                                <div className="dot"></div>
-                                <div className="dot"></div>
-                            </div>
-                        </div>
-                        <div className="card-metric-time">{card.value}</div>
-                        <p className="recent">Click to filter</p>
-                    </div>
+                    <span>{card.value}</span>
+                    <p>{card.title}</p>
                 </div>
             ))}
         </div>
