@@ -1,17 +1,19 @@
-
-'use client';
-
+import { useState } from 'react';
 import { Task } from '@/lib/types';
 import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
     LineChart, Line, PieChart, Pie, Cell, Legend
 } from 'recharts';
+import { subDays, subMonths, isAfter, parseISO } from 'date-fns';
 
 interface DashboardChartsProps {
     tasks: Task[];
 }
 
 export default function DashboardCharts({ tasks }: DashboardChartsProps) {
+    // State for Project Status Distribution filter
+    const [statusTimeRange, setStatusTimeRange] = useState('30d'); // '7d' | '30d' | '3m'
+
     if (!tasks || tasks.length === 0) return null;
 
     // 1. Resource Allocation (Active Tasks by Assignee) - Bar Chart
@@ -29,8 +31,39 @@ export default function DashboardCharts({ tasks }: DashboardChartsProps) {
     })).sort((a, b) => b.tasks - a.tasks).slice(0, 5); // Top 5
 
     // 2. Project Status Distribution - Pie Chart
-    const statusCounts = tasks.reduce((acc, task) => {
+    // Filter tasks based on selected time range
+    const filteredTasksForStatus = tasks.filter(task => {
+        if (!task.createdAt) return false;
+
+        const taskDate = parseISO(task.createdAt);
+        const today = new Date();
+        let cutoffDate;
+
+        switch (statusTimeRange) {
+            case '7d':
+                cutoffDate = subDays(today, 7);
+                break;
+            case '30d':
+                cutoffDate = subDays(today, 30);
+                break;
+            case '3m':
+                cutoffDate = subMonths(today, 3);
+                break;
+            default:
+                cutoffDate = subDays(today, 30);
+        }
+
+        // Include tasks created AFTER the cutoff date
+        return isAfter(taskDate, cutoffDate);
+    });
+
+    const statusCounts = filteredTasksForStatus.reduce((acc, task) => {
         if (task.status !== 'Completed') {
+            // Also exclude 'Rejected' if desired, but user only excluded Completed originally
+            // Screenshot shows 'Rejected' in the pie chart, so keep it.
+            // Wait, previous code excluded 'Completed'. Let's verify if we want that.
+            // Screenshot shows "Forecast", "In Progress", "On Hold", "Rejected", "Yet to Start".
+            // It does NOT show "Completed". So original logic stands.
             acc[task.status] = (acc[task.status] || 0) + 1;
         }
         return acc;
@@ -62,38 +95,50 @@ export default function DashboardCharts({ tasks }: DashboardChartsProps) {
             <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
                 <div className="flex justify-between items-center mb-6">
                     <h3 className="font-bold text-slate-800">Project Status Distribution</h3>
-                    <select className="text-xs border border-slate-200 rounded px-2 py-1 bg-slate-50 text-slate-600">
-                        <option>Last 30 days</option>
+                    <select
+                        value={statusTimeRange}
+                        onChange={(e) => setStatusTimeRange(e.target.value)}
+                        className="text-xs border border-slate-200 rounded px-2 py-1 bg-slate-50 text-slate-600 outline-none focus:border-blue-500 cursor-pointer"
+                    >
+                        <option value="7d">Last 7 days</option>
+                        <option value="30d">Last 30 days</option>
+                        <option value="3m">Last 3 months</option>
                     </select>
                 </div>
                 <div className="h-[300px] w-full">
-                    <ResponsiveContainer width="100%" height="100%">
-                        <PieChart margin={{ top: 0, left: 0, bottom: 0, right: 0 }}>
-                            <Pie
-                                data={statusData}
-                                cx="50%"
-                                cy="50%"
-                                innerRadius={60}
-                                outerRadius={80}
-                                fill="#8884d8"
-                                paddingAngle={5}
-                                dataKey="value"
-                            >
-                                {statusData.map((entry, index) => (
-                                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                                ))}
-                            </Pie>
-                            <Tooltip
-                                contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                            />
-                            <Legend
-                                layout="horizontal"
-                                verticalAlign="bottom"
-                                align="center"
-                                wrapperStyle={{ fontSize: '12px', paddingTop: '20px' }}
-                            />
-                        </PieChart>
-                    </ResponsiveContainer>
+                    {statusData.length > 0 ? (
+                        <ResponsiveContainer width="100%" height="100%">
+                            <PieChart margin={{ top: 0, left: 0, bottom: 0, right: 0 }}>
+                                <Pie
+                                    data={statusData}
+                                    cx="50%"
+                                    cy="50%"
+                                    innerRadius={60}
+                                    outerRadius={80}
+                                    fill="#8884d8"
+                                    paddingAngle={5}
+                                    dataKey="value"
+                                >
+                                    {statusData.map((entry, index) => (
+                                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                    ))}
+                                </Pie>
+                                <Tooltip
+                                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                                />
+                                <Legend
+                                    layout="horizontal"
+                                    verticalAlign="bottom"
+                                    align="center"
+                                    wrapperStyle={{ fontSize: '12px', paddingTop: '20px' }}
+                                />
+                            </PieChart>
+                        </ResponsiveContainer>
+                    ) : (
+                        <div className="h-full flex flex-col items-center justify-center text-slate-400">
+                            <p className="text-sm">No active projects in this period</p>
+                        </div>
+                    )}
                 </div>
             </div>
 
