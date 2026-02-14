@@ -86,7 +86,10 @@ export default function DashboardStats({ tasks, onFilterChange, activeFilter }: 
                 <div
                     key={index}
                     className={`status ${activeFilter === card.filter ? 'ring-2 ring-offset-2 ring-slate-400' : ''}`}
-                    style={{ '--card-hover-color': card.style['--accent-clr'] } as React.CSSProperties}
+                    style={{
+                        '--card-hover-color': card.style['--accent-clr'],
+                        '--card-bg-color': card.style['--dot-clr']
+                    } as React.CSSProperties}
                     onClick={() => onFilterChange(card.filter)}
                 >
                     <div className="mac-header">

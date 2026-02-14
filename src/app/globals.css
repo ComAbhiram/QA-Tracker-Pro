@@ -775,8 +775,8 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  background-color: #ffffff;
-  /* White background */
+  background-color: var(--card-bg-color);
+  /* Dynamic background color */
   color: #64748B;
   /* Grey text */
   padding: 15px;
