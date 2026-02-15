@@ -92,13 +92,13 @@ export default function DashboardCharts({ tasks }: DashboardChartsProps) {
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mb-8 w-full">
 
             {/* Project Status Distribution */}
-            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+            <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 transition-colors duration-300">
                 <div className="flex justify-between items-center mb-6">
-                    <h3 className="font-bold text-slate-800">Project Status Distribution</h3>
+                    <h3 className="font-bold text-slate-800 dark:text-slate-100">Project Status Distribution</h3>
                     <select
                         value={statusTimeRange}
                         onChange={(e) => setStatusTimeRange(e.target.value)}
-                        className="text-xs border border-slate-200 rounded px-2 py-1 bg-slate-50 text-slate-600 outline-none focus:border-blue-500 cursor-pointer"
+                        className="text-xs border border-slate-200 dark:border-slate-700 rounded px-2 py-1 bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300 outline-none focus:border-blue-500 cursor-pointer"
                     >
                         <option value="7d">Last 7 days</option>
                         <option value="30d">Last 30 days</option>
@@ -143,9 +143,9 @@ export default function DashboardCharts({ tasks }: DashboardChartsProps) {
             </div>
 
             {/* Resource Allocation */}
-            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+            <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 transition-colors duration-300">
                 <div className="flex justify-between items-center mb-6">
-                    <h3 className="font-bold text-slate-800">Resource Allocation</h3>
+                    <h3 className="font-bold text-slate-800 dark:text-slate-100">Resource Allocation</h3>
                     <button className="text-xs text-slate-400 hover:text-sky-600 transition-colors">Export</button>
                 </div>
                 <div className="h-[250px] w-full">
@@ -162,9 +162,9 @@ export default function DashboardCharts({ tasks }: DashboardChartsProps) {
             </div>
 
             {/* Task Completion Trend */}
-            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+            <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 transition-colors duration-300">
                 <div className="flex justify-between items-center mb-6">
-                    <h3 className="font-bold text-slate-800">Task Completion Trend</h3>
+                    <h3 className="font-bold text-slate-800 dark:text-slate-100">Task Completion Trend</h3>
                     <button className="text-xs text-slate-400 hover:text-sky-600 transition-colors">Export</button>
                 </div>
                 <div className="h-[250px] w-full">

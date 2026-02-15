@@ -503,10 +503,10 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
                 isLoading={loading}
             />
 
-            <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[85dvh] overflow-y-auto animate-in zoom-in-95 duration-200 custom-scrollbar">
+            <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl w-full max-w-2xl max-h-[85dvh] overflow-y-auto animate-in zoom-in-95 duration-200 custom-scrollbar border border-slate-100 dark:border-slate-800 transition-colors duration-300">
 
                 {/* Header */}
-                <div className="sticky top-0 bg-white/90 backdrop-blur-md z-10 flex items-center justify-between p-4 md:p-6 border-b border-slate-100 bg-gradient-to-r from-white to-slate-50">
+                <div className="sticky top-0 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md z-10 flex items-center justify-between p-4 md:p-6 border-b border-slate-100 dark:border-slate-800 bg-gradient-to-r from-white to-slate-50 dark:from-slate-900 dark:to-slate-800 transition-colors duration-300">
                     <div className="flex items-center gap-4">
                         <div className={`p-3 rounded-2xl ${task ? 'bg-indigo-50 text-indigo-600' : 'bg-emerald-50 text-emerald-600'} shadow-sm`}>
                             {task ? <Activity size={24} /> : <Briefcase size={24} />}

@@ -37,6 +37,7 @@ import { useGuestMode } from '@/contexts/GuestContext';
 import ManageTeamModal from './ManageTeamModal';
 import { TeamSelector } from './TeamSelector';
 import CloseButton from './ui/CloseButton';
+import { ModeToggle } from './ModeToggle';
 
 interface NavItem {
     label: string;
@@ -185,8 +186,8 @@ export function Sidebar() {
 
             {/* Sidebar */}
             <ManageTeamModal isOpen={showManageTeam} onClose={() => setShowManageTeam(false)} />
-            <nav className={`sidebar ${collapsed ? '-translate-x-full' : 'translate-x-0'} lg:translate-x-0`}>
-                <div className="sidebar-header">
+            <nav className={`sidebar ${collapsed ? '-translate-x-full' : 'translate-x-0'} lg:translate-x-0 dark:bg-slate-900 dark:border-slate-800`}>
+                <div className="sidebar-header dark:border-slate-800">
                     <div className="logo">
                         <div className="logo-icon">
                             {isGuest ? <Eye size={20} /> : <LayoutDashboard size={20} />}
@@ -222,7 +223,7 @@ export function Sidebar() {
                                     }}
                                 />
                             </div>
-                        ) : sidebarTitle}
+                        ) : <span className="dark:text-slate-100">{sidebarTitle}</span>}
                     </div>
                     {/* Close Button Inside Sidebar */}
                     <CloseButton
@@ -262,12 +263,15 @@ export function Sidebar() {
                     ))}
                 </div>
 
-                <div className="mt-auto border-t border-slate-100 p-4 space-y-2">
+                <div className="mt-auto border-t border-slate-100 dark:border-slate-800 p-4 space-y-4">
+                    <div className="px-3">
+                        <ModeToggle />
+                    </div>
                     {/* Allow Manage Team for Super Admin AND Managers (isGuest) */}
                     {(userRole !== 'super_admin' || isGuest) && (
                         <button
                             onClick={() => setShowManageTeam(true)}
-                            className={`flex items-center gap-3 w-full p-3 rounded-xl text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 transition-all ${collapsed ? 'justify-center' : ''}`}
+                            className={`flex items-center gap-3 w-full p-3 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-indigo-50 dark:hover:bg-slate-800 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all ${collapsed ? 'justify-center' : ''}`}
                         >
                             <Users size={20} />
                             {!collapsed && <span className="font-medium">Manage Team</span>}
@@ -283,7 +287,7 @@ export function Sidebar() {
                                 window.location.href = '/login';
                             }
                         }}
-                        className={`flex items-center gap-3 w-full p-3 rounded-xl text-slate-600 hover:bg-red-50 hover:text-red-600 transition-all ${collapsed ? 'justify-center' : ''}`}
+                        className={`flex items-center gap-3 w-full p-3 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-400 transition-all ${collapsed ? 'justify-center' : ''}`}
                     >
                         <LogOut size={20} />
                         {!collapsed && <span className="font-medium">{isGuest ? 'Exit Manager Mode' : 'Sign Out'}</span>}

@@ -55,17 +55,17 @@
   }
 
   .nav-item {
-    @apply flex items-center px-4 py-3 rounded-lg cursor-pointer transition-all duration-200 font-medium text-slate-500 text-sm hover:bg-slate-50 hover:text-slate-800 relative overflow-hidden;
+    @apply flex items-center px-4 py-3 rounded-lg cursor-pointer transition-all duration-200 font-medium text-slate-500 dark:text-slate-400 text-sm hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:text-slate-800 dark:hover:text-slate-100 relative overflow-hidden;
   }
 
   .nav-item.active {
-    @apply text-yellow-600 bg-yellow-50 font-semibold;
+    @apply text-yellow-600 dark:text-yellow-500 bg-yellow-50 dark:bg-yellow-900/20 font-semibold;
     /* Clean active state: light yellow bg, yellow text, left border indicator */
   }
 
   .nav-item.active::before {
     content: '';
-    @apply absolute left-0 top-0 bottom-0 w-1 bg-yellow-500;
+    @apply absolute left-0 top-0 bottom-0 w-1 bg-yellow-500 dark:bg-yellow-600;
   }
 
   .nav-icon {
@@ -201,15 +201,15 @@
 
   /* Tables */
   .table-container {
-    @apply bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm;
+    @apply bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm;
   }
 
   .table-header {
-    @apply bg-slate-50 text-slate-500 text-xs font-semibold uppercase tracking-wider border-b-2 border-slate-200;
+    @apply bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400 text-xs font-semibold uppercase tracking-wider border-b-2 border-slate-200 dark:border-slate-800;
   }
 
   .table-row {
-    @apply border-b border-slate-100 last:border-0 hover:bg-slate-50/50 transition-colors;
+    @apply border-b border-slate-100 dark:border-slate-800 last:border-0 hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors;
   }
 
   /* Enhanced table cells */
@@ -223,7 +223,7 @@
 
   /* Task card boxes */
   .task-card {
-    @apply bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-all duration-200;
+    @apply bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-all duration-200;
   }
 
   .task-card-header {
@@ -892,7 +892,7 @@
 }
 
 .status:hover {
-  background-color: #ffffff;
+  @apply bg-white dark:bg-slate-800 transition-colors duration-300;
   transform: scale(1.05);
   /* Slightly increased scale for impact */
   border: 1px solid var(--card-hover-color);
