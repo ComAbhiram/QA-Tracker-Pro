@@ -518,16 +518,16 @@ export default function Home() {
                         })()}
                       </td>
                       <td className="px-3 py-2 border-r border-slate-100">
-                        <div className="flex -space-x-1.5 overflow-hidden">
+                        <div className="flex flex-col gap-1">
                           {task.assignedTo && (
-                            <div className="w-6 h-6 rounded-full bg-sky-100 border border-white flex items-center justify-center text-[10px] font-bold text-sky-700 shadow-sm" title={task.assignedTo}>
-                              {task.assignedTo.charAt(0)}
-                            </div>
+                            <span className="text-xs text-slate-700 font-medium truncate max-w-[120px]" title={task.assignedTo}>
+                              {task.assignedTo}
+                            </span>
                           )}
                           {task.assignedTo2 && (
-                            <div className="w-6 h-6 rounded-full bg-indigo-100 border border-white flex items-center justify-center text-[10px] font-bold text-indigo-700 shadow-sm" title={task.assignedTo2}>
-                              {task.assignedTo2.charAt(0)}
-                            </div>
+                            <span className="text-xs text-slate-700 font-medium truncate max-w-[120px]" title={task.assignedTo2}>
+                              {task.assignedTo2}
+                            </span>
                           )}
                         </div>
                       </td>
