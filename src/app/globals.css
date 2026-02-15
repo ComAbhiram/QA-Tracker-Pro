@@ -19,9 +19,8 @@
   }
 
   body {
-    @apply bg-slate-50 text-slate-700 min-h-screen font-sans overflow-x-hidden;
-    /* Clean white/gray background, no gradients */
-    background: #f8fafc;
+    @apply bg-slate-50 text-slate-700 min-h-screen font-sans overflow-x-hidden transition-colors duration-500;
+    /* Clean white/gray background as fallback, but typically handled by layout div */
   }
 }
 
@@ -155,6 +154,8 @@
     --uib-shadow-1: #cbd5e1;
     /* Slate-300 */
     --uib-shadow-2: #ffffff;
+
+    @apply dark:[--uib-bg:theme(colors.slate.800)] dark:[--uib-color:theme(colors.slate.200)] dark:[--uib-border:theme(colors.slate.700)] dark:[--uib-shadow-1:theme(colors.slate.950)] dark:[--uib-shadow-2:theme(colors.slate.800)];
   }
 
   .btn-success {

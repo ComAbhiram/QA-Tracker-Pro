@@ -371,8 +371,8 @@ export default function Home() {
       {/* Header & Actions */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-slate-800">Team Tracker</h1>
-          <p className="text-slate-500">Overview of all active team projects</p>
+          <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-100">Team Tracker</h1>
+          <p className="text-slate-500 dark:text-slate-400">Overview of all active team projects</p>
         </div>
         <div className="flex flex-wrap gap-3">
           <button
@@ -412,10 +412,10 @@ export default function Home() {
 
       <div className="flex flex-col gap-8">
         {/* Main Task List - Powered by Paginated Fetch */}
-        <div className="w-full bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden flex flex-col">
-          <div className="p-6 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <h3 className="font-bold text-lg text-slate-800 flex items-center gap-2">
-              <Layers size={20} className="text-indigo-600" />
+        <div className="w-full bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden flex flex-col transition-colors duration-300">
+          <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <h3 className="font-bold text-lg text-slate-800 dark:text-slate-100 flex items-center gap-2">
+              <Layers size={20} className="text-indigo-600 dark:text-indigo-400" />
               All Tasks
             </h3>
 
@@ -426,56 +426,56 @@ export default function Home() {
                   placeholder="Search tasks..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 w-full sm:w-64"
+                  className="pl-9 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 dark:text-slate-100 w-full sm:w-64 transition-colors"
                 />
-                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
               </div>
-              <span className="text-xs font-semibold bg-slate-100 text-slate-600 px-2 py-1 rounded-md whitespace-nowrap">
+              <span className="text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 px-2 py-1 rounded-md whitespace-nowrap">
                 {totalItems} total results
               </span>
             </div>
           </div>
 
           <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-transparent">
-            <table className="w-full text-left text-sm text-slate-600 border-collapse">
-              <thead className="bg-slate-50 border-b border-slate-200">
+            <table className="w-full text-left text-sm text-slate-600 dark:text-slate-400 border-collapse">
+              <thead className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700">
                 <tr>
                   <ResizableHeader
                     label="Project"
                     width={columnWidths.projectName}
                     widthKey="projectName"
                     onResizeStart={handleResizeStart}
-                    className="text-xs font-semibold text-slate-600 uppercase tracking-wider border-r border-slate-200"
+                    className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider border-r border-slate-200 dark:border-slate-700"
                   />
                   <ResizableHeader
                     label="Phase"
                     width={columnWidths.phase}
                     widthKey="phase"
                     onResizeStart={handleResizeStart}
-                    className="text-xs font-semibold text-slate-600 uppercase tracking-wider border-r border-slate-200"
+                    className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider border-r border-slate-200 dark:border-slate-700"
                   />
                   <ResizableHeader
                     label="Status"
                     width={columnWidths.status}
                     widthKey="status"
                     onResizeStart={handleResizeStart}
-                    className="text-xs font-semibold text-slate-600 uppercase tracking-wider border-r border-slate-200"
+                    className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider border-r border-slate-200 dark:border-slate-700"
                   />
                   <ResizableHeader
                     label="Assignees"
                     width={columnWidths.assignees}
                     widthKey="assignees"
                     onResizeStart={handleResizeStart}
-                    className="text-xs font-semibold text-slate-600 uppercase tracking-wider border-r border-slate-200"
+                    className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider border-r border-slate-200 dark:border-slate-700"
                   />
                   <ResizableHeader
                     label="Timeline"
                     width={columnWidths.timeline}
                     widthKey="timeline"
                     onResizeStart={handleResizeStart}
-                    className="text-xs font-semibold text-slate-600 uppercase tracking-wider border-r border-slate-200"
+                    className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider border-r border-slate-200 dark:border-slate-700"
                   />
-                  <th className="px-3 py-2 text-xs font-semibold text-slate-600 uppercase tracking-wider text-left bg-slate-50 border-b border-slate-200">
+                  <th className="px-3 py-2 text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider text-left bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700">
                     Comments
                   </th>
                 </tr>
@@ -490,18 +490,18 @@ export default function Home() {
                     <tr
                       key={task.id}
                       onClick={() => handleEditTask(task)}
-                      className="border-b border-slate-100 hover:bg-slate-50/50 transition-colors group cursor-pointer"
+                      className="border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors group cursor-pointer"
                     >
-                      <td className="px-3 py-2 font-medium text-slate-800 border-r border-slate-100 truncate max-w-[200px]" title={task.projectName}>
+                      <td className="px-3 py-2 font-medium text-slate-800 dark:text-slate-100 border-r border-slate-100 dark:border-slate-800 truncate max-w-[200px]" title={task.projectName}>
                         <div className="flex flex-col truncate">
                           <span className="truncate text-xs font-semibold">{task.projectName}</span>
-                          <span className="text-[10px] text-slate-400 font-normal truncate">{task.projectType}</span>
+                          <span className="text-[10px] text-slate-400 dark:text-slate-500 font-normal truncate">{task.projectType}</span>
                         </div>
                       </td>
-                      <td className="px-3 py-2 border-r border-slate-100 text-xs truncate max-w-[150px]" title={task.subPhase || ''}>
+                      <td className="px-3 py-2 border-r border-slate-100 dark:border-slate-800 text-xs truncate max-w-[150px]" title={task.subPhase || ''}>
                         {task.subPhase || '-'}
                       </td>
-                      <td className="px-3 py-2 border-r border-slate-100">
+                      <td className="px-3 py-2 border-r border-slate-100 dark:border-slate-800">
                         {(() => {
                           switch (task.status) {
                             case 'In Progress': return <div className="flex items-center gap-1.5 text-blue-700 font-medium text-xs"><PlayCircle size={12} /> In Progress</div>;
@@ -516,21 +516,21 @@ export default function Home() {
                           }
                         })()}
                       </td>
-                      <td className="px-3 py-2 border-r border-slate-100">
+                      <td className="px-3 py-2 border-r border-slate-100 dark:border-slate-800">
                         <div className="flex flex-col gap-1">
                           {task.assignedTo && (
-                            <span className="text-xs text-slate-700 font-medium truncate max-w-[120px]" title={task.assignedTo}>
+                            <span className="text-xs text-slate-700 dark:text-slate-300 font-medium truncate max-w-[120px]" title={task.assignedTo}>
                               {task.assignedTo}
                             </span>
                           )}
                           {task.assignedTo2 && (
-                            <span className="text-xs text-slate-700 font-medium truncate max-w-[120px]" title={task.assignedTo2}>
+                            <span className="text-xs text-slate-700 dark:text-slate-300 font-medium truncate max-w-[120px]" title={task.assignedTo2}>
                               {task.assignedTo2}
                             </span>
                           )}
                         </div>
                       </td>
-                      <td className="px-3 py-2 border-r border-slate-100 text-xs">
+                      <td className="px-3 py-2 border-r border-slate-100 dark:border-slate-800 text-xs">
                         {task.startDate ? (
                           <span className="truncate block max-w-[120px]" title={`${new Date(task.startDate).toLocaleDateString()} - ${task.endDate ? new Date(task.endDate).toLocaleDateString() : '...'}`}>
                             {new Date(task.startDate).toLocaleDateString(undefined, { month: '2-digit', day: '2-digit' })}
@@ -541,7 +541,7 @@ export default function Home() {
                           <span className="text-slate-300 italic text-[10px]">No timeline</span>
                         )}
                       </td>
-                      <td className="px-3 py-2 text-left border-r border-slate-100 text-xs truncate max-w-[200px]" title={task.comments || ''}>
+                      <td className="px-3 py-2 text-left border-r border-slate-100 dark:border-slate-800 text-xs truncate max-w-[200px] dark:text-slate-400" title={task.comments || ''}>
                         {task.comments || '-'}
                       </td>
                     </tr>

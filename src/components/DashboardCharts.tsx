@@ -124,13 +124,21 @@ export default function DashboardCharts({ tasks }: DashboardChartsProps) {
                                     ))}
                                 </Pie>
                                 <Tooltip
-                                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                                    contentStyle={{
+                                        borderRadius: '12px',
+                                        border: 'none',
+                                        boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
+                                        backgroundColor: 'var(--tw-bg-opacity, 1) rgb(255 255 255 / var(--tw-bg-opacity))', // Fallback
+                                    }}
+                                    itemStyle={{ color: 'inherit' }}
+                                    cursor={{ fill: 'transparent' }}
                                 />
                                 <Legend
                                     layout="horizontal"
                                     verticalAlign="bottom"
                                     align="center"
                                     wrapperStyle={{ fontSize: '12px', paddingTop: '20px' }}
+                                    formatter={(value: any) => <span className="text-slate-600 dark:text-slate-400">{value}</span>}
                                 />
                             </PieChart>
                         </ResponsiveContainer>
@@ -151,10 +159,26 @@ export default function DashboardCharts({ tasks }: DashboardChartsProps) {
                 <div className="h-[250px] w-full">
                     <ResponsiveContainer width="100%" height="100%">
                         <BarChart data={resourceData}>
-                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                            <XAxis dataKey="name" fontSize={12} tickLine={false} axisLine={false} />
-                            <YAxis fontSize={12} tickLine={false} axisLine={false} />
-                            <Tooltip cursor={{ fill: '#f0f9ff' }} />
+                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" className="dark:stroke-slate-800" />
+                            <XAxis
+                                dataKey="name"
+                                fontSize={10}
+                                tickLine={false}
+                                axisLine={false}
+                                tick={{ fill: 'currentColor' }}
+                                className="text-slate-500 dark:text-slate-500"
+                            />
+                            <YAxis
+                                fontSize={10}
+                                tickLine={false}
+                                axisLine={false}
+                                tick={{ fill: 'currentColor' }}
+                                className="text-slate-500 dark:text-slate-500"
+                            />
+                            <Tooltip
+                                cursor={{ fill: '#f1f5f9', opacity: 0.1 }}
+                                contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                            />
                             <Bar dataKey="tasks" fill="#0ea5e9" radius={[4, 4, 0, 0]} barSize={40} />
                         </BarChart>
                     </ResponsiveContainer>
@@ -170,10 +194,25 @@ export default function DashboardCharts({ tasks }: DashboardChartsProps) {
                 <div className="h-[250px] w-full">
                     <ResponsiveContainer width="100%" height="100%">
                         <LineChart data={trendData}>
-                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                            <XAxis dataKey="name" fontSize={12} tickLine={false} axisLine={false} />
-                            <YAxis fontSize={12} tickLine={false} axisLine={false} />
-                            <Tooltip />
+                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" className="dark:stroke-slate-800" />
+                            <XAxis
+                                dataKey="name"
+                                fontSize={10}
+                                tickLine={false}
+                                axisLine={false}
+                                tick={{ fill: 'currentColor' }}
+                                className="text-slate-500 dark:text-slate-500"
+                            />
+                            <YAxis
+                                fontSize={10}
+                                tickLine={false}
+                                axisLine={false}
+                                tick={{ fill: 'currentColor' }}
+                                className="text-slate-500 dark:text-slate-500"
+                            />
+                            <Tooltip
+                                contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                            />
                             <Line type="monotone" dataKey="total" stroke="#0ea5e9" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} />
                             <Line type="monotone" dataKey="completed" stroke="#10b981" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} />
                         </LineChart>
