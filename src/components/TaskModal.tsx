@@ -75,8 +75,13 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
 
                 // If NOT Manager Mode (isGuest) AND NOT QA Team (Global), filter by team
                 // This means Managers (isGuest=true) will NOT send team_id, thus fetching ALL projects (Super Admin privilege)
-                if (!isGuest && effectiveTeamId && effectiveTeamId !== 'ba60298b-8635-4cca-bcd5-7e470fad60e6') {
-                    url += `?team_id=${effectiveTeamId}`;
+                if (!isGuest && effectiveTeamId) {
+                    if (effectiveTeamId !== 'ba60298b-8635-4cca-bcd5-7e470fad60e6') {
+                        url += `?team_id=${effectiveTeamId}`;
+                    }
+                } else if (isGuest && !selectedTeamId) {
+                    // Avoid calling API with undefined id if possible or handle in API
+                    // For now, if guest but no team, we might want to skip or handled by API
                 }
 
                 const response = await fetch(url);
@@ -195,7 +200,11 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
     // Fetch sub-phases for team
     useEffect(() => {
         const fetchSubPhases = async () => {
-            if (!effectiveTeamId) return;
+            if (!effectiveTeamId || effectiveTeamId === 'undefined') {
+                setSubPhases([]);
+                setLoadingSubPhases(false);
+                return;
+            }
 
             setLoadingSubPhases(true);
             try {

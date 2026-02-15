@@ -322,10 +322,9 @@ export default function Home() {
         return;
       }
     } else {
-      const newId = Date.now();
       const { error } = await supabase
         .from('tasks')
-        .insert([{ ...dbPayload, id: newId }]);
+        .insert([dbPayload]);
 
       if (error) {
         console.error('Error creating task:', error);

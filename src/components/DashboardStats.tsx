@@ -14,7 +14,7 @@ export default function DashboardStats({ tasks, onFilterChange, activeFilter }: 
         active: tasks.filter(t => ['In Progress', 'Being Developed', 'Ready for QA', 'Assigned to QA', 'Yet to Start', 'Forecast'].includes(t.status)).length,
         completed: tasks.filter(t => t.status === 'Completed').length,
         overdue: tasks.filter(t => {
-            if (!t.endDate) return false;
+            if (!t.endDate || isNaN(new Date(t.endDate).getTime())) return false;
             const end = new Date(t.endDate);
             const now = new Date();
             now.setHours(0, 0, 0, 0);

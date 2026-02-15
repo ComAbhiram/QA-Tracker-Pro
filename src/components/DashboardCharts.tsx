@@ -33,7 +33,7 @@ export default function DashboardCharts({ tasks }: DashboardChartsProps) {
     // 2. Project Status Distribution - Pie Chart
     // Filter tasks based on selected time range
     const filteredTasksForStatus = tasks.filter(task => {
-        if (!task.createdAt) return false;
+        if (!task.createdAt || isNaN(new Date(task.createdAt).getTime())) return false;
 
         const taskDate = parseISO(task.createdAt);
         const today = new Date();
