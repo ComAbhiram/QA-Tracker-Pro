@@ -58,7 +58,7 @@ export default function Home() {
     console.log('fetchStatsData: isGuest=', isGuest, 'selectedTeamId=', selectedTeamId);
     let query = supabase
       .from('tasks')
-      .select('id, status, end_date, assigned_to, project_name, sub_phase', { count: 'exact' });
+      .select('id, status, end_date, assigned_to, project_name, sub_phase, created_at', { count: 'exact' });
 
     // Apply Team Filter if Guest
     if (isGuest) {
@@ -83,7 +83,7 @@ export default function Home() {
         // Fill other required Task fields with defaults to satisfy TS (though components only use specific fields)
         projectName: t.project_name || '',
         subPhase: t.sub_phase || '',
-        createdAt: '',
+        createdAt: t.created_at || new Date().toISOString(), // Fallback for charts
         projectType: null,
         priority: null,
         pc: null,
@@ -411,11 +411,9 @@ export default function Home() {
         activeFilter={filter}
       />
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+      <div className="flex flex-col gap-8">
         {/* Main Task List - Powered by Paginated Fetch */}
-
-        {/* Main Task List - Powered by Paginated Fetch */}
-        <div className="xl:col-span-2 bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden flex flex-col">
+        <div className="w-full bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden flex flex-col">
           <div className="p-6 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <h3 className="font-bold text-lg text-slate-800 flex items-center gap-2">
               <Layers size={20} className="text-indigo-600" />
@@ -570,7 +568,7 @@ export default function Home() {
         </div>
 
         {/* Side Content: Charts - Powered by lightweight Global Stats Data */}
-        <div className="space-y-8">
+        <div className="w-full">
           <DashboardCharts tasks={allStatsTasks} />
         </div>
       </div>
