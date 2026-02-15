@@ -476,8 +476,8 @@ export default function Home() {
                     onResizeStart={handleResizeStart}
                     className="text-xs font-semibold text-slate-600 uppercase tracking-wider border-r border-slate-200"
                   />
-                  <th className="px-3 py-2 text-xs font-semibold text-slate-600 uppercase tracking-wider text-right bg-slate-50 border-b border-slate-200">
-                    Action
+                  <th className="px-3 py-2 text-xs font-semibold text-slate-600 uppercase tracking-wider text-left bg-slate-50 border-b border-slate-200">
+                    Comments
                   </th>
                 </tr>
               </thead>
@@ -488,7 +488,11 @@ export default function Home() {
                   <tr><td colSpan={6} className="p-8 text-center text-slate-400 text-sm">No tasks found</td></tr>
                 ) : (
                   tasks.map(task => (
-                    <tr key={task.id} className="border-b border-slate-100 hover:bg-slate-50/50 transition-colors group">
+                    <tr
+                      key={task.id}
+                      onClick={() => handleEditTask(task)}
+                      className="border-b border-slate-100 hover:bg-slate-50/50 transition-colors group cursor-pointer"
+                    >
                       <td className="px-3 py-2 font-medium text-slate-800 border-r border-slate-100 truncate max-w-[200px]" title={task.projectName}>
                         <div className="flex flex-col truncate">
                           <span className="truncate text-xs font-semibold">{task.projectName}</span>
@@ -538,16 +542,8 @@ export default function Home() {
                           <span className="text-slate-300 italic text-[10px]">No timeline</span>
                         )}
                       </td>
-                      <td className="px-3 py-2 text-right">
-                        {!isGuest && (
-                          <button
-                            onClick={() => handleEditTask(task)}
-                            className="text-slate-400 hover:text-sky-600 hover:bg-sky-50 p-1.5 rounded-lg transition-all"
-                            title="Edit Task"
-                          >
-                            <Edit2 size={14} />
-                          </button>
-                        )}
+                      <td className="px-3 py-2 text-left border-r border-slate-100 text-xs truncate max-w-[200px]" title={task.comments || ''}>
+                        {task.comments || '-'}
                       </td>
                     </tr>
                   ))
