@@ -32,11 +32,8 @@ export default function QuickLeaveActions({ assigneeName, teamId, currentLeave, 
             // Let's use strict match to the default we set, OR if we want to be smart:
             // If current matches dbLeaveType, toggle off.
 
-            const isToggleOff = currentLeave?.leave_type === dbLeaveType;
-            const method = isToggleOff ? 'DELETE' : 'POST';
-
             const response = await fetch('/api/leaves/quick', {
-                method: method,
+                method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     team_member_name: assigneeName,
@@ -51,7 +48,15 @@ export default function QuickLeaveActions({ assigneeName, teamId, currentLeave, 
                 throw new Error(err.error || 'Failed to update leave');
             }
 
-            success(isToggleOff ? 'Leave cleared' : `Marked as ${dbLeaveType}`);
+            const data = await response.json();
+            const action = data.action; // 'removed' or 'updated'
+
+            if (action === 'removed') {
+                success('Leave cleared');
+            } else {
+                success(`Marked as ${dbLeaveType}`);
+            }
+
             onUpdate();
         } catch (err: any) {
             console.error('Quick Action Error:', err);
