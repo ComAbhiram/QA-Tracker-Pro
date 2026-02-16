@@ -32,7 +32,20 @@ export async function GET(request: Request) {
             return NextResponse.json({ error: error.message }, { status: 500 });
         }
 
-        return NextResponse.json({ projects: data });
+        let projects = data || [];
+
+        // Deduplicate by name for Managers to avoid clutter from previous multi-team imports
+        if (isManager) {
+            const seenNames = new Set();
+            projects = projects.filter(p => {
+                const lowerName = p.name.trim().toLowerCase();
+                if (seenNames.has(lowerName)) return false;
+                seenNames.add(lowerName);
+                return true;
+            });
+        }
+
+        return NextResponse.json({ projects });
     } catch (error) {
         console.error('Internal server error:', error);
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
@@ -43,6 +56,17 @@ export async function POST(request: Request) {
     try {
         const body = await request.json();
         const { name, status, description, team_id, hubstaff_id } = body;
+
+        // Check if already exists (globally or within team)
+        const { data: existing } = await supabaseAdmin
+            .from('projects')
+            .select('id')
+            .or(`name.eq.${name}${hubstaff_id ? `,hubstaff_id.eq.${hubstaff_id}` : ''}`)
+            .maybeSingle();
+
+        if (existing) {
+            return NextResponse.json({ error: 'Project already exists' }, { status: 409 });
+        }
 
         // Use supabaseAdmin to bypass RLS
         const { data, error } = await supabaseAdmin

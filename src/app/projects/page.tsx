@@ -323,7 +323,11 @@ export default function ProjectsPage() {
                                                 )}
                                             </td>
                                             <td className="px-4 py-2.5 text-slate-500 text-xs">{project.status}</td>
-                                            <td className="px-4 py-2.5 text-slate-400 text-xs">{new Date(project.createdAt).toLocaleDateString()}</td>
+                                            <td className="px-4 py-2.5 text-slate-400 text-xs">
+                                                {project.createdAt && !isNaN(new Date(project.createdAt).getTime())
+                                                    ? new Date(project.createdAt).toLocaleDateString()
+                                                    : 'N/A'}
+                                            </td>
                                         </tr>
                                     ))}
                                 </tbody>
