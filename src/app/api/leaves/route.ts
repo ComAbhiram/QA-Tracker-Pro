@@ -175,17 +175,31 @@ export async function POST(request: Request) {
         }
 
         // Determine effective team_id
-        const isSuperAdmin = (profile as any)?.role === 'super_admin';
-        const canOverride = isSuperAdmin || isManagerMode;
+        // CRITICAL FIX: The leave should belong to the TEAM MEMBER'S team, not necessarily the creator's or manager's current view.
+        // We must fetch the target user's team_id from user_profiles.
+        const { data: targetUserProfile } = await supabaseAdmin
+            .from('user_profiles')
+            .select('team_id')
+            .eq('id', team_member_id)
+            .single();
 
-        let effectiveTeamId = profile?.team_id;
-        if (canOverride && overrideTeamId) {
-            effectiveTeamId = overrideTeamId;
+        let effectiveTeamId = targetUserProfile?.team_id;
+
+        // Fallback or Override logic (only if target user has no team?)
+        // Generally, the user's profile team_id is the source of truth for where their leaves should show up.
+        if (!effectiveTeamId) {
+            const isSuperAdmin = (profile as any)?.role === 'super_admin';
+            const canOverride = isSuperAdmin || isManagerMode;
+            if (canOverride && overrideTeamId) {
+                effectiveTeamId = overrideTeamId;
+            } else {
+                effectiveTeamId = profile?.team_id;
+            }
         }
 
         if (!effectiveTeamId) {
             return NextResponse.json(
-                { error: 'Team ID is required' },
+                { error: 'Team ID could not be determined for the user' },
                 { status: 400 }
             );
         }

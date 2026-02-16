@@ -276,12 +276,11 @@ export default function AssigneeTaskTable({
     // FL: Red, HL: Yellow/Orange, WFH: Blue
     const getLeaveRowClass = () => {
         if (!activeLeave || activeLeave.date !== new Date().toISOString().split('T')[0]) return ''; // Only highlight for TODAY
-        switch (activeLeave.type) {
-            case 'Full Day': return 'bg-red-50/50 dark:bg-red-900/10 border-l-4 border-l-red-500';
-            case 'Half Day': return 'bg-amber-50/50 dark:bg-amber-900/10 border-l-4 border-l-amber-500';
-            case 'WFH': return 'bg-blue-50/50 dark:bg-blue-900/10 border-l-4 border-l-blue-500';
-            default: return '';
-        }
+        const type = activeLeave.type.toLowerCase();
+        if (type.includes('full day')) return 'bg-red-50/50 dark:bg-red-900/10 border-l-4 border-l-red-500';
+        if (type.includes('half day')) return 'bg-amber-50/50 dark:bg-amber-900/10 border-l-4 border-l-amber-500';
+        if (type.includes('wfh') || type === 'work from home') return 'bg-blue-50/50 dark:bg-blue-900/10 border-l-4 border-l-blue-500';
+        return '';
     };
 
     // Also style the table container? Or just rows?

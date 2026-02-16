@@ -21,8 +21,12 @@ export async function GET(request: Request) {
 
         // Filter by team if provided, but for Manager Mode we return ALL
         if (teamId && !isManager && teamId !== 'ba60298b-8635-4cca-bcd5-7e470fad60e6') {
-            // Include projects for the specific team OR global projects (team_id is null)
+            // Use .or with proper syntax explicitly on the chain
+            // Query Logic: project.team_id == teamId OR project.team_id IS NULL
             query = query.or(`team_id.eq.${teamId},team_id.is.null`);
+        } else if (!isManager && teamId === 'ba60298b-8635-4cca-bcd5-7e470fad60e6') {
+            // QA Team can see everything (or specific QA logic?)
+            // For now, no filter = see all.
         }
 
         const { data, error } = await query;
