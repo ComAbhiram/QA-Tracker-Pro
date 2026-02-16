@@ -32,38 +32,9 @@ export async function GET(request: Request) {
             return NextResponse.json({ error: error.message }, { status: 500 });
         }
 
-        // 3. Merge with 'project_overview' (Imported/Active projects)
-        // We want to include these because sometimes a project exists here but hasn't been synced to 'projects' yet.
-        let overviewQuery = supabaseAdmin
-            .from('project_overview')
-            .select('id, project_name, team_id, project_type')
-            .order('project_name', { ascending: true });
-
-        // CRITICAL: Do NOT filter by team here either - need all for deduplication
-
-        const { data: overviewData } = await overviewQuery;
-
         let projects = data || [];
 
-        // CRITICAL FIX: Add ALL projects from project_overview, not just unique names
-        // The deduplication logic later will handle selecting the user's team version
-        if (overviewData) {
-            overviewData.forEach((ov: any) => {
-                if (ov.project_name) {
-                    projects.push({
-                        id: ov.id,
-                        name: ov.project_name,
-                        team_id: ov.team_id,
-                        status: 'Active',
-                        description: 'Imported from Overview',
-                        hubstaff_id: null
-                    });
-                }
-            });
-        }
-
-
-        // Sort combined list
+        // Sort projects list
         projects.sort((a: any, b: any) => a.name.localeCompare(b.name));
 
         // CRITICAL FIX: Deduplicate by name, but PRIORITIZE user's team projects
