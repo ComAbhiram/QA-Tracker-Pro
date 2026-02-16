@@ -28,6 +28,7 @@ export default function LeavePage() {
     const [viewMode, setViewMode] = useState<'calendar' | 'day' | 'table'>('calendar');
     const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false);
     const [currentUser, setCurrentUser] = useState<any>(null);
+    const [userTeamId, setUserTeamId] = useState<string | null>(null);
     const { isGuest, selectedTeamId, selectedTeamName, setGuestSession, isLoading: isGuestLoading } = useGuestMode();
     const { teams } = useTeams(isGuest);
 
@@ -41,6 +42,18 @@ export default function LeavePage() {
     async function fetchCurrentUser() {
         const { data: { user } } = await supabase.auth.getUser();
         setCurrentUser(user);
+
+        // Fetch user's team_id for filtering
+        if (user && !isGuest) {
+            const { data: profile } = await supabase
+                .from('user_profiles')
+                .select('team_id')
+                .eq('id', user.id)
+                .single();
+            if (profile) {
+                setUserTeamId(profile.team_id);
+            }
+        }
     }
 
     async function fetchLeaves() {
@@ -57,8 +70,12 @@ export default function LeavePage() {
 
         try {
             let url = `/api/leaves?start_date=${start.toISOString().split('T')[0]}&end_date=${end.toISOString().split('T')[0]}`;
+
+            // CRITICAL FIX: Always pass team_id to prevent cross-team data leakage
             if (isGuest && selectedTeamId) {
                 url += `&team_id=${selectedTeamId}`;
+            } else if (!isGuest && userTeamId) {
+                url += `&team_id=${userTeamId}`;
             }
 
             const response = await fetch(url);

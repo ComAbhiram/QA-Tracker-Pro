@@ -33,17 +33,27 @@ export default function ProjectsPage() {
             } else {
                 console.log('No user found in auth.getUser()');
             }
-            fetchProjects();
         };
         init();
     }, []);
+
+    useEffect(() => {
+        if (userTeamId) {
+            fetchProjects();
+        }
+    }, [userTeamId]);
 
     const fetchProjects = async () => {
         setLoading(true);
         try {
             // Use API to fetch projects (bypasses RLS for Managers)
-            // Use API to fetch projects (bypasses RLS for Managers)
-            const response = await fetch('/api/projects', { cache: 'no-store' });
+            // Pass team_id to ensure proper filtering
+            let url = '/api/projects';
+            if (userTeamId) {
+                url += `?team_id=${userTeamId}`;
+            }
+
+            const response = await fetch(url, { cache: 'no-store' });
             const data = await response.json();
 
             if (data.projects) {
