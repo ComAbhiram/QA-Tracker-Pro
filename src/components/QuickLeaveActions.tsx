@@ -12,6 +12,14 @@ interface QuickLeaveActionsProps {
     onUpdate: () => void;
 }
 
+// Helper to get IST Date YYYY-MM-DD
+const getISTDateString = () => {
+    const now = new Date();
+    const istOffset = 5.5 * 60 * 60 * 1000;
+    const istDate = new Date(now.getTime() + (now.getTimezoneOffset() * 60 * 1000) + istOffset);
+    return istDate.toISOString().split('T')[0];
+};
+
 export default function QuickLeaveActions({ assigneeName, teamId, currentLeave, onUpdate }: QuickLeaveActionsProps) {
     const [loading, setLoading] = useState<string | null>(null);
     const { success, error } = useToast();
@@ -39,7 +47,7 @@ export default function QuickLeaveActions({ assigneeName, teamId, currentLeave, 
                     team_member_name: assigneeName,
                     team_id: teamId,
                     leave_type: dbLeaveType,
-                    date: new Date().toISOString().split('T')[0]
+                    date: getISTDateString()
                 })
             });
 

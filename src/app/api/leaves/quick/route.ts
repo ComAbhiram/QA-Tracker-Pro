@@ -89,7 +89,7 @@ export async function POST(request: Request) {
             if (potentialUsers && potentialUsers.length === 1) {
                 userData = potentialUsers[0];
             } else if (potentialUsers && potentialUsers.length > 1) {
-                console.warn(`[QuickLeave] Ambiguous first name match for '${firstName}'. Found:`, potentialUsers.map(u => u.full_name));
+                console.warn(`[QuickLeave] Ambiguous first name match for '${firstName}'. Found:`, potentialUsers.map(u => (u as any).full_name));
             }
         }
 
@@ -120,9 +120,17 @@ export async function POST(request: Request) {
         let result;
 
         // 4. Toggle Logic
+        // Normalize for comparison
+        const requestedType = leave_type.trim();
+        const existingType = existingLeave?.leave_type?.trim();
+
         // If the SAME leave type exists, delete it (Toggle Off)
-        if (existingLeave && existingLeave.leave_type === leave_type) {
-            console.log(`[QuickLeave] Toggling OFF leave ${leave_type} for ${userData.full_name}`);
+        // We use a lenient match for HL to ensure it toggles even if the DB has a slightly different HL string
+        const isMatch = existingType === requestedType ||
+            (requestedType.includes('Half Day') && existingType?.includes('Half Day'));
+
+        if (existingLeave && isMatch) {
+            console.log(`[QuickLeave] Toggling OFF leave ${existingType} for ${userData.full_name}`);
             const { error: deleteError } = await supabaseAdmin
                 .from('leaves')
                 .delete()
