@@ -60,11 +60,16 @@ export async function GET(request: Request) {
         const canOverride = isSuperAdmin || isManagerMode;
 
         let effectiveTeamId = profile?.team_id;
-        if (canOverride) {
-            effectiveTeamId = overrideTeamId || null; // Allow fetching ALL teams if no override specified
+
+        // If user can override AND explicitly provided a team_id, use it
+        // Otherwise, use their own team_id (even for managers)
+        if (canOverride && overrideTeamId) {
+            effectiveTeamId = overrideTeamId;
         }
 
-        if (!effectiveTeamId && !canOverride) {
+        console.log('[API /leaves] User:', user?.id, 'canOverride:', canOverride, 'overrideTeamId:', overrideTeamId, 'profile.team_id:', profile?.team_id, 'effectiveTeamId:', effectiveTeamId);
+
+        if (!effectiveTeamId) {
             return NextResponse.json(
                 { error: 'Team ID is required' },
                 { status: 400 }
