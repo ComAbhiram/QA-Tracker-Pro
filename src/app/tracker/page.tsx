@@ -363,11 +363,11 @@ export default function Tracker() {
         // 1. Filter by View Mode
         .filter((task: Task) => {
             if (viewMode === 'forecast') {
+                // Forecast tab: only show Forecast tasks
                 return task.status === 'Forecast';
             } else {
-                // 'active' mode shows all fetched (which are already filtered for non-completed/rejected in fetchData)
-                // and now we also exclude 'Forecast' tasks from 'active' view
-                return task.status !== 'Forecast';
+                // Active tab: show ALL tasks (already filtered for non-completed/rejected in fetchData)
+                return true;
             }
         })
         // 2. Sort by Custom Status Order
