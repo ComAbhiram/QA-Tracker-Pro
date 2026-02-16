@@ -5,7 +5,9 @@ import { cookies } from 'next/headers';
 export async function GET(request: Request) {
     try {
         const { searchParams } = new URL(request.url);
-        const teamId = searchParams.get('team_id');
+        const teamIdParam = searchParams.get('team_id');
+        // Handle "undefined" or "null" strings which might come from frontend
+        const teamId = (teamIdParam && teamIdParam !== 'undefined' && teamIdParam !== 'null') ? teamIdParam : null;
 
         // precise authentication check can be added here if needed
         // For now, we rely on the implementation context that this is used for authorized task management
@@ -18,13 +20,14 @@ export async function GET(request: Request) {
 
         const cookieStore = cookies();
         const isManager = cookieStore.get('manager_session')?.value || cookieStore.get('guest_token')?.value || request.headers.get('X-Manager-Mode') === 'true';
+        const isQATeamGlobal = teamId === 'ba60298b-8635-4cca-bcd5-7e470fad60e6';
 
         // Filter by team if provided, but for Manager Mode we return ALL
-        if (teamId && !isManager && teamId !== 'ba60298b-8635-4cca-bcd5-7e470fad60e6') {
+        if (teamId && !isManager && !isQATeamGlobal) {
             // Use .or with proper syntax explicitly on the chain
             // Query Logic: project.team_id == teamId OR project.team_id IS NULL
             query = query.or(`team_id.eq.${teamId},team_id.is.null`);
-        } else if (!isManager && teamId === 'ba60298b-8635-4cca-bcd5-7e470fad60e6') {
+        } else if (!isManager && isQATeamGlobal) {
             // QA Team can see everything (or specific QA logic?)
             // For now, no filter = see all.
         }
@@ -43,7 +46,7 @@ export async function GET(request: Request) {
             .select('id, project_name, team_id, project_type')
             .order('project_name', { ascending: true });
 
-        if (teamId && !isManager && teamId !== 'ba60298b-8635-4cca-bcd5-7e470fad60e6') {
+        if (teamId && !isManager && !isQATeamGlobal) {
             overviewQuery = overviewQuery.eq('team_id', teamId);
         }
 
@@ -51,20 +54,20 @@ export async function GET(request: Request) {
 
         let projects = data || [];
 
-        // Strategy: Combine projects. If duplicates overlap by name, keep 'projects' table version (it usually has more Task Tracker specific metadata like hubstaff_id matching)
-        // But if 'project_overview' has a project NOT in 'projects', add it.
-
+        // Strategy: Combine projects. If duplicates overlap by name, keep 'projects' table version
         const existingNames = new Set(projects.map((p: any) => p.name.trim().toLowerCase()));
 
         if (overviewData) {
             overviewData.forEach((ov: any) => {
                 const normalizedName = ov.project_name?.trim().toLowerCase();
+
+                // If not in projects table, ADD IT.
                 if (normalizedName && !existingNames.has(normalizedName)) {
                     projects.push({
-                        id: ov.id, // Note: ID formats might differ (int vs uuid), frontend should handle gracefully
+                        id: ov.id, // Note: ID formats might differ (int vs uuid)
                         name: ov.project_name,
                         team_id: ov.team_id,
-                        status: 'Active', // Default for overview items
+                        status: 'Active',
                         description: 'Imported from Overview',
                         hubstaff_id: null
                     });
@@ -76,7 +79,7 @@ export async function GET(request: Request) {
         // Sort combined list
         projects.sort((a: any, b: any) => a.name.localeCompare(b.name));
 
-        // Deduplicate by name for Managers to avoid clutter from previous multi-team imports
+        // Deduplicate by name for Managers to avoid clutter
         if (isManager) {
             const seenNames = new Set();
             projects = projects.filter(p => {
@@ -99,7 +102,7 @@ export async function POST(request: Request) {
         const body = await request.json();
         const { name, status, description, team_id, hubstaff_id } = body;
 
-        // Check if already exists in projects table
+        // 1. Check if already exists in projects table
         const { data: existingProject } = await supabaseAdmin
             .from('projects')
             .select('id')
@@ -110,13 +113,26 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Project already exists in projects list' }, { status: 409 });
         }
 
-        // We DO NOT check project_overview here anymore.
-        // Reason: A project might exist in project_overview (Imported from Hubstaff)
-        // but NOT in the 'projects' table (used for Dropdowns).
-        // Passing this check allows us to "sync" it to the projects table.
+        // 2. Check if already exists in project_overview table
+        // If it does, we CANNOT insert into 'projects' if it triggers a sync that violates unique constraints.
+        // Instead, we return success (200) so the frontend thinks it's imported, 
+        // and rely on the GET endpoint to merge it into the list.
+        if (team_id) {
+            const { data: existingOverview } = await supabaseAdmin
+                .from('project_overview')
+                .select('id')
+                .eq('project_name', name)
+                .eq('team_id', team_id)
+                .maybeSingle();
 
-
-
+            if (existingOverview) {
+                console.log(`[Import] Project '${name}' already in project_overview. Skipping insert to avoid trigger error.`);
+                return NextResponse.json({
+                    project: existingOverview,
+                    message: "Project already exists in overview. Synced."
+                });
+            }
+        }
 
         // Use supabaseAdmin to bypass RLS
         const { data, error } = await supabaseAdmin
