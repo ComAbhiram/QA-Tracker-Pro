@@ -702,6 +702,22 @@ export default function Tracker() {
                                 onResizeStart={startResizing}
                                 onEditTask={handleEditTask}
                                 onFieldUpdate={handleFieldUpdate}
+                                onLeaveUpdate={() => {
+                                    // Refresh leaves immediately
+                                    const fetchLeaves = async () => {
+                                        let url = '/api/leaves';
+                                        if (isGuest && selectedTeamId) {
+                                            url += `?team_id=${selectedTeamId}`;
+                                        }
+                                        const res = await fetch(url);
+                                        if (res.ok) {
+                                            const data = await res.json();
+                                            setLeaves(data.leaves || []);
+                                        }
+                                    };
+                                    fetchLeaves();
+                                }}
+                                selectedTeamId={selectedTeamId}
                             />
                         ))
                 )}

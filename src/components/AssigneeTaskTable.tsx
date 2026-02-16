@@ -29,6 +29,7 @@ import { StatusBadge } from '@/components/ui/standard/StatusBadge';
 import { PriorityBadge } from '@/components/ui/standard/PriorityBadge';
 import Tooltip from '@/components/ui/Tooltip';
 import SimpleTooltip from '@/components/ui/SimpleTooltip';
+import QuickLeaveActions from './QuickLeaveActions';
 
 interface AssigneeTaskTableProps {
     assignee: string;
@@ -41,6 +42,9 @@ interface AssigneeTaskTableProps {
     onResizeStart?: (key: string, e: React.MouseEvent) => void;
     // Generalized update handler for inline edits
     onFieldUpdate: (taskId: number, field: string, value: any) => Promise<void>;
+    // New prop to trigger parent refresh
+    onLeaveUpdate?: () => void;
+    selectedTeamId?: string | null;
 }
 
 type SortKey = 'projectName' | 'projectType' | 'priority' | 'subPhase' | 'pc' | 'status' | 'startDate' | 'endDate' | 'actualCompletionDate' | 'deviation';
@@ -170,7 +174,10 @@ const StatusSelectCell = ({ status, onSave }: { status: string, onSave: (val: st
 };
 
 
-export default function AssigneeTaskTable({ assignee, tasks, leaves, columnWidths, hideHeader = false, isRowExpanded = false, onEditTask, onFieldUpdate, onResizeStart }: AssigneeTaskTableProps) {
+export default function AssigneeTaskTable({
+    assignee, tasks, leaves, columnWidths, hideHeader = false, isRowExpanded = false,
+    onEditTask, onFieldUpdate, onLeaveUpdate, selectedTeamId, onResizeStart
+}: AssigneeTaskTableProps) {
     const [currentPage, setCurrentPage] = useState(1);
     const [sortConfig, setSortConfig] = useState<{ key: SortKey; direction: 'asc' | 'desc' } | null>(null);
     const itemsPerPage = 10;
@@ -259,19 +266,48 @@ export default function AssigneeTaskTable({ assignee, tasks, leaves, columnWidth
 
     const activeLeave = getActiveLeave();
 
+    // Determine row background color based on active leave type
+    // FL: Red, HL: Yellow/Orange, WFH: Blue
+    const getLeaveRowClass = () => {
+        if (!activeLeave || activeLeave.date !== new Date().toISOString().split('T')[0]) return ''; // Only highlight for TODAY
+        switch (activeLeave.type) {
+            case 'Full Day': return 'bg-red-50/50 dark:bg-red-900/10 border-l-4 border-l-red-500';
+            case 'Half Day': return 'bg-amber-50/50 dark:bg-amber-900/10 border-l-4 border-l-amber-500';
+            case 'WFH': return 'bg-blue-50/50 dark:bg-blue-900/10 border-l-4 border-l-blue-500';
+            default: return '';
+        }
+    };
+
+    // Also style the table container? Or just rows?
+    // User: "till the day ends the row of the employee should be highlighted with that color"
+    // Since we have multiple rows per assignee, maybe highlight the HEADER or the CONTAINER?
+    // "row of the employee" - usually implies the container in this grouped view, or every task row?
+    // Highlighting every task row might be noisy.
+    // Highlighting the CONTAINER or HEADER seems cleaner. Let's do Container + Header.
+
+    const containerHighlight = getLeaveRowClass();
+
     // Dynamic Class for Cells
     const cellClass = isRowExpanded ? "whitespace-normal break-words" : "truncate";
 
     return (
-        <div className="bg-white dark:bg-slate-900 rounded-lg shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden mb-2 transition-colors">
+        <div className={`bg-white dark:bg-slate-900 rounded-lg shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden mb-2 transition-colors ${containerHighlight}`}>
             {/* Header Section (Compact) - Always visible per assignee table */}
-            <div className={`px-3 py-1.5 flex flex-col md:flex-row md:items-center justify-between gap-3 border-b dark:border-slate-800/50 ${headerColorClass} transition-colors`}>
+            <div className={`px-3 py-1.5 flex flex-col md:flex-row md:items-center justify-between gap-3 border-b dark:border-slate-800/50 ${headerColorClass} transition-colors group`}>
                 <div className="flex items-center gap-3">
                     <div className="w-6 h-6 rounded-full bg-white/60 dark:bg-black/20 backdrop-blur-sm border border-black/5 flex items-center justify-center font-bold text-xs shadow-sm dark:text-slate-200">
                         {assignee.charAt(0)}
                     </div>
                     <div>
-                        <h3 className="font-bold text-xs leading-tight opacity-90">{assignee}</h3>
+                        <div className="flex items-center gap-2">
+                            <h3 className="font-bold text-xs leading-tight opacity-90">{assignee}</h3>
+                            <QuickLeaveActions
+                                assigneeName={assignee}
+                                teamId={selectedTeamId || undefined}
+                                currentLeave={activeLeave && activeLeave.date === new Date().toISOString().split('T')[0] ? { leave_type: activeLeave.type } as any : null}
+                                onUpdate={() => onLeaveUpdate?.()}
+                            />
+                        </div>
                         {activeLeave && (
                             <p className="text-[10px] text-orange-700 dark:text-orange-400 font-semibold mt-0.5">
                                 On Leave: {format(new Date(activeLeave.date), 'MMM d')} ({activeLeave.type})
