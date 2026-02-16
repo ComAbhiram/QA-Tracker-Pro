@@ -69,11 +69,27 @@ export default function LeaveModal({ isOpen, onClose, onSave }: LeaveModalProps)
     const handleMemberChange = (value: string | number | null) => {
         const selectedId = String(value || '');
         const selectedMember = members.find(m => String(m.id) === selectedId);
-        setFormData({
-            ...formData,
-            team_member_id: selectedId,
-            team_member_name: selectedMember?.name || ''
-        });
+
+        if (selectedMember) {
+            setFormData({
+                ...formData,
+                team_member_id: selectedId,
+                team_member_name: selectedMember.name
+            });
+        } else if (selectedId) {
+            // Custom value entered
+            setFormData({
+                ...formData,
+                team_member_id: selectedId, // Use the custom name as ID too
+                team_member_name: selectedId
+            });
+        } else {
+            setFormData({
+                ...formData,
+                team_member_id: '',
+                team_member_name: ''
+            });
+        }
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -143,6 +159,7 @@ export default function LeaveModal({ isOpen, onClose, onSave }: LeaveModalProps)
                                 emptyMessage="No members found."
                                 isLoading={fetchingMembers}
                                 required={true}
+                                allowCustomValue={true}
                             />
                         </div>
 

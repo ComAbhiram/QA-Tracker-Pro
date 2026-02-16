@@ -57,15 +57,29 @@ export async function POST(request: Request) {
         const body = await request.json();
         const { name, status, description, team_id, hubstaff_id } = body;
 
-        // Check if already exists (globally or within team)
-        const { data: existing } = await supabaseAdmin
+        // Check if already exists in projects table
+        const { data: existingProject } = await supabaseAdmin
             .from('projects')
             .select('id')
             .or(`name.eq.${name}${hubstaff_id ? `,hubstaff_id.eq.${hubstaff_id}` : ''}`)
             .maybeSingle();
 
-        if (existing) {
-            return NextResponse.json({ error: 'Project already exists' }, { status: 409 });
+        if (existingProject) {
+            return NextResponse.json({ error: 'Project already exists in projects list' }, { status: 409 });
+        }
+
+        // Also check project_overview to prevent duplicate key error (unique constraint on project_name + team_id)
+        if (team_id) {
+            const { data: existingOverview } = await supabaseAdmin
+                .from('project_overview')
+                .select('id')
+                .eq('project_name', name)
+                .eq('team_id', team_id)
+                .maybeSingle();
+
+            if (existingOverview) {
+                return NextResponse.json({ error: 'Project already exists in overview for this team' }, { status: 409 });
+            }
         }
 
         // Use supabaseAdmin to bypass RLS

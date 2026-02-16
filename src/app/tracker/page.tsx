@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase';
 import { mapTaskFromDB, Task, Leave } from '@/lib/types';
 import { Search, Plus, Download, CalendarClock, X, ArrowUp, ArrowDown, Users, ArrowUpRight } from 'lucide-react';
 import TaskModal from '@/components/TaskModal';
+import LeaveModal, { LeaveFormData } from '@/components/LeaveModal';
 import AssigneeTaskTable from '@/components/AssigneeTaskTable';
 import { useGuestMode } from '@/contexts/GuestContext';
 import { calculateAvailability } from '@/lib/availability';
@@ -35,6 +36,7 @@ export default function Tracker() {
     const { success, error: toastError } = useToast();
     const [viewMode, setViewMode] = useState<'active' | 'forecast'>('active');
     const [isRowExpanded, setIsRowExpanded] = useState(false);
+    const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false);
 
     // Team Selector State (Manager Mode)
     const { teams } = useTeams(isGuest);
@@ -247,6 +249,36 @@ export default function Tracker() {
         // Refresh tasks
         refreshTasks();
         setIsTaskModalOpen(false);
+    };
+
+    const handleSaveLeave = async (leaveData: LeaveFormData) => {
+        try {
+            const response = await fetch('/api/leaves', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    ...leaveData,
+                    team_id: isGuest ? selectedTeamId : undefined // Let API handle user profile team if not guest
+                })
+            });
+
+            if (!response.ok) {
+                const err = await response.json();
+                throw new Error(err.error || 'Failed to save leave');
+            }
+
+            success('Leave marked successfully');
+            // Refresh leaves and tasks
+            refreshTasks();
+            const leavesRes = await fetch(isGuest && selectedTeamId ? `/api/leaves?team_id=${selectedTeamId}` : '/api/leaves');
+            if (leavesRes.ok) {
+                const leavesData = await leavesRes.json();
+                setLeaves(leavesData.leaves || []);
+            }
+        } catch (err: any) {
+            console.error('Error saving leave:', err);
+            toastError(err.message || 'Failed to save leave');
+        }
     };
 
     const handleDeleteTask = async (taskId: number) => {
@@ -512,6 +544,13 @@ export default function Tracker() {
 
                     <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
                         <button
+                            onClick={() => setIsLeaveModalOpen(true)}
+                            className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-orange-50 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 hover:bg-orange-100 dark:hover:bg-orange-900/50 px-4 py-2 rounded-lg transition-all font-semibold border border-orange-100 dark:border-orange-800 text-sm"
+                        >
+                            <CalendarClock size={16} />
+                            Add Leave
+                        </button>
+                        <button
                             onClick={() => setIsAvailabilityCheckOpen(true)}
                             className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 px-4 py-2 rounded-lg transition-all font-semibold border border-indigo-100 dark:border-indigo-800 text-sm"
                         >
@@ -674,6 +713,12 @@ export default function Tracker() {
                 task={editingTask}
                 onSave={saveTask}
                 onDelete={handleDeleteTask}
+            />
+
+            <LeaveModal
+                isOpen={isLeaveModalOpen}
+                onClose={() => setIsLeaveModalOpen(false)}
+                onSave={handleSaveLeave}
             />
         </div >
     );

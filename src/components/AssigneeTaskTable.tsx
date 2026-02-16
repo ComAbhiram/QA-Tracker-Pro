@@ -229,6 +229,36 @@ export default function AssigneeTaskTable({ assignee, tasks, leaves, columnWidth
     const headerColorClass = getHeaderColor(assignee);
     const availabilityDate = calculateAvailability(tasks, leaves);
 
+    // Check if assignee has leave today or in near future
+    const getActiveLeave = () => {
+        const now = new Date();
+        const istOffset = 5.5 * 60 * 60 * 1000;
+        const istDate = new Date(now.getTime() + (now.getTimezoneOffset() * 60 * 1000) + istOffset);
+        const today = istDate.toISOString().split('T')[0];
+
+        // Check for leave on today's date
+        const todayLeave = leaves.find(l => l.team_member_name === assignee && l.leave_date === today);
+        if (todayLeave) {
+            return { date: today, type: todayLeave.leave_type };
+        }
+
+        // Check for upcoming leave within next 7 days
+        const nextWeek = new Date(istDate);
+        nextWeek.setDate(nextWeek.getDate() + 7);
+        const upcomingLeave = leaves.find(l => {
+            if (l.team_member_name !== assignee) return false;
+            const leaveDate = new Date(l.leave_date);
+            return leaveDate > istDate && leaveDate <= nextWeek;
+        });
+        if (upcomingLeave) {
+            return { date: upcomingLeave.leave_date, type: upcomingLeave.leave_type };
+        }
+
+        return null;
+    };
+
+    const activeLeave = getActiveLeave();
+
     // Dynamic Class for Cells
     const cellClass = isRowExpanded ? "whitespace-normal break-words" : "truncate";
 
@@ -242,6 +272,11 @@ export default function AssigneeTaskTable({ assignee, tasks, leaves, columnWidth
                     </div>
                     <div>
                         <h3 className="font-bold text-xs leading-tight opacity-90">{assignee}</h3>
+                        {activeLeave && (
+                            <p className="text-[10px] text-orange-700 dark:text-orange-400 font-semibold mt-0.5">
+                                On Leave: {format(new Date(activeLeave.date), 'MMM d')} ({activeLeave.type})
+                            </p>
+                        )}
                     </div>
                 </div>
 
