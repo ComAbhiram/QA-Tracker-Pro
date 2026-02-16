@@ -45,24 +45,19 @@ export async function GET(request: Request) {
 
         let projects = data || [];
 
-        // Strategy: Combine projects. If duplicates overlap by name, keep 'projects' table version
-        const existingNames = new Set(projects.map((p: any) => p.name.trim().toLowerCase()));
-
+        // CRITICAL FIX: Add ALL projects from project_overview, not just unique names
+        // The deduplication logic later will handle selecting the user's team version
         if (overviewData) {
             overviewData.forEach((ov: any) => {
-                const normalizedName = ov.project_name?.trim().toLowerCase();
-
-                // If not in projects table, ADD IT.
-                if (normalizedName && !existingNames.has(normalizedName)) {
+                if (ov.project_name) {
                     projects.push({
-                        id: ov.id, // Note: ID formats might differ (int vs uuid)
+                        id: ov.id,
                         name: ov.project_name,
                         team_id: ov.team_id,
                         status: 'Active',
                         description: 'Imported from Overview',
                         hubstaff_id: null
                     });
-                    existingNames.add(normalizedName);
                 }
             });
         }
