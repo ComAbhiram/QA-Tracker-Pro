@@ -107,7 +107,7 @@ export interface Project {
 }
 
 // Helper to validate date strings
-export const isValidProjectDate = (dateStr: string | null): boolean => {
+export const isValidProjectDate = (dateStr: string | null): dateStr is string => {
     if (!dateStr) return false;
     const d = new Date(dateStr);
     return !isNaN(d.getTime());
