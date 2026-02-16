@@ -188,70 +188,73 @@ export default function LeavePage() {
         <div className="max-w-[1600px] mx-auto space-y-6">
 
             {/* Header Controls */}
-            <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                <div>
-                    <h1 className="text-3xl font-bold text-slate-800">Leave Management</h1>
-                    <p className="text-slate-500">Manage team member leave requests and view calendar</p>
+            <header className="flex flex-col gap-6 bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 transition-colors">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-100">Leave Management</h1>
+                        <p className="text-slate-500 dark:text-slate-400">Manage team member leave requests and view calendar</p>
+                    </div>
+
+                    {/* Manager Mode Team Selector */}
+                    {isGuest && teams.length > 0 && (
+                        <div className="flex-1 flex justify-end min-w-0 overflow-x-auto no-scrollbar ml-4">
+                            <TeamSelectorPill
+                                teams={teams}
+                                selectedTeamName={selectedTeamName}
+                                onSelect={handleTeamSelect}
+                            />
+                        </div>
+                    )}
                 </div>
 
-                {/* Manager Mode Team Selector */}
-                {isGuest && teams.length > 0 && (
-                    <div className="flex-1 flex justify-center min-w-0">
-                        <TeamSelectorPill
-                            teams={teams}
-                            selectedTeamName={selectedTeamName}
-                            onSelect={handleTeamSelect}
-                        />
-                    </div>
-                )}
-
-                <div className="flex flex-wrap items-center gap-4">
-                    {/* Add Leave Button */}
-                    {/* Add Leave Button */}
-                    <button
-                        onClick={() => setIsLeaveModalOpen(true)}
-                        className="btn btn-primary flex items-center gap-2 shadow-lg shadow-orange-200"
-                    >
-                        <PlusCircle size={18} />
-                        Add Leave
-                    </button>
-
-                    <div className="h-8 w-px bg-slate-200 hidden md:block"></div>
-
-                    {/* View Toggle */}
-                    <div className="flex bg-slate-100 p-1 rounded-xl">
+                <div className="flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-slate-50 dark:border-slate-800">
+                    <div className="flex flex-wrap items-center gap-4">
+                        {/* Add Leave Button */}
                         <button
-                            onClick={() => setViewMode('calendar')}
-                            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${viewMode === 'calendar' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                            onClick={() => setIsLeaveModalOpen(true)}
+                            className="btn btn-primary flex items-center gap-2 shadow-lg shadow-orange-200 transition-all hover:scale-[1.02] active:scale-[0.98]"
                         >
-                            <CalendarIcon size={16} /> Calendar
+                            <PlusCircle size={18} />
+                            Add Leave
                         </button>
-                        <button
-                            onClick={() => setViewMode('day')}
-                            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${viewMode === 'day' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
-                        >
-                            <List size={16} /> Day View
-                        </button>
-                    </div>
 
-                    <div className="h-8 w-px bg-slate-200 hidden md:block"></div>
+                        <div className="h-8 w-px bg-slate-200 dark:bg-slate-700 hidden md:block"></div>
+
+                        {/* View Toggle */}
+                        <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-xl transition-colors">
+                            <button
+                                onClick={() => setViewMode('calendar')}
+                                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${viewMode === 'calendar' ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
+                            >
+                                <CalendarIcon size={16} /> Calendar
+                            </button>
+                            <button
+                                onClick={() => setViewMode('day')}
+                                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${viewMode === 'day' ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
+                            >
+                                <List size={16} /> Day View
+                            </button>
+                        </div>
+                    </div>
 
                     {/* Navigation */}
-                    <div className="flex items-center gap-2">
-                        <button onClick={prevPeriod} className="p-2 hover:bg-slate-50 rounded-lg text-slate-600 border border-slate-200 hover:border-indigo-300 transition-all">
-                            <ChevronLeft size={20} />
-                        </button>
-                        <div className="min-w-[180px] text-center font-bold text-lg text-slate-800">
-                            {viewMode === 'calendar' ? format(currentDate, 'MMMM yyyy') : format(currentDate, 'EEEE, MMM d, yyyy')}
+                    <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-2">
+                            <button onClick={prevPeriod} className="p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 hover:border-indigo-300 dark:hover:border-indigo-500 transition-all">
+                                <ChevronLeft size={20} />
+                            </button>
+                            <div className="min-w-[180px] text-center font-bold text-lg text-slate-800 dark:text-slate-100">
+                                {viewMode === 'calendar' ? format(currentDate, 'MMMM yyyy') : format(currentDate, 'EEEE, MMM d, yyyy')}
+                            </div>
+                            <button onClick={nextPeriod} className="p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 hover:border-indigo-300 dark:hover:border-indigo-500 transition-all">
+                                <ChevronRight size={20} />
+                            </button>
                         </div>
-                        <button onClick={nextPeriod} className="p-2 hover:bg-slate-50 rounded-lg text-slate-600 border border-slate-200 hover:border-indigo-300 transition-all">
-                            <ChevronRight size={20} />
+
+                        <button onClick={goToToday} className="text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 px-3 py-1.5 rounded-lg transition-colors">
+                            Today
                         </button>
                     </div>
-
-                    <button onClick={goToToday} className="text-sm font-medium text-indigo-600 hover:bg-indigo-50 px-3 py-1.5 rounded-lg transition-colors">
-                        Today
-                    </button>
                 </div>
             </header>
 
