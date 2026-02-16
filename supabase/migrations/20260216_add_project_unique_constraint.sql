@@ -45,4 +45,4 @@ CREATE INDEX IF NOT EXISTS idx_projects_hubstaff_team
 ON projects(hubstaff_id, team_id) 
 WHERE hubstaff_id IS NOT NULL;
 
-RAISE NOTICE 'Migration complete! Added unique constraint on (hubstaff_id, team_id)';
+-- Migration complete! Unique constraint added on (hubstaff_id, team_id)
