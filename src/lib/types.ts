@@ -90,7 +90,7 @@ export interface Leave {
     leave_date: string; // YYYY-MM-DD
     leave_type: string;
     reason?: string;
-    status: string; // 'Approved', 'Pending', 'Rejected'
+    status?: string; // 'Approved', 'Pending', 'Rejected' - Optional as column may not exist
     created_by?: string;
     created_at: string;
     team_id: string;

@@ -162,7 +162,6 @@ export async function POST(request: Request) {
                     team_member_name: userData.full_name, // Use the profile name
                     leave_date: targetDate,
                     leave_type,
-                    status: 'Approved',
                     team_id: team_id || userData.team_id
                 }])
                 .select()
