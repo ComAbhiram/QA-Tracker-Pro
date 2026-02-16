@@ -27,7 +27,7 @@ export default function LeavePage() {
     const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false);
     const [currentUser, setCurrentUser] = useState<any>(null);
     const { isGuest, selectedTeamId, selectedTeamName, setGuestSession } = useGuestMode();
-    const { teams } = useTeams();
+    const { teams } = useTeams(isGuest);
 
     useEffect(() => {
         fetchCurrentUser();
