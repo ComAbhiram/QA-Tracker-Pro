@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
+import { mapHubstaffNameToQA } from '@/lib/hubstaff-name-mapping';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
@@ -47,56 +48,95 @@ export async function POST(request: Request) {
         // Use Admin Client
         const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
-        // 2. Resolve Team Member ID (from auth users or just simple store by name if we lack ID mapping?)
-        // The existing `leaves` table requires `team_member_id`.
-        // We need to find the user profile.
+        console.log(`[QuickLeave] Processing for: ${team_member_name} on ${targetDate}`);
 
-        // Search by name in user_profiles?
-        // Note: `team_member_name` in the tracker comes from `assigned_to` column in tasks.
-        // It might not perfectly match `user_profiles.full_name`.
-        // However, standard flow is mapped.
-        // Let's try to find the user.
-
-        const { data: userData, error: userError } = await supabaseAdmin
+        // 2. Resolve User ID
+        // Try exact match first
+        let { data: userData } = await supabaseAdmin
             .from('user_profiles')
-            .select('id, team_id')
+            .select('id, team_id, full_name')
             .ilike('full_name', team_member_name)
-            .single();
+            .maybeSingle();
 
-        let targetUserId = userData?.id;
-        let targetTeamId = team_id || userData?.team_id;
+        // If not found, try using the mapped name for Hubstaff -> QA
+        if (!userData) {
+            const mappedName = mapHubstaffNameToQA(team_member_name);
+            console.log(`[QuickLeave] Exact match failed. Trying mapped name: '${mappedName}'`);
 
-        if (!targetUserId) {
-            // Fallback: This might be a legacy user or name mismatch.
-            // If we can't find ID, we can't insert into `leaves` effectively if it enforces FK.
-            // If it doesn't enforce FK, we can use a placeholder?
-            // Checking existing `leaves` table logic: The POST route requires `team_member_id`.
-            // If we can't find the user, we should probably error or try a loose match.
-            // For now, let's assume we find them. If not, fail.
-            // Wait, existing manual LeaveModal asks user to SELECT assignee from a dropdown of USERS.
-            // So Task Assignee "should" be a real user.
+            if (mappedName !== team_member_name) {
+                const { data: mappedUserData } = await supabaseAdmin
+                    .from('user_profiles')
+                    .select('id, team_id, full_name')
+                    .ilike('full_name', mappedName)
+                    .maybeSingle();
 
-            // If task assignee is just a text string that doesn't match, we have a problem.
-            // Let's try to search strictly first.
-            console.warn(`Could not find user profile for ${team_member_name}`);
+                userData = mappedUserData;
+            }
+        }
 
-            // If we fail, we might return an error that "User must be registered".
+        // If still not found, search by first name (lenient fallback)
+        if (!userData) {
+            const firstName = team_member_name.split(' ')[0];
+            console.log(`[QuickLeave] Mapped match failed. Trying first name: '${firstName}'`);
+
+            // Check if multiple users have the same first name to avoid collisions
+            const { data: potentialUsers } = await supabaseAdmin
+                .from('user_profiles')
+                .select('id, team_id, full_name')
+                .ilike('full_name', `${firstName}%`)
+                .limit(2);
+
+            if (potentialUsers && potentialUsers.length === 1) {
+                userData = potentialUsers[0];
+            } else if (potentialUsers && potentialUsers.length > 1) {
+                console.warn(`[QuickLeave] Ambiguous first name match for '${firstName}'. Found:`, potentialUsers.map(u => u.full_name));
+            }
+        }
+
+        if (!userData) {
+            console.error(`[QuickLeave] User '${team_member_name}' not found in user_profiles.`);
             return NextResponse.json({ error: `User '${team_member_name}' not found` }, { status: 404 });
         }
 
+        console.log(`[QuickLeave] Resolved user: ${team_member_name} -> ${userData.full_name} (ID: ${userData.id})`);
+
         // 3. Upsert Logic:
         // Check if leave exists for this user on this date.
-        const { data: existingLeave } = await supabaseAdmin
+        const { data: existingLeave, error: leaveError } = await supabaseAdmin
             .from('leaves')
-            .select('id')
-            .eq('team_member_id', targetUserId)
+            .select('id, leave_type')
+            .eq('team_member_id', userData.id)
             .eq('leave_date', targetDate)
-            .single();
+            .maybeSingle();
+
+        if (leaveError && leaveError.code !== 'PGRST116') {
+            console.error('Error checking existing leave:', leaveError);
+            return NextResponse.json({ error: 'Failed to check existing leave' }, { status: 500 });
+        }
 
         let result;
-        if (existingLeave) {
-            // Update
-            result = await supabaseAdmin
+
+        // 4. Toggle Logic
+        // If the SAME leave type exists, delete it (Toggle Off)
+        if (existingLeave && existingLeave.leave_type === leave_type) {
+            console.log(`[QuickLeave] Toggling OFF leave ${leave_type} for ${userData.full_name}`);
+            const { error: deleteError } = await supabaseAdmin
+                .from('leaves')
+                .delete()
+                .eq('id', existingLeave.id);
+
+            if (deleteError) throw deleteError;
+
+            return NextResponse.json({
+                message: `Leave removed for ${userData.full_name}`,
+                action: 'removed',
+                leave: null
+            });
+        }
+        // If DIFFERENT leave type exists, Update it
+        else if (existingLeave) {
+            console.log(`[QuickLeave] Updating leave from ${existingLeave.leave_type} to ${leave_type}`);
+            const { data, error: updateError } = await supabaseAdmin
                 .from('leaves')
                 .update({
                     leave_type,
@@ -105,61 +145,44 @@ export async function POST(request: Request) {
                 .eq('id', existingLeave.id)
                 .select()
                 .single();
-        } else {
-            // Insert
-            result = await supabaseAdmin
+
+            if (updateError) throw updateError;
+            result = data;
+        }
+        // If NO leave exists, Insert new one
+        else {
+            console.log(`[QuickLeave] Creating new leave ${leave_type}`);
+            const { data, error: insertError } = await supabaseAdmin
                 .from('leaves')
                 .insert([{
-                    team_member_id: targetUserId,
-                    team_member_name: team_member_name, // Store the display name
+                    team_member_id: userData.id,
+                    team_member_name: userData.full_name, // Use the profile name
                     leave_date: targetDate,
                     leave_type,
-                    status: 'Approved', // Quick actions assumed auto-approved? Or Pending? Assuming Approved for tracker visibility.
-                    team_id: targetTeamId
+                    status: 'Approved',
+                    team_id: team_id || userData.team_id
                 }])
                 .select()
                 .single();
+
+            if (insertError) throw insertError;
+            result = data;
         }
 
-        if (result.error) throw result.error;
-
-        return NextResponse.json({ success: true, leave: result.data });
+        return NextResponse.json({
+            message: `Leave set to ${leave_type} for ${userData.full_name}`,
+            action: 'updated',
+            leave: result
+        });
 
     } catch (error: any) {
         console.error('Quick Leave Error:', error);
-        return NextResponse.json({ error: error.message }, { status: 500 });
+        return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
     }
 }
 
 export async function DELETE(request: Request) {
-    // Toggle OFF logic
-    try {
-        const body = await request.json();
-        const { team_member_name, date } = body;
-        const targetDate = date || getISTDateString();
-
-        const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
-
-        // Find existing leave to delete
-        // We search by name + date roughly because getting ID again is annoying but safer.
-        const { data: userData } = await supabaseAdmin
-            .from('user_profiles')
-            .select('id')
-            .ilike('full_name', team_member_name)
-            .single();
-
-        if (!userData) return NextResponse.json({ error: 'User not found' }, { status: 404 });
-
-        const { error } = await supabaseAdmin
-            .from('leaves')
-            .delete()
-            .eq('team_member_id', userData.id)
-            .eq('leave_date', targetDate);
-
-        if (error) throw error;
-
-        return NextResponse.json({ success: true });
-    } catch (error: any) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
-    }
+    // We can handle delete via POST toggle, or implement explicit DELETE if needed
+    // For now, the POST toggle handles removal.
+    return NextResponse.json({ message: 'Use POST to toggle leave status' }, { status: 405 });
 }
