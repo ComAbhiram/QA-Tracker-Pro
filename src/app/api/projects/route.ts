@@ -22,15 +22,8 @@ export async function GET(request: Request) {
         const isManager = cookieStore.get('manager_session')?.value || cookieStore.get('guest_token')?.value || request.headers.get('X-Manager-Mode') === 'true';
         const isQATeamGlobal = teamId === 'ba60298b-8635-4cca-bcd5-7e470fad60e6';
 
-        // Filter by team if provided, but for Manager Mode we return ALL
-        if (teamId && !isManager && !isQATeamGlobal) {
-            // Use .or with proper syntax explicitly on the chain
-            // Query Logic: project.team_id == teamId OR project.team_id IS NULL
-            query = query.or(`team_id.eq.${teamId},team_id.is.null`);
-        } else if (!isManager && isQATeamGlobal) {
-            // QA Team can see everything (or specific QA logic?)
-            // For now, no filter = see all.
-        }
+        // CRITICAL: Do NOT filter by team here - we need ALL projects for proper deduplication
+        // Team filtering happens AFTER deduplication to ensure we show user's team version
 
         const { data, error } = await query;
 
@@ -46,9 +39,7 @@ export async function GET(request: Request) {
             .select('id, project_name, team_id, project_type')
             .order('project_name', { ascending: true });
 
-        if (teamId && !isManager && !isQATeamGlobal) {
-            overviewQuery = overviewQuery.or(`team_id.eq.${teamId},team_id.is.null`);
-        }
+        // CRITICAL: Do NOT filter by team here either - need all for deduplication
 
         const { data: overviewData } = await overviewQuery;
 
@@ -101,6 +92,19 @@ export async function GET(request: Request) {
             const userTeamProject = group.find(p => p.team_id === teamId);
             return userTeamProject || group[0];
         });
+
+        // NOW filter by team AFTER deduplication
+        // This ensures we show user's team projects + shared projects (team_id = null)
+        if (teamId && !isManager && !isQATeamGlobal) {
+            projects = projects.filter(p => p.team_id === teamId || p.team_id === null);
+        } else if (isQATeamGlobal && !isManager) {
+            // QA team sees all projects
+            // No filtering needed
+        } else if (!isManager) {
+            // Non-manager, non-QA team users see only their team's projects
+            projects = projects.filter(p => p.team_id === teamId || p.team_id === null);
+        }
+        // Managers see everything (no filter)
 
         return NextResponse.json({ projects });
     } catch (error) {
