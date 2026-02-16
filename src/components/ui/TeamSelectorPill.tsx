@@ -8,7 +8,7 @@ interface Team {
 interface TeamSelectorPillProps {
     teams: Team[];
     selectedTeamName: string | null;
-    onSelect: (teamName: string) => void;
+    onSelect: (teamId: string, teamName: string) => void;
 }
 
 export const TeamSelectorPill = ({ teams, selectedTeamName, onSelect }: TeamSelectorPillProps) => {
@@ -45,7 +45,7 @@ export const TeamSelectorPill = ({ teams, selectedTeamName, onSelect }: TeamSele
                             ref={el => { tabsRef.current[index] = el; }}
                             className={`relative px-3 py-1.5 rounded-[3rem] cursor-pointer font-semibold transition-colors duration-300 z-10 select-none text-center whitespace-nowrap text-xs ${selectedTeamName === team.name ? 'text-white' : 'text-[#ddd] hover:text-[#ff6ec4]'
                                 }`}
-                            onClick={() => onSelect(team.name)}
+                            onClick={() => onSelect(team.id, team.name)}
                         >
                             {team.name}
                         </label>

@@ -56,24 +56,20 @@ export default function Tracker() {
     });
 
 
-    const handleTeamSelect = (newTeamName: string) => {
-        const selectedTeam = teams.find(t => t.name === newTeamName);
+    const handleTeamSelect = (teamId: string, teamName: string) => {
+        let targetTeamId = teamId;
 
-        if (selectedTeam) {
-            let targetTeamId = selectedTeam.id;
-
-            // QA Team -> Super Admin mapping logic (Mirrors Sidebar logic)
-            if (newTeamName.toLowerCase() === 'qa team') {
-                const superAdminTeam = teams.find(t => t.name.toLowerCase() === 'super admin');
-                if (superAdminTeam) {
-                    targetTeamId = superAdminTeam.id;
-                }
+        // QA Team -> Super Admin mapping logic (Mirrors Sidebar logic)
+        if (teamName.toLowerCase() === 'qa team') {
+            const superAdminTeam = teams.find(t => t.name.toLowerCase() === 'super admin');
+            if (superAdminTeam) {
+                targetTeamId = superAdminTeam.id;
             }
-
-            setGuestSession(targetTeamId, newTeamName);
-            // Force reload to ensure context updates propogate clean
-            window.location.reload();
         }
+
+        setGuestSession(targetTeamId, teamName);
+        // Force reload to ensure context updates propogate clean
+        window.location.reload();
     };
 
     // Fetch ALL active tasks (no pagination in query)
