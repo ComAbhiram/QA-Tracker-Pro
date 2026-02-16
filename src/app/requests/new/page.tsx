@@ -48,6 +48,7 @@ export default function LeavePage() {
     async function fetchCurrentUser() {
         const { data: { user } } = await supabase.auth.getUser();
         setCurrentUser(user);
+        console.log('[Leave] fetchCurrentUser - isGuest:', isGuest, 'user:', user?.id);
 
         // Fetch user's team_id for filtering
         if (user && !isGuest) {
@@ -56,8 +57,10 @@ export default function LeavePage() {
                 .select('team_id')
                 .eq('id', user.id)
                 .single();
+            console.log('[Leave] Fetched profile:', profile);
             if (profile) {
                 setUserTeamId(profile.team_id);
+                console.log('[Leave] Set userTeamId:', profile.team_id);
             }
         }
     }
@@ -74,15 +77,22 @@ export default function LeavePage() {
             end = endOfMonth(currentDate);
         }
 
+        console.log('[Leave] fetchLeaves - isGuest:', isGuest, 'selectedTeamId:', selectedTeamId, 'userTeamId:', userTeamId);
+
         try {
             let url = `/api/leaves?start_date=${start.toISOString().split('T')[0]}&end_date=${end.toISOString().split('T')[0]}`;
 
             // CRITICAL FIX: Always pass team_id to prevent cross-team data leakage
             if (isGuest && selectedTeamId) {
                 url += `&team_id=${selectedTeamId}`;
+                console.log('[Leave] Using selectedTeamId:', selectedTeamId);
             } else if (!isGuest && userTeamId) {
                 url += `&team_id=${userTeamId}`;
+                console.log('[Leave] Using userTeamId:', userTeamId);
+            } else {
+                console.error('[Leave] ⚠️ NO TEAM_ID! isGuest:', isGuest, 'selectedTeamId:', selectedTeamId, 'userTeamId:', userTeamId);
             }
+            console.log('[Leave] Final URL:', url);
 
             const response = await fetch(url);
             const data = await response.json();
