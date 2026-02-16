@@ -444,7 +444,7 @@ export default function Home() {
                     label="Project"
                     width={columnWidths.projectName}
                     widthKey="projectName"
-                    onResizeStart={(e: React.MouseEvent) => handleResizeStart('projectName', e)}
+                    onResizeStart={handleResizeStart}
                     className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider border-r border-slate-200 dark:border-slate-700"
                   />
                   <ResizableHeader
