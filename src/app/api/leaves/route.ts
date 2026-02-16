@@ -76,8 +76,8 @@ export async function GET(request: Request) {
 
         let query = supabaseAdmin
             .from('leaves')
-            .select('*, team_member:user_profiles!inner(team_id)')
-            .eq('team_member.team_id', effectiveTeamId)
+            .select('*')
+            .eq('team_id', effectiveTeamId)
             .order('leave_date', { ascending: true });
 
         // Filter by date range if provided
