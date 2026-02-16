@@ -13,7 +13,7 @@ export async function GET(request: Request) {
         let query = supabaseAdmin
             .from('projects')
             .select('id, name, team_id')
-            .in('status', ['active', 'imported'])
+            // Removed .in('status') filter to allow On Hold projects to be seen for Import check and Dropdown
             .order('name');
 
         const cookieStore = cookies();

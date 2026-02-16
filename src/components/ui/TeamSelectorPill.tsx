@@ -37,13 +37,13 @@ export const TeamSelectorPill = ({ teams, selectedTeamName, onSelect }: TeamSele
             <div className="overflow-x-auto pb-1 -mb-1 w-full flex justify-center no-scrollbar">
                 {/* Pill Container - Uiverse Style */}
                 <div
-                    className="relative flex items-center bg-[#1a1a1a] rounded-[3rem] p-1 gap-0 shadow-[inset_0_0_20px_#000] min-w-fit"
+                    className="relative flex items-center bg-white dark:bg-slate-900 rounded-[3rem] p-1 gap-0 shadow-sm border border-slate-200 dark:border-slate-800 min-w-fit"
                 >
                     {teams.map((team, index) => (
                         <label
                             key={team.id}
                             ref={el => { tabsRef.current[index] = el; }}
-                            className={`relative px-3 py-1.5 rounded-[3rem] cursor-pointer font-semibold transition-colors duration-300 z-10 select-none text-center whitespace-nowrap text-xs ${selectedTeamName === team.name ? 'text-white' : 'text-[#ddd] hover:text-[#ff6ec4]'
+                            className={`relative px-3 py-1.5 rounded-[3rem] cursor-pointer font-semibold transition-colors duration-300 z-10 select-none text-center whitespace-nowrap text-xs ${selectedTeamName === team.name ? 'text-white' : 'text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400'
                                 }`}
                             onClick={() => onSelect(team.id, team.name)}
                         >
@@ -53,7 +53,7 @@ export const TeamSelectorPill = ({ teams, selectedTeamName, onSelect }: TeamSele
 
                     {/* Sliding Indicator */}
                     <div
-                        className="absolute bottom-[5px] h-[4px] bg-gradient-to-r from-[#ff6ec4] to-[#7873f5] rounded-[2px] transition-all duration-300 z-0 ease-[cubic-bezier(0.25,0.8,0.25,1)]"
+                        className="absolute bottom-0 top-0 my-1 bg-indigo-600 rounded-[3rem] transition-all duration-300 z-0 ease-[cubic-bezier(0.25,0.8,0.25,1)] shadow-md"
                         style={{
                             left: indicatorStyle.left,
                             width: indicatorStyle.width
