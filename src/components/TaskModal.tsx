@@ -73,15 +73,14 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
                 // Use new API route to bypass RLS and ensure Managers get all projects
                 let url = '/api/projects';
 
-                // If NOT Manager Mode (isGuest) AND NOT QA Team (Global), filter by team
-                // This means Managers (isGuest=true) will NOT send team_id, thus fetching ALL projects (Super Admin privilege)
-                if (!isGuest && effectiveTeamId) {
+                // If Manager Mode (isGuest) AND a team is selected, filter by that team
+                // If NOT Manager Mode AND NOT QA Team, filter by user's team
+                if (isGuest && selectedTeamId) {
+                    url += `?team_id=${selectedTeamId}`;
+                } else if (!isGuest && effectiveTeamId) {
                     if (effectiveTeamId !== 'ba60298b-8635-4cca-bcd5-7e470fad60e6') {
                         url += `?team_id=${effectiveTeamId}`;
                     }
-                } else if (isGuest && !selectedTeamId) {
-                    // Avoid calling API with undefined id if possible or handle in API
-                    // For now, if guest but no team, we might want to skip or handled by API
                 }
 
                 const response = await fetch(url);

@@ -54,11 +54,17 @@ export async function GET(request: Request) {
         const { searchParams } = new URL(request.url);
         const startDate = searchParams.get('start_date');
         const endDate = searchParams.get('end_date');
+        const overrideTeamId = searchParams.get('team_id');
+
+        // Determine effective team_id
+        // Managers (super admins) can override team_id
+        const isSuperAdmin = profile?.role === 'super_admin';
+        const effectiveTeamId = (isSuperAdmin && overrideTeamId) ? overrideTeamId : profile.team_id;
 
         let query = supabaseAdmin
             .from('leaves')
             .select('*')
-            .eq('team_id', profile.team_id) // Filter by team
+            .eq('team_id', effectiveTeamId) // Filter by team
             .order('leave_date', { ascending: true });
 
         // Filter by date range if provided
@@ -142,7 +148,8 @@ export async function POST(request: Request) {
             leave_date,
             leave_type,
             reason,
-            created_by
+            created_by,
+            team_id: overrideTeamId
         } = body;
 
         // Validate required fields
@@ -152,6 +159,10 @@ export async function POST(request: Request) {
                 { status: 400 }
             );
         }
+
+        // Determine effective team_id
+        const isSuperAdmin = profile?.role === 'super_admin';
+        const effectiveTeamId = (isSuperAdmin && overrideTeamId) ? overrideTeamId : profile.team_id;
 
         // Insert the leave request with team_id
         const { data, error } = await supabaseAdmin
@@ -164,7 +175,7 @@ export async function POST(request: Request) {
                     leave_type,
                     reason: reason || null,
                     created_by: created_by || null,
-                    team_id: profile.team_id // Add team_id
+                    team_id: effectiveTeamId // Add team_id
                 }
             ])
             .select()

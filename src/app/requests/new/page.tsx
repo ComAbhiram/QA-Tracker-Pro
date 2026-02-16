@@ -5,6 +5,9 @@ import { supabase } from '@/lib/supabase';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isToday, addMonths, subMonths, addDays, subDays } from 'date-fns';
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, List, PlusCircle, User, Tag, FileText, Trash2 } from 'lucide-react';
 import LeaveModal, { LeaveFormData } from '@/components/LeaveModal';
+import { useGuestMode } from '@/contexts/GuestContext';
+import TeamSelectorPill from '@/components/TeamSelectorPill';
+import { useTeams } from '@/hooks/useTeams';
 
 interface Leave {
     id: number;
@@ -23,11 +26,13 @@ export default function LeavePage() {
     const [viewMode, setViewMode] = useState<'calendar' | 'day'>('calendar');
     const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false);
     const [currentUser, setCurrentUser] = useState<any>(null);
+    const { isGuest, selectedTeamId, selectedTeamName, setGuestSession } = useGuestMode();
+    const { teams } = useTeams();
 
     useEffect(() => {
         fetchCurrentUser();
         fetchLeaves();
-    }, [currentDate, viewMode]);
+    }, [currentDate, viewMode, selectedTeamId]);
 
     async function fetchCurrentUser() {
         const { data: { user } } = await supabase.auth.getUser();
@@ -47,9 +52,12 @@ export default function LeavePage() {
         }
 
         try {
-            const response = await fetch(
-                `/api/leaves?start_date=${start.toISOString().split('T')[0]}&end_date=${end.toISOString().split('T')[0]}`
-            );
+            let url = `/api/leaves?start_date=${start.toISOString().split('T')[0]}&end_date=${end.toISOString().split('T')[0]}`;
+            if (isGuest && selectedTeamId) {
+                url += `&team_id=${selectedTeamId}`;
+            }
+
+            const response = await fetch(url);
             const data = await response.json();
             setLeaves(data.leaves || []);
         } catch (error) {
@@ -66,7 +74,8 @@ export default function LeavePage() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     ...leaveData,
-                    created_by: currentUser?.id
+                    created_by: currentUser?.id,
+                    team_id: isGuest ? selectedTeamId : undefined
                 })
             });
 
@@ -165,6 +174,17 @@ export default function LeavePage() {
                     <h1 className="text-3xl font-bold text-slate-800">Leave Management</h1>
                     <p className="text-slate-500">Manage team member leave requests and view calendar</p>
                 </div>
+
+                {/* Manager Mode Team Selector */}
+                {isGuest && teams.length > 0 && (
+                    <div className="flex-1 flex justify-center min-w-0">
+                        <TeamSelectorPill
+                            teams={teams}
+                            selectedTeamName={selectedTeamName}
+                            onSelect={(id, name) => setGuestSession(id, name)}
+                        />
+                    </div>
+                )}
 
                 <div className="flex flex-wrap items-center gap-4">
                     {/* Add Leave Button */}

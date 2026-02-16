@@ -119,7 +119,9 @@ export default function Tracker() {
             if (isGuest) {
                 const isQATeamGlobal = selectedTeamId === 'ba60298b-8635-4cca-bcd5-7e470fad60e6';
 
-                if (selectedTeamId && !isQATeamGlobal) {
+                if (selectedTeamId) {
+                    // Even for QA Team, we want to filter by their team_id to avoid mixed data
+                    // unless some specific "Everything" view is requested
                     taskQuery = taskQuery.eq('team_id', selectedTeamId);
                 } else if (!selectedTeamId) {
                     console.warn('Manager Mode: selectedTeamId is missing, blocking data fetch.');
@@ -156,7 +158,11 @@ export default function Tracker() {
 
             // 2. Fetch Leaves (Active team only)
             try {
-                const leavesRes = await fetch('/api/leaves');
+                let url = '/api/leaves';
+                if (isGuest && selectedTeamId) {
+                    url += `?team_id=${selectedTeamId}`;
+                }
+                const leavesRes = await fetch(url);
                 if (leavesRes.ok) {
                     const leavesData = await leavesRes.json();
                     setLeaves(leavesData.leaves || []);
@@ -208,7 +214,7 @@ export default function Tracker() {
             current_updates: taskData.currentUpdates, // Ensure this is saved
             include_saturday: taskData.includeSaturday || false,
             include_sunday: taskData.includeSunday || false,
-            team_id: taskData.teamId,
+            team_id: isGuest ? selectedTeamId : taskData.teamId,
         };
 
         if (editingTask) {
@@ -234,15 +240,30 @@ export default function Tracker() {
             }
             success('Task updated successfully');
         } else {
-            // For insert, usually RLS allows active team member to insert.
-            const { error } = await supabase
-                .from('tasks')
-                .insert([dbPayload]);
+            // For insert, use API to bypass RLS for Managers
+            if (isGuest) {
+                const response = await fetch('/api/tasks/create', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(dbPayload)
+                });
 
-            if (error) {
-                console.error('Error creating task:', error);
-                toastError(`Failed to create task: ${error.message}`);
-                return;
+                if (!response.ok) {
+                    const err = await response.json();
+                    console.error('Error creating task via API:', err);
+                    toastError(`Failed to create task: ${err.error || 'Server error'}`);
+                    return;
+                }
+            } else {
+                const { error } = await supabase
+                    .from('tasks')
+                    .insert([dbPayload]);
+
+                if (error) {
+                    console.error('Error creating task:', error);
+                    toastError(`Failed to create task: ${error.message}`);
+                    return;
+                }
             }
             success('Task created successfully');
         }
