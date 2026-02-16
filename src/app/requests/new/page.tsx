@@ -35,9 +35,15 @@ export default function LeavePage() {
     useEffect(() => {
         if (!isGuestLoading) {
             fetchCurrentUser();
+        }
+    }, [isGuestLoading]);
+
+    // Separate effect to fetch leaves when team context is ready
+    useEffect(() => {
+        if (!isGuestLoading && (userTeamId || (isGuest && selectedTeamId))) {
             fetchLeaves();
         }
-    }, [currentDate, viewMode, selectedTeamId, isGuestLoading]);
+    }, [currentDate, viewMode, selectedTeamId, userTeamId, isGuestLoading]);
 
     async function fetchCurrentUser() {
         const { data: { user } } = await supabase.auth.getUser();
