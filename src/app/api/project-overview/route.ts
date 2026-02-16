@@ -46,10 +46,11 @@ export async function GET(request: NextRequest) {
 
         const isGuestMode = cookieStore.get('guest_mode')?.value === 'true';
 
-        // 1. Fetch Project Manual Overviews
-        let projectsQuery = supabase
-            .from('project_overview')
-            .select('*');
+        // 1. Fetch ONLY Imported/Created Projects (from 'projects' table)
+        // This ensures we only show projects that have been explicitly imported or manually created
+        let projectsQuery = supabaseAdmin
+            .from('projects')
+            .select('id, name, team_id, status, description, hubstaff_id, created_at');
 
         if (profile.role !== 'super_admin' && !isGuestMode) {
             projectsQuery = projectsQuery.eq('team_id', profile.team_id);
@@ -59,12 +60,43 @@ export async function GET(request: NextRequest) {
             projectsQuery = projectsQuery.eq('team_id', requestedTeamId);
         }
 
-        const { data: projects, error: projectsError } = await projectsQuery.order('created_at', { ascending: false });
+        const { data: importedProjects, error: projectsError } = await projectsQuery.order('created_at', { ascending: false });
 
         if (projectsError) {
-            console.error('Error fetching project overviews:', projectsError);
+            console.error('Error fetching imported projects:', projectsError);
             return NextResponse.json({ error: 'Failed to fetch projects' }, { status: 500 });
         }
+
+        // 2. Fetch metadata from project_overview for these imported projects
+        // Only fetch for projects that have a hubstaff_id
+        const hubstaffIds = importedProjects
+            ?.filter(p => p.hubstaff_id)
+            .map(p => p.hubstaff_id) || [];
+
+        let projectMetadata: any[] = [];
+        if (hubstaffIds.length > 0) {
+            const { data: metadata } = await supabaseAdmin
+                .from('project_overview')
+                .select('*')
+                .in('hubstaff_id', hubstaffIds);
+
+            projectMetadata = metadata || [];
+        }
+
+        // 3. Merge imported projects with their metadata
+        const projects = importedProjects?.map(project => {
+            const metadata = projectMetadata.find(m => m.hubstaff_id === project.hubstaff_id);
+            return {
+                ...project,
+                // Add metadata fields if available
+                ...(metadata && {
+                    activity_percentage: metadata.activity_percentage,
+                    total_hours: metadata.total_hours,
+                    total_cost: metadata.total_cost,
+                    // Add any other metadata fields you need
+                })
+            };
+        }) || [];
 
         // 2. Fetch All Tasks for Aggregation AND Grid View
         // We fetch all fields because we return this list to the frontend for the Task Overview tab
