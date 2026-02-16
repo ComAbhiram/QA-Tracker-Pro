@@ -80,14 +80,26 @@ export async function GET(request: Request) {
         // Sort combined list
         projects.sort((a: any, b: any) => a.name.localeCompare(b.name));
 
-        // CRITICAL FIX: Deduplicate by name for ALL users, not just managers
-        // This prevents duplicate projects with same name but different team_ids from appearing
-        const seenNames = new Set();
-        projects = projects.filter(p => {
+        // CRITICAL FIX: Deduplicate by name, but PRIORITIZE user's team projects
+        // If multiple teams have the same project, keep the user's team version
+        const projectsByName = new Map<string, any[]>(); // Map<lowercaseName, project[]>
+
+        // Group projects by name
+        projects.forEach(p => {
             const lowerName = p.name.trim().toLowerCase();
-            if (seenNames.has(lowerName)) return false;
-            seenNames.add(lowerName);
-            return true;
+            if (!projectsByName.has(lowerName)) {
+                projectsByName.set(lowerName, []);
+            }
+            projectsByName.get(lowerName)!.push(p);
+        });
+
+        // For each name, pick the best project (user's team if available, otherwise first)
+        projects = Array.from(projectsByName.values()).map(group => {
+            if (group.length === 1) return group[0];
+
+            // Multiple projects with same name - prefer user's team
+            const userTeamProject = group.find(p => p.team_id === teamId);
+            return userTeamProject || group[0];
         });
 
         return NextResponse.json({ projects });
