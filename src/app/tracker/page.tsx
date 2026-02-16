@@ -14,6 +14,7 @@ import useColumnResizing from '@/hooks/useColumnResizing';
 import ResizableHeader from '@/components/ui/ResizableHeader';
 import CloseButton from '@/components/ui/CloseButton';
 import TeamSelectorPill from '@/components/ui/TeamSelectorPill';
+import { useTeams } from '@/hooks/useTeams';
 
 export default function Tracker() {
     const { isGuest, selectedTeamId, selectedTeamName, setGuestSession, isLoading: isGuestLoading } = useGuestMode();
@@ -36,8 +37,7 @@ export default function Tracker() {
     const [isRowExpanded, setIsRowExpanded] = useState(false);
 
     // Team Selector State (Manager Mode)
-    interface Team { id: string; name: string; }
-    const [teams, setTeams] = useState<Team[]>([]);
+    const { teams } = useTeams(isGuest);
 
     // Column Resizing (Lifted State)
     const { columnWidths, startResizing } = useColumnResizing({
@@ -55,26 +55,6 @@ export default function Tracker() {
         sprint: 50
     });
 
-    // Fetch Teams for Manager Mode
-    useEffect(() => {
-        if (isGuest) {
-            const fetchTeams = async () => {
-                try {
-                    const { data, error } = await supabase.from('teams').select('id, name').order('name');
-                    if (error) throw error;
-                    if (data) {
-                        const filteredTeams = data.filter(team =>
-                            !['cochin', 'dubai'].includes(team.name.toLowerCase())
-                        );
-                        setTeams(filteredTeams);
-                    }
-                } catch (error) {
-                    console.error('Error fetching teams:', error);
-                }
-            };
-            fetchTeams();
-        }
-    }, [isGuest]);
 
     const handleTeamSelect = (newTeamName: string) => {
         const selectedTeam = teams.find(t => t.name === newTeamName);

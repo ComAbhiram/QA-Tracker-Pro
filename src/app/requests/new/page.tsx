@@ -6,7 +6,7 @@ import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isTod
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, List, PlusCircle, User, Tag, FileText, Trash2 } from 'lucide-react';
 import LeaveModal, { LeaveFormData } from '@/components/LeaveModal';
 import { useGuestMode } from '@/contexts/GuestContext';
-import TeamSelectorPill from '@/components/TeamSelectorPill';
+import TeamSelectorPill from '@/components/ui/TeamSelectorPill';
 import { useTeams } from '@/hooks/useTeams';
 
 interface Leave {
