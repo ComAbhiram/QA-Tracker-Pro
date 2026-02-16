@@ -23,9 +23,22 @@ export async function GET(request: Request) {
 
         if (error) throw error;
 
+        // Check for check constraints on leaves table
+        const { data: constraints, error: constraintError } = await supabaseAdmin
+            .rpc('get_check_constraints', { table_name: 'leaves' });
+
+        // If RPC fails (likely), try to infer by checking existing rows distinct leave_types
+        const { data: distinctTypes } = await supabaseAdmin
+            .from('leaves')
+            .select('leave_type')
+            .not('leave_type', 'is', null)
+            .limit(50);
+
+        const uniqueTypes = [...new Set(distinctTypes?.map(d => d.leave_type))];
+
         return NextResponse.json({
             columns_found: data && data.length > 0 ? Object.keys(data[0]) : 'No data to infer columns',
-            first_row: data ? data[0] : null
+            existing_leave_types: uniqueTypes
         });
 
     } catch (error: any) {
