@@ -75,8 +75,8 @@ export async function POST(request: Request) {
         }
 
         // If still not found, search by first name (lenient fallback)
+        let firstName = team_member_name.split(' ')[0];
         if (!userData) {
-            const firstName = team_member_name.split(' ')[0];
             console.log(`[QuickLeave] Mapped match failed. Trying first name: '${firstName}'`);
 
             // Check if multiple users have the same first name to avoid collisions
@@ -94,8 +94,11 @@ export async function POST(request: Request) {
         }
 
         if (!userData) {
+            const mappedName = mapHubstaffNameToQA(team_member_name);
             console.error(`[QuickLeave] User '${team_member_name}' not found in user_profiles.`);
-            return NextResponse.json({ error: `User '${team_member_name}' not found` }, { status: 404 });
+            return NextResponse.json({
+                error: `User '${team_member_name}' not found. Tried exact, mapped ('${mappedName}'), and first name ('${firstName}'). Please verify user_profiles.`
+            }, { status: 404 });
         }
 
         console.log(`[QuickLeave] Resolved user: ${team_member_name} -> ${userData.full_name} (ID: ${userData.id})`);
