@@ -47,7 +47,7 @@ export async function GET(request: Request) {
             .order('project_name', { ascending: true });
 
         if (teamId && !isManager && !isQATeamGlobal) {
-            overviewQuery = overviewQuery.eq('team_id', teamId);
+            overviewQuery = overviewQuery.or(`team_id.eq.${teamId},team_id.is.null`);
         }
 
         const { data: overviewData } = await overviewQuery;
