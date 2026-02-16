@@ -18,16 +18,21 @@ export default function QuickLeaveActions({ assigneeName, teamId, currentLeave, 
 
     const handleQuickAction = async (type: string) => {
         if (loading) return;
-        setLoading(type);
+        setLoading(type); // specific type (FL, HL, WFH) for loading state
 
         try {
-            // If clicking the same type that is already active, we might want to toggle it OFF (delete).
-            // Or just re-apply. User requirement: "When clicked FL It automatically marked...".
-            // Let's assume strict set for now. If they want to clear, maybe a separate "Clear" button or toggle?
-            // "if marked as WFH automatically mark as the employee as Work from home".
-            // Let's implement toggle: If active == type, delete. Else, upsert.
+            // Map Quick Action types to DB Valid types
+            let dbLeaveType = type;
+            if (type === 'FL') dbLeaveType = 'Full Day Casual Leave';
+            if (type === 'HL') dbLeaveType = 'Half Day Morning Session Casual Leave';
+            if (type === 'WFH') dbLeaveType = 'WFH';
 
-            const isToggleOff = currentLeave?.leave_type === type;
+            // Check if WE are toggling off.
+            // For FL: matches 'Full Day Casual Leave' (strictly for now, or maybe if current starts with Full Day?)
+            // Let's use strict match to the default we set, OR if we want to be smart:
+            // If current matches dbLeaveType, toggle off.
+
+            const isToggleOff = currentLeave?.leave_type === dbLeaveType;
             const method = isToggleOff ? 'DELETE' : 'POST';
 
             const response = await fetch('/api/leaves/quick', {
@@ -36,11 +41,7 @@ export default function QuickLeaveActions({ assigneeName, teamId, currentLeave, 
                 body: JSON.stringify({
                     team_member_name: assigneeName,
                     team_id: teamId,
-                    leave_type: type,
-                    // Date is handled by server as "Today" (IST) usually, or we pass it.
-                    // Safer to pass "Today" from client to avoid server timezone mismatch if any, 
-                    // BUT server should really control "Official Day".
-                    // Let's pass the date to be explicit.
+                    leave_type: dbLeaveType,
                     date: new Date().toISOString().split('T')[0]
                 })
             });
@@ -50,7 +51,7 @@ export default function QuickLeaveActions({ assigneeName, teamId, currentLeave, 
                 throw new Error(err.error || 'Failed to update leave');
             }
 
-            success(isToggleOff ? 'Leave cleared' : `Marked as ${type}`);
+            success(isToggleOff ? 'Leave cleared' : `Marked as ${dbLeaveType}`);
             onUpdate();
         } catch (err: any) {
             console.error('Quick Action Error:', err);
@@ -60,9 +61,18 @@ export default function QuickLeaveActions({ assigneeName, teamId, currentLeave, 
         }
     };
 
-    const getButtonClass = (type: string, baseColor: string, hoverColor: string, activeColor: string) => {
-        const isActive = currentLeave?.leave_type === type;
-        const isLoading = loading === type;
+    const getButtonClass = (btnType: 'FL' | 'HL' | 'WFH', baseColor: string, hoverColor: string, activeColor: string) => {
+        let isActive = false;
+
+        if (currentLeave?.leave_type) {
+            if (btnType === 'FL') isActive = currentLeave.leave_type === 'Full Day Casual Leave';
+            // For HL, light it up if it's ANY half day? Or just the one we set?
+            // Let's light it up if it includes "Half Day" so it shows status even if set manually to Afternoon
+            if (btnType === 'HL') isActive = currentLeave.leave_type.includes('Half Day');
+            if (btnType === 'WFH') isActive = currentLeave.leave_type === 'WFH';
+        }
+
+        const isLoading = loading === btnType;
 
         // If active, show solid color. If not, show outline/ghost.
         return `
@@ -80,22 +90,22 @@ export default function QuickLeaveActions({ assigneeName, teamId, currentLeave, 
         <div className="flex items-center gap-1 ml-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
             {/* FL - Full Day Leave (Red) */}
             <button
-                onClick={(e) => { e.stopPropagation(); handleQuickAction('Full Day'); }}
-                className={getButtonClass('Full Day', 'text-red-600', 'bg-red-50', 'bg-red-600 border-red-700')}
-                title="Mark Full Day Leave"
+                onClick={(e) => { e.stopPropagation(); handleQuickAction('FL'); }}
+                className={getButtonClass('FL', 'text-red-600', 'bg-red-50', 'bg-red-600 border-red-700')}
+                title="Mark Full Day Casual Leave"
                 disabled={!!loading}
             >
-                {loading === 'Full Day' ? <Loader2 size={10} className="animate-spin" /> : 'FL'}
+                {loading === 'FL' ? <Loader2 size={10} className="animate-spin" /> : 'FL'}
             </button>
 
             {/* HL - Half Day Leave (Yellow/Orange) */}
             <button
-                onClick={(e) => { e.stopPropagation(); handleQuickAction('Half Day'); }}
-                className={getButtonClass('Half Day', 'text-amber-600', 'bg-amber-50', 'bg-amber-500 border-amber-600')}
-                title="Mark Half Day Leave"
+                onClick={(e) => { e.stopPropagation(); handleQuickAction('HL'); }}
+                className={getButtonClass('HL', 'text-amber-600', 'bg-amber-50', 'bg-amber-500 border-amber-600')}
+                title="Mark Half Day Morning Casual Leave"
                 disabled={!!loading}
             >
-                {loading === 'Half Day' ? <Loader2 size={10} className="animate-spin" /> : 'HL'}
+                {loading === 'HL' ? <Loader2 size={10} className="animate-spin" /> : 'HL'}
             </button>
 
             {/* WFH - Work From Home (Blue) */}
