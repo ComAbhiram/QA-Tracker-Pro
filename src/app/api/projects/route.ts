@@ -33,6 +33,7 @@ export async function GET(request: Request) {
         }
 
         let projects = data || [];
+        console.log(`[DEBUG] Initial projects from DB: ${projects.length}`);
 
         // Sort projects list
         projects.sort((a: any, b: any) => a.name.localeCompare(b.name));
@@ -50,6 +51,8 @@ export async function GET(request: Request) {
             projectsByName.get(lowerName)!.push(p);
         });
 
+        console.log(`[DEBUG] Unique project names after grouping: ${projectsByName.size}`);
+
         // For each name, pick the best project (user's team if available, otherwise first)
         projects = Array.from(projectsByName.values()).map(group => {
             if (group.length === 1) return group[0];
@@ -59,18 +62,25 @@ export async function GET(request: Request) {
             return userTeamProject || group[0];
         });
 
+        console.log(`[DEBUG] Projects after deduplication: ${projects.length}`);
+
         // NOW filter by team AFTER deduplication
         // This ensures we show user's team projects + shared projects (team_id = null)
         if (teamId && !isManager && !isQATeamGlobal) {
             projects = projects.filter(p => p.team_id === teamId || p.team_id === null);
+            console.log(`[DEBUG] Projects after team filter (non-QA, non-manager): ${projects.length}`);
         } else if (isQATeamGlobal && !isManager) {
             // QA team sees all projects
             // No filtering needed
+            console.log(`[DEBUG] QA team - no filtering, keeping all ${projects.length} projects`);
         } else if (!isManager) {
             // Non-manager, non-QA team users see only their team's projects
             projects = projects.filter(p => p.team_id === teamId || p.team_id === null);
+            console.log(`[DEBUG] Projects after team filter (non-manager): ${projects.length}`);
         }
         // Managers see everything (no filter)
+
+        console.log(`[DEBUG] Final projects count: ${projects.length}`);
 
         return NextResponse.json({ projects });
     } catch (error) {
