@@ -21,8 +21,8 @@ export async function GET(request: Request) {
         // we should probably allow fetching all.
 
         if (teamId && teamId !== 'ba60298b-8635-4cca-bcd5-7e470fad60e6') {
-            // If a specific team is requested (and not QA global), filter
-            query = query.eq('team_id', teamId);
+            // Include projects for the specific team OR global projects (team_id is null)
+            query = query.or(`team_id.eq.${teamId},team_id.is.null`);
         }
 
         const { data, error } = await query;

@@ -28,6 +28,7 @@ export default function Home() {
   // Filter & Search State
   const [filter, setFilter] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
+  const [showTodayOnly, setShowTodayOnly] = useState(false);
 
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
@@ -164,6 +165,13 @@ export default function Home() {
       query = query.or(`project_name.ilike.${term},sub_phase.ilike.${term},assigned_to.ilike.${term},assigned_to2.ilike.${term},status.ilike.${term}`);
     }
 
+    // Apply Today Only filter
+    if (showTodayOnly) {
+      const today = new Date().toISOString().split('T')[0];
+      // Tasks where today is between start_date and end_date
+      query = query.lte('start_date', today).gte('end_date', today);
+    }
+
     // Apply Pagination
     const from = (page - 1) * itemsPerPage;
     const to = from + itemsPerPage - 1;
@@ -253,12 +261,12 @@ export default function Home() {
     }, 400);
 
     return () => clearTimeout(timer);
-  }, [searchQuery, filter, currentPage, fetchTableData]);
+  }, [searchQuery, filter, currentPage, showTodayOnly, fetchTableData]);
 
   // Reset page when filter/search changes (This works by effect separation or logic)
   useEffect(() => {
     setCurrentPage(1);
-  }, [filter, searchQuery]);
+  }, [filter, searchQuery, showTodayOnly]);
 
 
   // Handlers
@@ -433,6 +441,16 @@ export default function Home() {
               <span className="text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 px-2 py-1 rounded-md whitespace-nowrap">
                 {totalItems} total results
               </span>
+              <button
+                onClick={() => setShowTodayOnly(!showTodayOnly)}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${showTodayOnly
+                    ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm shadow-indigo-200 dark:shadow-indigo-900/20'
+                    : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700'
+                  }`}
+              >
+                <CalendarClock size={14} />
+                {showTodayOnly ? 'Today Only' : 'Present Day'}
+              </button>
             </div>
           </div>
 
