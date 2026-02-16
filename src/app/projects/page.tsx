@@ -42,7 +42,8 @@ export default function ProjectsPage() {
         setLoading(true);
         try {
             // Use API to fetch projects (bypasses RLS for Managers)
-            const response = await fetch('/api/projects');
+            // Use API to fetch projects (bypasses RLS for Managers)
+            const response = await fetch('/api/projects', { cache: 'no-store' });
             const data = await response.json();
 
             if (data.projects) {
@@ -387,7 +388,10 @@ export default function ProjectsPage() {
 
                         <div className="space-y-2 max-h-[50vh] overflow-y-auto">
                             {hubstaffProjects.map((hp) => {
-                                const isImported = projects.some(p => p.hubstaffId === hp.id || p.name === hp.name);
+                                const isImported = projects.some(p =>
+                                    (p.hubstaffId && p.hubstaffId === hp.id) ||
+                                    p.name.trim().toLowerCase() === hp.name.trim().toLowerCase()
+                                );
                                 return (
                                     <div key={hp.id} className="flex items-center justify-between p-3 border border-slate-100 rounded-lg hover:bg-slate-50 transition-colors">
                                         <div>

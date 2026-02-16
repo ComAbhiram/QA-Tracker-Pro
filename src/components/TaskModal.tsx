@@ -472,7 +472,7 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
     };
 
     const handleProjectChange = (value: string | number | null) => {
-        const selectedProject = projects.find(p => p.id === value);
+        const selectedProject = projects.find(p => p.id == value);
         setFormData(prev => ({
             ...prev,
             projectName: selectedProject ? selectedProject.label : (value ? String(value) : '')
