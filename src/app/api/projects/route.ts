@@ -76,19 +76,19 @@ export async function GET(request: Request) {
             });
         }
 
+
         // Sort combined list
         projects.sort((a: any, b: any) => a.name.localeCompare(b.name));
 
-        // Deduplicate by name for Managers to avoid clutter
-        if (isManager) {
-            const seenNames = new Set();
-            projects = projects.filter(p => {
-                const lowerName = p.name.trim().toLowerCase();
-                if (seenNames.has(lowerName)) return false;
-                seenNames.add(lowerName);
-                return true;
-            });
-        }
+        // CRITICAL FIX: Deduplicate by name for ALL users, not just managers
+        // This prevents duplicate projects with same name but different team_ids from appearing
+        const seenNames = new Set();
+        projects = projects.filter(p => {
+            const lowerName = p.name.trim().toLowerCase();
+            if (seenNames.has(lowerName)) return false;
+            seenNames.add(lowerName);
+            return true;
+        });
 
         return NextResponse.json({ projects });
     } catch (error) {
