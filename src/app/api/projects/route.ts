@@ -13,14 +13,14 @@ export async function GET(request: Request) {
         let query = supabaseAdmin
             .from('projects')
             .select('id, name, team_id')
-            .eq('status', 'active')
+            .in('status', ['active', 'imported'])
             .order('name');
 
-        // Optional: Filter by team if provided, but for Manager Mode we might want ALL
-        // The client currently filters. If we want to emulate "Super Admin" privileges for Managers,
-        // we should probably allow fetching all.
+        const cookieStore = cookies();
+        const isManager = cookieStore.get('manager_session')?.value || cookieStore.get('guest_token')?.value || request.headers.get('X-Manager-Mode') === 'true';
 
-        if (teamId && teamId !== 'ba60298b-8635-4cca-bcd5-7e470fad60e6') {
+        // Filter by team if provided, but for Manager Mode we return ALL
+        if (teamId && !isManager && teamId !== 'ba60298b-8635-4cca-bcd5-7e470fad60e6') {
             // Include projects for the specific team OR global projects (team_id is null)
             query = query.or(`team_id.eq.${teamId},team_id.is.null`);
         }
