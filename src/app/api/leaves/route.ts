@@ -37,7 +37,7 @@ export async function GET(request: Request) {
         // Get user's team_id from user_profiles
         const { data: profile } = await supabase
             .from('user_profiles')
-            .select('team_id')
+            .select('role, team_id')
             .eq('id', user.id)
             .single();
 
@@ -58,7 +58,7 @@ export async function GET(request: Request) {
 
         // Determine effective team_id
         // Managers (super admins) can override team_id
-        const isSuperAdmin = profile?.role === 'super_admin';
+        const isSuperAdmin = (profile as any)?.role === 'super_admin';
         const effectiveTeamId = (isSuperAdmin && overrideTeamId) ? overrideTeamId : profile.team_id;
 
         let query = supabaseAdmin
@@ -127,7 +127,7 @@ export async function POST(request: Request) {
         // Get user's team_id from user_profiles
         const { data: profile } = await supabase
             .from('user_profiles')
-            .select('team_id')
+            .select('role, team_id')
             .eq('id', user.id)
             .single();
 
@@ -161,7 +161,7 @@ export async function POST(request: Request) {
         }
 
         // Determine effective team_id
-        const isSuperAdmin = profile?.role === 'super_admin';
+        const isSuperAdmin = (profile as any)?.role === 'super_admin';
         const effectiveTeamId = (isSuperAdmin && overrideTeamId) ? overrideTeamId : profile.team_id;
 
         // Insert the leave request with team_id

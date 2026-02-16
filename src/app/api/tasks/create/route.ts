@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
         const { ...taskData } = body;
 
         // Determine effective team_id
-        const isSuperAdmin = profile.role === 'super_admin';
+        const isSuperAdmin = (profile as any).role === 'super_admin';
         const effectiveTeamId = (isSuperAdmin && taskData.team_id) ? taskData.team_id : profile.team_id;
 
         // Perform Insert using Admin Client (Bypass RLS)
