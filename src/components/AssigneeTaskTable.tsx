@@ -253,7 +253,12 @@ export default function AssigneeTaskTable({
         // Check for leave on today's date
         const todayLeave = leaves.find(l => {
             const lName = normalize(l.team_member_name);
-            return (lName === normalizedAssignee || lName === normalizedMapped) && l.leave_date === today;
+            // Enhanced matching: Exact, Mapped, or Partial
+            const matchesName = lName === normalizedAssignee || lName === normalizedMapped;
+            const matchesPartial = lName.includes(normalizedAssignee) || normalizedAssignee.includes(lName) ||
+                (normalizedMapped && (lName.includes(normalizedMapped) || normalizedMapped.includes(lName)));
+
+            return (matchesName || matchesPartial) && l.leave_date === today;
         });
 
         if (todayLeave) {
@@ -265,7 +270,11 @@ export default function AssigneeTaskTable({
         nextWeek.setDate(nextWeek.getDate() + 7);
         const upcomingLeave = leaves.find(l => {
             const lName = normalize(l.team_member_name);
-            if (lName !== normalizedAssignee && lName !== normalizedMapped) return false;
+            const matchesName = lName === normalizedAssignee || lName === normalizedMapped;
+            const matchesPartial = lName.includes(normalizedAssignee) || normalizedAssignee.includes(lName) ||
+                (normalizedMapped && (lName.includes(normalizedMapped) || normalizedMapped.includes(lName)));
+
+            if (!matchesName && !matchesPartial) return false;
 
             const leaveDate = new Date(l.leave_date);
             return leaveDate > istDate && leaveDate <= nextWeek;

@@ -15,7 +15,8 @@ BEGIN
         NEW.team_id,
         NOW(),
         NOW()
-    );
+    )
+    ON CONFLICT (project_name, team_id) DO NOTHING;
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
