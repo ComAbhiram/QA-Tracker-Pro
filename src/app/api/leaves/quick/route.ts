@@ -128,10 +128,27 @@ export async function POST(request: Request) {
 
         if (!userData) {
             const mappedName = mapHubstaffNameToQA(team_member_name);
-            console.error(`[QuickLeave] User '${team_member_name}' not found in user_profiles.`);
-            return NextResponse.json({
-                error: `User '${team_member_name}' not found. Tried exact, mapped ('${mappedName}'), and first name ('${firstName}'). Please verify user_profiles.`
-            }, { status: 404 });
+            console.warn(`[QuickLeave] User '${team_member_name}' not found in user_profiles. Using FALLBACK strategy.`);
+
+            // FALLBACK ID GENERATION
+            // Since team_member_id is TEXT, we can generate a consistent ID for this user name.
+            // This allows leaves to be created even if the user hasn't been synced to user_profiles yet.
+            // We use a prefix to distinguish these "Shadow Users".
+            const fallbackId = `shadow_${team_member_name.toLowerCase().replace(/\s+/g, '_')}`;
+
+            userData = {
+                id: fallbackId,
+                full_name: team_member_name,
+                team_id: team_id || null // We might not know the team if passed in body is null?
+                // Actually, if team_id comes from body (frontend context), use it.
+            };
+
+            // Limit this fallback to likely valid names?
+            if (team_member_name.length < 3) {
+                return NextResponse.json({
+                    error: `User '${team_member_name}' not found and name too short for fallback.`
+                }, { status: 404 });
+            }
         }
 
         console.log(`[QuickLeave] Resolved user: ${team_member_name} -> ${userData.full_name} (ID: ${userData.id})`);
