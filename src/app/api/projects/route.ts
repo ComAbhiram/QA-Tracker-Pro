@@ -12,7 +12,7 @@ export async function GET(request: Request) {
 
         let query = supabaseAdmin
             .from('projects')
-            .select('id, name, team_id')
+            .select('*')
             // Removed .in('status') filter to allow On Hold projects to be seen for Import check and Dropdown
             .order('name');
 
@@ -36,7 +36,45 @@ export async function GET(request: Request) {
             return NextResponse.json({ error: error.message }, { status: 500 });
         }
 
+        // 3. Merge with 'project_overview' (Imported/Active projects)
+        // We want to include these because sometimes a project exists here but hasn't been synced to 'projects' yet.
+        let overviewQuery = supabaseAdmin
+            .from('project_overview')
+            .select('id, project_name, team_id, project_type')
+            .order('project_name', { ascending: true });
+
+        if (teamId && !isManager && teamId !== 'ba60298b-8635-4cca-bcd5-7e470fad60e6') {
+            overviewQuery = overviewQuery.eq('team_id', teamId);
+        }
+
+        const { data: overviewData } = await overviewQuery;
+
         let projects = data || [];
+
+        // Strategy: Combine projects. If duplicates overlap by name, keep 'projects' table version (it usually has more Task Tracker specific metadata like hubstaff_id matching)
+        // But if 'project_overview' has a project NOT in 'projects', add it.
+
+        const existingNames = new Set(projects.map((p: any) => p.name.trim().toLowerCase()));
+
+        if (overviewData) {
+            overviewData.forEach((ov: any) => {
+                const normalizedName = ov.project_name?.trim().toLowerCase();
+                if (normalizedName && !existingNames.has(normalizedName)) {
+                    projects.push({
+                        id: ov.id, // Note: ID formats might differ (int vs uuid), frontend should handle gracefully
+                        name: ov.project_name,
+                        team_id: ov.team_id,
+                        status: 'Active', // Default for overview items
+                        description: 'Imported from Overview',
+                        hubstaff_id: null
+                    });
+                    existingNames.add(normalizedName);
+                }
+            });
+        }
+
+        // Sort combined list
+        projects.sort((a: any, b: any) => a.name.localeCompare(b.name));
 
         // Deduplicate by name for Managers to avoid clutter from previous multi-team imports
         if (isManager) {

@@ -244,13 +244,18 @@ export default function AssigneeTaskTable({
         const istDate = new Date(now.getTime() + (now.getTimezoneOffset() * 60 * 1000) + istOffset);
         const today = istDate.toISOString().split('T')[0];
 
-        // Check for leave on today's date
-        // Use mapped name to match DB
+        // Normalization helper
+        const normalize = (s: string) => s?.toLowerCase().trim() || '';
+        const normalizedAssignee = normalize(assignee);
         const mappedAssigneeName = mapHubstaffNameToQA(assignee);
-        const todayLeave = leaves.find(l =>
-            (l.team_member_name === assignee || l.team_member_name === mappedAssigneeName) &&
-            l.leave_date === today
-        );
+        const normalizedMapped = normalize(mappedAssigneeName);
+
+        // Check for leave on today's date
+        const todayLeave = leaves.find(l => {
+            const lName = normalize(l.team_member_name);
+            return (lName === normalizedAssignee || lName === normalizedMapped) && l.leave_date === today;
+        });
+
         if (todayLeave) {
             return { date: today, type: todayLeave.leave_type };
         }
@@ -259,10 +264,13 @@ export default function AssigneeTaskTable({
         const nextWeek = new Date(istDate);
         nextWeek.setDate(nextWeek.getDate() + 7);
         const upcomingLeave = leaves.find(l => {
-            if (l.team_member_name !== assignee && l.team_member_name !== mappedAssigneeName) return false;
+            const lName = normalize(l.team_member_name);
+            if (lName !== normalizedAssignee && lName !== normalizedMapped) return false;
+
             const leaveDate = new Date(l.leave_date);
             return leaveDate > istDate && leaveDate <= nextWeek;
         });
+
         if (upcomingLeave) {
             return { date: upcomingLeave.leave_date, type: upcomingLeave.leave_type };
         }

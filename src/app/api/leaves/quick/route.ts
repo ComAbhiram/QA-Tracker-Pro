@@ -74,35 +74,54 @@ export async function POST(request: Request) {
             }
         }
 
-        // If still not found, search by first name (lenient fallback)
-        let firstName = team_member_name.split(' ')[0];
-        if (!userData) {
-            console.log(`[QuickLeave] Mapped match failed. Trying first name starts with: '${firstName}'`);
+        // If still not found, searching strategies:
+        const cleanName = team_member_name.trim();
+        const firstName = cleanName.split(' ')[0];
 
-            // 1. Try Starts With
-            let { data: potentialUsers } = await supabaseAdmin
+        if (!userData) {
+            console.log(`[QuickLeave] Exact/Mapped match failed. Trying advanced search for: '${team_member_name}'`);
+
+            const cleanLower = cleanName.toLowerCase();
+
+            // 1. Try "Starts With" on Full Name (e.g. "Jishnu" matches "Jishnu V Gopal")
+            let { data: startsWithUsers } = await supabaseAdmin
                 .from('user_profiles')
                 .select('id, team_id, full_name')
-                .ilike('full_name', `${firstName}%`)
-                .limit(2);
+                .ilike('full_name', `${cleanName}%`)
+                .limit(5);
 
-            if (potentialUsers && potentialUsers.length === 1) {
-                userData = potentialUsers[0];
-            } else if (potentialUsers && potentialUsers.length > 1) {
-                console.warn(`[QuickLeave] Ambiguous first name match for '${firstName}%'. Found:`, potentialUsers.map(u => (u as any).full_name));
-            } else {
-                // 2. Try Contains (Fallback for "V Jishnu" when searching "Jishnu")
-                console.log(`[QuickLeave] Starts-with failed. Trying contains: '%${firstName}%'`);
-                const { data: fuzzyUsers } = await supabaseAdmin
+            if (startsWithUsers && startsWithUsers.length === 1) {
+                userData = startsWithUsers[0];
+            } else if (startsWithUsers && startsWithUsers.length > 1) {
+                // If ambiguous, check if any is an exact word match ignoring case
+                const exactWordMatch = startsWithUsers.find(u => u.full_name.toLowerCase() === cleanLower);
+                if (exactWordMatch) userData = exactWordMatch;
+                else console.warn(`[QuickLeave] Ambiguous starts-with match:`, startsWithUsers.map(u => u.full_name));
+            }
+
+            // 2. Try "Contains" (e.g. "V Gopal" matches "Jishnu V Gopal")
+            if (!userData) {
+                let { data: containsUsers } = await supabaseAdmin
                     .from('user_profiles')
                     .select('id, team_id, full_name')
-                    .ilike('full_name', `%${firstName}%`)
-                    .limit(2);
+                    .ilike('full_name', `%${cleanName}%`)
+                    .limit(5);
 
-                if (fuzzyUsers && fuzzyUsers.length === 1) {
-                    userData = fuzzyUsers[0];
-                } else if (fuzzyUsers && fuzzyUsers.length > 1) {
-                    console.warn(`[QuickLeave] Ambiguous contains match for '%${firstName}%'. Found:`, fuzzyUsers.map(u => (u as any).full_name));
+                if (containsUsers && containsUsers.length === 1) {
+                    userData = containsUsers[0];
+                }
+            }
+
+            // 3. Try "First Name" starts with (Fallback)
+            if (!userData && firstName.length > 2) {
+                let { data: firstNameUsers } = await supabaseAdmin
+                    .from('user_profiles')
+                    .select('id, team_id, full_name')
+                    .ilike('full_name', `${firstName}%`)
+                    .limit(5);
+
+                if (firstNameUsers && firstNameUsers.length === 1) {
+                    userData = firstNameUsers[0];
                 }
             }
         }
