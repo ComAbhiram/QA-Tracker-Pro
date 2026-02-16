@@ -93,29 +93,29 @@ export default function RejectedProjects() {
 
     return (
         <div className="max-w-[1800px] mx-auto space-y-8 p-4">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div className="flex items-center gap-4">
-                    <div className="p-3 bg-red-50 text-red-600 rounded-2xl shadow-sm">
+                    <div className="p-3 bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-2xl shadow-sm">
                         <AlertCircle size={28} />
                     </div>
                     <div>
                         <div className="flex items-center gap-3">
-                            <h1 className="text-3xl font-bold text-slate-800 tracking-tight">Rejected Projects</h1>
-                            <span className="px-3 py-1 bg-red-100 text-red-700 text-sm font-bold rounded-full">
+                            <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-100 tracking-tight">Rejected Projects</h1>
+                            <span className="px-3 py-1 bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300 text-sm font-bold rounded-full">
                                 {tasks.length} {tasks.length === 1 ? 'task' : 'tasks'}
                             </span>
                         </div>
-                        <p className="text-slate-500 font-medium">History of cancelled or rejected tasks with reasons</p>
+                        <p className="text-slate-500 dark:text-slate-400 font-medium">History of cancelled or rejected tasks with reasons</p>
                     </div>
                 </div>
 
                 {/* View Toggle */}
-                <div className="flex gap-2 bg-white border border-slate-200 rounded-xl p-1">
+                <div className="flex gap-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-1 self-start md:self-auto">
                     <button
                         onClick={() => toggleView('table')}
                         className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${viewMode === 'table'
-                            ? 'bg-red-50 text-red-700 font-semibold'
-                            : 'text-slate-600 hover:bg-slate-50'
+                            ? 'bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 font-semibold'
+                            : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700'
                             }`}
                     >
                         <Table2 size={18} />
@@ -124,8 +124,8 @@ export default function RejectedProjects() {
                     <button
                         onClick={() => toggleView('box')}
                         className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${viewMode === 'box'
-                            ? 'bg-red-50 text-red-700 font-semibold'
-                            : 'text-slate-600 hover:bg-slate-50'
+                            ? 'bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 font-semibold'
+                            : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700'
                             }`}
                     >
                         <Grid3x3 size={18} />
@@ -148,9 +148,9 @@ export default function RejectedProjects() {
                         <div key={task.id} className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 hover:shadow-md transition-all group">
                             <div className="flex justify-between items-start mb-4">
                                 <span className={`px-3 py-1 rounded-full text-xs font-bold ${task.priority === 'High' ? 'bg-orange-100 text-orange-700' :
-                                        task.priority === 'Urgent' ? 'bg-red-100 text-red-700' :
-                                            task.priority === 'Medium' ? 'bg-amber-100 text-amber-700' :
-                                                'bg-green-100 text-green-700'
+                                    task.priority === 'Urgent' ? 'bg-red-100 text-red-700' :
+                                        task.priority === 'Medium' ? 'bg-amber-100 text-amber-700' :
+                                            'bg-green-100 text-green-700'
                                     }`}>
                                     {task.priority || 'Normal'}
                                 </span>

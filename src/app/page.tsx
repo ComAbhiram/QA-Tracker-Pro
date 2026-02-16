@@ -211,7 +211,7 @@ export default function Home() {
           // Others will be at the end
         };
 
-        finalTasks.sort((a, b) => {
+        finalTasks.sort((a: Task, b: Task) => {
           const orderA = statusOrder[a.status] || 99;
           const orderB = statusOrder[b.status] || 99;
           return orderA - orderB;
@@ -374,16 +374,16 @@ export default function Home() {
           <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-100">Team Tracker</h1>
           <p className="text-slate-500 dark:text-slate-400">Overview of all active team projects</p>
         </div>
-        <div className="flex flex-wrap gap-3">
+        <div className="flex flex-wrap gap-3 w-full md:w-auto">
           <button
             onClick={() => setIsReportModalOpen(true)}
-            className="btn btn-secondary flex items-center gap-2"
+            className="flex-1 sm:flex-none btn btn-secondary flex items-center justify-center gap-2"
           >
             <FileText size={18} /> Daily Reports
           </button>
           <button
             onClick={() => setIsAvailabilityModalOpen(true)}
-            className="btn btn-secondary flex items-center gap-2"
+            className="flex-1 sm:flex-none btn btn-secondary flex items-center justify-center gap-2"
           >
             <CalendarClock size={18} /> Check Availability
           </button>
@@ -392,7 +392,7 @@ export default function Home() {
           {!isGuest && (
             <button
               onClick={handleAddTask}
-              className="btn btn-primary flex items-center gap-2"
+              className="flex-1 sm:flex-none btn btn-primary flex items-center justify-center gap-2"
             >
               <Plus size={18} /> New Task
             </button>
@@ -438,13 +438,13 @@ export default function Home() {
 
           <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-transparent">
             <table className="w-full text-left text-sm text-slate-600 dark:text-slate-400 border-collapse">
-              <thead className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700">
+              <thead className="bg-slate-50 dark:bg-slate-800 border-b-2 border-slate-200 dark:border-slate-700">
                 <tr>
                   <ResizableHeader
                     label="Project"
                     width={columnWidths.projectName}
                     widthKey="projectName"
-                    onResizeStart={handleResizeStart}
+                    onResizeStart={(e: React.MouseEvent) => handleResizeStart('projectName', e)}
                     className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider border-r border-slate-200 dark:border-slate-700"
                   />
                   <ResizableHeader
@@ -475,7 +475,7 @@ export default function Home() {
                     onResizeStart={handleResizeStart}
                     className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider border-r border-slate-200 dark:border-slate-700"
                   />
-                  <th className="px-3 py-2 text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider text-left bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700">
+                  <th className="px-3 py-2 text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider text-left bg-slate-50 dark:bg-slate-800 border-b-2 border-slate-200 dark:border-slate-700">
                     Comments
                   </th>
                 </tr>

@@ -89,7 +89,7 @@ const EditableCell = ({ value, onSave, className, type = 'text', options = [], i
                     onBlur={handleSave}
                     onKeyDown={handleKeyDown}
                     onClick={(e) => e.stopPropagation()}
-                    className={`w-full bg-white border border-indigo-300 rounded px-1 py-0.5 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500 shadow-sm ${className}`}
+                    className={`w-full bg-white dark:bg-slate-800 border border-indigo-300 dark:border-indigo-700 rounded px-1 py-0.5 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:text-slate-100 shadow-sm ${className}`}
                 >
                     {options.map(opt => (
                         <option key={opt} value={opt}>{opt}</option>
@@ -107,7 +107,7 @@ const EditableCell = ({ value, onSave, className, type = 'text', options = [], i
                     onKeyDown={handleKeyDown}
                     onClick={(e) => e.stopPropagation()}
                     rows={2} // slightly taller for multiline if needed, but keeping compact
-                    className={`w-full bg-white border border-indigo-300 rounded px-1 py-0.5 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500 shadow-sm resize-none overflow-hidden ${className}`}
+                    className={`w-full bg-white dark:bg-slate-800 border border-indigo-300 dark:border-indigo-700 rounded px-1 py-0.5 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:text-slate-100 shadow-sm resize-none overflow-hidden ${className}`}
                     style={{ minHeight: '24px' }}
                 />
             );
@@ -121,7 +121,7 @@ const EditableCell = ({ value, onSave, className, type = 'text', options = [], i
                 onBlur={handleSave}
                 onKeyDown={handleKeyDown}
                 onClick={(e) => e.stopPropagation()}
-                className={`w-full bg-white border border-indigo-300 rounded px-1 py-0.5 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500 shadow-sm ${className}`}
+                className={`w-full bg-white dark:bg-slate-800 border border-indigo-300 dark:border-indigo-700 rounded px-1 py-0.5 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:text-slate-100 shadow-sm ${className}`}
             />
         );
     }
@@ -132,7 +132,7 @@ const EditableCell = ({ value, onSave, className, type = 'text', options = [], i
                 e.stopPropagation();
                 setIsEditing(true);
             }}
-            className={`cursor-pointer hover:bg-slate-100 min-h-[20px] rounded px-1 py-0.5 transition-colors border border-transparent hover:border-slate-200 ${isExpanded ? 'whitespace-normal break-words' : 'truncate'} ${className}`}
+            className={`cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 min-h-[20px] rounded px-1 py-0.5 transition-colors border border-transparent hover:border-slate-200 dark:hover:border-slate-700 ${isExpanded ? 'whitespace-normal break-words' : 'truncate'} ${className}`}
             title={value?.toString() || 'Click to edit'}
         >
             {value || <span className="opacity-0 group-hover:opacity-30">-</span>}
@@ -154,12 +154,12 @@ const StatusSelectCell = ({ status, onSave }: { status: string, onSave: (val: st
                     <StatusBadge status={status} />
                 </div>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-40 z-50">
+            <DropdownMenuContent className="w-40 z-50 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
                 {statusOptions.map((s) => (
                     <DropdownMenuItem
                         key={s}
                         onClick={() => onSave(s)}
-                        className="text-xs cursor-pointer py-1.5 focus:bg-slate-100"
+                        className="text-xs cursor-pointer py-1.5 focus:bg-slate-100 dark:focus:bg-slate-700 dark:text-slate-200"
                     >
                         {s}
                     </DropdownMenuItem>
@@ -218,6 +218,8 @@ export default function AssigneeTaskTable({ assignee, tasks, leaves, columnWidth
             'bg-indigo-50 border-indigo-200 text-indigo-800', 'bg-violet-50 border-violet-200 text-violet-800',
             'bg-purple-50 border-purple-200 text-purple-800', 'bg-fuchsia-50 border-fuchsia-200 text-fuchsia-800',
             'bg-pink-50 border-pink-200 text-pink-800', 'bg-rose-50 border-rose-200 text-rose-800',
+            'bg-slate-800 border-slate-700 text-slate-100', // Dark variant 1
+            'bg-indigo-900 border-indigo-800 text-indigo-100', // Dark variant 2
         ];
         let hash = 0;
         for (let i = 0; i < name.length; i++) { hash = name.charCodeAt(i) + ((hash << 5) - hash); }
@@ -231,11 +233,11 @@ export default function AssigneeTaskTable({ assignee, tasks, leaves, columnWidth
     const cellClass = isRowExpanded ? "whitespace-normal break-words" : "truncate";
 
     return (
-        <div className="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden mb-2">
+        <div className="bg-white dark:bg-slate-900 rounded-lg shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden mb-2 transition-colors">
             {/* Header Section (Compact) - Always visible per assignee table */}
-            <div className={`px-3 py-1.5 flex flex-col md:flex-row md:items-center justify-between gap-3 border-b ${headerColorClass}`}>
+            <div className={`px-3 py-1.5 flex flex-col md:flex-row md:items-center justify-between gap-3 border-b dark:border-slate-800/50 ${headerColorClass} transition-colors`}>
                 <div className="flex items-center gap-3">
-                    <div className="w-6 h-6 rounded-full bg-white/60 backdrop-blur-sm border border-black/5 flex items-center justify-center font-bold text-xs shadow-sm">
+                    <div className="w-6 h-6 rounded-full bg-white/60 dark:bg-black/20 backdrop-blur-sm border border-black/5 flex items-center justify-center font-bold text-xs shadow-sm dark:text-slate-200">
                         {assignee.charAt(0)}
                     </div>
                     <div>
@@ -243,10 +245,10 @@ export default function AssigneeTaskTable({ assignee, tasks, leaves, columnWidth
                     </div>
                 </div>
 
-                <div className="flex items-center gap-3 text-slate-700">
-                    <div className="flex items-center gap-2 bg-white/50 px-2 py-0.5 rounded-md border border-black/5">
-                        <CalendarClock size={12} className="text-red-600" />
-                        <span className="text-[10px] font-bold text-slate-700">
+                <div className="flex items-center gap-3 text-slate-700 dark:text-slate-300">
+                    <div className="flex items-center gap-2 bg-white/50 dark:bg-black/20 px-2 py-0.5 rounded-md border border-black/5">
+                        <CalendarClock size={12} className="text-red-600 dark:text-red-400" />
+                        <span className="text-[10px] font-bold text-slate-700 dark:text-slate-200">
                             Available: {format(availabilityDate, 'MMM d')}
                         </span>
                     </div>
@@ -255,7 +257,7 @@ export default function AssigneeTaskTable({ assignee, tasks, leaves, columnWidth
 
             {/* Table */}
             <div className="overflow-x-visible pb-0"> {/* Allow dropdowns to overflow if needed, but table-layout fixed handles most */}
-                <table className="w-full text-xs text-slate-800 border-collapse table-fixed border border-slate-200">
+                <table className="w-full text-xs text-slate-800 dark:text-slate-200 border-collapse table-fixed border border-slate-200 dark:border-slate-800">
                     <col style={{ width: columnWidths.projectName }} />
                     <col style={{ width: columnWidths.projectType }} />
                     <col style={{ width: columnWidths.priority }} />
@@ -282,21 +284,21 @@ export default function AssigneeTaskTable({ assignee, tasks, leaves, columnWidth
                         </thead>
                     )}
 
-                    <tbody className="divide-y divide-slate-100">
+                    <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                         {paginatedTasks.map(task => (
                             <tr
                                 key={task.id}
                                 onClick={() => onEditTask(task)}
-                                className="group hover:bg-slate-50 cursor-pointer transition-colors"
+                                className="group hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer transition-colors"
                             >
-                                <td className="px-2 py-1 border-r border-slate-200 font-medium text-slate-700">
+                                <td className="px-2 py-1 border-r border-slate-200 dark:border-slate-800 font-medium text-slate-700 dark:text-slate-200">
                                     <div className={cellClass} title={task.projectName}>{task.projectName}</div>
                                     {task.currentUpdates && (
                                         <SimpleTooltip
                                             content={task.currentUpdates}
                                             className="mt-0.5 cursor-help"
                                         >
-                                            <span className="text-[10px] text-indigo-600 font-medium hover:text-indigo-800 transition-colors">
+                                            <span className="text-[10px] text-indigo-600 dark:text-indigo-400 font-medium hover:text-indigo-800 dark:hover:text-indigo-300 transition-colors">
                                                 Updates
                                             </span>
                                         </SimpleTooltip>
@@ -304,25 +306,25 @@ export default function AssigneeTaskTable({ assignee, tasks, leaves, columnWidth
 
                                 </td>
 
-                                <td className={`px-2 py-1 border-r border-slate-200 text-slate-500 ${cellClass}`}>{task.projectType || '-'}</td>
+                                <td className={`px-2 py-1 border-r border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 ${cellClass}`}>{task.projectType || '-'}</td>
 
-                                <td className="px-2 py-1 truncate border-r border-slate-200">
+                                <td className="px-2 py-1 truncate border-r border-slate-200 dark:border-slate-800">
                                     <div className="transform scale-90 origin-left">
                                         <PriorityBadge priority={task.priority} />
                                     </div>
                                 </td>
 
-                                <td className={`px-2 py-1 border-r border-slate-200 text-slate-600 ${cellClass}`} title={task.subPhase || ''}>{task.subPhase || '-'}</td>
-                                <td className={`px-2 py-1 border-r border-slate-200 text-slate-600 ${cellClass}`}>{task.pc || '-'}</td>
+                                <td className={`px-2 py-1 border-r border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 ${cellClass}`} title={task.subPhase || ''}>{task.subPhase || '-'}</td>
+                                <td className={`px-2 py-1 border-r border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 ${cellClass}`}>{task.pc || '-'}</td>
 
                                 {/* Status - Editable Select */}
-                                <td className="px-2 py-1 border-r border-slate-200" onClick={e => e.stopPropagation()}>
+                                <td className="px-2 py-1 border-r border-slate-200 dark:border-slate-800" onClick={e => e.stopPropagation()}>
                                     <div className="flex items-center gap-1.5 w-full min-w-0">
                                         <div className="flex-1 min-w-0">
                                             <StatusSelectCell status={task.status} onSave={(val) => onFieldUpdate(task.id, 'status', val)} />
                                         </div>
                                         {isTaskOverdue(task) && (
-                                            <span className="flex-shrink-0 flex items-center gap-0.5 text-red-600 font-bold text-[10px]" title={`${getOverdueDays(task)} days overdue`}>
+                                            <span className="flex-shrink-0 flex items-center gap-0.5 text-red-600 dark:text-red-400 font-bold text-[10px]" title={`${getOverdueDays(task)} days overdue`}>
                                                 <AlertCircle size={10} /> {getOverdueDays(task)}d
                                             </span>
                                         )}
@@ -330,31 +332,31 @@ export default function AssigneeTaskTable({ assignee, tasks, leaves, columnWidth
                                 </td>
 
                                 {/* Start Date - Inline Edit */}
-                                <td className="px-1 py-0.5 truncate border-r border-slate-200" onClick={(e) => e.stopPropagation()}>
+                                <td className="px-1 py-0.5 truncate border-r border-slate-200 dark:border-slate-800" onClick={(e) => e.stopPropagation()}>
                                     <DatePicker
                                         date={task.startDate ? new Date(task.startDate) : undefined}
                                         setDate={(d) => handleDateChange(d, task.id, 'start_date')}
-                                        className="w-full h-full border-none shadow-none bg-transparent hover:bg-slate-100 rounded px-1 text-[11px] font-normal min-h-[24px] py-0"
+                                        className="w-full h-full border-none shadow-none bg-transparent hover:bg-slate-100 dark:hover:bg-slate-800 rounded px-1 text-[11px] font-normal min-h-[24px] py-0 dark:text-slate-200"
                                         placeholder="-"
                                     />
                                 </td>
 
                                 {/* End Date - Inline Edit */}
-                                <td className={`px-1 py-0.5 truncate border-r border-slate-200 transition-colors ${isTaskOverdue(task) ? 'bg-red-50' : ''}`} onClick={(e) => e.stopPropagation()}>
+                                <td className={`px-1 py-0.5 truncate border-r border-slate-200 dark:border-slate-800 transition-colors ${isTaskOverdue(task) ? 'bg-red-50 dark:bg-red-900/20' : ''}`} onClick={(e) => e.stopPropagation()}>
                                     <DatePicker
                                         date={task.endDate ? new Date(task.endDate) : undefined}
                                         setDate={(d) => handleDateChange(d, task.id, 'end_date')}
-                                        className={`w-full h-full border-none shadow-none bg-transparent rounded px-1 text-[11px] font-normal min-h-[24px] py-0 ${isTaskOverdue(task) ? 'text-red-700 font-semibold' : 'hover:bg-slate-100'}`}
+                                        className={`w-full h-full border-none shadow-none bg-transparent rounded px-1 text-[11px] font-normal min-h-[24px] py-0 ${isTaskOverdue(task) ? 'text-red-700 dark:text-red-400 font-semibold' : 'hover:bg-slate-100 dark:hover:bg-slate-800 dark:text-slate-200'}`}
                                         placeholder="-"
                                     />
                                 </td>
 
-                                <td className="px-2 py-1 truncate border-r border-slate-200 text-slate-600">
+                                <td className="px-2 py-1 truncate border-r border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400">
                                     {task.actualCompletionDate ? format(new Date(task.actualCompletionDate), 'MMM d') : '-'}
                                 </td>
 
                                 {/* Comments - Editable */}
-                                <td className={`px-2 py-1 border-r border-slate-200 text-slate-600 ${cellClass}`} title={task.comments || ''} onClick={e => e.stopPropagation()}>
+                                <td className={`px-2 py-1 border-r border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 ${cellClass}`} title={task.comments || ''} onClick={e => e.stopPropagation()}>
                                     <EditableCell
                                         value={task.comments}
                                         onSave={(val) => onFieldUpdate(task.id, 'comments', val)}
@@ -364,7 +366,7 @@ export default function AssigneeTaskTable({ assignee, tasks, leaves, columnWidth
                                 </td>
 
                                 {/* Deviation - Editable */}
-                                <td className={`px-2 py-1 border-r border-slate-200 text-slate-600 ${cellClass}`} onClick={e => e.stopPropagation()}>
+                                <td className={`px-2 py-1 border-r border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 ${cellClass}`} onClick={e => e.stopPropagation()}>
                                     <EditableCell
                                         value={task.deviation}
                                         onSave={(val) => onFieldUpdate(task.id, 'deviation', val)}
@@ -374,9 +376,9 @@ export default function AssigneeTaskTable({ assignee, tasks, leaves, columnWidth
                                 </td>
 
 
-                                <td className="px-2 py-1 truncate text-center text-slate-600">
+                                <td className="px-2 py-1 truncate text-center text-slate-600 dark:text-slate-400">
                                     {task.sprintLink ? (
-                                        <a href={task.sprintLink} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline" onClick={e => e.stopPropagation()}>Link</a>
+                                        <a href={task.sprintLink} target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline" onClick={e => e.stopPropagation()}>Link</a>
                                     ) : '-'}
                                 </td>
                             </tr>
@@ -387,7 +389,7 @@ export default function AssigneeTaskTable({ assignee, tasks, leaves, columnWidth
 
             {/* Per-Assignee Pagination */}
             {totalItems > itemsPerPage && (
-                <div className="py-2 px-3 border-t border-slate-100">
+                <div className="py-2 px-3 border-t border-slate-100 dark:border-slate-800">
                     <Pagination
                         currentPage={currentPage}
                         totalItems={totalItems}

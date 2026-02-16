@@ -89,7 +89,7 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
                     const data = await response.json();
                     if (data.projects) {
                         setProjects(data.projects.map((p: any) => ({
-                            id: p.name, // Using name as ID based on existing logic
+                            id: p.id,
                             label: p.name
                         })));
                     }
@@ -473,9 +473,10 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
     };
 
     const handleProjectChange = (value: string | number | null) => {
+        const selectedProject = projects.find(p => p.id === value);
         setFormData(prev => ({
             ...prev,
-            projectName: value ? String(value) : ''
+            projectName: selectedProject ? selectedProject.label : (value ? String(value) : '')
         }));
     };
 
@@ -512,8 +513,8 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
                             {task ? <Activity size={24} /> : <Briefcase size={24} />}
                         </div>
                         <div>
-                            <h2 className="text-2xl font-bold text-slate-800 tracking-tight">{task ? 'Edit Task' : 'New Project Task'}</h2>
-                            <p className="text-sm text-slate-500 font-medium">{task ? 'Update task details below' : 'Kickoff a new project tracking item'}</p>
+                            <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100 tracking-tight">{task ? 'Edit Task' : 'New Project Task'}</h2>
+                            <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">{task ? 'Update task details below' : 'Kickoff a new project tracking item'}</p>
                         </div>
                     </div>
                     <CloseButton onClick={onClose} />
@@ -525,21 +526,22 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
                     {/* 1. Project Name & 2. Project Type */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div className="space-y-3">
-                            <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                            <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
                                 <Briefcase size={16} className="text-indigo-500" /> Project Name <span className="text-red-500">*</span>
                             </label>
                             <Combobox
                                 options={projects}
-                                value={formData.projectName}
+                                value={projects.find(p => p.label === formData.projectName)?.id || formData.projectName}
                                 onChange={handleProjectChange}
                                 placeholder={isFetchingProjects ? "Loading projects..." : "Select Project..."}
                                 searchPlaceholder="Search projects..."
                                 emptyMessage="No projects found."
                                 isLoading={isFetchingProjects}
+                                allowCustomValue={true}
                             />
                         </div>
                         <div className="space-y-3">
-                            <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                            <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
                                 <Activity size={16} className="text-indigo-500" /> Project Type
                             </label>
                             <input
@@ -547,7 +549,7 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
                                 name="projectType"
                                 value={formData.projectType || ''}
                                 onChange={handleChange}
-                                className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all placeholder:text-slate-400 font-medium text-slate-700"
+                                className="w-full px-5 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500 font-medium text-slate-700 dark:text-slate-200"
                                 placeholder="e.g. Web Development, Mobile App"
                             />
                         </div>
@@ -556,7 +558,7 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
                     {/* 3. Priority & 4. PC */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div className="space-y-3">
-                            <label className="text-sm font-semibold text-slate-700">Priority</label>
+                            <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Priority</label>
                             <Combobox
                                 options={[
                                     { id: 'Low', label: 'Low' },
@@ -573,7 +575,7 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
                             />
                         </div>
                         <div className="space-y-3">
-                            <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                            <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
                                 <User size={16} className="text-indigo-500" /> Project Coordinator (PC)
                             </label>
                             <Combobox
@@ -591,7 +593,7 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
 
                     {/* 4.5. Phase/Task */}
                     <div className="space-y-3">
-                        <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                        <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
                             <Layers size={16} className="text-indigo-500" /> Phase/Task
                         </label>
                         <Combobox
@@ -608,7 +610,7 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
 
                     {/* Dynamic Assignees */}
                     <div className="space-y-4">
-                        <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                        <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
                             <User size={16} className="text-indigo-500" /> Assignees
                         </label>
                         <div className="space-y-3">
@@ -630,7 +632,7 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
                                         <button
                                             type="button"
                                             onClick={() => removeAssignee(index)}
-                                            className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                                            className="p-2 text-slate-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                                             title="Remove Assignee"
                                         >
                                             <X size={18} />
@@ -642,7 +644,7 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
                         <button
                             type="button"
                             onClick={addAssignee}
-                            className="text-sm font-semibold text-indigo-600 hover:text-indigo-700 flex items-center gap-2 px-2 py-1 hover:bg-indigo-50 rounded-lg transition-colors"
+                            className="text-sm font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 flex items-center gap-2 px-2 py-1 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-colors"
                         >
                             <Plus size={16} /> Add Assignee
                         </button>
@@ -651,27 +653,27 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
                     {/* 7. Status */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div className="space-y-3">
-                            <label className="text-sm font-semibold text-slate-700">Status</label>
+                            <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Status</label>
                             <select
                                 name="status"
                                 value={formData.status || 'Yet to Start'}
                                 onChange={handleChange}
-                                className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all font-medium text-slate-700 appearance-none cursor-pointer"
+                                className="w-full px-5 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all font-medium text-slate-700 dark:text-slate-200 appearance-none cursor-pointer"
                             >
-                                <option value="Yet to Start">Yet to Start</option>
-                                <option value="Being Developed">Being Developed</option>
-                                <option value="Ready for QA">Ready for QA</option>
-                                <option value="Assigned to QA">Assigned to QA</option>
-                                <option value="In Progress">In Progress</option>
-                                <option value="On Hold">On Hold</option>
-                                <option value="Completed">Completed</option>
-                                <option value="Forecast">Forecast</option>
-                                <option value="Rejected">Rejected</option>
+                                <option value="Yet to Start" className="dark:bg-slate-900">Yet to Start</option>
+                                <option value="Being Developed" className="dark:bg-slate-900">Being Developed</option>
+                                <option value="Ready for QA" className="dark:bg-slate-900">Ready for QA</option>
+                                <option value="Assigned to QA" className="dark:bg-slate-900">Assigned to QA</option>
+                                <option value="In Progress" className="dark:bg-slate-900">In Progress</option>
+                                <option value="On Hold" className="dark:bg-slate-900">On Hold</option>
+                                <option value="Completed" className="dark:bg-slate-900">Completed</option>
+                                <option value="Forecast" className="dark:bg-slate-900">Forecast</option>
+                                <option value="Rejected" className="dark:bg-slate-900">Rejected</option>
                             </select>
                         </div>
                         {formData.status === 'Rejected' && (
                             <div className="space-y-3">
-                                <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
                                     Reason for Rejection <span className="text-red-500">*</span>
                                 </label>
                                 <textarea
@@ -689,7 +691,7 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
                     {/* 8. Start Date & 9. End Date */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div className="space-y-3">
-                            <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                            <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
                                 <Calendar size={16} className="text-indigo-500" /> Start Date
                             </label>
                             <DatePicker
@@ -699,7 +701,7 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
                             />
                         </div>
                         <div className="space-y-3">
-                            <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                            <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
                                 <Calendar size={16} className="text-indigo-500" /> End Date
                             </label>
                             <DatePicker
@@ -713,16 +715,16 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
                     {/* Weekend Schedule & Actual Completion Date */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div className="space-y-3">
-                            <label className="text-sm font-semibold text-slate-700 block">Weekend Schedule</label>
+                            <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 block">Weekend Schedule</label>
                             <div className="flex gap-4">
-                                <div className="flex items-center gap-2 cursor-pointer bg-slate-50 px-4 py-3 rounded-xl border border-slate-200 hover:bg-slate-100 transition-colors flex-1 justify-center">
+                                <div className="flex items-center gap-2 cursor-pointer bg-slate-50 dark:bg-slate-800 px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors flex-1 justify-center">
                                     <Checkbox
                                         checked={formData.includeSaturday || false}
                                         onChange={(checked) => setFormData(prev => ({ ...prev, includeSaturday: checked }))}
                                         label="Sat"
                                     />
                                 </div>
-                                <div className="flex items-center gap-2 cursor-pointer bg-slate-50 px-4 py-3 rounded-xl border border-slate-200 hover:bg-slate-100 transition-colors flex-1 justify-center">
+                                <div className="flex items-center gap-2 cursor-pointer bg-slate-50 dark:bg-slate-800 px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors flex-1 justify-center">
                                     <Checkbox
                                         checked={formData.includeSunday || false}
                                         onChange={(checked) => setFormData(prev => ({ ...prev, includeSunday: checked }))}
@@ -734,15 +736,15 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
 
                         {formData.status !== 'Rejected' && (
                             <div className="space-y-3">
-                                <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
                                     <Calendar size={16} className="text-emerald-500" /> Actual Completion Date
-                                    {formData.status === 'Completed' && <span className="text-xs text-emerald-600">(Auto-filled)</span>}
+                                    {formData.status === 'Completed' && <span className="text-xs text-emerald-600 dark:text-emerald-400">(Auto-filled)</span>}
                                 </label>
                                 <DatePicker
                                     date={formData.actualCompletionDate ? new Date(formData.actualCompletionDate) : undefined}
                                     setDate={(date) => handleDateChange('actualCompletionDate', date)}
                                     placeholder="Pick completion date"
-                                    className="bg-emerald-50 border-emerald-200"
+                                    className="bg-emerald-50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-900/50"
                                 />
                             </div>
                         )}
@@ -751,22 +753,22 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
                     {/* 11. Comments & 12. Current Updates */}
                     <div className="grid grid-cols-1 gap-8">
                         <div className="space-y-3">
-                            <label className="text-sm font-semibold text-slate-700">Comments</label>
+                            <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Comments</label>
                             <textarea
                                 name="comments"
                                 value={formData.comments || ''}
                                 onChange={handleChange}
-                                className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all placeholder:text-slate-400 font-medium text-slate-700 min-h-[100px]"
+                                className="w-full px-5 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500 font-medium text-slate-700 dark:text-slate-200 min-h-[100px]"
                                 placeholder="General comments about the task..."
                             />
                         </div>
                         <div className="space-y-3">
-                            <label className="text-sm font-semibold text-slate-700">Current Updates</label>
+                            <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Current Updates</label>
                             <textarea
                                 name="currentUpdates"
                                 value={formData.currentUpdates || ''}
                                 onChange={handleChange}
-                                className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all placeholder:text-slate-400 font-medium text-slate-700 min-h-[100px]"
+                                className="w-full px-5 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500 font-medium text-slate-700 dark:text-slate-200 min-h-[100px]"
                                 placeholder="Current status updates..."
                             />
                         </div>
@@ -775,24 +777,24 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
                     {/* 13. Deviation Reason & 14. Sprint Link */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div className="space-y-3">
-                            <label className="text-sm font-semibold text-slate-700">Deviation Reason</label>
+                            <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Deviation Reason</label>
                             <textarea
                                 name="deviationReason"
                                 // task.deviationReason hidden for image as requested
                                 value={formData.deviationReason || ''}
                                 onChange={handleChange}
-                                className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all placeholder:text-slate-400 font-medium text-slate-700 min-h-[100px]"
+                                className="w-full px-5 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500 font-medium text-slate-700 dark:text-slate-200 min-h-[100px]"
                                 placeholder="Reason for any deviations..."
                             />
                         </div>
                         <div className="space-y-3">
-                            <label className="text-sm font-semibold text-slate-700">Sprint Link</label>
+                            <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Sprint Link</label>
                             <input
                                 type="text"
                                 name="sprintLink"
                                 value={formData.sprintLink || ''}
                                 onChange={handleChange}
-                                className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all placeholder:text-slate-400 font-medium text-slate-700"
+                                className="w-full px-5 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500 font-medium text-slate-700 dark:text-slate-200"
                                 placeholder="Sprint or task tracking link..."
                             />
                         </div>
@@ -800,9 +802,9 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
 
                     {/* EDIT MODE ONLY FIELDS: Days Allotted, Time Taken, etc. */}
                     {task && (
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-6 border-t border-slate-100">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-6 border-t border-slate-100 dark:border-slate-800">
                             <div className="space-y-3">
-                                <label className="text-sm font-semibold text-slate-700">Days Allotted</label>
+                                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Days Allotted</label>
                                 <input
                                     type="number"
                                     name="daysAllotted"
@@ -810,11 +812,11 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
                                     min="0"
                                     value={formData.daysAllotted || 0}
                                     onChange={handleChange}
-                                    className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all font-mono text-slate-700 font-medium"
+                                    className="w-full px-5 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all font-mono text-slate-700 dark:text-slate-200 font-medium"
                                 />
                             </div>
                             <div className="space-y-3">
-                                <label className="text-sm font-semibold text-slate-700">Time Taken (HH:MM:SS)</label>
+                                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Time Taken (HH:MM:SS)</label>
                                 <input
                                     type="text"
                                     name="timeTaken"
@@ -822,33 +824,33 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
                                     onChange={handleChange}
                                     placeholder="00:00:00"
                                     pattern="[0-9]{2}:[0-9]{2}:[0-9]{2}"
-                                    className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all font-mono text-slate-700 font-medium"
+                                    className="w-full px-5 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all font-mono text-slate-700 dark:text-slate-200 font-medium"
                                 />
                             </div>
 
                             <div className="space-y-3">
-                                <label className="text-sm font-semibold text-slate-700">Days Taken (Auto)</label>
+                                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Days Taken (Auto)</label>
                                 <input
                                     type="number"
                                     name="daysTaken"
                                     readOnly
                                     value={formData.daysTaken || 0}
-                                    className="w-full px-5 py-3 bg-slate-100 border border-slate-200 rounded-xl outline-none font-mono text-slate-600 font-medium cursor-not-allowed"
+                                    className="w-full px-5 py-3 bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl outline-none font-mono text-slate-600 dark:text-slate-500 font-medium cursor-not-allowed"
                                 />
                             </div>
                             <div className="space-y-3">
-                                <label className="text-sm font-semibold text-slate-700">Deviation (Auto)</label>
+                                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Deviation (Auto)</label>
                                 <input
                                     type="number"
                                     name="deviation"
                                     readOnly
                                     value={formData.deviation || 0}
-                                    className={`w-full px-5 py-3 bg-slate-100 border border-slate-200 rounded-xl outline-none font-mono font-medium cursor-not-allowed ${(formData.deviation || 0) > 0 ? 'text-red-600' : 'text-emerald-600'
+                                    className={`w-full px-5 py-3 bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl outline-none font-mono font-medium cursor-not-allowed ${(formData.deviation || 0) > 0 ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400'
                                         }`}
                                 />
                             </div>
                             <div className="space-y-3">
-                                <label className="text-sm font-semibold text-slate-700">Activity %</label>
+                                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Activity %</label>
                                 <input
                                     type="number"
                                     name="activityPercentage"
@@ -856,7 +858,7 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
                                     max="100"
                                     value={formData.activityPercentage || 0}
                                     onChange={handleChange}
-                                    className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all font-mono text-slate-700 font-medium"
+                                    className="w-full px-5 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all font-mono text-slate-700 dark:text-slate-200 font-medium"
                                 />
                             </div>
                         </div>
@@ -864,45 +866,45 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
 
                     {/* Bug Fields - QA Team Only */}
                     {isQATeam && (
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-6 border-t border-slate-100">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-6 border-t border-slate-100 dark:border-slate-800">
                             <div className="space-y-3">
-                                <label className="text-sm font-semibold text-slate-700">Total Bugs</label>
+                                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Total Bugs</label>
                                 <input
                                     type="number"
                                     name="bugCount"
                                     min="0"
                                     value={formData.bugCount || 0}
                                     onChange={handleChange}
-                                    className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all font-mono text-slate-700 font-medium"
+                                    className="w-full px-5 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all font-mono text-slate-700 dark:text-slate-200 font-medium"
                                 />
                             </div>
                             <div className="space-y-3">
-                                <label className="text-sm font-semibold text-slate-700">HTML Bugs</label>
+                                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">HTML Bugs</label>
                                 <input
                                     type="number"
                                     name="htmlBugs"
                                     min="0"
                                     value={formData.htmlBugs || 0}
                                     onChange={handleChange}
-                                    className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all font-mono text-slate-700 font-medium"
+                                    className="w-full px-5 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all font-mono text-slate-700 dark:text-slate-200 font-medium"
                                 />
                             </div>
                             <div className="space-y-3">
-                                <label className="text-sm font-semibold text-slate-700">Func. Bugs</label>
+                                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Func. Bugs</label>
                                 <input
                                     type="number"
                                     name="functionalBugs"
                                     min="0"
                                     value={formData.functionalBugs || 0}
                                     onChange={handleChange}
-                                    className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all font-mono text-slate-700 font-medium"
+                                    className="w-full px-5 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all font-mono text-slate-700 dark:text-slate-200 font-medium"
                                 />
                             </div>
                         </div>
                     )}
 
                     {/* Footer Actions */}
-                    <div className="pt-6 flex items-center justify-end gap-3 border-t border-slate-100 mt-8">
+                    <div className="pt-6 flex items-center justify-end gap-3 border-t border-slate-100 dark:border-slate-800 mt-8">
                         <button
                             type="button"
                             onClick={onClose}

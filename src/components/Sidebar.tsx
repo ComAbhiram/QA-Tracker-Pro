@@ -271,9 +271,9 @@ export function Sidebar() {
                     {(userRole !== 'super_admin' || isGuest) && (
                         <button
                             onClick={() => setShowManageTeam(true)}
-                            className={`flex items-center gap-3 w-full p-3 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-indigo-50 dark:hover:bg-slate-800 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all ${collapsed ? 'justify-center' : ''}`}
+                            className={`flex items-center gap-3 w-full p-3 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-indigo-50 dark:hover:bg-slate-800/50 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all ${collapsed ? 'justify-center' : ''}`}
                         >
-                            <Users size={20} />
+                            <Users size={20} className="transition-colors" />
                             {!collapsed && <span className="font-medium">Manage Team</span>}
                         </button>
                     )}

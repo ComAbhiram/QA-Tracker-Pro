@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { mapTaskFromDB, Task, Leave } from '@/lib/types';
-import { Search, Plus, Download, CalendarClock, X, ArrowUp, ArrowDown } from 'lucide-react';
+import { Search, Plus, Download, CalendarClock, X, ArrowUp, ArrowDown, Users, ArrowUpRight } from 'lucide-react';
 import TaskModal from '@/components/TaskModal';
 import AssigneeTaskTable from '@/components/AssigneeTaskTable';
 import { useGuestMode } from '@/contexts/GuestContext';
@@ -332,12 +332,14 @@ export default function Tracker() {
     // Filter and Sort Tasks
     const processedTasks = tasks
         // 1. Filter by View Mode
-        .filter(task => {
+        .filter((task: Task) => {
             if (viewMode === 'forecast') {
                 return task.status === 'Forecast';
+            } else {
+                // 'active' mode shows all fetched (which are already filtered for non-completed/rejected in fetchData)
+                // and now we also exclude 'Forecast' tasks from 'active' view
+                return task.status !== 'Forecast';
             }
-            // 'active' mode shows all fetched (which are already filtered for non-completed/rejected in fetchData)
-            return true;
         })
         // 2. Sort by Custom Status Order
         .sort((a, b) => {
@@ -364,11 +366,27 @@ export default function Tracker() {
         });
 
 
-    // Group by assignee (using processed tasks)
+    // Group by assignee (include Primary, Secondary, and Additional Assignees)
     const groupedTasks = processedTasks.reduce((acc, task) => {
-        const assignee = task.assignedTo || 'Unassigned';
-        if (!acc[assignee]) acc[assignee] = [];
-        acc[assignee].push(task);
+        const assignees = new Set<string>();
+
+        if (task.assignedTo) assignees.add(task.assignedTo);
+        if (task.assignedTo2) assignees.add(task.assignedTo2);
+        if (task.additionalAssignees) {
+            task.additionalAssignees.forEach(a => assignees.add(a));
+        }
+
+        if (assignees.size === 0) {
+            const unassigned = 'Unassigned';
+            if (!acc[unassigned]) acc[unassigned] = [];
+            acc[unassigned].push(task);
+        } else {
+            assignees.forEach(assignee => {
+                if (!acc[assignee]) acc[assignee] = [];
+                acc[assignee].push(task);
+            });
+        }
+
         return acc;
     }, {} as Record<string, Task[]>);
 
@@ -403,6 +421,13 @@ export default function Tracker() {
         URL.revokeObjectURL(url);
     };
 
+    const isTaskOverdue = (task: Task) => {
+        if (!task.endDate || task.status === 'Completed' || task.status === 'Rejected') return false;
+        const deadline = new Date(task.endDate);
+        deadline.setHours(18, 30, 0, 0);
+        return new Date() > deadline;
+    };
+
     const handleCheckAvailability = () => {
         if (!checkDate) return;
 
@@ -434,8 +459,8 @@ export default function Tracker() {
             <header className="flex flex-col gap-6 mb-6">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
-                        <h1 className="text-3xl font-bold text-slate-800">Task Tracker</h1>
-                        <p className="text-slate-500">Track all active tasks</p>
+                        <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-100">Task Tracker</h1>
+                        <p className="text-slate-500 dark:text-slate-400">Track all active tasks</p>
                     </div>
 
                     {/* Manager Mode Team Selector - Aligned with Title */}
@@ -451,147 +476,133 @@ export default function Tracker() {
                 </div>
 
                 <div className="flex flex-wrap items-center justify-between gap-3">
-                    <div className="flex items-center gap-3">
-                        {/* Search Box - Light Styling */}
-                        <div className="relative">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                    <div className="flex flex-wrap items-center gap-2">
+                        <div className="relative group w-full sm:w-auto">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-slate-600 transition-colors" size={14} />
                             <input
                                 type="text"
                                 placeholder="Filter tasks..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                className="w-[200px] bg-white text-slate-700 placeholder:text-slate-500 pl-9 pr-3 py-2 border border-slate-200 rounded-md focus:outline-none focus:ring-1 focus:ring-slate-300 text-xs transition-all shadow-sm"
+                                className="w-full sm:w-[200px] bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 placeholder:text-slate-500 dark:placeholder:text-slate-500 pl-9 pr-3 py-2 border border-slate-200 dark:border-slate-700 rounded-md focus:outline-none focus:ring-1 focus:ring-slate-300 dark:focus:ring-slate-600 text-xs transition-all shadow-sm"
                             />
                         </div>
 
-                        {/* Date Filter - Custom DatePicker */}
-                        <DatePicker
-                            date={dateFilter}
-                            setDate={setDateFilter}
-                            className="w-[140px] bg-white text-slate-700 border border-slate-200 min-h-0 py-2 px-3 text-xs shadow-sm hover:bg-slate-50 rounded-md"
-                            placeholder="Filter by date"
-                        />
+                        <div className="w-full sm:w-auto flex justify-between sm:justify-start items-center gap-2">
+                            <DatePicker
+                                selected={dateFilter}
+                                onSelect={setDateFilter}
+                                placeholder="Filter by date"
+                                className="w-[140px] bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 min-h-0 py-2 px-3 text-xs shadow-sm hover:bg-slate-50 dark:hover:bg-slate-700 rounded-md"
+                            />
 
-                        <div className="h-6 w-px bg-slate-200 mx-1 hidden md:block"></div>
-
-                        {/* View Mode Toggle */}
-                        <div className="bg-slate-100 p-0.5 rounded-lg flex items-center border border-slate-200">
-                            <button
-                                onClick={() => setViewMode('active')}
-                                className={`px-3 py-1.5 text-xs font-bold rounded-md transition-all ${viewMode === 'active'
-                                    ? 'bg-white text-slate-800 shadow-sm'
-                                    : 'text-slate-500 hover:text-slate-700'
-                                    }`}
-                            >
-                                Active
-                            </button>
-                            <button
-                                onClick={() => setViewMode('forecast')}
-                                className={`px-3 py-1.5 text-xs font-bold rounded-md transition-all ${viewMode === 'forecast'
-                                    ? 'bg-white text-purple-600 shadow-sm'
-                                    : 'text-slate-500 hover:text-slate-700'
-                                    }`}
-                            >
-                                Forecast
-                            </button>
+                            <div className="bg-slate-100 dark:bg-slate-800 p-0.5 rounded-lg flex items-center border border-slate-200 dark:border-slate-700">
+                                <button
+                                    onClick={() => setViewMode('active')}
+                                    className={`px-3 py-1.5 text-xs font-bold rounded-md transition-all ${viewMode === 'active' ? 'bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
+                                >
+                                    Active
+                                </button>
+                                <button
+                                    onClick={() => setViewMode('forecast')}
+                                    className={`px-3 py-1.5 text-xs font-bold rounded-md transition-all ${viewMode === 'forecast' ? 'bg-white dark:bg-slate-700 text-purple-600 dark:text-purple-400 shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
+                                >
+                                    Forecast
+                                </button>
+                            </div>
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-3">
-                        {/* Row Expand Toggle */}
+                    <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
                         <button
-                            onClick={() => setIsRowExpanded(!isRowExpanded)}
-                            className={`p-2 rounded-md border text-slate-600 transition-all ${isRowExpanded ? 'bg-indigo-50 border-indigo-200 text-indigo-600' : 'bg-white border-slate-200 hover:bg-slate-50'}`}
-                            title={isRowExpanded ? "Collapse Rows" : "Expand Rows"}
+                            onClick={() => setIsAvailabilityCheckOpen(true)}
+                            className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 px-4 py-2 rounded-lg transition-all font-semibold border border-indigo-100 dark:border-indigo-800 text-sm"
                         >
-                            {isRowExpanded ? <ArrowUp size={16} /> : <ArrowDown size={16} />}
-                        </button>
-
-                        {/* Actions */}
-                        <button
-                            onClick={() => { setIsAvailabilityCheckOpen(true); setHasChecked(false); setCheckDate(''); setAvailableMembers([]); }}
-                            className="btn btn-secondary flex items-center gap-2"
-                        >
-                            <CalendarClock size={16} /> Check
+                            <Users size={16} />
+                            Check
                         </button>
                         <button
                             onClick={exportCSV}
-                            className="btn btn-secondary flex items-center gap-2"
+                            className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 px-4 py-2 rounded-lg transition-all font-semibold border border-emerald-100 dark:border-emerald-800 text-sm"
                         >
-                            <Download size={16} /> Export
+                            <ArrowUpRight size={16} />
+                            Export
                         </button>
                         <button
-                            onClick={handleAddTask}
-                            className="btn btn-primary flex items-center gap-2"
+                            onClick={() => { setEditingTask(null); setIsTaskModalOpen(true); }}
+                            className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg shadow-lg shadow-indigo-200 dark:shadow-none hover:shadow-indigo-300 transition-all font-bold text-sm"
                         >
-                            <Plus size={16} /> New Task
+                            <Plus size={18} />
+                            New Task
                         </button>
                     </div>
                 </div>
             </header>
 
             {/* Availability Check Modal */}
-            {isAvailabilityCheckOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
-                        <div className="flex items-center justify-between p-6 border-b border-slate-100 bg-slate-50/50">
-                            <h3 className="text-xl font-bold text-slate-800">Check Availability</h3>
-                            <CloseButton onClick={() => setIsAvailabilityCheckOpen(false)} />
-                        </div>
-
-                        <div className="p-6 space-y-6">
-                            <div>
-                                <label className="block text-sm font-semibold text-slate-700 mb-2">Select Date needed from</label>
-                                <div className="flex gap-2">
-                                    <input
-                                        type="date"
-                                        value={checkDate}
-                                        onChange={(e) => setCheckDate(e.target.value)}
-                                        className="flex-1 px-4 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
-                                    />
-                                    <button
-                                        onClick={handleCheckAvailability}
-                                        disabled={!checkDate}
-                                        className="px-4 py-2.5 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                                    >
-                                        Check
-                                    </button>
-                                </div>
+            {
+                isAvailabilityCheckOpen && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+                        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden border border-slate-200 dark:border-slate-800">
+                            <div className="flex items-center justify-between p-6 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50">
+                                <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100">Check Availability</h3>
+                                <CloseButton onClick={() => setIsAvailabilityCheckOpen(false)} />
                             </div>
 
-                            {hasChecked && (
-                                <div className="animate-in slide-in-from-bottom-2 duration-300">
-                                    <h4 className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-3">
-                                        {availableMembers.length} Available Member{availableMembers.length !== 1 ? 's' : ''}
-                                    </h4>
-
-                                    {availableMembers.length > 0 ? (
-                                        <div className="space-y-2 max-h-[300px] overflow-y-auto custom-scrollbar pr-2">
-                                            {availableMembers.map(member => (
-                                                <div key={member} className="flex items-center gap-3 p-3 rounded-xl bg-emerald-50 border border-emerald-100 text-emerald-900">
-                                                    <div className="w-8 h-8 rounded-full bg-emerald-200 flex items-center justify-center text-emerald-800 font-bold text-xs">
-                                                        {member.charAt(0)}
-                                                    </div>
-                                                    <span className="font-semibold">{member}</span>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    ) : (
-                                        <div className="text-center py-8 bg-slate-50 rounded-xl border border-slate-100 border-dashed">
-                                            <p className="text-slate-500">No members available on this date.</p>
-                                        </div>
-                                    )}
+                            <div className="p-6 space-y-6">
+                                <div>
+                                    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Select Date needed from</label>
+                                    <div className="flex gap-2">
+                                        <input
+                                            type="date"
+                                            value={checkDate}
+                                            onChange={(e) => setCheckDate(e.target.value)}
+                                            className="flex-1 px-4 py-2.5 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
+                                        />
+                                        <button
+                                            onClick={handleCheckAvailability}
+                                            disabled={!checkDate}
+                                            className="px-4 py-2.5 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                        >
+                                            Check
+                                        </button>
+                                    </div>
                                 </div>
-                            )}
+
+                                {hasChecked && (
+                                    <div className="animate-in slide-in-from-bottom-2 duration-300">
+                                        <h4 className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-3">
+                                            {availableMembers.length} Available Member{availableMembers.length !== 1 ? 's' : ''}
+                                        </h4>
+
+                                        {availableMembers.length > 0 ? (
+                                            <div className="space-y-2 max-h-[300px] overflow-y-auto custom-scrollbar pr-2">
+                                                {availableMembers.map((member: string) => (
+                                                    <div key={member} className="flex items-center gap-3 p-3 rounded-xl bg-emerald-50 border border-emerald-100 text-emerald-900">
+                                                        <div className="w-8 h-8 rounded-full bg-emerald-200 dark:bg-emerald-900 flex items-center justify-center text-emerald-800 dark:text-emerald-100 font-bold text-xs">
+                                                            {member.charAt(0)}
+                                                        </div>
+                                                        <span className="font-semibold text-emerald-900 dark:text-emerald-100">{member}</span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <div className="text-center py-8 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800 border-dashed">
+                                                <p className="text-slate-500 dark:text-slate-400">No members available on this date.</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </div>
-                </div>
-            )}
+                )
+            }
 
 
             {/* STICKY HEADER for All Tables */}
-            <div className="sticky top-0 z-40 bg-white shadow-md border-b border-slate-200 mb-2 rounded-t-lg overflow-hidden">
-                <table className="w-full text-xs text-slate-800 border-collapse table-fixed">
+            <div className="sticky top-0 z-40 bg-white dark:bg-slate-900 shadow-md border-b border-slate-200 dark:border-slate-700 mb-2 rounded-t-lg overflow-hidden transition-colors">
+                <table className="w-full text-xs text-slate-800 dark:text-slate-200 border-collapse table-fixed">
                     <colgroup>
                         <col style={{ width: columnWidths.projectName }} />
 
@@ -607,7 +618,7 @@ export default function Tracker() {
                         <col style={{ width: columnWidths.deviation }} />
                         <col style={{ width: columnWidths.sprint }} />
                     </colgroup>
-                    <thead className="bg-slate-50 text-slate-600 font-bold uppercase tracking-wider">
+                    <thead className="bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-bold uppercase tracking-wider backdrop-blur-md">
                         <tr>
                             <ResizableHeader label="Project" widthKey="projectName" width={columnWidths.projectName} onResizeStart={startResizing} />
 
@@ -632,9 +643,9 @@ export default function Tracker() {
                 {loading ? (
                     <div className="text-center py-12 text-slate-500">Loading tasks...</div>
                 ) : Object.keys(groupedTasks).length === 0 ? (
-                    <div className="text-center py-12 bg-white rounded-xl shadow-sm border border-slate-200">
-                        <div className="text-slate-400 mb-2">No tasks found</div>
-                        <p className="text-sm text-slate-500">Try adjusting your search or filters</p>
+                    <div className="text-center py-12 bg-white dark:bg-slate-900/50 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800">
+                        <div className="text-slate-400 dark:text-slate-500 mb-2 font-medium">No tasks found</div>
+                        <p className="text-sm text-slate-500 dark:text-slate-400">Try adjusting your search or filters</p>
                     </div>
                 ) : (
                     Object.keys(groupedTasks)
@@ -667,6 +678,6 @@ export default function Tracker() {
                 onSave={saveTask}
                 onDelete={handleDeleteTask}
             />
-        </div>
+        </div >
     );
 }

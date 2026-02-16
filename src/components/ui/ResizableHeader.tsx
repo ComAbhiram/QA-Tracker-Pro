@@ -40,7 +40,7 @@ export default function ResizableHeader({
     return (
         <th
             style={{ width }}
-            className={`relative px-2 py-2 text-xs font-semibold text-left border-r border-slate-400 bg-slate-50 text-slate-900 select-none group ${isSortable ? 'cursor-pointer hover:bg-slate-200' : ''} ${className}`}
+            className={`relative px-2 py-2 text-xs font-semibold text-left border-r border-slate-400 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 select-none group ${isSortable ? 'cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-700' : ''} ${className}`}
             onClick={() => isSortable && sortKey && onSort?.(sortKey)}
         >
             <div className="flex items-center justify-between truncate">

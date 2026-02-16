@@ -261,6 +261,7 @@
   height: 50px;
   border-radius: 50%;
   background-color: rgb(20, 20, 20);
+  @apply dark:bg-slate-800 dark:border dark:border-slate-700;
   border: none;
   font-weight: 600;
   display: flex;
@@ -336,6 +337,7 @@
   cursor: pointer;
   position: relative;
   background: linear-gradient(90deg, #5bfcc4, #f593e4, #71a4f0);
+  @apply dark:from-emerald-400 dark:to-cyan-400;
   border-radius: 12px;
   color: #fff;
   transition: all 0.3s ease;
@@ -343,6 +345,7 @@
     inset 0px 0px 5px #ffffffa9,
     inset 0px 35px 30px #000,
     0px 5px 10px #000000cc;
+  @apply dark:shadow-none;
   text-shadow: 1px 1px 1px #000;
 }
 
@@ -851,6 +854,7 @@
   color: #1e293b;
   /* Dark Slate 800 for contrast */
   /* Dark text for vibrant BG */
+  @apply dark:text-slate-100;
   padding: 15px;
   flex: 1;
   min-width: 180px;
@@ -880,6 +884,7 @@
   color: #0f172a;
   /* Slate 900 for number */
   /* Dark number for vibrant BG */
+  @apply dark:text-white;
 }
 
 .status p {
@@ -894,6 +899,7 @@
 
 .status:hover {
   @apply bg-white dark:bg-slate-800 transition-colors duration-300;
+  @apply dark:text-white;
   transform: scale(1.05);
   /* Slightly increased scale for impact */
   border: 1px solid var(--card-hover-color);

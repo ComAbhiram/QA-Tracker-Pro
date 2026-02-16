@@ -26,24 +26,24 @@ export const StatusBadge = ({ status, className = "", size = 13 }: StatusBadgePr
 
     switch (status) {
         case 'In Progress':
-            return content(<PlayCircle size={size} />, 'text-blue-700');
+            return content(<PlayCircle size={size} />, 'text-blue-700 dark:text-blue-400');
         case 'Being Developed':
-            return content(<Code2 size={size} />, 'text-purple-600');
+            return content(<Code2 size={size} />, 'text-purple-600 dark:text-purple-400');
         case 'Completed':
-            return content(<CheckCircle2 size={size} />, 'text-emerald-700');
+            return content(<CheckCircle2 size={size} />, 'text-emerald-700 dark:text-emerald-400');
         case 'Yet to Start':
-            return content(<Circle size={size} />, 'text-slate-500');
+            return content(<Circle size={size} />, 'text-slate-500 dark:text-slate-400');
         case 'Forecast':
-            return content(<Cloud size={size} />, 'text-violet-600');
+            return content(<Cloud size={size} />, 'text-violet-600 dark:text-violet-400');
         case 'On Hold':
-            return content(<PauseCircle size={size} />, 'text-amber-600');
+            return content(<PauseCircle size={size} />, 'text-amber-600 dark:text-amber-400');
         case 'Ready for QA':
-            return content(<Clock size={size} />, 'text-pink-600');
+            return content(<Clock size={size} />, 'text-pink-600 dark:text-pink-400');
         case 'Assigned to QA':
-            return content(<Clock size={size} />, 'text-cyan-600');
+            return content(<Clock size={size} />, 'text-cyan-600 dark:text-cyan-400');
         case 'Rejected':
-            return content(<XCircle size={size} />, 'text-red-600');
+            return content(<XCircle size={size} />, 'text-red-600 dark:text-red-400');
         default:
-            return <div className={`text-slate-600 truncate ${className}`}>{status}</div>;
+            return <div className={`text-slate-600 dark:text-slate-400 truncate ${className}`}>{status}</div>;
     }
 };

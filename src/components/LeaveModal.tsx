@@ -125,97 +125,98 @@ export default function LeaveModal({ isOpen, onClose, onSave }: LeaveModalProps)
                 </div>
 
                 {/* Form */}
-                <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar">
+                <form onSubmit={handleSubmit} className="flex-1 flex flex-col overflow-hidden">
+                    <div className="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar">
 
-                    {/* Team Member Selection */}
-                    <div>
-                        <label className="flex items-center gap-2 text-sm font-semibold text-slate-700 mb-2">
-                            <User size={16} className="text-indigo-600" />
-                            Team Member <span className="text-red-500">*</span>
-                        </label>
-                        <Combobox
-                            options={memberOptions}
-                            value={formData.team_member_id}
-                            onChange={handleMemberChange}
-                            placeholder="Select or search team member..."
-                            searchPlaceholder="Search members..."
-                            emptyMessage="No members found."
-                            isLoading={fetchingMembers}
-                            required={true}
-                        />
+                        {/* Team Member Selection */}
+                        <div>
+                            <label className="flex items-center gap-2 text-sm font-semibold text-slate-700 mb-2">
+                                <User size={16} className="text-indigo-600" />
+                                Team Member <span className="text-red-500">*</span>
+                            </label>
+                            <Combobox
+                                options={memberOptions}
+                                value={formData.team_member_id}
+                                onChange={handleMemberChange}
+                                placeholder="Select or search team member..."
+                                searchPlaceholder="Search members..."
+                                emptyMessage="No members found."
+                                isLoading={fetchingMembers}
+                                required={true}
+                            />
+                        </div>
+
+                        {/* Leave Date */}
+                        <div>
+                            <label className="flex items-center gap-2 text-sm font-semibold text-slate-700 mb-2">
+                                <Calendar size={16} className="text-indigo-600" />
+                                Leave/WFH Date <span className="text-red-500">*</span>
+                            </label>
+                            <input
+                                type="date"
+                                value={formData.leave_date}
+                                onChange={(e) => setFormData({ ...formData, leave_date: e.target.value })}
+                                required
+                                className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                            />
+                        </div>
+
+                        {/* Leave Type */}
+                        <div>
+                            <label className="flex items-center gap-2 text-sm font-semibold text-slate-700 mb-2">
+                                <Tag size={16} className="text-indigo-600" />
+                                Type <span className="text-red-500">*</span>
+                            </label>
+                            <select
+                                value={formData.leave_type}
+                                onChange={(e) => setFormData({ ...formData, leave_type: e.target.value })}
+                                required
+                                className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all bg-white"
+                            >
+                                <option value="">Select Type</option>
+                                {LEAVE_TYPES.map(type => (
+                                    <option key={type} value={type}>
+                                        {type}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
+                        {/* Reason */}
+                        <div>
+                            <label className="flex items-center gap-2 text-sm font-semibold text-slate-700 mb-2">
+                                <FileText size={16} className="text-indigo-600" />
+                                Reason
+                            </label>
+                            <textarea
+                                value={formData.reason}
+                                onChange={(e) => setFormData({ ...formData, reason: e.target.value })}
+                                rows={4}
+                                placeholder="Enter reason for leave (optional)"
+                                className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all resize-none"
+                            />
+                        </div>
                     </div>
 
-                    {/* Leave Date */}
-                    <div>
-                        <label className="flex items-center gap-2 text-sm font-semibold text-slate-700 mb-2">
-                            <Calendar size={16} className="text-indigo-600" />
-                            Leave/WFH Date <span className="text-red-500">*</span>
-                        </label>
-                        <input
-                            type="date"
-                            value={formData.leave_date}
-                            onChange={(e) => setFormData({ ...formData, leave_date: e.target.value })}
-                            required
-                            className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
-                        />
-                    </div>
-
-                    {/* Leave Type */}
-                    <div>
-                        <label className="flex items-center gap-2 text-sm font-semibold text-slate-700 mb-2">
-                            <Tag size={16} className="text-indigo-600" />
-                            Type <span className="text-red-500">*</span>
-                        </label>
-                        <select
-                            value={formData.leave_type}
-                            onChange={(e) => setFormData({ ...formData, leave_type: e.target.value })}
-                            required
-                            className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all bg-white"
+                    {/* Footer */}
+                    <div className="flex items-center justify-end gap-3 p-6 border-t border-slate-200 bg-slate-50">
+                        <button
+                            type="button"
+                            onClick={onClose}
+                            className="btn btn-secondary"
+                            disabled={loading}
                         >
-                            <option value="">Select Type</option>
-                            {LEAVE_TYPES.map(type => (
-                                <option key={type} value={type}>
-                                    {type}
-                                </option>
-                            ))}
-                        </select>
+                            Cancel
+                        </button>
+                        <button
+                            type="submit"
+                            className="btn btn-primary shadow-lg shadow-indigo-200"
+                            disabled={loading}
+                        >
+                            {loading ? 'Saving...' : 'Submit Request'}
+                        </button>
                     </div>
-
-                    {/* Reason */}
-                    <div>
-                        <label className="flex items-center gap-2 text-sm font-semibold text-slate-700 mb-2">
-                            <FileText size={16} className="text-indigo-600" />
-                            Reason
-                        </label>
-                        <textarea
-                            value={formData.reason}
-                            onChange={(e) => setFormData({ ...formData, reason: e.target.value })}
-                            rows={4}
-                            placeholder="Enter reason for leave (optional)"
-                            className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all resize-none"
-                        />
-                    </div>
-
                 </form>
-
-                {/* Footer */}
-                <div className="flex items-center justify-end gap-3 p-6 border-t border-slate-200 bg-slate-50">
-                    <button
-                        type="button"
-                        onClick={onClose}
-                        className="btn btn-secondary"
-                        disabled={loading}
-                    >
-                        Cancel
-                    </button>
-                    <button
-                        type="submit"
-                        className="btn btn-primary shadow-lg shadow-indigo-200"
-                        disabled={loading}
-                    >
-                        {loading ? 'Saving...' : 'Submit Request'}
-                    </button>
-                </div>
             </div>
         </div>
     );
