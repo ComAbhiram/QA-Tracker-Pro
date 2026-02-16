@@ -167,7 +167,12 @@ export default function Home() {
 
     // Apply Today Only filter
     if (showTodayOnly) {
-      const today = new Date().toISOString().split('T')[0];
+      // Use IST for accurate Today check
+      const now = new Date();
+      const istOffset = 5.5 * 60 * 60 * 1000;
+      const istDate = new Date(now.getTime() + (now.getTimezoneOffset() * 60 * 1000) + istOffset);
+      const today = istDate.toISOString().split('T')[0];
+
       // Tasks where today is between start_date and end_date
       query = query.lte('start_date', today).gte('end_date', today);
     }
@@ -235,7 +240,7 @@ export default function Home() {
       }
     }
     setLoadingTasks(false);
-  }, [isGuest, selectedTeamId, itemsPerPage, isGuestLoading]);
+  }, [isGuest, selectedTeamId, itemsPerPage, isGuestLoading, showTodayOnly]);
 
 
   // Effects
@@ -258,10 +263,10 @@ export default function Home() {
       // Current implementation of simple debounce might clobber page navigation if typed fast.
       // Solution: Pass currentPage, but inside the component we need to coordinate resets.
       fetchTableData(currentPage, filter, searchQuery);
-    }, 400);
+    }, 500);
 
     return () => clearTimeout(timer);
-  }, [searchQuery, filter, currentPage, showTodayOnly, fetchTableData]);
+  }, [fetchTableData, currentPage, filter, searchQuery, showTodayOnly]);
 
   // Reset page when filter/search changes (This works by effect separation or logic)
   useEffect(() => {
@@ -444,8 +449,8 @@ export default function Home() {
               <button
                 onClick={() => setShowTodayOnly(!showTodayOnly)}
                 className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${showTodayOnly
-                    ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm shadow-indigo-200 dark:shadow-indigo-900/20'
-                    : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700'
+                  ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm shadow-indigo-200 dark:shadow-indigo-900/20'
+                  : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700'
                   }`}
               >
                 <CalendarClock size={14} />
