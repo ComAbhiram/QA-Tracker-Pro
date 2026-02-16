@@ -17,14 +17,25 @@ export async function updateSession(request: NextRequest) {
                     return request.cookies.getAll()
                 },
                 setAll(cookiesToSet) {
-                    cookiesToSet.forEach(({ name, value, options }) => request.cookies.set(name, value))
+                    // Force 30 days expiration on all auth cookies
+                    const maxAge = 30 * 24 * 60 * 60; // 30 days
+
+                    cookiesToSet.forEach(({ name, value, options }) => {
+                        request.cookies.set(name, value)
+                    })
+
                     response = NextResponse.next({
                         request: {
                             headers: request.headers,
                         },
                     })
+
                     cookiesToSet.forEach(({ name, value, options }) =>
-                        response.cookies.set(name, value, options)
+                        response.cookies.set(name, value, {
+                            ...options,
+                            maxAge,
+                            sameSite: 'lax',
+                        })
                     )
                 },
             },

@@ -106,6 +106,13 @@ export interface Project {
     teamId?: string; // Multi-tenancy support
 }
 
+// Helper to validate date strings
+export const isValidProjectDate = (dateStr: string | null): boolean => {
+    if (!dateStr) return false;
+    const d = new Date(dateStr);
+    return !isNaN(d.getTime());
+};
+
 export const mapTaskFromDB = (task: DBTask): Task => ({
     id: task.id,
     projectName: task.project_name || '',
@@ -117,16 +124,16 @@ export const mapTaskFromDB = (task: DBTask): Task => ({
     assignedTo2: task.assigned_to2,
     additionalAssignees: task.additional_assignees || [],
     status: (task.status || 'In Progress').trim(),
-    startDate: task.start_date,
-    endDate: task.end_date,
-    actualCompletionDate: task.actual_completion_date,
+    startDate: isValidProjectDate(task.start_date) ? task.start_date : null,
+    endDate: isValidProjectDate(task.end_date) ? task.end_date : null,
+    actualCompletionDate: isValidProjectDate(task.actual_completion_date) ? task.actual_completion_date : null,
     includeSaturday: task.include_saturday || false,
     includeSunday: task.include_sunday || false,
-    actualStartDate: task.actual_start_date,
-    actualEndDate: task.actual_end_date,
+    actualStartDate: isValidProjectDate(task.actual_start_date) ? task.actual_start_date : null,
+    actualEndDate: isValidProjectDate(task.actual_end_date) ? task.actual_end_date : null,
     startTime: task.start_time || '09:30',
     endTime: task.end_time || '18:30',
-    completedAt: task.completed_at,
+    completedAt: isValidProjectDate(task.completed_at) ? task.completed_at : null,
     comments: task.comments,
     currentUpdates: task.current_updates,
     bugCount: task.bug_count || 0,
@@ -140,9 +147,8 @@ export const mapTaskFromDB = (task: DBTask): Task => ({
     daysTaken: task.days_taken || 0,
     deviation: task.deviation || 0,
     activityPercentage: task.activity_percentage || 0,
-    createdAt: task.created_at,
+    createdAt: isValidProjectDate(task.created_at) ? task.created_at : new Date().toISOString(),
     teamId: (task as any).team_id
-
 });
 
 export const mapProjectFromDB = (project: DBProject): Project => ({
@@ -151,7 +157,7 @@ export const mapProjectFromDB = (project: DBProject): Project => ({
     description: project.description,
     status: project.status,
     hubstaffId: project.hubstaff_id,
-    createdAt: project.created_at,
+    createdAt: isValidProjectDate(project.created_at) ? project.created_at : new Date().toISOString(),
     teamId: (project as any).team_id
 });
 

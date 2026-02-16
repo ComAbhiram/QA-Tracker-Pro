@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { X, Save, Calendar, User, Briefcase, Activity, Layers, Plus } from 'lucide-react';
-import { Task } from '@/lib/types';
+import { Task, isValidProjectDate } from '@/lib/types';
 import { supabase } from '@/lib/supabase';
 import Combobox from './ui/Combobox';
 import Checkbox from './ui/Checkbox';
@@ -288,9 +288,9 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
                 priority: task.priority,
                 pc: task.pc,
                 status: task.status,
-                startDate: task.startDate ? new Date(task.startDate).toISOString().split('T')[0] : '',
-                endDate: task.endDate ? new Date(task.endDate).toISOString().split('T')[0] : '',
-                actualCompletionDate: task.actualCompletionDate ? new Date(task.actualCompletionDate).toISOString().split('T')[0] : '',
+                startDate: isValidProjectDate(task.startDate) ? new Date(task.startDate).toISOString().split('T')[0] : '',
+                endDate: isValidProjectDate(task.endDate) ? new Date(task.endDate).toISOString().split('T')[0] : '',
+                actualCompletionDate: isValidProjectDate(task.actualCompletionDate) ? new Date(task.actualCompletionDate).toISOString().split('T')[0] : '',
                 startTime: task.startTime,
                 endTime: task.endTime,
                 assignedTo: task.assignedTo,

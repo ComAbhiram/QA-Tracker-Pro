@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
+import { isValidProjectDate } from '@/lib/types';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isToday, addMonths, subMonths, addDays, subDays } from 'date-fns';
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, List, PlusCircle, User, Tag, FileText, Trash2 } from 'lucide-react';
 import LeaveModal, { LeaveFormData } from '@/components/LeaveModal';
@@ -62,7 +63,10 @@ export default function LeavePage() {
 
             const response = await fetch(url);
             const data = await response.json();
-            setLeaves(data.leaves || []);
+
+            // Filter out leaves with invalid dates to prevent crashes
+            const validLeaves = (data.leaves || []).filter((l: any) => isValidProjectDate(l.leave_date));
+            setLeaves(validLeaves);
         } catch (error) {
             console.error('Error fetching leaves:', error);
         } finally {
@@ -384,118 +388,105 @@ export default function LeavePage() {
                 )}
 
                 {viewMode === 'table' && (
-                    <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden transition-colors">
-                        <div className="overflow-x-auto">
-                            <table className="w-full">
-                                <thead className="bg-slate-50 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
-                                    <tr>
-                                        <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
-                                            Team Member
-                                        </th>
-                                        <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
-                                            Leave Date
-                                        </th>
-                                        <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
-                                            Leave Type
-                                        </th>
-                                        <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
-                                            Reason
-                                        </th>
-                                        <th className="px-6 py-4 text-center text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
-                                            Actions
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                                    {loading ? (
-                                        <tr>
-                                            <td colSpan={5} className="px-6 py-12 text-center">
-                                                <Loader size="lg" color="indigo" />
-                                            </td>
-                                        </tr>
-                                    ) : leaves.length === 0 ? (
-                                        <tr>
-                                            <td colSpan={5} className="px-6 py-12 text-center">
-                                                <div className="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500">
-                                                    <div className="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mb-4 text-3xl">
-                                                        📅
-                                                    </div>
-                                                    <p className="text-lg font-medium text-slate-600 dark:text-slate-400">No leaves found</p>
-                                                    <p className="text-sm">Add a leave request to get started</p>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    ) : (
-                                        leaves
-                                            .sort((a, b) => new Date(b.leave_date).getTime() - new Date(a.leave_date).getTime())
-                                            .map((leave) => (
-                                                <tr
-                                                    key={leave.id}
-                                                    className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
-                                                >
-                                                    <td className="px-6 py-4">
-                                                        <div className="flex items-center gap-3">
-                                                            <div className="w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
-                                                                <User size={18} className="text-indigo-600 dark:text-indigo-400" />
-                                                            </div>
-                                                            <div>
-                                                                <p className="font-semibold text-slate-800 dark:text-slate-200">
-                                                                    {leave.team_member_name}
-                                                                </p>
-                                                            </div>
-                                                        </div>
-                                                    </td>
-                                                    <td className="px-6 py-4">
-                                                        <div className="flex items-center gap-2">
-                                                            <CalendarIcon size={16} className="text-slate-400" />
-                                                            <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                                                                {format(new Date(leave.leave_date), 'MMM d, yyyy')}
-                                                            </span>
-                                                        </div>
-                                                    </td>
-                                                    <td className="px-6 py-4">
-                                                        <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border ${getLeaveTypeColor(leave.leave_type)}`}>
-                                                            <Tag size={12} />
-                                                            {leave.leave_type}
-                                                        </span>
-                                                    </td>
-                                                    <td className="px-6 py-4">
-                                                        {leave.reason ? (
-                                                            <div className="flex items-start gap-2 max-w-md">
-                                                                <FileText size={14} className="text-slate-400 mt-0.5 flex-shrink-0" />
-                                                                <p className="text-sm text-slate-600 dark:text-slate-400 line-clamp-2">
-                                                                    {leave.reason}
-                                                                </p>
-                                                            </div>
-                                                        ) : (
-                                                            <span className="text-sm text-slate-400 dark:text-slate-500 italic">No reason provided</span>
-                                                        )}
-                                                    </td>
-                                                    <td className="px-6 py-4">
-                                                        <div className="flex items-center justify-center">
-                                                            <button
-                                                                onClick={() => handleDeleteLeave(leave.id)}
-                                                                className="p-2 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300"
-                                                                title="Delete leave"
-                                                            >
-                                                                <Trash2 size={16} />
-                                                            </button>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            ))
-                                    )}
-                                </tbody>
-                            </table>
-                        </div>
-
-                        {/* Table Footer with Count */}
-                        {!loading && leaves.length > 0 && (
-                            <div className="px-6 py-4 bg-slate-50 dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700">
-                                <p className="text-sm text-slate-600 dark:text-slate-400">
-                                    Showing <span className="font-semibold text-slate-800 dark:text-slate-200">{leaves.length}</span> leave request{leaves.length !== 1 ? 's' : ''}
-                                </p>
+                    <div className="space-y-8">
+                        {loading ? (
+                            <div className="flex justify-center py-20 bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800">
+                                <Loader size="lg" color="indigo" />
                             </div>
+                        ) : leaves.length === 0 ? (
+                            <div className="flex flex-col items-center justify-center py-20 bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 text-slate-400 dark:text-slate-500">
+                                <div className="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mb-4 text-3xl">
+                                    📅
+                                </div>
+                                <p className="text-lg font-medium text-slate-600 dark:text-slate-400">No leaves found</p>
+                                <p className="text-sm">Add a leave request to get started</p>
+                            </div>
+                        ) : (
+                            // Group leaves by Month and Year
+                            (Object.entries(
+                                leaves
+                                    .sort((a: Leave, b: Leave) => new Date(b.leave_date).getTime() - new Date(a.leave_date).getTime())
+                                    .reduce((acc: Record<string, Leave[]>, leave: Leave) => {
+                                        const date = new Date(leave.leave_date);
+                                        const key = format(date, 'MMMM yyyy');
+                                        if (!acc[key]) acc[key] = [];
+                                        acc[key].push(leave);
+                                        return acc;
+                                    }, {} as Record<string, Leave[]>)
+                            ) as [string, Leave[]][]).map(([monthYear, monthLeaves]) => (
+                                <div key={monthYear} className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden">
+                                    <div className="px-6 py-4 bg-slate-50/50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                                        <h3 className="font-bold text-lg text-slate-800 dark:text-slate-200">{monthYear}</h3>
+                                        <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-800 px-2 py-1 rounded-md border border-slate-200 dark:border-slate-700">
+                                            {monthLeaves.length} {monthLeaves.length === 1 ? 'Leave' : 'Leaves'}
+                                        </span>
+                                    </div>
+                                    <div className="overflow-x-auto">
+                                        <table className="w-full">
+                                            <thead className="bg-slate-50 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-700">
+                                                <tr>
+                                                    <th className="px-6 py-3 text-left text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Date</th>
+                                                    <th className="px-6 py-3 text-left text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Team Member</th>
+                                                    <th className="px-6 py-3 text-left text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Leave Type</th>
+                                                    <th className="px-6 py-3 text-left text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Reason</th>
+                                                    <th className="px-6 py-3 text-center text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                                                {monthLeaves.map((leave) => (
+                                                    <tr key={leave.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors group">
+                                                        <td className="px-6 py-3 whitespace-nowrap">
+                                                            <div className="flex flex-col">
+                                                                <span className="text-sm font-bold text-slate-700 dark:text-slate-300">
+                                                                    {format(new Date(leave.leave_date), 'd')}
+                                                                </span>
+                                                                <span className="text-[10px] font-semibold text-slate-400 uppercase">
+                                                                    {format(new Date(leave.leave_date), 'EEE')}
+                                                                </span>
+                                                            </div>
+                                                        </td>
+                                                        <td className="px-6 py-3">
+                                                            <div className="flex items-center gap-3">
+                                                                <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-xs font-bold text-indigo-700 dark:text-indigo-400 border-2 border-white dark:border-slate-800 shadow-sm">
+                                                                    {leave.team_member_name.charAt(0)}
+                                                                </div>
+                                                                <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                                                                    {leave.team_member_name}
+                                                                </span>
+                                                            </div>
+                                                        </td>
+                                                        <td className="px-6 py-3">
+                                                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-bold border shadow-sm ${getLeaveTypeColor(leave.leave_type)}`}>
+                                                                {leave.leave_type}
+                                                            </span>
+                                                        </td>
+                                                        <td className="px-6 py-3">
+                                                            {leave.reason ? (
+                                                                <span className="text-sm text-slate-600 dark:text-slate-400 line-clamp-1 max-w-[200px]" title={leave.reason}>
+                                                                    {leave.reason}
+                                                                </span>
+                                                            ) : (
+                                                                <span className="text-xs text-slate-400 italic">No reason</span>
+                                                            )}
+                                                        </td>
+                                                        <td className="px-6 py-3">
+                                                            <div className="flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                                                <button
+                                                                    onClick={() => handleDeleteLeave(leave.id)}
+                                                                    className="p-1.5 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg text-slate-400 hover:text-red-600 dark:text-slate-500 dark:hover:text-red-400 transition-colors"
+                                                                    title="Delete leave"
+                                                                >
+                                                                    <Trash2 size={16} />
+                                                                </button>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            ))
                         )}
                     </div>
                 )}

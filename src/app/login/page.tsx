@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
+import { useGuestMode } from '@/contexts/GuestContext';
 import { Lock, Mail, LayoutDashboard, Users, X, ArrowRight } from 'lucide-react';
 import Image from 'next/image';
 import Loader from '@/components/ui/Loader';
@@ -43,6 +44,8 @@ export default function LoginPage() {
         }
     };
 
+    const { setGuestSession } = useGuestMode(); // Import hook at top level
+
     const handleManagerLogin = async () => {
         if (managerPassword === 'inter223') {
             try {
@@ -58,6 +61,41 @@ export default function LoginPage() {
                 if (!response.ok) {
                     setError('Failed to authenticate manager');
                     return;
+                }
+
+                // Auto-select "QA Team" logic
+                try {
+                    const teamsResponse = await fetch('/api/teams');
+                    const teamsData = await teamsResponse.json();
+
+                    if (teamsData.teams && Array.isArray(teamsData.teams)) {
+                        const teams: any[] = teamsData.teams;
+                        const qaTeam = teams.find(t => t.name.toLowerCase() === 'qa team');
+
+                        if (qaTeam) {
+                            let targetTeamId = qaTeam.id;
+                            let targetTeamName = qaTeam.name;
+
+                            // Check for 'Super Admin' mapping if 'QA Team' is selected
+                            // This logic mirrors guest/page.tsx
+                            if (targetTeamName.toLowerCase() === 'qa team') {
+                                const superAdminTeam = teams.find(t => t.name.toLowerCase() === 'super admin');
+                                if (superAdminTeam) {
+                                    targetTeamId = superAdminTeam.id;
+                                    console.log('Manager Login: Mapping QA Team to Super Admin ID');
+                                }
+                            }
+
+                            setGuestSession(targetTeamId, targetTeamName);
+                            setShowManagerModal(false);
+                            setManagerPassword('');
+                            router.push('/');
+                            return;
+                        }
+                    }
+                } catch (teamErr) {
+                    console.error('Failed to auto-fetch teams for manager:', teamErr);
+                    // Fallback to guest selection page if auto-select fails
                 }
 
                 setShowManagerModal(false);
