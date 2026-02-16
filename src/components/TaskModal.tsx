@@ -101,8 +101,12 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
             }
         };
 
-        if (isOpen) {
+        // CRITICAL FIX: Only fetch when modal is open AND effectiveTeamId is available
+        // This prevents race condition where projects fetch before userTeamId is set
+        if (isOpen && effectiveTeamId) {
             fetchProjects();
+        } else if (isOpen && !effectiveTeamId) {
+            console.log('[TaskModal] Waiting for effectiveTeamId before fetching projects...');
         }
     }, [isOpen, effectiveTeamId, isGuest]);
 
