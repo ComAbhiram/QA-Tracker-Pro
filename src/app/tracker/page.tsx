@@ -490,8 +490,8 @@ export default function Tracker() {
 
                         <div className="w-full sm:w-auto flex justify-between sm:justify-start items-center gap-2">
                             <DatePicker
-                                selected={dateFilter}
-                                onSelect={setDateFilter}
+                                date={dateFilter}
+                                setDate={setDateFilter}
                                 placeholder="Filter by date"
                                 className="w-[140px] bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 min-h-0 py-2 px-3 text-xs shadow-sm hover:bg-slate-50 dark:hover:bg-slate-700 rounded-md"
                             />
