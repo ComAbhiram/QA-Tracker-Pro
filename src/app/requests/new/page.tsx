@@ -307,7 +307,7 @@ export default function LeavePage() {
                                                 {format(day, 'd')}
                                             </span>
                                         </div>
-                                        <div className="flex-1 overflow-y-auto space-y-1 custom-scrollbar">
+                                        <div className="flex-1 overflow-y-auto space-y-1 custom-scrollbar min-h-0">
                                             {dayLeaves.slice(0, 3).map(leave => (
                                                 <div key={leave.id} className={`group relative text-[11px] px-2 py-1.5 rounded-md border truncate font-semibold mb-1 transition-all hover:scale-[1.02] ${getLeaveTypeColor(leave.leave_type)} cursor-help`}>
                                                     {leave.team_member_name}

@@ -75,12 +75,9 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
 
                 // If Manager Mode (isGuest) AND a team is selected, filter by that team
                 // If NOT Manager Mode AND NOT QA Team, filter by user's team
+                // If Manager Mode (isGuest) AND a team is selected, filter by that team
                 if (isGuest && selectedTeamId) {
                     url += `?team_id=${selectedTeamId}`;
-                } else if (!isGuest && effectiveTeamId) {
-                    if (effectiveTeamId !== 'ba60298b-8635-4cca-bcd5-7e470fad60e6') {
-                        url += `?team_id=${effectiveTeamId}`;
-                    }
                 }
 
                 const response = await fetch(url);
