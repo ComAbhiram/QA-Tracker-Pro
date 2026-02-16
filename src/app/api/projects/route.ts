@@ -102,15 +102,36 @@ export async function POST(request: Request) {
         const body = await request.json();
         const { name, status, description, team_id, hubstaff_id } = body;
 
-        // 1. Check if already exists in projects table
-        const { data: existingProject } = await supabaseAdmin
-            .from('projects')
-            .select('id')
-            .or(`name.eq.${name}${hubstaff_id ? `,hubstaff_id.eq.${hubstaff_id}` : ''}`)
-            .maybeSingle();
+        // 1. Check if this team has already imported this project
+        // CRITICAL FIX: Check by (hubstaff_id, team_id) to prevent same team from importing twice
+        // But allow different teams to import the same Hubstaff project
+        if (hubstaff_id && team_id) {
+            const { data: existingProject } = await supabaseAdmin
+                .from('projects')
+                .select('id, name')
+                .eq('hubstaff_id', hubstaff_id)
+                .eq('team_id', team_id)
+                .maybeSingle();
 
-        if (existingProject) {
-            return NextResponse.json({ error: 'Project already exists in projects list' }, { status: 409 });
+            if (existingProject) {
+                return NextResponse.json({
+                    error: `Project "${existingProject.name}" has already been imported by your team`
+                }, { status: 409 });
+            }
+        } else if (name && team_id) {
+            // Fallback: check by name if no hubstaff_id
+            const { data: existingProject } = await supabaseAdmin
+                .from('projects')
+                .select('id')
+                .eq('name', name)
+                .eq('team_id', team_id)
+                .maybeSingle();
+
+            if (existingProject) {
+                return NextResponse.json({
+                    error: 'Project with this name already exists for your team'
+                }, { status: 409 });
+            }
         }
 
         // 2. Check if already exists in project_overview table
