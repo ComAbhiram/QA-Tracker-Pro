@@ -73,11 +73,11 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
                 // Use new API route to bypass RLS and ensure Managers get all projects
                 let url = '/api/projects';
 
-                // If Manager Mode (isGuest) AND a team is selected, filter by that team
-                // If NOT Manager Mode AND NOT QA Team, filter by user's team
-                // If Manager Mode (isGuest) AND a team is selected, filter by that team
-                if (isGuest && selectedTeamId) {
-                    url += `?team_id=${selectedTeamId}`;
+                // CRITICAL FIX: Pass team_id for ALL users (guest mode AND regular users)
+                // This ensures consistent filtering across Manage Projects and Task Creation
+                if (effectiveTeamId) {
+                    url += `?team_id=${effectiveTeamId}`;
+                    console.log('[TaskModal] Fetching projects with team_id:', effectiveTeamId);
                 }
 
                 const response = await fetch(url);
