@@ -46,10 +46,11 @@ export async function GET(request: NextRequest) {
 
         const isGuestMode = cookieStore.get('guest_mode')?.value === 'true';
 
-        // 1. Fetch Project Manual Overviews
-        let projectsQuery = supabase
-            .from('project_overview')
-            .select('*');
+        // 1. Fetch ONLY Imported Projects (those that exist in 'projects' table)
+        // Use supabaseAdmin to bypass RLS and get all imported projects
+        let projectsQuery = supabaseAdmin
+            .from('projects')
+            .select('id, name, team_id, status, description, hubstaff_id, created_at');
 
         if (profile.role !== 'super_admin' && !isGuestMode) {
             projectsQuery = projectsQuery.eq('team_id', profile.team_id);
@@ -59,12 +60,48 @@ export async function GET(request: NextRequest) {
             projectsQuery = projectsQuery.eq('team_id', requestedTeamId);
         }
 
-        const { data: projects, error: projectsError } = await projectsQuery.order('created_at', { ascending: false });
+        const { data: importedProjects, error: projectsError } = await projectsQuery.order('created_at', { ascending: false });
 
         if (projectsError) {
-            console.error('Error fetching project overviews:', projectsError);
+            console.error('Error fetching imported projects:', projectsError);
             return NextResponse.json({ error: 'Failed to fetch projects' }, { status: 500 });
         }
+
+        // 2. Fetch additional metadata from project_overview for these imported projects
+        const projectNames = importedProjects?.map(p => p.name) || [];
+
+        let overviewQuery = supabaseAdmin
+            .from('project_overview')
+            .select('*')
+            .in('project_name', projectNames);
+
+        if (profile.role !== 'super_admin' && !isGuestMode) {
+            overviewQuery = overviewQuery.eq('team_id', profile.team_id);
+        } else if (requestedTeamId) {
+            overviewQuery = overviewQuery.eq('team_id', requestedTeamId);
+        }
+
+        const { data: overviewData } = await overviewQuery;
+
+        // 3. Merge imported projects with their overview metadata
+        const projects = importedProjects?.map(project => {
+            const overview = overviewData?.find(ov =>
+                ov.project_name?.toLowerCase().trim() === project.name?.toLowerCase().trim() &&
+                ov.team_id === project.team_id
+            );
+
+            return {
+                id: overview?.id || project.id,
+                project_name: project.name,
+                team_id: project.team_id,
+                status: project.status,
+                description: project.description,
+                hubstaff_id: project.hubstaff_id,
+                created_at: project.created_at,
+                // Include overview metadata if available
+                ...overview
+            };
+        }) || [];
 
         // 2. Fetch All Tasks for Aggregation AND Grid View
         // We fetch all fields because we return this list to the frontend for the Task Overview tab

@@ -25,14 +25,13 @@ LIMIT 1;
 
 -- Import the project into projects table
 -- Note: Adjust the hubstaff_id if you know it, otherwise use 3943128 from the diagnostic query
-INSERT INTO projects (name, team_id, status, description, hubstaff_id, created_at, updated_at)
+INSERT INTO projects (name, team_id, status, description, hubstaff_id, created_at)
 SELECT 
     'Talent Training / Talent',
     'ba60298b-8635-4cca-bcd5-7e470fad60e6', -- QA Team ID
     'active',
     'Imported from Hubstaff',
     3943128, -- Hubstaff ID from earlier diagnostic
-    NOW(),
     NOW()
 WHERE NOT EXISTS (
     SELECT 1 FROM projects 
