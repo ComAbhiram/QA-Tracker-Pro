@@ -183,31 +183,31 @@ export async function POST(request: Request) {
         }
 
         // Determine effective team_id
-        // CRITICAL FIX: The leave should belong to the TEAM MEMBER'S team, not necessarily the creator's or manager's current view.
-        // We must fetch the target user's team_id from user_profiles.
-        const { data: targetUserProfile } = await supabaseAdmin
-            .from('user_profiles')
-            .select('team_id')
-            .eq('id', team_member_id)
-            .single();
+        // CRITICAL FIX: The leave should belong to the CURRENT TEAM CONTEXT (overrideTeamId),
+        // NOT the team member's profile team_id. This allows teams to manage leaves for their members.
+        let effectiveTeamId = overrideTeamId; // Use the team context first
 
-        let effectiveTeamId = targetUserProfile?.team_id;
-
-        // Fallback or Override logic (only if target user has no team?)
-        // Generally, the user's profile team_id is the source of truth for where their leaves should show up.
+        // If no override provided, fall back to target user's profile team_id
         if (!effectiveTeamId) {
-            const isSuperAdmin = (profile as any)?.role === 'super_admin';
-            const canOverride = isSuperAdmin || isManagerMode;
-            if (canOverride && overrideTeamId) {
-                effectiveTeamId = overrideTeamId;
-            } else {
-                effectiveTeamId = profile?.team_id;
-            }
+            const { data: targetUserProfile } = await supabaseAdmin
+                .from('user_profiles')
+                .select('team_id')
+                .eq('id', team_member_id)
+                .single();
+
+            effectiveTeamId = targetUserProfile?.team_id;
         }
+
+        // Final fallback to creator's team_id
+        if (!effectiveTeamId) {
+            effectiveTeamId = profile?.team_id;
+        }
+
+        console.log('[API /leaves POST] team_member_id:', team_member_id, 'overrideTeamId:', overrideTeamId, 'effectiveTeamId:', effectiveTeamId);
 
         if (!effectiveTeamId) {
             return NextResponse.json(
-                { error: 'Team ID could not be determined for the user' },
+                { error: 'Team ID could not be determined for the leave' },
                 { status: 400 }
             );
         }
