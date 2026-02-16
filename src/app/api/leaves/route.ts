@@ -176,7 +176,19 @@ export async function POST(request: Request) {
 
         // Determine effective team_id
         const isSuperAdmin = (profile as any)?.role === 'super_admin';
-        const effectiveTeamId = (isSuperAdmin && overrideTeamId) ? overrideTeamId : profile.team_id;
+        const canOverride = isSuperAdmin || isManagerMode;
+
+        let effectiveTeamId = profile?.team_id;
+        if (canOverride && overrideTeamId) {
+            effectiveTeamId = overrideTeamId;
+        }
+
+        if (!effectiveTeamId) {
+            return NextResponse.json(
+                { error: 'Team ID is required' },
+                { status: 400 }
+            );
+        }
 
         // Insert the leave request with team_id
         const { data, error } = await supabaseAdmin
