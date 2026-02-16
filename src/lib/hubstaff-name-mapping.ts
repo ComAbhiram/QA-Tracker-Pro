@@ -14,6 +14,12 @@ export const HUBSTAFF_TO_QA_NAME_MAP: Record<string, string> = {
     'Samir Mulashiya': 'Samir',
     'Amrutha lakshmi': 'Amrutha',
     'amrutha ms': 'Amrutha',
+    'Vishnu': 'Vishnu', // Self-mapping if needed or handle case sensitivity
+    'Jishnu V Gopal': 'Jishnu',
+    'Sayooj K': 'Sayooj',
+    'Sayooj': 'Sayooj',
+    'Abhiram P Mohan': 'Abhiram',
+    'Abhiram': 'Abhiram',
 };
 
 /**

@@ -68,19 +68,13 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Project already exists in projects list' }, { status: 409 });
         }
 
-        // Also check project_overview to prevent duplicate key error (unique constraint on project_name + team_id)
-        if (team_id) {
-            const { data: existingOverview } = await supabaseAdmin
-                .from('project_overview')
-                .select('id')
-                .eq('project_name', name)
-                .eq('team_id', team_id)
-                .maybeSingle();
+        // We DO NOT check project_overview here anymore.
+        // Reason: A project might exist in project_overview (Imported from Hubstaff)
+        // but NOT in the 'projects' table (used for Dropdowns).
+        // Passing this check allows us to "sync" it to the projects table.
 
-            if (existingOverview) {
-                return NextResponse.json({ error: 'Project already exists in overview for this team' }, { status: 409 });
-            }
-        }
+
+
 
         // Use supabaseAdmin to bypass RLS
         const { data, error } = await supabaseAdmin

@@ -77,10 +77,10 @@ export async function POST(request: Request) {
         // If still not found, search by first name (lenient fallback)
         let firstName = team_member_name.split(' ')[0];
         if (!userData) {
-            console.log(`[QuickLeave] Mapped match failed. Trying first name: '${firstName}'`);
+            console.log(`[QuickLeave] Mapped match failed. Trying first name starts with: '${firstName}'`);
 
-            // Check if multiple users have the same first name to avoid collisions
-            const { data: potentialUsers } = await supabaseAdmin
+            // 1. Try Starts With
+            let { data: potentialUsers } = await supabaseAdmin
                 .from('user_profiles')
                 .select('id, team_id, full_name')
                 .ilike('full_name', `${firstName}%`)
@@ -89,7 +89,21 @@ export async function POST(request: Request) {
             if (potentialUsers && potentialUsers.length === 1) {
                 userData = potentialUsers[0];
             } else if (potentialUsers && potentialUsers.length > 1) {
-                console.warn(`[QuickLeave] Ambiguous first name match for '${firstName}'. Found:`, potentialUsers.map(u => (u as any).full_name));
+                console.warn(`[QuickLeave] Ambiguous first name match for '${firstName}%'. Found:`, potentialUsers.map(u => (u as any).full_name));
+            } else {
+                // 2. Try Contains (Fallback for "V Jishnu" when searching "Jishnu")
+                console.log(`[QuickLeave] Starts-with failed. Trying contains: '%${firstName}%'`);
+                const { data: fuzzyUsers } = await supabaseAdmin
+                    .from('user_profiles')
+                    .select('id, team_id, full_name')
+                    .ilike('full_name', `%${firstName}%`)
+                    .limit(2);
+
+                if (fuzzyUsers && fuzzyUsers.length === 1) {
+                    userData = fuzzyUsers[0];
+                } else if (fuzzyUsers && fuzzyUsers.length > 1) {
+                    console.warn(`[QuickLeave] Ambiguous contains match for '%${firstName}%'. Found:`, fuzzyUsers.map(u => (u as any).full_name));
+                }
             }
         }
 

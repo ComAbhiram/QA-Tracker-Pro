@@ -30,6 +30,7 @@ import { PriorityBadge } from '@/components/ui/standard/PriorityBadge';
 import Tooltip from '@/components/ui/Tooltip';
 import SimpleTooltip from '@/components/ui/SimpleTooltip';
 import QuickLeaveActions from './QuickLeaveActions';
+import { mapHubstaffNameToQA } from '@/lib/hubstaff-name-mapping';
 
 interface AssigneeTaskTableProps {
     assignee: string;
@@ -244,7 +245,12 @@ export default function AssigneeTaskTable({
         const today = istDate.toISOString().split('T')[0];
 
         // Check for leave on today's date
-        const todayLeave = leaves.find(l => l.team_member_name === assignee && l.leave_date === today);
+        // Use mapped name to match DB
+        const mappedAssigneeName = mapHubstaffNameToQA(assignee);
+        const todayLeave = leaves.find(l =>
+            (l.team_member_name === assignee || l.team_member_name === mappedAssigneeName) &&
+            l.leave_date === today
+        );
         if (todayLeave) {
             return { date: today, type: todayLeave.leave_type };
         }
@@ -253,7 +259,7 @@ export default function AssigneeTaskTable({
         const nextWeek = new Date(istDate);
         nextWeek.setDate(nextWeek.getDate() + 7);
         const upcomingLeave = leaves.find(l => {
-            if (l.team_member_name !== assignee) return false;
+            if (l.team_member_name !== assignee && l.team_member_name !== mappedAssigneeName) return false;
             const leaveDate = new Date(l.leave_date);
             return leaveDate > istDate && leaveDate <= nextWeek;
         });
