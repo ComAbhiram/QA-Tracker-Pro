@@ -8,6 +8,7 @@ import LeaveModal, { LeaveFormData } from '@/components/LeaveModal';
 import { useGuestMode } from '@/contexts/GuestContext';
 import TeamSelectorPill from '@/components/ui/TeamSelectorPill';
 import { useTeams } from '@/hooks/useTeams';
+import Loader from '@/components/ui/Loader';
 
 interface Leave {
     id: number;
@@ -26,13 +27,15 @@ export default function LeavePage() {
     const [viewMode, setViewMode] = useState<'calendar' | 'day'>('calendar');
     const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false);
     const [currentUser, setCurrentUser] = useState<any>(null);
-    const { isGuest, selectedTeamId, selectedTeamName, setGuestSession } = useGuestMode();
+    const { isGuest, selectedTeamId, selectedTeamName, setGuestSession, isLoading: isGuestLoading } = useGuestMode();
     const { teams } = useTeams(isGuest);
 
     useEffect(() => {
-        fetchCurrentUser();
-        fetchLeaves();
-    }, [currentDate, viewMode, selectedTeamId]);
+        if (!isGuestLoading) {
+            fetchCurrentUser();
+            fetchLeaves();
+        }
+    }, [currentDate, viewMode, selectedTeamId, isGuestLoading]);
 
     async function fetchCurrentUser() {
         const { data: { user } } = await supabase.auth.getUser();
@@ -165,6 +168,22 @@ export default function LeavePage() {
         return 'bg-slate-600 text-white border-slate-700';
     };
 
+    const handleTeamSelect = (id: string, name: string) => {
+        setGuestSession(id, name);
+        // Force reload to ensure context updates propogate clean - same as tracker/page.tsx
+        setTimeout(() => {
+            window.location.reload();
+        }, 100);
+    };
+
+    if (isGuestLoading) {
+        return (
+            <div className="flex items-center justify-center min-h-[400px]">
+                <Loader size="lg" color="indigo" />
+            </div>
+        );
+    }
+
     return (
         <div className="max-w-[1600px] mx-auto space-y-6">
 
@@ -181,7 +200,7 @@ export default function LeavePage() {
                         <TeamSelectorPill
                             teams={teams}
                             selectedTeamName={selectedTeamName}
-                            onSelect={(id, name) => setGuestSession(id, name)}
+                            onSelect={handleTeamSelect}
                         />
                     </div>
                 )}

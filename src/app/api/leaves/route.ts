@@ -24,32 +24,30 @@ export async function GET(request: Request) {
             }
         );
 
-        // Get the current user's team_id
+        // Get authenticated user from session OR check for manager mode cookies
         const { data: { user } } = await supabase.auth.getUser();
 
-        if (!user) {
+        const managerSession = cookieStore.get('manager_session')?.value;
+        const guestToken = cookieStore.get('guest_token')?.value;
+        const isManagerMode = managerSession === 'active' || guestToken === 'manager_access_token_2026';
+
+        if (!user && !isManagerMode) {
             return NextResponse.json(
                 { error: 'Unauthorized' },
                 { status: 401 }
             );
         }
 
-        // Get user's team_id from user_profiles
-        const { data: profile } = await supabase
-            .from('user_profiles')
-            .select('role, team_id')
-            .eq('id', user.id)
-            .single();
-
-        if (!profile || !profile.team_id) {
-            return NextResponse.json(
-                { error: 'User not associated with a team' },
-                { status: 400 }
-            );
+        let profile = null;
+        if (user) {
+            // Get user's team_id from user_profiles
+            const { data: profileData } = await supabase
+                .from('user_profiles')
+                .select('role, team_id')
+                .eq('id', user.id)
+                .single();
+            profile = profileData;
         }
-
-        // Use service role key for querying
-        const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
         const { searchParams } = new URL(request.url);
         const startDate = searchParams.get('start_date');
@@ -57,9 +55,24 @@ export async function GET(request: Request) {
         const overrideTeamId = searchParams.get('team_id');
 
         // Determine effective team_id
-        // Managers (super admins) can override team_id
+        // Managers (super admins or guest managers) can override team_id
         const isSuperAdmin = (profile as any)?.role === 'super_admin';
-        const effectiveTeamId = (isSuperAdmin && overrideTeamId) ? overrideTeamId : profile.team_id;
+        const canOverride = isSuperAdmin || isManagerMode;
+
+        let effectiveTeamId = profile?.team_id;
+        if (canOverride && overrideTeamId) {
+            effectiveTeamId = overrideTeamId;
+        }
+
+        if (!effectiveTeamId) {
+            return NextResponse.json(
+                { error: 'Team ID is required' },
+                { status: 400 }
+            );
+        }
+
+        // Use service role key for querying
+        const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
         let query = supabaseAdmin
             .from('leaves')
@@ -114,28 +127,29 @@ export async function POST(request: Request) {
             }
         );
 
-        // Get the current user's team_id
+        // Get authenticated user from session OR check for manager mode cookies
         const { data: { user } } = await supabase.auth.getUser();
 
-        if (!user) {
+        const managerSession = cookieStore.get('manager_session')?.value;
+        const guestToken = cookieStore.get('guest_token')?.value;
+        const isManagerMode = managerSession === 'active' || guestToken === 'manager_access_token_2026';
+
+        if (!user && !isManagerMode) {
             return NextResponse.json(
                 { error: 'Unauthorized' },
                 { status: 401 }
             );
         }
 
-        // Get user's team_id from user_profiles
-        const { data: profile } = await supabase
-            .from('user_profiles')
-            .select('role, team_id')
-            .eq('id', user.id)
-            .single();
-
-        if (!profile || !profile.team_id) {
-            return NextResponse.json(
-                { error: 'User not associated with a team' },
-                { status: 400 }
-            );
+        let profile = null;
+        if (user) {
+            // Get user's team_id from user_profiles
+            const { data: profileData } = await supabase
+                .from('user_profiles')
+                .select('role, team_id')
+                .eq('id', user.id)
+                .single();
+            profile = profileData;
         }
 
         // Use service role key for inserting

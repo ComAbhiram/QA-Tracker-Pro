@@ -20,6 +20,7 @@ export function useTeams(isGuest: boolean) {
         const fetchTeams = async () => {
             setIsLoading(true);
             try {
+                console.log('[useTeams] Fetching teams for isGuest:', isGuest);
                 const { data, error } = await supabase
                     .from('teams')
                     .select('id, name')
@@ -31,6 +32,7 @@ export function useTeams(isGuest: boolean) {
                     const filteredTeams = data.filter(team =>
                         !['cochin', 'dubai'].includes(team.name.toLowerCase())
                     );
+                    console.log('[useTeams] Teams fetched:', filteredTeams.length);
                     setTeams(filteredTeams);
                 }
             } catch (err: any) {
