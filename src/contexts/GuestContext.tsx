@@ -22,6 +22,7 @@ const GUEST_COOKIE_NAME = 'guest_mode';
 
 // Helper function to set cookie
 function setCookie(name: string, value: string, days: number = 7) {
+    if (typeof window === 'undefined') return;
     const expires = new Date();
     expires.setTime(expires.getTime() + days * 24 * 60 * 60 * 1000);
     document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/;SameSite=Lax`;
@@ -29,6 +30,7 @@ function setCookie(name: string, value: string, days: number = 7) {
 
 // Helper function to delete cookie
 function deleteCookie(name: string) {
+    if (typeof window === 'undefined') return;
     document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;`;
 }
 
@@ -40,8 +42,13 @@ export function GuestProvider({ children }: { children: ReactNode }) {
         selectedTeamName: null,
     });
 
-    // Load guest session from localStorage on mount
+    // Load guest session from localStorage on mount (client-side only)
     useEffect(() => {
+        if (typeof window === 'undefined') {
+            setIsLoading(false);
+            return;
+        }
+
         const stored = localStorage.getItem(GUEST_SESSION_KEY);
         if (stored) {
             try {
@@ -67,7 +74,9 @@ export function GuestProvider({ children }: { children: ReactNode }) {
             selectedTeamName: teamName,
         };
         setGuestSessionState(session);
-        localStorage.setItem(GUEST_SESSION_KEY, JSON.stringify(session));
+        if (typeof window !== 'undefined') {
+            localStorage.setItem(GUEST_SESSION_KEY, JSON.stringify(session));
+        }
         // Set cookie for server-side detection
         setCookie(GUEST_COOKIE_NAME, 'true');
         // Set a special guest token for API authentication
@@ -81,7 +90,9 @@ export function GuestProvider({ children }: { children: ReactNode }) {
             selectedTeamName: null,
         };
         setGuestSessionState(session);
-        localStorage.removeItem(GUEST_SESSION_KEY);
+        if (typeof window !== 'undefined') {
+            localStorage.removeItem(GUEST_SESSION_KEY);
+        }
         // Remove cookie
         deleteCookie(GUEST_COOKIE_NAME);
     };
