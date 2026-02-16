@@ -60,11 +60,11 @@ export async function GET(request: Request) {
         const canOverride = isSuperAdmin || isManagerMode;
 
         let effectiveTeamId = profile?.team_id;
-        if (canOverride && overrideTeamId) {
-            effectiveTeamId = overrideTeamId;
+        if (canOverride) {
+            effectiveTeamId = overrideTeamId || null; // Allow fetching ALL teams if no override specified
         }
 
-        if (!effectiveTeamId) {
+        if (!effectiveTeamId && !canOverride) {
             return NextResponse.json(
                 { error: 'Team ID is required' },
                 { status: 400 }
@@ -77,8 +77,11 @@ export async function GET(request: Request) {
         let query = supabaseAdmin
             .from('leaves')
             .select('*')
-            .eq('team_id', effectiveTeamId)
             .order('leave_date', { ascending: true });
+
+        if (effectiveTeamId) {
+            query = query.eq('team_id', effectiveTeamId);
+        }
 
         // Filter by date range if provided
         if (startDate) {
@@ -215,7 +218,7 @@ export async function POST(request: Request) {
                     leave_type,
                     reason: reason || null,
                     created_by: created_by || null,
-                    team_id: effectiveTeamId // Add team_id
+                    team_id: effectiveTeamId || overrideTeamId // Add team_id (profile source of truth)
                 }
             ])
             .select()

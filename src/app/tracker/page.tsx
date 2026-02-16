@@ -136,10 +136,16 @@ export default function Tracker() {
 
             // 2. Fetch Leaves (Active team only)
             try {
-                let url = '/api/leaves';
-                if (isGuest && selectedTeamId) {
-                    url += `?team_id=${selectedTeamId}`;
-                }
+                // Fetch ALL leaves for valid date range (Today -> Future) to support cross-team view
+                // We don't filter by team_id so we can see Frontend devs in Wordpress tracker etc.
+                const today = new Date().toISOString().split('T')[0];
+                const nextMonth = new Date();
+                nextMonth.setDate(nextMonth.getDate() + 30);
+                const endDate = nextMonth.toISOString().split('T')[0];
+
+                let url = `/api/leaves?start_date=${today}&end_date=${endDate}`;
+                // Removed team_id filter to allow cross-team visibility
+
                 const leavesRes = await fetch(url);
                 if (leavesRes.ok) {
                     const leavesData = await leavesRes.json();
@@ -167,6 +173,7 @@ export default function Tracker() {
     const saveTask = async (taskData: Partial<Task>) => {
         const dbPayload: any = {
             project_name: taskData.projectName,
+            project_type: taskData.projectType, // Added missing field
             sub_phase: taskData.subPhase,
             status: taskData.status,
             assigned_to: taskData.assignedTo,
@@ -705,10 +712,17 @@ export default function Tracker() {
                                 onLeaveUpdate={() => {
                                     // Refresh leaves immediately
                                     const fetchLeaves = async () => {
-                                        let url = '/api/leaves';
-                                        if (isGuest && selectedTeamId) {
-                                            url += `?team_id=${selectedTeamId}`;
-                                        }
+                                        // Use IST date to match QuickLeave logic
+                                        const now = new Date();
+                                        const istOffset = 5.5 * 60 * 60 * 1000;
+                                        const istDate = new Date(now.getTime() + (now.getTimezoneOffset() * 60 * 1000) + istOffset);
+                                        const today = istDate.toISOString().split('T')[0];
+
+                                        const nextMonth = new Date();
+                                        nextMonth.setDate(nextMonth.getDate() + 30);
+                                        const endDate = nextMonth.toISOString().split('T')[0];
+
+                                        let url = `/api/leaves?start_date=${today}&end_date=${endDate}`;
                                         const res = await fetch(url);
                                         if (res.ok) {
                                             const data = await res.json();

@@ -239,10 +239,8 @@ export default function AssigneeTaskTable({
 
     // Check if assignee has leave today or in near future
     const getActiveLeave = () => {
-        const now = new Date();
-        const istOffset = 5.5 * 60 * 60 * 1000;
-        const istDate = new Date(now.getTime() + (now.getTimezoneOffset() * 60 * 1000) + istOffset);
-        const today = istDate.toISOString().split('T')[0];
+        // robustly get today in IST
+        const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
 
         // Normalization helper
         const normalize = (s: string) => s?.toLowerCase().trim() || '';
@@ -266,8 +264,12 @@ export default function AssigneeTaskTable({
         }
 
         // Check for upcoming leave within next 7 days
-        const nextWeek = new Date(istDate);
-        nextWeek.setDate(nextWeek.getDate() + 7);
+        // Calculate next week date string
+        const todayDateObj = new Date(today);
+        const nextWeekDateObj = new Date(todayDateObj);
+        nextWeekDateObj.setDate(todayDateObj.getDate() + 7);
+        const nextWeek = nextWeekDateObj.toISOString().split('T')[0];
+
         const upcomingLeave = leaves.find(l => {
             const lName = normalize(l.team_member_name);
             const matchesName = lName === normalizedAssignee || lName === normalizedMapped;
@@ -276,8 +278,8 @@ export default function AssigneeTaskTable({
 
             if (!matchesName && !matchesPartial) return false;
 
-            const leaveDate = new Date(l.leave_date);
-            return leaveDate > istDate && leaveDate <= nextWeek;
+            // String comparison works for YYYY-MM-DD
+            return l.leave_date > today && l.leave_date <= nextWeek;
         });
 
         if (upcomingLeave) {

@@ -9,10 +9,7 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 // Helper to get IST Date YYYY-MM-DD
 function getISTDateString() {
-    const now = new Date();
-    const istOffset = 5.5 * 60 * 60 * 1000;
-    const istDate = new Date(now.getTime() + (now.getTimezoneOffset() * 60 * 1000) + istOffset);
-    return istDate.toISOString().split('T')[0];
+    return new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
 }
 
 export async function POST(request: Request) {
@@ -220,7 +217,7 @@ export async function POST(request: Request) {
                     team_member_name: userData.full_name, // Use the profile name
                     leave_date: targetDate,
                     leave_type,
-                    team_id: team_id || userData.team_id
+                    team_id: userData.team_id || team_id
                 }])
                 .select()
                 .single();

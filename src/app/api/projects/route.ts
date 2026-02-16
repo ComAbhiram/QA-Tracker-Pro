@@ -114,9 +114,11 @@ export async function POST(request: Request) {
         }
 
         // 2. Check if already exists in project_overview table
-        // If it does, we CANNOT insert into 'projects' if it triggers a sync that violates unique constraints.
-        // Instead, we return success (200) so the frontend thinks it's imported, 
-        // and rely on the GET endpoint to merge it into the list.
+        // REMOVED: The DB trigger now handles ON CONFLICT DO NOTHING, so we CAN (and MUST) insert into 'projects'
+        // to ensure the project is actually linked to the current team in the 'projects' table.
+        // Failing to insert here causes the "Ghost Project" issue where it exists in overview but not in the main list.
+
+        /* 
         if (team_id) {
             const { data: existingOverview } = await supabaseAdmin
                 .from('project_overview')
@@ -132,7 +134,8 @@ export async function POST(request: Request) {
                     message: "Project already exists in overview. Synced."
                 });
             }
-        }
+        } 
+        */
 
         // Use supabaseAdmin to bypass RLS
         const { data, error } = await supabaseAdmin
