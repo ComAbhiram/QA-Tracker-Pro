@@ -20,8 +20,8 @@ export const HUBSTAFF_TO_QA_NAME_MAP: Record<string, string> = {
     'Jishnu V Gopal': 'Jishnu',
     'Sayooj K': 'Sayooj',
     'Sayooj': 'Sayooj',
-    'Abhiram P Mohan': 'Abhiram',
     'Abhiram': 'Abhiram',
+    'Abhiram P Mohan': 'Abhiram',
 };
 
 /**
@@ -48,6 +48,12 @@ export function getQANameFromHubstaff(hubstaffName: string): string {
  * @returns Hubstaff full name or null if not found
  */
 export function getHubstaffNameFromQA(qaName: string): string | null {
+    // Priority 1: If the input name already matches a key that maps to itself, keep it (Identity mapping)
+    if (HUBSTAFF_TO_QA_NAME_MAP[qaName] === qaName) {
+        return qaName;
+    }
+
+    // Priority 2: Standard reverse lookup (first found)
     const entry = Object.entries(HUBSTAFF_TO_QA_NAME_MAP).find(([_, qa]) => qa === qaName);
     return entry ? entry[0] : null;
 }
