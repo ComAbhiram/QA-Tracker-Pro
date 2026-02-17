@@ -56,7 +56,8 @@ export async function POST(request: NextRequest) {
 
         if (teamError) throw teamError;
 
-        // 2. Create user account
+        // 2. Create or Get user account
+        let userId: string;
         const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
             email: adminEmail,
             password: adminPassword,
@@ -64,24 +65,44 @@ export async function POST(request: NextRequest) {
         });
 
         if (authError) {
-            // Rollback team creation
-            await supabaseServer.from('teams').delete().eq('id', team.id);
-            throw authError;
+            if (authError.message.includes('already registered')) {
+                // User already exists, fetch their ID
+                const { data: usersData, error: listError } = await supabaseAdmin.auth.admin.listUsers();
+                if (listError) {
+                    await supabaseServer.from('teams').delete().eq('id', team.id);
+                    throw listError;
+                }
+                const existingUser = usersData.users.find(u => u.email === adminEmail);
+                if (!existingUser) {
+                    await supabaseServer.from('teams').delete().eq('id', team.id);
+                    throw new Error('User reported as registered but not found in list');
+                }
+                userId = existingUser.id;
+                console.log(`[TeamsAPI] Linking existing user ${adminEmail} (ID: ${userId}) to new team ${teamName}`);
+            } else {
+                // Rollback team creation for other errors
+                await supabaseServer.from('teams').delete().eq('id', team.id);
+                throw authError;
+            }
+        } else {
+            userId = authData.user.id;
         }
 
-        // 3. Create user profile linked to team
+        // 3. Create or Update user profile linked to team (Upsert)
         const { error: profileError } = await supabaseServer
             .from('user_profiles')
-            .insert({
-                id: authData.user.id,
+            .upsert({
+                id: userId,
                 email: adminEmail,
                 team_id: team.id,
                 role: 'admin'
-            });
+            }, { onConflict: 'id' });
 
         if (profileError) {
-            // Rollback user and team creation
-            await supabaseAdmin.auth.admin.deleteUser(authData.user.id);
+            // Rollback team creation (don't delete user if they already existed)
+            if (!authError) {
+                await supabaseAdmin.auth.admin.deleteUser(userId);
+            }
             await supabaseServer.from('teams').delete().eq('id', team.id);
             throw profileError;
         }
