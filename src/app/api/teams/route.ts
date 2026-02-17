@@ -56,52 +56,75 @@ export async function POST(request: NextRequest) {
 
         if (teamError) throw teamError;
 
-        // 2. Create or Get user account
-        let userId: string;
-        const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
-            email: adminEmail,
-            password: adminPassword,
-            email_confirm: true
-        });
+        // 2. Resolve User ID
+        let userId: string | null = null;
+        let createdNewAuthUser = false;
 
-        if (authError) {
-            if (authError.message.includes('already registered')) {
-                // User already exists, fetch their ID
-                const { data: usersData, error: listError } = await supabaseAdmin.auth.admin.listUsers();
-                if (listError) {
-                    await supabaseServer.from('teams').delete().eq('id', team.id);
-                    throw listError;
-                }
-                const searchEmail = adminEmail.trim().toLowerCase();
-                const existingUser = usersData.users.find(u => u.email?.toLowerCase() === searchEmail);
-                if (!existingUser) {
-                    await supabaseServer.from('teams').delete().eq('id', team.id);
-                    throw new Error(`User with email ${adminEmail} reported as registered but not found in list. Please check the email case.`);
-                }
-                userId = existingUser.id;
-                console.log(`[TeamsAPI] Linking existing user ${adminEmail} (ID: ${userId}) to new team ${teamName}`);
-            } else {
-                // Rollback team creation for other errors
-                await supabaseServer.from('teams').delete().eq('id', team.id);
-                throw authError;
-            }
+        // A. Check if a profile already exists for this email (most direct way to get ID)
+        const { data: existingProfile } = await supabaseAdmin
+            .from('user_profiles')
+            .select('id')
+            .ilike('email', adminEmail.trim())
+            .maybeSingle();
+
+        if (existingProfile) {
+            userId = existingProfile.id;
         } else {
-            userId = authData.user.id;
+            // B. If no profile, try creating the Auth user
+            const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
+                email: adminEmail,
+                password: adminPassword,
+                email_confirm: true
+            });
+
+            if (authError) {
+                // C. If creation fails because they already exist in Auth
+                if (authError.message.toLowerCase().includes('already registered') ||
+                    authError.message.toLowerCase().includes('already exists') ||
+                    authError.status === 422) {
+
+                    // Fetch existing user ID from Auth list
+                    const { data: usersData, error: listError } = await supabaseAdmin.auth.admin.listUsers();
+                    const searchEmail = adminEmail.trim().toLowerCase();
+                    const existingUser = usersData?.users.find(u => u.email?.toLowerCase() === searchEmail);
+
+                    if (existingUser) {
+                        userId = existingUser.id;
+                    } else {
+                        // Rollback and fail if we still can't find them
+                        await supabaseServer.from('teams').delete().eq('id', team.id);
+                        throw new Error(`User ${adminEmail} is registered in Auth but profile is missing and ID couldn't be resolved.`);
+                    }
+                } else {
+                    // Other auth error - rollback and fail
+                    await supabaseServer.from('teams').delete().eq('id', team.id);
+                    throw authError;
+                }
+            } else {
+                userId = authData.user.id;
+                createdNewAuthUser = true;
+            }
         }
 
-        // 3. Create or Update user profile linked to team (Upsert)
+        if (!userId) {
+            await supabaseServer.from('teams').delete().eq('id', team.id);
+            throw new Error('Failed to resolve User ID for admin account.');
+        }
+
+        // 3. Create or Update user profile linked to team
         const { error: profileError } = await supabaseServer
             .from('user_profiles')
             .upsert({
                 id: userId,
-                email: adminEmail,
+                email: adminEmail.trim().toLowerCase(),
                 team_id: team.id,
-                role: 'admin'
+                role: 'admin',
+                full_name: 'Admin' // Default name if new
             }, { onConflict: 'id' });
 
         if (profileError) {
-            // Rollback team creation (don't delete user if they already existed)
-            if (!authError) {
+            // Rollback team creation (don't delete user if they were already there)
+            if (createdNewAuthUser) {
                 await supabaseAdmin.auth.admin.deleteUser(userId);
             }
             await supabaseServer.from('teams').delete().eq('id', team.id);
