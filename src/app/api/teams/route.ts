@@ -90,6 +90,9 @@ export async function POST(request: NextRequest) {
 
                     if (existingUser) {
                         userId = existingUser.id;
+                        // Update password for existing user so it matches what was typed in the form
+                        await supabaseAdmin.auth.admin.updateUserById(userId, { password: adminPassword });
+                        console.log(`[TeamsAPI] Updated password for linked user ${adminEmail}`);
                     } else {
                         // Rollback and fail if we still can't find them
                         await supabaseServer.from('teams').delete().eq('id', team.id);
@@ -118,7 +121,7 @@ export async function POST(request: NextRequest) {
                 id: userId,
                 email: adminEmail.trim().toLowerCase(),
                 team_id: team.id,
-                role: 'manager',
+                role: 'team_admin',
                 full_name: 'Admin' // Default name if new
             }, { onConflict: 'id' });
 
