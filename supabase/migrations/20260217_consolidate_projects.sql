@@ -4,7 +4,6 @@
 -- 1. Add all missing columns from project_overview to projects
 ALTER TABLE public.projects 
 ADD COLUMN IF NOT EXISTS team_id UUID REFERENCES public.teams(id),
-ADD COLUMN IF NOT EXISTS location TEXT,
 ADD COLUMN IF NOT EXISTS pc TEXT,
 ADD COLUMN IF NOT EXISTS allotted_time_days DECIMAL,
 ADD COLUMN IF NOT EXISTS tl_confirmed_effort_days DECIMAL,
@@ -28,7 +27,6 @@ ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('u
 
 UPDATE public.projects p
 SET 
-    location = po.location,
     pc = po.pc,
     allotted_time_days = po.allotted_time_days,
     tl_confirmed_effort_days = po.tl_confirmed_effort_days,
@@ -51,14 +49,14 @@ AND (p.team_id = po.team_id OR (p.team_id IS NULL AND po.team_id IS NOT NULL));
 -- 3. Any projects in project_overview that are NOT in projects? 
 -- (Shouldn't happen with the trigger, but let's be safe)
 INSERT INTO public.projects (
-    name, team_id, location, pc, allotted_time_days, 
+    name, team_id, pc, allotted_time_days, 
     tl_confirmed_effort_days, blockers, expected_effort_days, 
     hubstaff_budget, committed_days, fixing_text, live_text, 
     budget_text, started_date, project_type, category, 
     created_by, updated_at, status
 )
 SELECT 
-    project_name, team_id, location, pc, allotted_time_days, 
+    project_name, team_id, pc, allotted_time_days, 
     tl_confirmed_effort_days, blockers, expected_effort_days, 
     hubstaff_budget, committed_days, fixing_text, live_text, 
     budget_text, started_date, project_type, category, 
