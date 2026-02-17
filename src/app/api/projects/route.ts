@@ -16,7 +16,8 @@ export async function GET(request: Request) {
             .from('projects')
             .select('*')
             // Removed .in('status') filter to allow On Hold projects to be seen for Import check and Dropdown
-            .order('name');
+            .order('name')
+            .limit(5000); // Increased limit from default 1000 to 5000
 
         const cookieStore = cookies();
         const isManager = cookieStore.get('manager_session')?.value || cookieStore.get('guest_token')?.value || request.headers.get('X-Manager-Mode') === 'true';

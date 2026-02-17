@@ -155,7 +155,7 @@ export default function ProjectOverviewPage() {
 
     useEffect(() => {
         fetchData();
-    }, []);
+    }, [isGuest, selectedTeamId]);
 
     const handleExport = () => {
         const timestamp = new Date().toISOString().split('T')[0];
