@@ -46,16 +46,37 @@ export async function GET(request: NextRequest) {
 
         const isGuestMode = cookieStore.get('guest_mode')?.value === 'true';
 
-        // 1. Fetch Project Manual Overviews
+        // 1. First, get the list of imported/created project IDs from 'projects' table
+        // This determines which projects should appear in Project Overview
+        let importedProjectsQuery = supabaseAdmin
+            .from('projects')
+            .select('id, name, hubstaff_id');
+
+        if (profile.role !== 'super_admin' && !isGuestMode) {
+            importedProjectsQuery = importedProjectsQuery.eq('team_id', profile.team_id);
+        } else if (requestedTeamId) {
+            importedProjectsQuery = importedProjectsQuery.eq('team_id', requestedTeamId);
+        }
+
+        const { data: importedProjects, error: importedError } = await importedProjectsQuery;
+
+        if (importedError) {
+            console.error('Error fetching imported projects:', importedError);
+            return NextResponse.json({ error: 'Failed to fetch imported projects' }, { status: 500 });
+        }
+
+        // 2. Get project names from imported projects (for filtering project_overview)
+        const importedProjectNames = importedProjects?.map(p => p.name) || [];
+
+        // 3. Fetch Project Overview data, but only for imported projects
         let projectsQuery = supabase
             .from('project_overview')
-            .select('*');
+            .select('*')
+            .in('name', importedProjectNames); // Only get projects that are imported
 
         if (profile.role !== 'super_admin' && !isGuestMode) {
             projectsQuery = projectsQuery.eq('team_id', profile.team_id);
         } else if (requestedTeamId) {
-            // If Super Admin (or allowed context like Guest Mode) requests a specific team, filter by it
-            // This supports the Manager Mode view
             projectsQuery = projectsQuery.eq('team_id', requestedTeamId);
         }
 
