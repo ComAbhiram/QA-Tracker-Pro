@@ -29,13 +29,15 @@ export function DatePicker({ date, setDate, className, placeholder = "Pick a dat
                 <Button
                     variant={"outline"}
                     className={cn(
-                        "w-full justify-between text-left font-normal bg-slate-50 border-slate-200 hover:bg-slate-100 min-h-[46px] rounded-xl px-5 text-slate-700",
+                        "w-full text-left font-normal bg-slate-50 border-slate-200 hover:bg-slate-100 min-h-[46px] rounded-xl px-5 text-slate-700 block",
                         !date && "text-muted-foreground",
                         className
                     )}
                 >
-                    {date && !isNaN(date.getTime()) ? format(date, "MMM d, yyyy") : <span className="text-slate-400">{placeholder}</span>}
-                    <ChevronDownIcon className="ml-2 h-4 w-4 opacity-50" />
+                    <span className="flex items-center justify-between w-full h-full">
+                        {date && !isNaN(date.getTime()) ? <span>{format(date, "MMM d, yyyy")}</span> : <span className="text-slate-400">{placeholder}</span>}
+                        <ChevronDownIcon className="ml-2 h-4 w-4 opacity-50 shrink-0" />
+                    </span>
                 </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0 z-[300]" align="start">
