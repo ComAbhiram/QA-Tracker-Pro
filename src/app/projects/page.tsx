@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Project, mapProjectFromDB } from '@/lib/types';
 import { Plus, Search, Database, Globe, RefreshCw, Check } from 'lucide-react';
+import { useGuestMode } from '@/contexts/GuestContext';
 
 export default function ProjectsPage() {
     const [projects, setProjects] = useState<Project[]>([]);
@@ -21,6 +22,7 @@ export default function ProjectsPage() {
     const [creating, setCreating] = useState(false);
     const [lastError, setLastError] = useState<string | null>(null);
 
+    const { isGuest, selectedTeamId } = useGuestMode();
     const [userTeamId, setUserTeamId] = useState<string | null>(null);
 
     useEffect(() => {
@@ -28,32 +30,34 @@ export default function ProjectsPage() {
             const { data: { user } } = await supabase.auth.getUser();
             if (user) {
                 const { data } = await supabase.from('user_profiles').select('team_id').eq('id', user.id).single();
-                console.log('Fetched team_id:', data?.team_id);
                 if (data) setUserTeamId(data.team_id);
-            } else {
-                console.log('No user found in auth.getUser()');
             }
         };
         init();
     }, []);
 
+    const activeTeamId = isGuest ? selectedTeamId : userTeamId;
+
     useEffect(() => {
-        if (userTeamId) {
+        if (activeTeamId) {
             fetchProjects();
         }
-    }, [userTeamId]);
+    }, [activeTeamId]);
 
     const fetchProjects = async () => {
         setLoading(true);
         try {
-            // Use API to fetch projects (bypasses RLS for Managers)
-            // Pass team_id to ensure proper filtering
             let url = '/api/projects';
-            if (userTeamId) {
-                url += `?team_id=${userTeamId}`;
+            if (activeTeamId) {
+                url += `?team_id=${activeTeamId}`;
             }
 
-            const response = await fetch(url, { cache: 'no-store' });
+            const response = await fetch(url, {
+                cache: 'no-store',
+                headers: {
+                    'X-Manager-Mode': isGuest ? 'true' : 'false'
+                }
+            });
             const data = await response.json();
 
             if (data.projects) {
@@ -97,8 +101,8 @@ export default function ProjectsPage() {
         setLastError(null);
         if (!confirm(`Are you sure you want to import ${hubstaffProjects.length} projects? This might take a moment.`)) return;
 
-        if (!userTeamId) {
-            setLastError('Error: User Team ID is missing. Please refresh the page.');
+        if (!activeTeamId) {
+            setLastError('Error: Team ID is missing. Please refresh the page.');
             return;
         }
 
@@ -121,7 +125,7 @@ export default function ProjectsPage() {
                         hubstaff_id: hp.id,
                         status: 'active',
                         description: hp.description || '',
-                        team_id: userTeamId
+                        team_id: activeTeamId
                     })
                 });
 
@@ -160,8 +164,8 @@ export default function ProjectsPage() {
 
     const importProject = async (hubstaffProject: any) => {
         setLastError(null);
-        if (!userTeamId) {
-            setLastError('Error: User Team ID is missing.');
+        if (!activeTeamId) {
+            setLastError('Error: Team ID is missing.');
             return;
         }
         setImporting(hubstaffProject.id);
@@ -181,7 +185,7 @@ export default function ProjectsPage() {
                     hubstaff_id: hubstaffProject.id,
                     status: 'active',
                     description: hubstaffProject.description || '',
-                    team_id: userTeamId
+                    team_id: activeTeamId
                 })
             });
 
@@ -206,9 +210,9 @@ export default function ProjectsPage() {
         setLastError(null);
         if (!newProjectName.trim()) return;
 
-        if (!userTeamId) {
-            setLastError('Error: User Team ID is missing.');
-            window.alert('Error: User Team ID is missing.');
+        if (!activeTeamId) {
+            setLastError('Error: Team ID is missing.');
+            window.alert('Error: Team ID is missing.');
             return;
         }
 
@@ -229,7 +233,7 @@ export default function ProjectsPage() {
                     name: newProjectName.trim(),
                     status: 'active',
                     description: 'Manually created',
-                    team_id: userTeamId
+                    team_id: activeTeamId
                 })
             });
 
