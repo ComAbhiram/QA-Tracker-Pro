@@ -198,6 +198,7 @@ export async function POST(request: Request) {
                 .from('leaves')
                 .update({
                     leave_type,
+                    team_id: team_id || userData.team_id, // Fix: Ensure team_id is persisted/updated on modification
                     updated_at: new Date().toISOString()
                 })
                 .eq('id', existingLeave.id)
