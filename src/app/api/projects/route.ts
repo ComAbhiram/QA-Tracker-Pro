@@ -35,6 +35,10 @@ export async function GET(request: Request) {
         let projects = data || [];
         console.log(`[DEBUG] Initial projects from DB: ${projects.length}`);
 
+        // DEBUG: Check if Talent Training exists in initial fetch
+        const talentTrainingInitial = projects.filter((p: any) => p.name.toLowerCase().includes('talent') && p.name.toLowerCase().includes('training'));
+        console.log(`[DEBUG] Talent Training projects in initial fetch: ${talentTrainingInitial.length}`, talentTrainingInitial.map((p: any) => ({ name: p.name, team_id: p.team_id })));
+
         // Sort projects list
         projects.sort((a: any, b: any) => a.name.localeCompare(b.name));
 
@@ -64,6 +68,10 @@ export async function GET(request: Request) {
 
         console.log(`[DEBUG] Projects after deduplication: ${projects.length}`);
 
+        // DEBUG: Check if Talent Training exists after deduplication
+        const talentTrainingAfterDedup = projects.filter((p: any) => p.name.toLowerCase().includes('talent') && p.name.toLowerCase().includes('training'));
+        console.log(`[DEBUG] Talent Training after deduplication: ${talentTrainingAfterDedup.length}`, talentTrainingAfterDedup.map((p: any) => ({ name: p.name, team_id: p.team_id })));
+
         // NOW filter by team AFTER deduplication
         // This ensures we show user's team projects + shared projects (team_id = null)
         if (teamId && !isManager && !isQATeamGlobal) {
@@ -81,6 +89,10 @@ export async function GET(request: Request) {
         // Managers see everything (no filter)
 
         console.log(`[DEBUG] Final projects count: ${projects.length}`);
+
+        // DEBUG: Check if Talent Training exists in final result
+        const talentTrainingFinal = projects.filter((p: any) => p.name.toLowerCase().includes('talent') && p.name.toLowerCase().includes('training'));
+        console.log(`[DEBUG] Talent Training in final result: ${talentTrainingFinal.length}`, talentTrainingFinal.map((p: any) => ({ name: p.name, team_id: p.team_id })));
 
         return NextResponse.json({ projects });
     } catch (error) {

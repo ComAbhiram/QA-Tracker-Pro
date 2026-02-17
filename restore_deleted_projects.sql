@@ -1,35 +1,30 @@
--- Restore accidentally deleted projects by re-inserting them into projects table
--- This will fix the "already imported" error and make them appear in dropdowns
+-- Restore projects by matching project names
+-- This will re-insert projects that were accidentally deleted
 
 INSERT INTO projects (
     name,
     team_id,
-    hubstaff_id,
     status,
-    description,
-    created_at,
-    updated_at
+    created_at
 )
-SELECT 
+SELECT DISTINCT
     po.project_name as name,
     po.team_id,
-    po.hubstaff_id,
-    'active' as status,  -- Default to active
-    NULL as description,
-    po.created_at,
-    NOW() as updated_at
+    'active' as status,
+    COALESCE(po.created_at, NOW()) as created_at
 FROM project_overview po
-LEFT JOIN projects p ON po.hubstaff_id = p.hubstaff_id AND po.team_id = p.team_id
 WHERE po.team_id = 'ba60298b-8635-4cca-bcd5-7e470fad60e6'
-    AND p.id IS NULL  -- Only insert projects that DON'T exist in projects table
-    AND po.hubstaff_id IS NOT NULL  -- Only restore Hubstaff projects (not manual ones)
-ON CONFLICT (hubstaff_id, team_id) DO NOTHING;  -- Skip if already exists
+    AND NOT EXISTS (
+        SELECT 1 
+        FROM projects p 
+        WHERE p.name = po.project_name
+        AND p.team_id = po.team_id
+    );
 
--- Show what was restored
+-- Show how many were restored
 SELECT 
-    'Restored projects' as action,
+    'Projects restored' as message,
     COUNT(*) as count
-FROM projects p
-INNER JOIN project_overview po ON p.hubstaff_id = po.hubstaff_id AND p.team_id = po.team_id
-WHERE p.team_id = 'ba60298b-8635-4cca-bcd5-7e470fad60e6'
-    AND p.updated_at > NOW() - INTERVAL '1 minute';
+FROM projects
+WHERE team_id = 'ba60298b-8635-4cca-bcd5-7e470fad60e6'
+    AND created_at > NOW() - INTERVAL '1 minute';
