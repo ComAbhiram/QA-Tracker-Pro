@@ -6,6 +6,7 @@ import { HubstaffDailyActivity, formatDuration, getActivityColor } from '@/lib/h
 import { formatTime, getMonthName, type MonthlyData } from '@/lib/hubstaff-utils';
 import { mapHubstaffNameToQA } from '@/lib/hubstaff-name-mapping';
 import CustomRangeTable from '@/components/CustomRangeTable';
+import Combobox from '@/components/ui/Combobox';
 
 interface TeamMember {
     id: number;
@@ -812,52 +813,40 @@ export default function Attendance() {
                                 <label className="block text-sm font-medium text-slate-700 mb-2">
                                     Team Member
                                 </label>
-                                <select
+                                <Combobox
+                                    options={[{ id: '', label: 'All Members' }, ...teamMembers.map(m => ({ id: String(m.id), label: m.name }))]}
                                     value={selectedUserId}
-                                    onChange={(e) => setSelectedUserId(e.target.value)}
-                                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 bg-white"
-                                >
-                                    <option value="">All Members</option>
-                                    {teamMembers.map((member) => (
-                                        <option key={member.id} value={member.id}>
-                                            {member.name}
-                                        </option>
-                                    ))}
-                                </select>
+                                    onChange={(val) => setSelectedUserId(val ? String(val) : '')}
+                                    placeholder="Select Member..."
+                                    searchPlaceholder="Search members..."
+                                    emptyMessage="No members found."
+                                />
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-slate-700 mb-2">
                                     Project
                                 </label>
-                                <select
+                                <Combobox
+                                    options={[{ id: '', label: 'All Projects' }, ...projects.map(p => ({ id: String(p.id), label: p.name }))]}
                                     value={selectedProjectId}
-                                    onChange={(e) => setSelectedProjectId(e.target.value)}
-                                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 bg-white"
-                                >
-                                    <option value="">All Projects</option>
-                                    {projects.map((project) => (
-                                        <option key={project.id} value={project.id}>
-                                            {project.name}
-                                        </option>
-                                    ))}
-                                </select>
+                                    onChange={(val) => setSelectedProjectId(val ? String(val) : '')}
+                                    placeholder="Select Project..."
+                                    searchPlaceholder="Search projects..."
+                                    emptyMessage="No projects found."
+                                />
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-slate-700 mb-2">
                                     Team
                                 </label>
-                                <select
+                                <Combobox
+                                    options={[{ id: '', label: 'All Teams' }, ...teams.map(t => ({ id: t, label: t }))]}
                                     value={selectedTeam}
-                                    onChange={(e) => setSelectedTeam(e.target.value)}
-                                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 bg-white"
-                                >
-                                    <option value="">All Teams</option>
-                                    {teams.map((team) => (
-                                        <option key={team} value={team}>
-                                            {team}
-                                        </option>
-                                    ))}
-                                </select>
+                                    onChange={(val) => setSelectedTeam(val ? String(val) : '')}
+                                    placeholder="Select Team..."
+                                    searchPlaceholder="Search teams..."
+                                    emptyMessage="No teams found."
+                                />
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-slate-700 mb-2">

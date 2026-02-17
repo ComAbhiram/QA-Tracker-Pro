@@ -30,7 +30,8 @@ import {
     FolderKanban,
     Users,
     PauseCircle,
-    Bug
+    Bug,
+    Plane
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useGuestMode } from '@/contexts/GuestContext';
@@ -168,7 +169,7 @@ export function Sidebar() {
         requests: {
             title: 'REQUESTS',
             items: [
-                { label: 'Leave and WFH', icon: <LogOut size={18} className="rotate-180" />, href: '/requests/new' },
+                { label: 'Leaves and WFH', icon: <Plane size={18} />, href: '/requests/new' },
             ]
         }
     };

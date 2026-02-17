@@ -110,6 +110,7 @@ export default function Reports() {
             const { getCurrentUserTeam } = await import('@/utils/userUtils');
             const userTeam = await getCurrentUserTeam();
             const isSuperAdmin = userTeam?.role === 'super_admin';
+            const effectiveTeamId = isGuest ? selectedTeamId : userTeam?.team_id;
 
             if (isSuperAdmin) {
                 const res = await fetch('/api/hubstaff/users');
@@ -118,11 +119,11 @@ export default function Reports() {
                     setTeamMembers(data.members || []);
                 }
             } else {
-                if (userTeam?.team_id) {
+                if (effectiveTeamId) {
                     const { data, error } = await supabase
                         .from('team_members')
                         .select('id, name')
-                        .eq('team_id', userTeam.team_id)
+                        .eq('team_id', effectiveTeamId)
                         .order('name');
 
                     if (!error && data) {
@@ -130,14 +131,25 @@ export default function Reports() {
                     }
                 }
             }
-        } catch (e) {
-            console.error('Error fetching users', e);
-        }
 
-        // Fetch projects
-        const { data } = await supabase.from('projects').select('name').eq('status', 'active');
-        if (data) {
-            setProjects(data.map(p => ({ id: p.name, label: p.name })));
+            // Fetch projects via API to ensure consistency and correct team filtering
+            let projectsUrl = '/api/projects';
+            if (effectiveTeamId) {
+                projectsUrl += `?team_id=${effectiveTeamId}`;
+            }
+
+            const projRes = await fetch(projectsUrl);
+            if (projRes.ok) {
+                const projData = await projRes.json();
+                if (projData.projects) {
+                    setProjects(projData.projects.map((p: any) => ({
+                        id: p.name,
+                        label: p.name
+                    })));
+                }
+            }
+        } catch (e) {
+            console.error('Error fetching filters', e);
         }
     }
 
@@ -382,16 +394,14 @@ export default function Reports() {
                     </div>
                     <div className="flex-1 w-full">
                         <label className="text-sm font-medium text-slate-600 mb-1 block">Member</label>
-                        <select
+                        <Combobox
+                            options={[{ id: '', label: 'All Members' }, ...teamMembers.map(m => ({ id: m.name, label: m.name }))]}
                             value={selectedQA}
-                            onChange={e => setSelectedQA(e.target.value)}
-                            className="w-full px-3 py-2 border rounded-lg text-sm"
-                        >
-                            <option value="">All Members</option>
-                            {teamMembers.map(m => (
-                                <option key={m.id} value={m.name}>{m.name}</option>
-                            ))}
-                        </select>
+                            onChange={(val) => setSelectedQA(val ? String(val) : '')}
+                            placeholder="Select Member..."
+                            searchPlaceholder="Search members..."
+                            emptyMessage="No members found."
+                        />
                     </div>
                     <div className="flex-1 w-full">
                         <label className="text-sm font-medium text-slate-600 mb-1 block">Project</label>
