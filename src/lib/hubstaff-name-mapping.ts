@@ -7,6 +7,7 @@ export const HUBSTAFF_TO_QA_NAME_MAP: Record<string, string> = {
     'Alfiya Noori': 'Alfiya',
     'Neethu Shaji': 'Neethu',
     'Akhila Mohanan': 'Akhila',
+    'Akhila Mohan': 'Akhila',
     'Ramees Nuhman': 'Rmees',
     'Josin Joseph': 'Josin',
     'Sreegith VA': 'Sreegith',

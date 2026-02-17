@@ -46,33 +46,10 @@ export async function GET(request: NextRequest) {
 
         const isGuestMode = cookieStore.get('guest_mode')?.value === 'true';
 
-        // 1. First, get the list of imported/created project IDs from 'projects' table
-        // This determines which projects should appear in Project Overview
-        let importedProjectsQuery = supabaseAdmin
-            .from('projects')
-            .select('id, name, hubstaff_id');
-
-        if (profile.role !== 'super_admin' && !isGuestMode) {
-            importedProjectsQuery = importedProjectsQuery.eq('team_id', profile.team_id);
-        } else if (requestedTeamId) {
-            importedProjectsQuery = importedProjectsQuery.eq('team_id', requestedTeamId);
-        }
-
-        const { data: importedProjects, error: importedError } = await importedProjectsQuery;
-
-        if (importedError) {
-            console.error('Error fetching imported projects:', importedError);
-            return NextResponse.json({ error: 'Failed to fetch imported projects' }, { status: 500 });
-        }
-
-        // 2. Get project names from imported projects (for filtering project_overview)
-        const importedProjectNames = importedProjects?.map(p => p.name) || [];
-
-        // 3. Fetch Project Overview data, but only for imported projects
+        // 1. Fetch Projects and their metadata from 'projects' table
         let projectsQuery = supabase
-            .from('project_overview')
-            .select('*')
-            .in('project_name', importedProjectNames); // Only get projects that are imported
+            .from('projects')
+            .select('*');
 
         if (profile.role !== 'super_admin' && !isGuestMode) {
             projectsQuery = projectsQuery.eq('team_id', profile.team_id);
@@ -83,12 +60,11 @@ export async function GET(request: NextRequest) {
         const { data: projects, error: projectsError } = await projectsQuery.order('created_at', { ascending: false });
 
         if (projectsError) {
-            console.error('Error fetching project overviews:', projectsError);
+            console.error('Error fetching projects:', projectsError);
             return NextResponse.json({ error: 'Failed to fetch projects' }, { status: 500 });
         }
 
         // 2. Fetch All Tasks for Aggregation AND Grid View
-        // We fetch all fields because we return this list to the frontend for the Task Overview tab
         let tasksQuery = supabase
             .from('tasks')
             .select('*');
@@ -103,7 +79,6 @@ export async function GET(request: NextRequest) {
 
         if (tasksError) {
             console.error('Error fetching tasks for stats:', tasksError);
-            // We continue with empty stats if tasks fail
         }
 
         // 3. Aggregate Stats by Project Name
@@ -126,20 +101,15 @@ export async function GET(request: NextRequest) {
             const stats = projectStats[pName];
             stats.taskCount++;
 
-            // Resources
             if (task.assigned_to) stats.resources.add(task.assigned_to);
             if (task.assigned_to2) stats.resources.add(task.assigned_to2);
             if (Array.isArray(task.additional_assignees)) {
                 task.additional_assignees.forEach((a: string) => stats.resources.add(a));
             }
 
-            // Activity %
             stats.totalActivityPercentage += (Number(task.activity_percentage) || 0);
-
-            // Allotted Days
             stats.totalAllottedDays += (Number(task.days_allotted) || 0);
 
-            // Time Taken (convert HH:MM:SS to seconds)
             if (task.time_taken) {
                 const parts = task.time_taken.split(':').map(Number);
                 if (parts.length === 3) {
@@ -150,7 +120,7 @@ export async function GET(request: NextRequest) {
 
         // 4. Merge Stats into Projects
         const projectsWithStats = (projects || []).map((project: any) => {
-            const stats = projectStats[project.project_name] || {
+            const stats = projectStats[project.name] || {
                 resources: new Set(),
                 totalActivityPercentage: 0,
                 totalTimeTakenSeconds: 0,
@@ -158,15 +128,16 @@ export async function GET(request: NextRequest) {
                 taskCount: 0
             };
 
-            const timeTakenDays = stats.totalTimeTakenSeconds / (3600 * 8); // 8 hours = 1 day
+            const timeTakenDays = stats.totalTimeTakenSeconds / (3600 * 8);
             const deviation = stats.totalAllottedDays - timeTakenDays;
 
             return {
                 ...project,
-                resources: Array.from(stats.resources).join(', '), // Comma separated list
-                activity_percentage: stats.totalActivityPercentage, // Sum as requested
-                hs_time_taken_days: timeTakenDays, // Calculated from tasks
-                allotted_time_days_calc: stats.totalAllottedDays, // Sum from tasks
+                project_name: project.name, // Mapping 'name' to 'project_name' for frontend compatibility
+                resources: Array.from(stats.resources).join(', '),
+                activity_percentage: stats.totalActivityPercentage,
+                hs_time_taken_days: timeTakenDays,
+                allotted_time_days_calc: stats.totalAllottedDays,
                 deviation_calc: deviation,
                 task_count: stats.taskCount
             };
@@ -249,11 +220,11 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Insert new project overview
+        // Insert new project
         const { data: newProject, error } = await supabase
-            .from('project_overview')
+            .from('projects')
             .insert({
-                project_name,
+                name: project_name,
                 team_id: profile.team_id,
                 location: location || null,
                 pc: pc || null,
@@ -269,13 +240,13 @@ export async function POST(request: NextRequest) {
                 started_date: started_date || null,
                 project_type: project_type || null,
                 category: category || null,
-                created_by: user.id
+                status: 'active'
             })
             .select()
             .single();
 
         if (error) {
-            console.error('Error creating project overview:', error);
+            console.error('Error creating project:', error);
             return NextResponse.json(
                 { error: 'Failed to create project', details: error.message },
                 { status: 500 }
@@ -332,12 +303,18 @@ export async function PUT(request: NextRequest) {
         // Only include fields that are actually present in the request body
         // and filter out any fields that shouldn't be updated directly via this endpoint
         const allowedFields = [
-            'project_name',
+            'name',
             'team_id', 'pc', 'allotted_time_days', 'tl_confirmed_effort_days',
             'blockers', 'expected_effort_days', 'hubstaff_budget', 'committed_days',
             'fixing_text', 'live_text', 'budget_text', 'started_date',
             'project_type', 'category'
         ];
+
+        // Map 'project_name' to 'name' if provided
+        if (updateFields.project_name) {
+            updateFields.name = updateFields.project_name;
+            delete updateFields.project_name;
+        }
 
         const cleanUpdateData: Record<string, any> = {};
         Object.keys(updateFields).forEach(key => {
@@ -353,32 +330,25 @@ export async function PUT(request: NextRequest) {
         console.log(`[ProjectOverview] Updating project ${id} with:`, cleanUpdateData);
 
         const isGuestMode = cookieStore.get('guest_mode')?.value === 'true';
-
-        // Choose client based on privileges
-        // If Super Admin (role check handled by RLS typically, but we want to be sure) OR Guest Mode (Manager -> Super Admin)
-        // we use regular client for normal users, but for Guest Mode bypassing RLS might be needed if they are editing other team's projects.
-        // However, user.role is 'admin', RLS might block 'project_overview' update for other teams.
-        // So safe bet: Use supabaseAdmin if isGuestMode.
-
         const dbClient = isGuestMode ? supabaseAdmin : supabase;
 
         // Fetch current project to check for name change
         const { data: currentProject } = await dbClient
-            .from('project_overview')
-            .select('project_name, team_id')
+            .from('projects')
+            .select('name, team_id')
             .eq('id', id)
             .single();
 
-        // Update project overview
+        // Update project
         const { data: updatedProject, error } = await dbClient
-            .from('project_overview')
+            .from('projects')
             .update(cleanUpdateData)
             .eq('id', id)
             .select()
             .single();
 
         if (error) {
-            console.error('Error updating project overview:', error);
+            console.error('Error updating project:', error);
             return NextResponse.json(
                 { error: 'Failed to update project', details: error.message },
                 { status: 500 }
@@ -386,18 +356,17 @@ export async function PUT(request: NextRequest) {
         }
 
         // Cascade update to tasks if project name changed
-        if (currentProject && cleanUpdateData.project_name && currentProject.project_name !== cleanUpdateData.project_name) {
-            console.log(`[ProjectOverview] Cascading name change from "${currentProject.project_name}" to "${cleanUpdateData.project_name}"`);
+        if (currentProject && cleanUpdateData.name && currentProject.name !== cleanUpdateData.name) {
+            console.log(`[ProjectOverview] Cascading name change from "${currentProject.name}" to "${cleanUpdateData.name}"`);
 
             const { error: taskUpdateError } = await supabase
                 .from('tasks')
-                .update({ project_name: cleanUpdateData.project_name })
-                .eq('project_name', currentProject.project_name)
-                .eq('team_id', currentProject.team_id); // Ensure we only update tasks for this team
+                .update({ project_name: cleanUpdateData.name })
+                .eq('project_name', currentProject.name)
+                .eq('team_id', currentProject.team_id);
 
             if (taskUpdateError) {
                 console.error('Error cascading project name update to tasks:', taskUpdateError);
-                // We don't fail the request, but we log it. Could optionally return a warning.
             }
         }
 
@@ -451,14 +420,14 @@ export async function DELETE(request: NextRequest) {
         const isGuestMode = cookieStore.get('guest_mode')?.value === 'true';
         const dbClient = isGuestMode ? supabaseAdmin : supabase;
 
-        // Delete project overview
+        // Delete project
         const { error } = await dbClient
-            .from('project_overview')
+            .from('projects')
             .delete()
             .eq('id', id);
 
         if (error) {
-            console.error('Error deleting project overview:', error);
+            console.error('Error deleting project:', error);
             return NextResponse.json(
                 { error: 'Failed to delete project', details: error.message },
                 { status: 500 }

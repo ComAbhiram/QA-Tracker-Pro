@@ -18,6 +18,7 @@ export const TEAM_MEMBERS: TeamMemberConfig[] = [
 
     // PHP
     { name: 'Akhila', hubstaffName: 'Akhila Mohanan', department: 'PHP' },
+    { name: 'Akhila', hubstaffName: 'Akhila Mohan', department: 'PHP' },
     { name: 'Ramees', hubstaffName: 'Ramees Nuhman', department: 'PHP' },
     { name: 'Suchith', hubstaffName: 'Suchith Lal', department: 'PHP' },
     { name: 'Priya', hubstaffName: 'Priya K', department: 'PHP' },
