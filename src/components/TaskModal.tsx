@@ -936,7 +936,14 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
                             className="btn btn-primary px-8 py-3 w-auto h-auto rounded-xl shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed text-sm active:scale-95 duration-200"
                         >
                             <Save size={18} />
-                            {loading ? <div className="flex items-center gap-2"><Loader size="xs" color="white" /> Saving...</div> : 'Save Task'}
+                            {loading ? (
+                                <span className="flex items-center gap-2">
+                                    <Loader size="xs" color="white" />
+                                    <span>Saving...</span>
+                                </span>
+                            ) : (
+                                <span>Save Task</span>
+                            )}
                         </button>
                     </div>
 

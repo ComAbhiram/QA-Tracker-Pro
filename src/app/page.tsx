@@ -347,9 +347,9 @@ export default function Home() {
     }
 
     // Refresh data
+    setIsTaskModalOpen(false); // Close first to stabilize DOM
     fetchTableData(currentPage, filter, searchQuery);
     fetchStatsData();
-    setIsTaskModalOpen(false);
   };
 
   const handleDeleteTask = async (taskId: number) => {

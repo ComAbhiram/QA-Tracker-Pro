@@ -80,11 +80,13 @@ export default function ConfirmationModal({
                         className={`px-4 py-2 text-sm font-semibold text-white rounded-lg transition-colors shadow-sm disabled:opacity-50 flex items-center gap-2 ${currentColors.button}`}
                     >
                         {isLoading ? (
-                            <>
+                            <span className="flex items-center gap-2">
                                 <Loader size="xs" color="white" />
-                                Processing...
-                            </>
-                        ) : confirmText}
+                                <span>Processing...</span>
+                            </span>
+                        ) : (
+                            <span>{confirmText}</span>
+                        )}
                     </button>
                 </div>
             </div >
