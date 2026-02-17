@@ -334,7 +334,7 @@ export default function AssigneeTaskTable({
                         </div>
                         {activeLeave && (
                             <p className="text-[10px] text-orange-700 dark:text-orange-400 font-semibold mt-0.5">
-                                On Leave: {format(new Date(activeLeave.date), 'MMM d')} ({activeLeave.type})
+                                {activeLeave.type === 'WFH' ? 'On WFH:' : 'On Leave:'} {format(new Date(activeLeave.date), 'MMM d')} ({activeLeave.type})
                             </p>
                         )}
                     </div>
