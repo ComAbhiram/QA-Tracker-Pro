@@ -42,31 +42,37 @@ export async function GET(request: Request) {
         // Sort projects list
         projects.sort((a: any, b: any) => a.name.localeCompare(b.name));
 
-        // CRITICAL FIX: Deduplicate by name, but PRIORITIZE user's team projects
-        // If multiple teams have the same project, keep the user's team version
-        const projectsByName = new Map<string, any[]>(); // Map<lowercaseName, project[]>
+        // CRITICAL FIX: For QA team, skip deduplication entirely
+        // They should see ALL projects from ALL teams without any filtering
+        if (!isQATeamGlobal) {
+            // CRITICAL FIX: Deduplicate by name, but PRIORITIZE user's team projects
+            // If multiple teams have the same project, keep the user's team version
+            const projectsByName = new Map<string, any[]>(); // Map<lowercaseName, project[]>
 
-        // Group projects by name
-        projects.forEach(p => {
-            const lowerName = p.name.trim().toLowerCase();
-            if (!projectsByName.has(lowerName)) {
-                projectsByName.set(lowerName, []);
-            }
-            projectsByName.get(lowerName)!.push(p);
-        });
+            // Group projects by name
+            projects.forEach(p => {
+                const lowerName = p.name.trim().toLowerCase();
+                if (!projectsByName.has(lowerName)) {
+                    projectsByName.set(lowerName, []);
+                }
+                projectsByName.get(lowerName)!.push(p);
+            });
 
-        console.log(`[DEBUG] Unique project names after grouping: ${projectsByName.size}`);
+            console.log(`[DEBUG] Unique project names after grouping: ${projectsByName.size}`);
 
-        // For each name, pick the best project (user's team if available, otherwise first)
-        projects = Array.from(projectsByName.values()).map(group => {
-            if (group.length === 1) return group[0];
+            // For each name, pick the best project (user's team if available, otherwise first)
+            projects = Array.from(projectsByName.values()).map(group => {
+                if (group.length === 1) return group[0];
 
-            // Multiple projects with same name - prefer user's team
-            const userTeamProject = group.find(p => p.team_id === teamId);
-            return userTeamProject || group[0];
-        });
+                // Multiple projects with same name - prefer user's team
+                const userTeamProject = group.find(p => p.team_id === teamId);
+                return userTeamProject || group[0];
+            });
 
-        console.log(`[DEBUG] Projects after deduplication: ${projects.length}`);
+            console.log(`[DEBUG] Projects after deduplication: ${projects.length}`);
+        } else {
+            console.log(`[DEBUG] QA team - skipping deduplication, keeping all ${projects.length} projects`);
+        }
 
         // DEBUG: Check if Talent Training exists after deduplication
         const talentTrainingAfterDedup = projects.filter((p: any) => p.name.toLowerCase().includes('talent') && p.name.toLowerCase().includes('training'));
