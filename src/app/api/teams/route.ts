@@ -118,7 +118,7 @@ export async function POST(request: NextRequest) {
                 id: userId,
                 email: adminEmail.trim().toLowerCase(),
                 team_id: team.id,
-                role: 'admin',
+                role: 'manager',
                 full_name: 'Admin' // Default name if new
             }, { onConflict: 'id' });
 
