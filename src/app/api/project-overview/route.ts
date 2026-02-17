@@ -57,12 +57,25 @@ export async function GET(request: NextRequest) {
             projectsQuery = projectsQuery.eq('team_id', requestedTeamId);
         }
 
-        const { data: projects, error: projectsError } = await projectsQuery.order('created_at', { ascending: false });
+        let { data: projects, error: projectsError } = await projectsQuery.order('created_at', { ascending: false });
 
         if (projectsError) {
             console.error('Error fetching projects:', projectsError);
             return NextResponse.json({ error: 'Failed to fetch projects' }, { status: 500 });
         }
+
+        // Global Deduplication:
+        const projectsByNameDedup = new Map<string, any>();
+        (projects || []).forEach(p => {
+            const cleanName = p.name.trim().toLowerCase();
+            if (!projectsByNameDedup.has(cleanName)) {
+                projectsByNameDedup.set(cleanName, p);
+            } else {
+                const existing = projectsByNameDedup.get(cleanName);
+                if (!existing.pc && p.pc) projectsByNameDedup.set(cleanName, p);
+            }
+        });
+        projects = Array.from(projectsByNameDedup.values());
 
         // 2. Fetch All Tasks for Aggregation AND Grid View
         let tasksQuery = supabase
@@ -359,11 +372,10 @@ export async function PUT(request: NextRequest) {
         if (currentProject && cleanUpdateData.name && currentProject.name !== cleanUpdateData.name) {
             console.log(`[ProjectOverview] Cascading name change from "${currentProject.name}" to "${cleanUpdateData.name}"`);
 
-            const { error: taskUpdateError } = await supabase
+            const { error: taskUpdateError } = await supabaseAdmin
                 .from('tasks')
                 .update({ project_name: cleanUpdateData.name })
-                .eq('project_name', currentProject.name)
-                .eq('team_id', currentProject.team_id);
+                .eq('project_name', currentProject.name);
 
             if (taskUpdateError) {
                 console.error('Error cascading project name update to tasks:', taskUpdateError);

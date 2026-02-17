@@ -19,13 +19,6 @@ export async function GET(request: Request) {
             .order('name')
             .limit(5000); // Increased limit from default 1000 to 5000
 
-        const cookieStore = cookies();
-        const isManager = cookieStore.get('manager_session')?.value || cookieStore.get('guest_token')?.value || request.headers.get('X-Manager-Mode') === 'true';
-        const isQATeamGlobal = teamId === 'ba60298b-8635-4cca-bcd5-7e470fad60e6';
-
-        // CRITICAL: Do NOT filter by team here - we need ALL projects for proper deduplication
-        // Team filtering happens AFTER deduplication to ensure we show user's team version
-
         const { data, error } = await query;
 
         if (error) {
@@ -34,72 +27,27 @@ export async function GET(request: Request) {
         }
 
         let projects = data || [];
-        console.log(`[DEBUG] Initial projects from DB: ${projects.length}`);
 
-        // DEBUG: Check if Talent Training exists in initial fetch
-        const talentTrainingInitial = projects.filter((p: any) => p.name.toLowerCase().includes('talent') && p.name.toLowerCase().includes('training'));
-        console.log(`[DEBUG] Talent Training projects in initial fetch: ${talentTrainingInitial.length}`, talentTrainingInitial.map((p: any) => ({ name: p.name, team_id: p.team_id })));
+        // Global Deduplication:
+        // Even if the DB has duplicates (before migration runs), the API should present a clean list.
+        const projectsByName = new Map<string, any>();
+        projects.forEach(p => {
+            const cleanName = p.name.trim().toLowerCase();
+            if (!projectsByName.has(cleanName)) {
+                projectsByName.set(cleanName, p);
+            } else {
+                // If duplicates exist, prioritize the one with metadata or more info
+                const existing = projectsByName.get(cleanName);
+                if (!existing.pc && p.pc) projectsByName.set(cleanName, p);
+                // hubstaff_id match is even better
+                if (!existing.hubstaff_id && p.hubstaff_id) projectsByName.set(cleanName, p);
+            }
+        });
+
+        projects = Array.from(projectsByName.values());
 
         // Sort projects list
         projects.sort((a: any, b: any) => a.name.localeCompare(b.name));
-
-        // CRITICAL FIX: For QA team, skip deduplication entirely
-        // They should see ALL projects from ALL teams without any filtering
-        if (!isQATeamGlobal) {
-            // CRITICAL FIX: Deduplicate by name, but PRIORITIZE user's team projects
-            // If multiple teams have the same project, keep the user's team version
-            const projectsByName = new Map<string, any[]>(); // Map<lowercaseName, project[]>
-
-            // Group projects by name
-            projects.forEach(p => {
-                const lowerName = p.name.trim().toLowerCase();
-                if (!projectsByName.has(lowerName)) {
-                    projectsByName.set(lowerName, []);
-                }
-                projectsByName.get(lowerName)!.push(p);
-            });
-
-            console.log(`[DEBUG] Unique project names after grouping: ${projectsByName.size}`);
-
-            // For each name, pick the best project (user's team if available, otherwise first)
-            projects = Array.from(projectsByName.values()).map(group => {
-                if (group.length === 1) return group[0];
-
-                // Multiple projects with same name - prefer user's team
-                const userTeamProject = group.find(p => p.team_id === teamId);
-                return userTeamProject || group[0];
-            });
-
-            console.log(`[DEBUG] Projects after deduplication: ${projects.length}`);
-        } else {
-            console.log(`[DEBUG] QA team - skipping deduplication, keeping all ${projects.length} projects`);
-        }
-
-        // DEBUG: Check if Talent Training exists after deduplication
-        const talentTrainingAfterDedup = projects.filter((p: any) => p.name.toLowerCase().includes('talent') && p.name.toLowerCase().includes('training'));
-        console.log(`[DEBUG] Talent Training after deduplication: ${talentTrainingAfterDedup.length}`, talentTrainingAfterDedup.map((p: any) => ({ name: p.name, team_id: p.team_id })));
-
-        // NOW filter by team AFTER deduplication
-        // This ensures we show user's team projects + shared projects (team_id = null)
-        if (teamId && !isManager && !isQATeamGlobal) {
-            projects = projects.filter(p => p.team_id === teamId || p.team_id === null);
-            console.log(`[DEBUG] Projects after team filter (non-QA, non-manager): ${projects.length}`);
-        } else if (isQATeamGlobal && !isManager) {
-            // QA team sees all projects
-            // No filtering needed
-            console.log(`[DEBUG] QA team - no filtering, keeping all ${projects.length} projects`);
-        } else if (!isManager) {
-            // Non-manager, non-QA team users see only their team's projects
-            projects = projects.filter(p => p.team_id === teamId || p.team_id === null);
-            console.log(`[DEBUG] Projects after team filter (non-manager): ${projects.length}`);
-        }
-        // Managers see everything (no filter)
-
-        console.log(`[DEBUG] Final projects count: ${projects.length}`);
-
-        // DEBUG: Check if Talent Training exists in final result
-        const talentTrainingFinal = projects.filter((p: any) => p.name.toLowerCase().includes('talent') && p.name.toLowerCase().includes('training'));
-        console.log(`[DEBUG] Talent Training in final result: ${talentTrainingFinal.length}`, talentTrainingFinal.map((p: any) => ({ name: p.name, team_id: p.team_id })));
 
         return NextResponse.json({ projects });
     } catch (error) {
@@ -116,32 +64,32 @@ export async function POST(request: Request) {
         // 1. Check if this team has already imported this project
         // CRITICAL FIX: Check by (hubstaff_id, team_id) to prevent same team from importing twice
         // But allow different teams to import the same Hubstaff project
-        if (hubstaff_id && team_id) {
+        if (hubstaff_id) {
             const { data: existingProject } = await supabaseAdmin
                 .from('projects')
                 .select('id, name')
                 .eq('hubstaff_id', hubstaff_id)
-                .eq('team_id', team_id)
                 .maybeSingle();
 
             if (existingProject) {
                 return NextResponse.json({
-                    error: `Project "${existingProject.name}" has already been imported by your team`
-                }, { status: 409 });
+                    project: existingProject,
+                    message: "Project already exists globally. Linked."
+                });
             }
-        } else if (name && team_id) {
+        } else if (name) {
             // Fallback: check by name if no hubstaff_id
             const { data: existingProject } = await supabaseAdmin
                 .from('projects')
-                .select('id')
+                .select('id, name')
                 .eq('name', name)
-                .eq('team_id', team_id)
                 .maybeSingle();
 
             if (existingProject) {
                 return NextResponse.json({
-                    error: 'Project with this name already exists for your team'
-                }, { status: 409 });
+                    project: existingProject,
+                    message: "Project with this name already exists globally. Linked."
+                });
             }
         }
 
@@ -176,7 +124,7 @@ export async function POST(request: Request) {
                 name,
                 status,
                 description,
-                team_id,
+                team_id: null, // Always global
                 hubstaff_id
             }])
             .select()
