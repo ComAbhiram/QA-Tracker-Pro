@@ -78,7 +78,7 @@ export default function Combobox({
                 disabled={disabled}
             >
                 <span className={`block truncate ${!isPlaceholder ? 'text-slate-700 font-medium' : 'text-slate-400'}`}>
-                    {displayLabel}
+                    <span>{displayLabel}</span>
                 </span>
                 <ChevronsUpDown className="w-4 h-4 text-slate-400" />
             </button>
@@ -114,7 +114,7 @@ export default function Combobox({
                         {isLoading ? (
                             <div className="py-6 text-center text-sm text-slate-500 flex items-center justify-center gap-2">
                                 <div className="animate-spin w-4 h-4 border-2 border-indigo-500 border-t-transparent rounded-full" />
-                                <span>Loading...</span>
+                                <span><span>Loading...</span></span>
                             </div>
                         ) : (
                             <>

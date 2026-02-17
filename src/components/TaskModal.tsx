@@ -529,7 +529,7 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div className="space-y-3">
                             <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
-                                <Briefcase size={16} className="text-indigo-500" /> Project Name <span className="text-red-500">*</span>
+                                <Briefcase size={16} className="text-indigo-500" /> <span>Project Name</span> <span className="text-red-500">*</span>
                             </label>
                             <Combobox
                                 options={projects}
@@ -613,7 +613,7 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
                     {/* Dynamic Assignees */}
                     <div className="space-y-4">
                         <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
-                            <User size={16} className="text-indigo-500" /> Assignees
+                            <User size={16} className="text-indigo-500" /> <span>Assignees</span>
                         </label>
                         <div className="space-y-3">
                             {assignees.map((assignee, index) => (
@@ -648,7 +648,7 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
                             onClick={addAssignee}
                             className="text-sm font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 flex items-center gap-2 px-2 py-1 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-colors"
                         >
-                            <Plus size={16} /> Add Assignee
+                            <Plus size={16} /> <span>Add Assignee</span>
                         </button>
                     </div>
 
@@ -935,15 +935,17 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
                             disabled={loading}
                             className="btn btn-primary px-8 py-3 w-auto h-auto rounded-xl shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed text-sm active:scale-95 duration-200"
                         >
-                            <Save size={18} />
-                            {loading ? (
-                                <span className="flex items-center gap-2">
-                                    <Loader size="xs" color="white" />
-                                    <span>Saving...</span>
-                                </span>
-                            ) : (
-                                <span>Save Task</span>
-                            )}
+                            <span className="flex items-center justify-center gap-2">
+                                <Save size={18} />
+                                {loading ? (
+                                    <span className="flex items-center gap-2">
+                                        <Loader size="xs" color="white" />
+                                        <span>Saving...</span>
+                                    </span>
+                                ) : (
+                                    <span>Save Task</span>
+                                )}
+                            </span>
                         </button>
                     </div>
 

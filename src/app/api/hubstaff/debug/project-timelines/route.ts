@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+export const dynamic = 'force-dynamic';
 import { getValidAccessToken } from '@/lib/hubstaff-auth';
 import { determineUserTeam } from '@/lib/hubstaff-team-mapping';
 

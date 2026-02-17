@@ -136,15 +136,25 @@ export default function Tracker() {
 
             // 2. Fetch Leaves (Active team only)
             try {
-                // Fetch ALL leaves for valid date range (Today -> Future) to support cross-team view
-                // We don't filter by team_id so we can see Frontend devs in Wordpress tracker etc.
-                const today = new Date().toISOString().split('T')[0];
-                const nextMonth = new Date();
-                nextMonth.setDate(nextMonth.getDate() + 30);
-                const endDate = nextMonth.toISOString().split('T')[0];
+                // Fetch ALL leaves for valid date range (Past 7 days -> Future 30 days) to support cross-team view
+                // We don't filter by team_id for guests/managers so we can see Frontend devs in Wordpress tracker etc.
+                const today = new Date();
+                const pastWeek = new Date(today);
+                pastWeek.setDate(today.getDate() - 7);
+                const startDate = pastWeek.toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
 
-                let url = `/api/leaves?start_date=${today}&end_date=${endDate}`;
-                // Removed team_id filter to allow cross-team visibility
+                const nextMonth = new Date(today);
+                nextMonth.setDate(today.getDate() + 30);
+                const endDate = nextMonth.toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
+
+                let url = `/api/leaves?start_date=${startDate}&end_date=${endDate}`;
+
+                // CRITICAL: For managers/guests, do NOT restrict to selectedTeamId here 
+                // because the tracker needs to see leaves for ANY user assigned to a task 
+                // in the current team's view, even if they belong to a different team.
+                if (!isGuest && selectedTeamId) {
+                    url += `&team_id=${selectedTeamId}`;
+                }
 
                 const leavesRes = await fetch(url);
                 if (leavesRes.ok) {
@@ -706,6 +716,7 @@ export default function Tracker() {
                                 columnWidths={columnWidths}
                                 hideHeader={true} // Hide individual headers since we have a sticky one
                                 isRowExpanded={isRowExpanded} // Pass Expand State
+                                dateFilter={dateFilter} // Pass date filter for dynamic leave display
                                 onResizeStart={startResizing}
                                 onEditTask={handleEditTask}
                                 onFieldUpdate={handleFieldUpdate}
@@ -713,16 +724,22 @@ export default function Tracker() {
                                     // Refresh leaves immediately
                                     const fetchLeaves = async () => {
                                         // Use IST date to match QuickLeave logic
-                                        const now = new Date();
-                                        const istOffset = 5.5 * 60 * 60 * 1000;
-                                        const istDate = new Date(now.getTime() + (now.getTimezoneOffset() * 60 * 1000) + istOffset);
-                                        const today = istDate.toISOString().split('T')[0];
+                                        const today = new Date();
+                                        const pastWeek = new Date(today);
+                                        pastWeek.setDate(today.getDate() - 7);
+                                        const startDateStr = pastWeek.toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
 
-                                        const nextMonth = new Date();
-                                        nextMonth.setDate(nextMonth.getDate() + 30);
-                                        const endDate = nextMonth.toISOString().split('T')[0];
+                                        const nextMonth = new Date(today);
+                                        nextMonth.setDate(today.getDate() + 30);
+                                        const endDateStr = nextMonth.toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
 
-                                        let url = `/api/leaves?start_date=${today}&end_date=${endDate}`;
+                                        let url = `/api/leaves?start_date=${startDateStr}&end_date=${endDateStr}`;
+
+                                        // Consistent with fetchData - don't restrict for guests
+                                        if (!isGuest && selectedTeamId) {
+                                            url += `&team_id=${selectedTeamId}`;
+                                        }
+
                                         const res = await fetch(url);
                                         if (res.ok) {
                                             const data = await res.json();

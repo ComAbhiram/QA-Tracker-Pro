@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+export const dynamic = 'force-dynamic';
 import { createClient } from '@supabase/supabase-js';
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
@@ -151,6 +152,14 @@ export async function POST(request: Request) {
         console.log(`[QuickLeave] Resolved user: ${team_member_name} -> ${userData.full_name} (ID: ${userData.id})`);
 
         // 3. Upsert Logic:
+        // Resolve effective team_id for the leave
+        // Use provided team_id first, then fallback to profile if known.
+        const effectiveTeamId = team_id || userData.team_id;
+
+        if (!effectiveTeamId) {
+            console.warn(`[QuickLeave] No team_id found for ${team_member_name}. This leave might be "global" or orphaned.`);
+        }
+
         // Check if leave exists for this user on this date.
         const { data: existingLeave, error: leaveError } = await supabaseAdmin
             .from('leaves')
@@ -198,7 +207,7 @@ export async function POST(request: Request) {
                 .from('leaves')
                 .update({
                     leave_type,
-                    team_id: team_id || userData.team_id, // Fix: Ensure team_id is persisted/updated on modification
+                    team_id: effectiveTeamId,
                     updated_at: new Date().toISOString()
                 })
                 .eq('id', existingLeave.id)
@@ -218,7 +227,7 @@ export async function POST(request: Request) {
                     team_member_name: userData.full_name, // Use the profile name
                     leave_date: targetDate,
                     leave_type,
-                    team_id: team_id || userData.team_id // Prioritize context team_id from body
+                    team_id: effectiveTeamId
                 }])
                 .select()
                 .single();

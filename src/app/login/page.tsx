@@ -135,7 +135,7 @@ export default function LoginPage() {
 
                         {error && (
                             <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl font-medium text-center">
-                                {error}
+                                <span>{error}</span>
                             </div>
                         )}
 
@@ -189,7 +189,7 @@ export default function LoginPage() {
                         <form onSubmit={handleLogin} className="space-y-4">
                             {error && !showManagerModal && (
                                 <div className="p-3 bg-red-50 border border-red-200 text-red-600 text-xs font-medium rounded-lg flex items-center justify-center text-center">
-                                    {error}
+                                    <span>{error}</span>
                                 </div>
                             )}
 
@@ -234,8 +234,10 @@ export default function LoginPage() {
                                 disabled={loading}
                                 className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 h-10 px-4 py-2 w-full bg-slate-900 text-slate-50 hover:bg-slate-900/90 shadow-sm"
                             >
-                                {loading && <div className="mr-2"><Loader size="xs" color="white" /></div>}
-                                Sign In
+                                <span className="flex items-center justify-center gap-2">
+                                    {loading && <Loader size="xs" color="white" />}
+                                    <span>Sign In</span>
+                                </span>
                             </button>
                         </form>
 

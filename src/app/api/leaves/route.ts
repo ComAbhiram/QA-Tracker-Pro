@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+export const dynamic = 'force-dynamic';
 import { createClient } from '@supabase/supabase-js';
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { cookies } from 'next/headers';
@@ -69,7 +70,8 @@ export async function GET(request: Request) {
 
         console.log('[API /leaves] User:', user?.id, 'canOverride:', canOverride, 'overrideTeamId:', overrideTeamId, 'profile.team_id:', profile?.team_id, 'effectiveTeamId:', effectiveTeamId);
 
-        if (!effectiveTeamId) {
+        // Relax requirement for managers/super admins to allow "global" view
+        if (!effectiveTeamId && !canOverride) {
             return NextResponse.json(
                 { error: 'Team ID is required' },
                 { status: 400 }
@@ -193,7 +195,7 @@ export async function POST(request: Request) {
                 .from('user_profiles')
                 .select('team_id')
                 .eq('id', team_member_id)
-                .single();
+                .maybeSingle();
 
             effectiveTeamId = targetUserProfile?.team_id;
         }

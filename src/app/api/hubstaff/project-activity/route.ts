@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
 
     const addLog = (msg: string) => {
         const timestamp = new Date().toISOString();
-        const fullMsg = `[${timestamp}] ${msg}`;
+        const fullMsg = `[${timestamp}] ${msg} `;
         console.log(fullMsg);
         logs.push(fullMsg);
         try {
@@ -78,16 +78,16 @@ export async function GET(request: NextRequest) {
 
         if (projectsCache && (now - projectsCache.timestamp < CACHE_TTL)) {
             projects = projectsCache.data;
-            addLog(`[Hubstaff API] Projects list loaded from cache (${projects.length} projects)`);
+            addLog(`[Hubstaff API] Projects list loaded from cache(${projects.length} projects)`);
         } else {
             addLog('[Hubstaff API] Fetching projects from Hubstaff API (cache expired or missing)');
             let allProjects: any[] = [];
             let pageId: string | null = null;
 
             do {
-                const pageParam: string = pageId ? `&page_start_id=${pageId}` : '';
+                const pageParam: string = pageId ? `& page_start_id=${pageId} ` : '';
                 const projectsResponse = await fetch(
-                    `${HUBSTAFF_API_BASE}/organizations/${orgId}/projects?status=active${pageParam}`,
+                    `${HUBSTAFF_API_BASE} /organizations/${orgId}/projects?status=active${pageParam}`,
                     {
                         headers: {
                             'Authorization': `Bearer ${accessToken}`,

@@ -8,19 +8,17 @@ import { Leave } from '@/lib/types';
 interface QuickLeaveActionsProps {
     assigneeName: string;
     teamId?: string;
+    date?: string; // Optional date in YYYY-MM-DD
     currentLeave?: Leave | null;
     onUpdate: () => void;
 }
 
 // Helper to get IST Date YYYY-MM-DD
 const getISTDateString = () => {
-    const now = new Date();
-    const istOffset = 5.5 * 60 * 60 * 1000;
-    const istDate = new Date(now.getTime() + (now.getTimezoneOffset() * 60 * 1000) + istOffset);
-    return istDate.toISOString().split('T')[0];
+    return new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
 };
 
-export default function QuickLeaveActions({ assigneeName, teamId, currentLeave, onUpdate }: QuickLeaveActionsProps) {
+export default function QuickLeaveActions({ assigneeName, teamId, date, currentLeave, onUpdate }: QuickLeaveActionsProps) {
     const [loading, setLoading] = useState<string | null>(null);
     const { success, error } = useToast();
 
@@ -35,10 +33,8 @@ export default function QuickLeaveActions({ assigneeName, teamId, currentLeave, 
             if (type === 'HL') dbLeaveType = 'Half Day Morning Session Casual Leave';
             if (type === 'WFH') dbLeaveType = 'WFH';
 
-            // Check if WE are toggling off.
-            // For FL: matches 'Full Day Casual Leave' (strictly for now, or maybe if current starts with Full Day?)
-            // Let's use strict match to the default we set, OR if we want to be smart:
-            // If current matches dbLeaveType, toggle off.
+            // Use provided date (from dateFilter) or default to today's IST date
+            const targetDate = date || getISTDateString();
 
             const response = await fetch('/api/leaves/quick', {
                 method: 'POST',
@@ -47,7 +43,7 @@ export default function QuickLeaveActions({ assigneeName, teamId, currentLeave, 
                     team_member_name: assigneeName,
                     team_id: teamId,
                     leave_type: dbLeaveType,
-                    date: getISTDateString()
+                    date: targetDate
                 })
             });
 

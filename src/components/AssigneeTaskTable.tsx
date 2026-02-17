@@ -39,6 +39,7 @@ interface AssigneeTaskTableProps {
     columnWidths: Record<string, number>;
     hideHeader?: boolean;
     isRowExpanded?: boolean;
+    dateFilter?: Date | undefined;
     onEditTask: (task: Task) => void;
     onResizeStart?: (key: string, e: React.MouseEvent) => void;
     // Generalized update handler for inline edits
@@ -177,7 +178,7 @@ const StatusSelectCell = ({ status, onSave }: { status: string, onSave: (val: st
 
 export default function AssigneeTaskTable({
     assignee, tasks, leaves, columnWidths, hideHeader = false, isRowExpanded = false,
-    onEditTask, onFieldUpdate, onLeaveUpdate, selectedTeamId, onResizeStart
+    dateFilter, onEditTask, onFieldUpdate, onLeaveUpdate, selectedTeamId, onResizeStart
 }: AssigneeTaskTableProps) {
     const [currentPage, setCurrentPage] = useState(1);
     const [sortConfig, setSortConfig] = useState<{ key: SortKey; direction: 'asc' | 'desc' } | null>(null);
@@ -237,10 +238,12 @@ export default function AssigneeTaskTable({
     const headerColorClass = getHeaderColor(assignee);
     const availabilityDate = calculateAvailability(tasks, leaves);
 
-    // Check if assignee has leave today or in near future
+    // Check if assignee has leave for the filtered date or today
     const getActiveLeave = () => {
-        // robustly get today in IST
-        const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
+        // Use filtered date if available, otherwise use today in IST
+        const targetDate = dateFilter
+            ? dateFilter.toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' })
+            : new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
 
         // Normalization helper
         const normalize = (s: string) => s?.toLowerCase().trim() || '';
@@ -248,42 +251,44 @@ export default function AssigneeTaskTable({
         const mappedAssigneeName = mapHubstaffNameToQA(assignee);
         const normalizedMapped = normalize(mappedAssigneeName);
 
-        // Check for leave on today's date
-        const todayLeave = leaves.find(l => {
+        // Check for leave on the target date (filtered or today)
+        const targetDateLeave = leaves.find(l => {
             const lName = normalize(l.team_member_name);
             // Enhanced matching: Exact, Mapped, or Partial
             const matchesName = lName === normalizedAssignee || lName === normalizedMapped;
             const matchesPartial = lName.includes(normalizedAssignee) || normalizedAssignee.includes(lName) ||
                 (normalizedMapped && (lName.includes(normalizedMapped) || normalizedMapped.includes(lName)));
 
-            return (matchesName || matchesPartial) && l.leave_date === today;
+            return (matchesName || matchesPartial) && l.leave_date === targetDate;
         });
 
-        if (todayLeave) {
-            return { date: today, type: todayLeave.leave_type };
+        if (targetDateLeave) {
+            return { date: targetDate, type: targetDateLeave.leave_type };
         }
 
-        // Check for upcoming leave within next 7 days
-        // Calculate next week date string
-        const todayDateObj = new Date(today);
-        const nextWeekDateObj = new Date(todayDateObj);
-        nextWeekDateObj.setDate(todayDateObj.getDate() + 7);
-        const nextWeek = nextWeekDateObj.toISOString().split('T')[0];
+        // Only check for upcoming leave if NO date filter is active (showing today's view)
+        if (!dateFilter) {
+            const today = targetDate; // Already calculated as today above
+            const todayDateObj = new Date(today);
+            const nextWeekDateObj = new Date(todayDateObj);
+            nextWeekDateObj.setDate(todayDateObj.getDate() + 7);
+            const nextWeek = nextWeekDateObj.toISOString().split('T')[0];
 
-        const upcomingLeave = leaves.find(l => {
-            const lName = normalize(l.team_member_name);
-            const matchesName = lName === normalizedAssignee || lName === normalizedMapped;
-            const matchesPartial = lName.includes(normalizedAssignee) || normalizedAssignee.includes(lName) ||
-                (normalizedMapped && (lName.includes(normalizedMapped) || normalizedMapped.includes(lName)));
+            const upcomingLeave = leaves.find(l => {
+                const lName = normalize(l.team_member_name);
+                const matchesName = lName === normalizedAssignee || lName === normalizedMapped;
+                const matchesPartial = lName.includes(normalizedAssignee) || normalizedAssignee.includes(lName) ||
+                    (normalizedMapped && (lName.includes(normalizedMapped) || normalizedMapped.includes(lName)));
 
-            if (!matchesName && !matchesPartial) return false;
+                if (!matchesName && !matchesPartial) return false;
 
-            // String comparison works for YYYY-MM-DD
-            return l.leave_date > today && l.leave_date <= nextWeek;
-        });
+                // String comparison works for YYYY-MM-DD
+                return l.leave_date > today && l.leave_date <= nextWeek;
+            });
 
-        if (upcomingLeave) {
-            return { date: upcomingLeave.leave_date, type: upcomingLeave.leave_type };
+            if (upcomingLeave) {
+                return { date: upcomingLeave.leave_date, type: upcomingLeave.leave_type };
+            }
         }
 
         return null;
@@ -294,7 +299,11 @@ export default function AssigneeTaskTable({
     // Determine row background color based on active leave type
     // FL: Red, HL: Yellow/Orange, WFH: Blue
     const getLeaveRowClass = () => {
-        if (!activeLeave || activeLeave.date !== new Date().toISOString().split('T')[0]) return ''; // Only highlight for TODAY
+        const todayStr = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
+        const filterDateStr = dateFilter?.toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
+        const checkDate = filterDateStr || todayStr;
+
+        if (!activeLeave || activeLeave.date !== checkDate) return '';
         const type = activeLeave.type.toLowerCase();
         if (type.includes('full day')) return 'bg-red-50/50 dark:bg-red-900/10 border-l-4 border-l-red-500';
         if (type.includes('half day')) return 'bg-amber-50/50 dark:bg-amber-900/10 border-l-4 border-l-amber-500';
@@ -328,7 +337,8 @@ export default function AssigneeTaskTable({
                             <QuickLeaveActions
                                 assigneeName={assignee}
                                 teamId={selectedTeamId || undefined}
-                                currentLeave={activeLeave && activeLeave.date === new Date().toISOString().split('T')[0] ? { leave_type: activeLeave.type } as any : null}
+                                date={activeLeave?.date === (dateFilter?.toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' }) || new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' })) ? activeLeave.date : (dateFilter?.toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' }) || new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' }))}
+                                currentLeave={activeLeave && activeLeave.date === (dateFilter?.toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' }) || new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' })) ? { leave_type: activeLeave.type } as any : null}
                                 onUpdate={() => onLeaveUpdate?.()}
                             />
                         </div>
