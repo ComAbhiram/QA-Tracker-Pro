@@ -48,7 +48,10 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
     const initialState: Partial<Task> = {
         status: 'Yet to Start',
         includeSaturday: false,
-        includeSunday: false
+        includeSunday: false,
+        startDate: null,
+        endDate: null,
+        actualCompletionDate: null,
     };
 
     const [formData, setFormData] = useState<Partial<Task>>(initialState);
@@ -156,9 +159,11 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
                     users = await fetchFromAPI();
                 }
 
-                const formattedUsers = users.map((u: any) => ({
-                    id: u.name,
-                    label: u.name
+                // Dedup and format
+                const uniqueUserNames = Array.from(new Set(users.map((u: any) => u.name).filter(Boolean)));
+                const formattedUsers = uniqueUserNames.map((name: any) => ({
+                    id: name,
+                    label: name
                 }));
                 setHubstaffUsers(formattedUsers);
 
@@ -286,9 +291,9 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
                 priority: task.priority,
                 pc: task.pc,
                 status: task.status,
-                startDate: isValidProjectDate(task.startDate) ? new Date(task.startDate).toISOString().split('T')[0] : '',
-                endDate: isValidProjectDate(task.endDate) ? new Date(task.endDate).toISOString().split('T')[0] : '',
-                actualCompletionDate: isValidProjectDate(task.actualCompletionDate) ? new Date(task.actualCompletionDate).toISOString().split('T')[0] : '',
+                startDate: isValidProjectDate(task.startDate) ? new Date(task.startDate).toISOString().split('T')[0] : null,
+                endDate: isValidProjectDate(task.endDate) ? new Date(task.endDate).toISOString().split('T')[0] : null,
+                actualCompletionDate: isValidProjectDate(task.actualCompletionDate) ? new Date(task.actualCompletionDate).toISOString().split('T')[0] : null,
                 startTime: task.startTime,
                 endTime: task.endTime,
                 assignedTo: task.assignedTo,
@@ -465,7 +470,7 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
     const handleDateChange = (field: 'startDate' | 'endDate' | 'actualCompletionDate', date?: Date) => {
         setFormData(prev => ({
             ...prev,
-            [field]: date ? format(date, 'yyyy-MM-dd') : ''
+            [field]: date && !isNaN(date.getTime()) ? format(date, 'yyyy-MM-dd') : null
         }));
     };
 
@@ -473,7 +478,7 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
         const selectedProject = projects.find(p => p.id == value);
         setFormData(prev => ({
             ...prev,
-            projectName: selectedProject ? selectedProject.label : (value ? String(value) : '')
+            projectName: selectedProject ? selectedProject.label : (value ? String(value) : null!)
         }));
     };
 

@@ -34,7 +34,7 @@ export function DatePicker({ date, setDate, className, placeholder = "Pick a dat
                         className
                     )}
                 >
-                    {date ? format(date, "MMM d, yyyy") : <span className="text-slate-400">{placeholder}</span>}
+                    {date && !isNaN(date.getTime()) ? format(date, "MMM d, yyyy") : <span className="text-slate-400">{placeholder}</span>}
                     <ChevronDownIcon className="ml-2 h-4 w-4 opacity-50" />
                 </Button>
             </PopoverTrigger>

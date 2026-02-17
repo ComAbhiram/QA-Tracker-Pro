@@ -143,13 +143,13 @@ export default function TaskOverviewTable({ tasks, onEdit }: TaskOverviewTablePr
                                     </div>
                                 </td>
                                 <td className="px-4 py-4 text-slate-500 font-medium border border-slate-400 text-xs whitespace-nowrap">
-                                    {task.startDate ? format(new Date(task.startDate), 'MMM d') : '-'}
+                                    {task.startDate && !isNaN(new Date(task.startDate).getTime()) ? format(new Date(task.startDate), 'MMM d') : '-'}
                                 </td>
                                 <td className="px-4 py-4 text-slate-500 font-medium border border-slate-400 text-xs whitespace-nowrap">
-                                    {task.endDate ? format(new Date(task.endDate), 'MMM d') : '-'}
+                                    {task.endDate && !isNaN(new Date(task.endDate).getTime()) ? format(new Date(task.endDate), 'MMM d') : '-'}
                                 </td>
                                 <td className="px-4 py-4 text-slate-500 font-medium border border-slate-400 text-xs whitespace-nowrap">
-                                    {task.actualCompletionDate ? format(new Date(task.actualCompletionDate), 'MMM d') : '-'}
+                                    {task.actualCompletionDate && !isNaN(new Date(task.actualCompletionDate).getTime()) ? format(new Date(task.actualCompletionDate), 'MMM d') : '-'}
                                 </td>
                                 <td className="px-4 py-4 text-slate-600 font-mono text-xs border border-slate-400">
                                     {task.timeTaken || '00:00:00'}

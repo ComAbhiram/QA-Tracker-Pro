@@ -114,8 +114,32 @@ export async function DELETE(request: NextRequest) {
             );
         }
 
-        // Delete team (cascade will handle user_profiles)
-        const { error } = await supabaseServer
+        // Create admin client for robust deletion
+        const supabaseAdmin = createClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.SUPABASE_SERVICE_ROLE_KEY!,
+            {
+                auth: {
+                    autoRefreshToken: false,
+                    persistSession: false
+                }
+            }
+        );
+
+        // 1. Clear team_id from user_profiles to avoid FK constraint errors
+        await supabaseAdmin
+            .from('user_profiles')
+            .update({ team_id: null })
+            .eq('team_id', teamId);
+
+        // 2. Clear team_id from projects
+        await supabaseAdmin
+            .from('projects')
+            .update({ team_id: null })
+            .eq('team_id', teamId);
+
+        // 3. Delete team (cascade might handle others, but let's be safe)
+        const { error } = await supabaseAdmin
             .from('teams')
             .delete()
             .eq('id', teamId);

@@ -217,7 +217,7 @@ export async function POST(request: Request) {
                     team_member_name: userData.full_name, // Use the profile name
                     leave_date: targetDate,
                     leave_type,
-                    team_id: userData.team_id || team_id
+                    team_id: team_id || userData.team_id // Prioritize context team_id from body
                 }])
                 .select()
                 .single();
