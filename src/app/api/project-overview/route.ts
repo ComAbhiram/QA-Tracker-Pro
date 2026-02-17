@@ -72,7 +72,7 @@ export async function GET(request: NextRequest) {
         let projectsQuery = supabase
             .from('project_overview')
             .select('*')
-            .in('name', importedProjectNames); // Only get projects that are imported
+            .in('project_name', importedProjectNames); // Only get projects that are imported
 
         if (profile.role !== 'super_admin' && !isGuestMode) {
             projectsQuery = projectsQuery.eq('team_id', profile.team_id);
