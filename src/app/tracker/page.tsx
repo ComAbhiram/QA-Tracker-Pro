@@ -16,6 +16,7 @@ import ResizableHeader from '@/components/ui/ResizableHeader';
 import CloseButton from '@/components/ui/CloseButton';
 import TeamSelectorPill from '@/components/ui/TeamSelectorPill';
 import { useTeams } from '@/hooks/useTeams';
+import { getCurrentUserTeam } from '@/utils/userUtils';
 
 export default function Tracker() {
     const { isGuest, selectedTeamId, selectedTeamName, setGuestSession, isLoading: isGuestLoading } = useGuestMode();
@@ -40,6 +41,7 @@ export default function Tracker() {
 
     // Team Selector State (Manager Mode)
     const { teams } = useTeams(isGuest);
+    const [userProfile, setUserProfile] = useState<{ team_id: string | null } | null>(null);
 
     // Column Resizing (Lifted State)
     const { columnWidths, startResizing } = useColumnResizing({
@@ -74,9 +76,18 @@ export default function Tracker() {
         window.location.reload();
     };
 
-    // Fetch ALL active tasks (no pagination in query)
     useEffect(() => {
         if (isGuestLoading) return; // Wait for guest session to initialize
+
+        async function fetchUserProfile() {
+            if (!isGuest) {
+                const profile = await getCurrentUserTeam();
+                if (profile) {
+                    setUserProfile({ team_id: profile.team_id });
+                }
+            }
+        }
+        fetchUserProfile();
 
         async function fetchData() {
             setLoading(true);
@@ -149,11 +160,11 @@ export default function Tracker() {
 
                 let url = `/api/leaves?start_date=${startDate}&end_date=${endDate}`;
 
-                // CRITICAL: For managers/guests, do NOT restrict to selectedTeamId here 
                 // because the tracker needs to see leaves for ANY user assigned to a task 
                 // in the current team's view, even if they belong to a different team.
-                if (!isGuest && selectedTeamId) {
-                    url += `&team_id=${selectedTeamId}`;
+                let effectiveLeaveTeamId = isGuest ? undefined : (userProfile?.team_id || undefined);
+                if (effectiveLeaveTeamId) {
+                    url += `&team_id=${effectiveLeaveTeamId}`;
                 }
 
                 const leavesRes = await fetch(url);
@@ -275,7 +286,7 @@ export default function Tracker() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     ...leaveData,
-                    team_id: isGuest ? selectedTeamId : undefined // Let API handle user profile team if not guest
+                    team_id: isGuest ? selectedTeamId : (userProfile?.team_id || undefined)
                 })
             });
 
@@ -287,7 +298,8 @@ export default function Tracker() {
             success('Leave marked successfully');
             // Refresh leaves and tasks
             refreshTasks();
-            const leavesRes = await fetch(isGuest && selectedTeamId ? `/api/leaves?team_id=${selectedTeamId}` : '/api/leaves');
+            const effectiveLeaveTeamId = isGuest ? selectedTeamId : (userProfile?.team_id || null);
+            const leavesRes = await fetch(effectiveLeaveTeamId ? `/api/leaves?team_id=${effectiveLeaveTeamId}` : '/api/leaves');
             if (leavesRes.ok) {
                 const leavesData = await leavesRes.json();
                 setLeaves(leavesData.leaves || []);
@@ -717,6 +729,7 @@ export default function Tracker() {
                                 hideHeader={true} // Hide individual headers since we have a sticky one
                                 isRowExpanded={isRowExpanded} // Pass Expand State
                                 dateFilter={dateFilter} // Pass date filter for dynamic leave display
+                                selectedTeamId={isGuest ? selectedTeamId : (userProfile?.team_id || null)}
                                 onResizeStart={startResizing}
                                 onEditTask={handleEditTask}
                                 onFieldUpdate={handleFieldUpdate}
@@ -736,8 +749,9 @@ export default function Tracker() {
                                         let url = `/api/leaves?start_date=${startDateStr}&end_date=${endDateStr}`;
 
                                         // Consistent with fetchData - don't restrict for guests
-                                        if (!isGuest && selectedTeamId) {
-                                            url += `&team_id=${selectedTeamId}`;
+                                        const leaveTeamId = isGuest ? null : (userProfile?.team_id || null);
+                                        if (leaveTeamId) {
+                                            url += `&team_id=${leaveTeamId}`;
                                         }
 
                                         const res = await fetch(url);

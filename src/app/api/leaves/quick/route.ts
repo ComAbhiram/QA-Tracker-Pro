@@ -151,10 +151,23 @@ export async function POST(request: Request) {
 
         console.log(`[QuickLeave] Resolved user: ${team_member_name} -> ${userData.full_name} (ID: ${userData.id})`);
 
-        // 3. Upsert Logic:
         // Resolve effective team_id for the leave
         // Use provided team_id first, then fallback to profile if known.
-        const effectiveTeamId = team_id || userData.team_id;
+        let effectiveTeamId = team_id || userData.team_id;
+
+        // If still missing, try to use the creator's team_id
+        if (!effectiveTeamId && user) {
+            const { data: creatorProfile } = await supabaseAdmin
+                .from('user_profiles')
+                .select('team_id')
+                .eq('id', user.id)
+                .maybeSingle();
+
+            if (creatorProfile?.team_id) {
+                console.log(`[QuickLeave] Falling back to creator's team_id: ${creatorProfile.team_id}`);
+                effectiveTeamId = creatorProfile.team_id;
+            }
+        }
 
         if (!effectiveTeamId) {
             console.warn(`[QuickLeave] No team_id found for ${team_member_name}. This leave might be "global" or orphaned.`);
