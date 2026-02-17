@@ -72,10 +72,11 @@ export async function POST(request: NextRequest) {
                     await supabaseServer.from('teams').delete().eq('id', team.id);
                     throw listError;
                 }
-                const existingUser = usersData.users.find(u => u.email === adminEmail);
+                const searchEmail = adminEmail.trim().toLowerCase();
+                const existingUser = usersData.users.find(u => u.email?.toLowerCase() === searchEmail);
                 if (!existingUser) {
                     await supabaseServer.from('teams').delete().eq('id', team.id);
-                    throw new Error('User reported as registered but not found in list');
+                    throw new Error(`User with email ${adminEmail} reported as registered but not found in list. Please check the email case.`);
                 }
                 userId = existingUser.id;
                 console.log(`[TeamsAPI] Linking existing user ${adminEmail} (ID: ${userId}) to new team ${teamName}`);
