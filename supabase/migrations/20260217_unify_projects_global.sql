@@ -6,16 +6,33 @@ DECLARE
     main_record RECORD;
     dup_record RECORD;
     merged_count INTEGER := 0;
+    has_created_at BOOLEAN;
 BEGIN
     RAISE NOTICE 'Starting global project unification...';
 
+    -- Check if created_at exists to help pick the "original" record
+    SELECT EXISTS (
+        SELECT 1 FROM information_schema.columns 
+        WHERE table_name = 'projects' AND column_name = 'created_at'
+    ) INTO has_created_at;
+
     -- 1. Merge duplicates based on Hubstaff ID (Grouped by Hubstaff ID)
+    -- We use a CTE to find the "survivor" (original) for each hubstaff_id
     FOR main_record IN 
-        SELECT hubstaff_id, MIN(id) as survivor_id
-        FROM projects
-        WHERE hubstaff_id IS NOT NULL
-        GROUP BY hubstaff_id
-        HAVING COUNT(*) > 1
+        SELECT hubstaff_id, survivor_id
+        FROM (
+            SELECT hubstaff_id, id as survivor_id,
+                   ROW_NUMBER() OVER (
+                       PARTITION BY hubstaff_id 
+                       ORDER BY 
+                           (CASE WHEN pc IS NOT NULL THEN 0 ELSE 1 END), -- Prefer those with PC info
+                           (CASE WHEN has_created_at THEN created_at ELSE NULL END) ASC, -- Then oldest
+                           id ASC -- Final tie-breaker
+                   ) as rn
+            FROM projects
+            WHERE hubstaff_id IS NOT NULL
+        ) t
+        WHERE rn = 1 AND hubstaff_id IN (SELECT hubstaff_id FROM projects GROUP BY hubstaff_id HAVING COUNT(*) > 1)
     LOOP
         FOR dup_record IN 
             SELECT id FROM projects 
@@ -48,12 +65,20 @@ BEGIN
     END LOOP;
 
     -- 2. Merge duplicates based on Project Name (for those without hubstaff_id)
-    -- Grouping by name (case-insensitive and trimmed)
     FOR main_record IN 
-        SELECT LOWER(TRIM(name)) as clean_name, MIN(id) as survivor_id
-        FROM projects
-        GROUP BY LOWER(TRIM(name))
-        HAVING COUNT(*) > 1
+        SELECT clean_name, survivor_id
+        FROM (
+            SELECT LOWER(TRIM(name)) as clean_name, id as survivor_id,
+                   ROW_NUMBER() OVER (
+                       PARTITION BY LOWER(TRIM(name)) 
+                       ORDER BY 
+                           (CASE WHEN pc IS NOT NULL THEN 0 ELSE 1 END), 
+                           (CASE WHEN has_created_at THEN created_at ELSE NULL END) ASC,
+                           id ASC
+                   ) as rn
+            FROM projects
+        ) t
+        WHERE rn = 1 AND clean_name IN (SELECT LOWER(TRIM(name)) FROM projects GROUP BY LOWER(TRIM(name)) HAVING COUNT(*) > 1)
     LOOP
         FOR dup_record IN 
             SELECT id FROM projects 
@@ -76,7 +101,7 @@ BEGIN
                 started_date = COALESCE(p.started_date, d.started_date),
                 project_type = COALESCE(p.project_type, d.project_type),
                 category = COALESCE(p.category, d.category),
-                hubstaff_id = COALESCE(p.hubstaff_id, d.hubstaff_id) -- Take Hubstaff ID if duplicate has it
+                hubstaff_id = COALESCE(p.hubstaff_id, d.hubstaff_id)
             FROM projects d
             WHERE p.id = main_record.survivor_id AND d.id = dup_record.id;
 
@@ -89,22 +114,19 @@ BEGIN
     RAISE NOTICE 'Merged % duplicate project records.', merged_count;
 
     -- 3. Set all unified projects to be "Global" (team_id = NULL)
-    -- This makes them visible to all teams by default in the API
     UPDATE projects SET team_id = NULL;
     RAISE NOTICE 'All projects set to global status (team_id = NULL).';
 
     -- 4. Update constraints for global uniqueness
     ALTER TABLE projects DROP CONSTRAINT IF EXISTS projects_hubstaff_team_unique;
-    
-    -- Drop existing uniqueness index if it exists
     DROP INDEX IF EXISTS idx_projects_hubstaff_team;
-
-    -- New Global Constraint: Hubstaff ID must be unique across ALL teams
     ALTER TABLE projects DROP CONSTRAINT IF EXISTS projects_hubstaff_id_key;
-    ALTER TABLE projects ADD CONSTRAINT projects_hubstaff_id_key UNIQUE (hubstaff_id) WHERE hubstaff_id IS NOT NULL;
 
-    -- New Global Constraint: Project Name must be unique (trimmed and lowercased)
-    -- We'll use a unique index for this as Postgres doesn't allow expressions in UNIQUE constraints easily
+    -- FIX: Use UNIQUE INDEX instead of CONSTRAINT for partial uniqueness (supported with WHERE)
+    DROP INDEX IF EXISTS idx_projects_unique_hubstaff_id;
+    CREATE UNIQUE INDEX idx_projects_unique_hubstaff_id ON projects (hubstaff_id) WHERE hubstaff_id IS NOT NULL;
+
+    -- Project Name must be unique (trimmed and lowercased)
     DROP INDEX IF EXISTS idx_projects_unique_name;
     CREATE UNIQUE INDEX idx_projects_unique_name ON projects (LOWER(TRIM(name)));
 
