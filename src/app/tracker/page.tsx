@@ -762,7 +762,6 @@ export default function Tracker() {
                                     };
                                     fetchLeaves();
                                 }}
-                                selectedTeamId={selectedTeamId}
                             />
                         ))
                 )}
