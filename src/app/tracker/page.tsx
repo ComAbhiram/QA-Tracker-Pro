@@ -147,22 +147,20 @@ export default function Tracker() {
 
             // 2. Fetch Leaves (Active team only)
             try {
-                // Fetch ALL leaves for valid date range (Past 7 days -> Future 30 days) to support cross-team view
-                // We don't filter by team_id for guests/managers so we can see Frontend devs in Wordpress tracker etc.
-                const today = new Date();
-                const pastWeek = new Date(today);
-                pastWeek.setDate(today.getDate() - 7);
-                const startDate = pastWeek.toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
+                // Fetch ALL leaves for valid date range (Past 7 days -> Future 30 days) relative to VIEWED date
+                const baseDate = dateFilter || new Date();
+                const pastWeek = new Date(baseDate);
+                pastWeek.setDate(pastWeek.getDate() - 14); // Wider window for robustness
+                const startDateStr = pastWeek.toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
 
-                const nextMonth = new Date(today);
-                nextMonth.setDate(today.getDate() + 30);
-                const endDate = nextMonth.toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
+                const nextMonth = new Date(baseDate);
+                nextMonth.setDate(nextMonth.getDate() + 45); // Wider window
+                const endDateStr = nextMonth.toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
 
-                let url = `/api/leaves?start_date=${startDate}&end_date=${endDate}`;
+                let url = `/api/leaves?start_date=${startDateStr}&end_date=${endDateStr}`;
 
-                // because the tracker needs to see leaves for ANY user assigned to a task 
-                // in the current team's view, even if they belong to a different team.
-                let effectiveLeaveTeamId = isGuest ? undefined : (userProfile?.team_id || undefined);
+                // Use selectedTeamId if available (even for guests) to ensure we see relevant leaves
+                const effectiveLeaveTeamId = isGuest ? selectedTeamId : (userProfile?.team_id || undefined);
                 if (effectiveLeaveTeamId) {
                     url += `&team_id=${effectiveLeaveTeamId}`;
                 }
@@ -179,7 +177,7 @@ export default function Tracker() {
             setLoading(false);
         }
         fetchData();
-    }, [searchTerm, dateFilter, isGuest, selectedTeamId, isGuestLoading]);
+    }, [searchTerm, dateFilter, isGuest, selectedTeamId, isGuestLoading, userProfile?.team_id]);
 
     const handleAddTask = () => {
         setEditingTask(null);
@@ -736,20 +734,18 @@ export default function Tracker() {
                                 onLeaveUpdate={() => {
                                     // Refresh leaves immediately
                                     const fetchLeaves = async () => {
-                                        // Use IST date to match QuickLeave logic
-                                        const today = new Date();
-                                        const pastWeek = new Date(today);
-                                        pastWeek.setDate(today.getDate() - 7);
+                                        const baseDate = dateFilter || new Date();
+                                        const pastWeek = new Date(baseDate);
+                                        pastWeek.setDate(pastWeek.getDate() - 14);
                                         const startDateStr = pastWeek.toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
 
-                                        const nextMonth = new Date(today);
-                                        nextMonth.setDate(today.getDate() + 30);
+                                        const nextMonth = new Date(baseDate);
+                                        nextMonth.setDate(nextMonth.getDate() + 45);
                                         const endDateStr = nextMonth.toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
 
                                         let url = `/api/leaves?start_date=${startDateStr}&end_date=${endDateStr}`;
 
-                                        // Consistent with fetchData - don't restrict for guests
-                                        const leaveTeamId = isGuest ? null : (userProfile?.team_id || null);
+                                        const leaveTeamId = isGuest ? selectedTeamId : (userProfile?.team_id || null);
                                         if (leaveTeamId) {
                                             url += `&team_id=${leaveTeamId}`;
                                         }

@@ -297,13 +297,14 @@ export default function AssigneeTaskTable({
     const activeLeave = getActiveLeave();
 
     // Determine row background color based on active leave type
+    const todayStr = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
+    const currentViewingDate = dateFilter
+        ? dateFilter.toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' })
+        : todayStr;
+
     // FL: Red, HL: Yellow/Orange, WFH: Blue
     const getLeaveRowClass = () => {
-        const todayStr = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
-        const filterDateStr = dateFilter?.toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
-        const checkDate = filterDateStr || todayStr;
-
-        if (!activeLeave || activeLeave.date !== checkDate) return '';
+        if (!activeLeave || activeLeave.date !== currentViewingDate) return '';
         const type = activeLeave.type.toLowerCase();
         if (type.includes('full day')) return 'bg-red-50/50 dark:bg-red-900/10 border-l-4 border-l-red-500';
         if (type.includes('half day')) return 'bg-amber-50/50 dark:bg-amber-900/10 border-l-4 border-l-amber-500';
@@ -337,8 +338,8 @@ export default function AssigneeTaskTable({
                             <QuickLeaveActions
                                 assigneeName={assignee}
                                 teamId={selectedTeamId || undefined}
-                                date={activeLeave?.date === (dateFilter?.toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' }) || new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' })) ? activeLeave.date : (dateFilter?.toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' }) || new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' }))}
-                                currentLeave={activeLeave && activeLeave.date === (dateFilter?.toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' }) || new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' })) ? { leave_type: activeLeave.type } as any : null}
+                                date={currentViewingDate}
+                                currentLeave={activeLeave && activeLeave.date === currentViewingDate ? { leave_type: activeLeave.type } as any : null}
                                 onUpdate={() => onLeaveUpdate?.()}
                             />
                         </div>
