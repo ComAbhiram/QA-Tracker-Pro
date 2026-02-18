@@ -134,7 +134,7 @@ export async function POST(request: NextRequest) {
             </div>
         </div>
         <div class="footer">
-            <p>This is an automated notification from QA Tracker Pro</p>
+            <p>This is an automated notification from Intersmart Team Tracker</p>
         </div>
     </div>
 </body>
@@ -152,7 +152,7 @@ export async function POST(request: NextRequest) {
 
         // Send email to all recipients
         const { data, error } = await resend.emails.send({
-            from: 'QA Tracker <onboarding@resend.dev>',
+            from: 'Intersmart Team Tracker <onboarding@resend.dev>',
             to: RECIPIENTS,
             subject: `Task ${dateFieldLabel} Changed - ${teamName}`,
             html: htmlContent,

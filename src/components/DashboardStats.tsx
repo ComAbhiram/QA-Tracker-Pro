@@ -37,7 +37,7 @@ export default function DashboardStats({ tasks, onFilterChange, activeFilter }: 
         {
             title: 'Active Tasks',
             value: stats.active,
-            filter: 'Active',
+            filter: 'active',
             icon: <PlayCircle size={24} />,
             style: {
                 '--primary-clr': '#14532d',
