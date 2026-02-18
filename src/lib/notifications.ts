@@ -25,8 +25,13 @@ interface PCNotificationParams {
 }
 
 export async function sendPCNotification(params: PCNotificationParams) {
-    if (!SMTP_USER || !SMTP_PASS) {
-        console.error('[Notification Service] SMTP credentials missing (SMTP_USER/SMTP_PASS)');
+    const smtpUser = process.env.SMTP_USER;
+    const smtpPass = process.env.SMTP_PASS;
+
+    console.log(`[Notification Service] Triggered for ${params.pcName} (${params.pcEmail})`);
+
+    if (!smtpUser || !smtpPass) {
+        console.error('[Notification Service] SMTP credentials missing in process.env (SMTP_USER/SMTP_PASS)');
         return { success: false, error: 'SMTP credentials missing' };
     }
 
@@ -92,26 +97,26 @@ export async function sendPCNotification(params: PCNotificationParams) {
     `;
 
     try {
-        console.log(`[Notification Service] Attempting to send SMTP email to ${pcEmail}...`);
+        console.log(`[Notification Service] Attempting to send SMTP email to ${pcEmail} using ${smtpUser}...`);
         // Create SMTP transporter
         const transporter = nodemailer.createTransport({
             service: 'gmail',
             auth: {
-                user: SMTP_USER,
-                pass: SMTP_PASS
+                user: smtpUser,
+                pass: smtpPass
             }
         });
 
         // Send mail
         const info = await transporter.sendMail({
-            from: `"Intersmart Team Tracker" <${SMTP_USER}>`,
+            from: `"Intersmart Team Tracker" <${smtpUser}>`,
             to: `"${pcName}" <${pcEmail}>`,
             cc: CC_RECIPIENTS.map(cc => `"${cc.name}" <${cc.address}>`).join(', '),
             subject: subject,
             html: htmlContent
         });
 
-        console.log('[Notification Service] Email sent via SMTP:', info.messageId);
+        console.log('[Notification Service] ✅ Email sent successfully via SMTP:', info.messageId);
         return { success: true };
     } catch (error) {
         console.error('[Notification Service] SMTP Error detailed:', error);

@@ -180,6 +180,7 @@ export async function PUT(request: NextRequest) {
         // Notify if PC is assigned and something important changed (or PC themselves changed)
         const targetPC = updates.pc || task.pc;
         if (targetPC && (pcChanged || statusChanged || assigneeChanged || startDateChanged || endDateChanged)) {
+            console.log(`[API Update] Notification eligibility met for PC: ${targetPC}. Fetching email...`);
             try {
                 // Fetch PC email
                 const { data: pcData } = await supabaseServer
