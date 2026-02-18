@@ -54,9 +54,9 @@ export default function PCManagementModal({ isOpen, onClose }: PCManagementModal
                     setError(errorMsg);
                 }
             }
-        } catch (err) {
+        } catch (err: any) {
             console.error('Error fetching PCs:', err);
-            setError('Failed to load PCs. The database table may not exist yet.');
+            setError(err?.message || 'Failed to load PCs. The database table may not exist yet.');
         } finally {
             setLoading(false);
         }
@@ -88,11 +88,11 @@ export default function PCManagementModal({ isOpen, onClose }: PCManagementModal
                 setNewPCName('');
                 setNewPCEmail('');
             } else {
-                setError(data.error || 'Failed to add PC');
+                setError(typeof data.error === 'string' ? data.error : 'Failed to add PC');
             }
-        } catch (err) {
+        } catch (err: any) {
             console.error('Error adding PC:', err);
-            setError('Failed to add PC');
+            setError(err?.message || 'Failed to add PC');
         } finally {
             setAdding(false);
         }
@@ -115,11 +115,11 @@ export default function PCManagementModal({ isOpen, onClose }: PCManagementModal
                 setPcs(prev => prev.filter(pc => pc.id !== id));
             } else {
                 const data = await response.json();
-                setError(data.error || 'Failed to delete PC');
+                setError(typeof data.error === 'string' ? data.error : 'Failed to delete PC');
             }
-        } catch (err) {
+        } catch (err: any) {
             console.error('Error deleting PC:', err);
-            setError('Failed to delete PC');
+            setError(err?.message || 'Failed to delete PC');
         } finally {
             setDeleting(null);
         }
@@ -159,15 +159,19 @@ export default function PCManagementModal({ isOpen, onClose }: PCManagementModal
 
             if (response.ok) {
                 const data = await response.json();
-                setPcs(prev => prev.map(pc => pc.id === id ? data.pc : pc));
-                setEditingId(null);
+                if (data.pc) {
+                    setPcs(prev => prev.map(pc => pc.id === id ? data.pc : pc));
+                    setEditingId(null);
+                } else {
+                    setError('Received invalid data from server');
+                }
             } else {
                 const data = await response.json();
-                setError(data.error || 'Failed to update PC');
+                setError(typeof data.error === 'string' ? data.error : 'Failed to update PC');
             }
-        } catch (err) {
+        } catch (err: any) {
             console.error('Error updating PC:', err);
-            setError('Failed to update PC');
+            setError(err?.message || 'Failed to update PC');
         } finally {
             setUpdating(false);
         }

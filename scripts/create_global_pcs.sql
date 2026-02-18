@@ -23,6 +23,22 @@ CREATE POLICY "Super admins can insert PCs" ON public.global_pcs
         )
     );
 
+-- Create policy to allow only super admins to update PCs
+CREATE POLICY "Super admins can update PCs" ON public.global_pcs
+    FOR UPDATE
+    USING (
+        EXISTS (
+            SELECT 1 FROM public.user_profiles 
+            WHERE id = auth.uid() AND role = 'super_admin'
+        )
+    )
+    WITH CHECK (
+        EXISTS (
+            SELECT 1 FROM public.user_profiles 
+            WHERE id = auth.uid() AND role = 'super_admin'
+        )
+    );
+
 -- Create policy to allow only super admins to delete PCs
 CREATE POLICY "Super admins can delete PCs" ON public.global_pcs
     FOR DELETE
