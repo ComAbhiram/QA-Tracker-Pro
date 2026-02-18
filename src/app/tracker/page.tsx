@@ -684,21 +684,26 @@ export default function Tracker() {
                             />
 
                             {/* PC Filter Dropdown */}
-                            {pcNames.length > 0 && (
-                                <div className="relative">
-                                    <select
-                                        value={pcFilter}
-                                        onChange={(e) => setPcFilter(e.target.value)}
-                                        className="appearance-none pl-3 pr-8 py-2 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 rounded-md text-xs shadow-sm focus:outline-none focus:ring-1 focus:ring-slate-300 dark:focus:ring-slate-600 cursor-pointer transition-all hover:bg-slate-50 dark:hover:bg-slate-700"
-                                    >
-                                        <option value="All">All PCs</option>
-                                        {pcNames.map(name => (
-                                            <option key={name} value={name}>{name}</option>
-                                        ))}
-                                    </select>
-                                    <svg className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-slate-400" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                                </div>
-                            )}
+                            <div className="relative">
+                                <select
+                                    value={pcFilter}
+                                    onChange={(e) => setPcFilter(e.target.value)}
+                                    className={`appearance-none pl-8 pr-8 py-2 border rounded-md text-xs font-medium shadow-sm focus:outline-none focus:ring-1 focus:ring-indigo-400 cursor-pointer transition-all
+                                        ${pcFilter !== 'All'
+                                            ? 'bg-indigo-50 dark:bg-indigo-900/30 border-indigo-300 dark:border-indigo-700 text-indigo-700 dark:text-indigo-300'
+                                            : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700'
+                                        }`}
+                                >
+                                    <option value="All">All PCs</option>
+                                    {pcNames.map(name => (
+                                        <option key={name} value={name}>{name}</option>
+                                    ))}
+                                </select>
+                                {/* Person icon */}
+                                <svg className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="4" /><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" /></svg>
+                                {/* Chevron */}
+                                <svg className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-slate-400" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                            </div>
 
                             <div className="bg-slate-100 dark:bg-slate-800 p-0.5 rounded-lg flex items-center border border-slate-200 dark:border-slate-700">
                                 <button
