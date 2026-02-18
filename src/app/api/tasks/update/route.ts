@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabaseServer } from '@/lib/supabase-server';
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { cookies } from 'next/headers';
+import { sendPCNotification } from '@/lib/notifications';
 
 export async function PUT(request: NextRequest) {
     try {
@@ -203,27 +204,19 @@ export async function PUT(request: NextRequest) {
                         }
                     });
 
-                    const protocol = request.headers.get('x-forwarded-proto') || 'https';
-                    const host = request.headers.get('host') || 'qa-tracker-pro.vercel.app';
-                    const notificationUrl = `${protocol}://${host}/api/send-pc-notification`;
-
-                    await fetch(notificationUrl, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            type: 'updated',
-                            pcEmail: pcData.email,
-                            pcName: targetPC,
-                            projectName: task.project_name,
-                            taskName: updates.sub_phase || task.sub_phase || 'General Task',
-                            assignee: updates.assigned_to || task.assigned_to || 'Unassigned',
-                            status: updates.status || task.status,
-                            priority: updates.priority || task.priority,
-                            startDate: updates.start_date || task.start_date,
-                            endDate: updates.end_date || task.end_date,
-                            changes: changes
-                        })
-                    }).catch(e => console.error('[API Update] Failed to trigger PC notification:', e));
+                    await sendPCNotification({
+                        type: 'updated',
+                        pcEmail: pcData.email,
+                        pcName: targetPC,
+                        projectName: task.project_name,
+                        taskName: updates.sub_phase || task.sub_phase || 'General Task',
+                        assignee: updates.assigned_to || task.assigned_to || 'Unassigned',
+                        status: updates.status || task.status,
+                        priority: updates.priority || task.priority,
+                        startDate: updates.start_date || task.start_date,
+                        endDate: updates.end_date || task.end_date,
+                        changes: changes
+                    });
                 }
             } catch (err) {
                 console.error('[API Update] Error preparing PC notification:', err);

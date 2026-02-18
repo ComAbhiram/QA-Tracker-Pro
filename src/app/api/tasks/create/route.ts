@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase-admin';
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { cookies } from 'next/headers';
+import { sendPCNotification } from '@/lib/notifications';
 
 export async function POST(request: NextRequest) {
     try {
@@ -82,29 +83,19 @@ export async function POST(request: NextRequest) {
                     .single();
 
                 if (pcData?.email) {
-                    console.log(`[API Tasks Create] Triggering PC notification for ${data.pc} (${pcData.email})`);
-
-                    const protocol = request.headers.get('x-forwarded-proto') || 'https';
-                    const host = request.headers.get('host') || 'qa-tracker-pro.vercel.app';
-                    const notificationUrl = `${protocol}://${host}/api/send-pc-notification`;
-
-                    // Await notification call to ensure it completes in serverless
-                    await fetch(notificationUrl, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            type: 'created',
-                            pcEmail: pcData.email,
-                            pcName: data.pc,
-                            projectName: data.project_name,
-                            taskName: data.sub_phase || 'General Task',
-                            assignee: data.assigned_to || 'Unassigned',
-                            status: data.status,
-                            priority: data.priority,
-                            startDate: data.start_date,
-                            endDate: data.end_date
-                        })
-                    }).catch(e => console.error('[API Tasks Create] Failed to trigger notification:', e));
+                    // Use the shared notification service instead of a fetch call to ourselves
+                    await sendPCNotification({
+                        type: 'created',
+                        pcEmail: pcData.email,
+                        pcName: data.pc,
+                        projectName: data.project_name,
+                        taskName: data.sub_phase || 'General Task',
+                        assignee: data.assigned_to || 'Unassigned',
+                        status: data.status,
+                        priority: data.priority,
+                        startDate: data.start_date,
+                        endDate: data.end_date
+                    });
                 }
             } catch (err) {
                 console.error('[API Tasks Create] Error preparing notification:', err);
