@@ -200,16 +200,33 @@ export async function PUT(request: NextRequest) {
 
                     // Calculate changes for the email
                     const changes: Record<string, { old: any, new: any }> = {};
-                    const fieldsToTrack = ['status', 'assigned_to', 'pc', 'start_date', 'end_date', 'priority', 'sub_phase'];
+                    const fieldsToTrack = [
+                        'status', 'assigned_to', 'assigned_to2', 'pc',
+                        'start_date', 'end_date', 'priority', 'sub_phase',
+                        'project_name', 'bug_count', 'comments', 'current_updates'
+                    ];
+
+                    const normalize = (val: any) => {
+                        if (val === null || val === undefined || val === '') return null;
+                        // Normalize dates to just YYYY-MM-DD
+                        if (typeof val === 'string' && val.includes('T')) return val.split('T')[0];
+                        return String(val).trim();
+                    };
 
                     fieldsToTrack.forEach(field => {
-                        if (updates[field] !== undefined && updates[field] !== task[field]) {
-                            changes[field] = {
-                                old: task[field],
-                                new: updates[field]
-                            };
+                        if (updates[field] !== undefined) {
+                            const oldVal = normalize(task[field]);
+                            const newVal = normalize(updates[field]);
+                            if (oldVal !== newVal) {
+                                changes[field] = {
+                                    old: task[field],
+                                    new: updates[field]
+                                };
+                            }
                         }
                     });
+
+                    console.log(`[API Update] Detected changes:`, JSON.stringify(changes));
 
                     await sendPCNotification({
                         type: 'updated',

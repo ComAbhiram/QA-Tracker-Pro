@@ -71,14 +71,30 @@ export async function sendPCNotification(params: PCNotificationParams) {
     `;
 
     if (type === 'updated' && changes && Object.keys(changes).length > 0) {
+        const fieldLabels: Record<string, string> = {
+            status: 'Status',
+            assigned_to: 'Assignee',
+            assigned_to2: 'Secondary Assignee',
+            pc: 'PC',
+            start_date: 'Start Date',
+            end_date: 'End Date',
+            priority: 'Priority',
+            sub_phase: 'Task/Phase',
+            project_name: 'Project Name',
+            bug_count: 'Bug Count',
+            comments: 'Comments',
+            current_updates: 'Current Updates'
+        };
+
         htmlContent += `
             <h3 style="color: #374151;">Changes made:</h3>
             <ul style="list-style: none; padding: 0;">
         `;
         for (const [field, change] of Object.entries(changes)) {
+            const label = fieldLabels[field] || field.replace(/_/g, ' ');
             htmlContent += `
                 <li style="margin-bottom: 10px; padding: 10px; background: #fffbeb; border-radius: 6px; border: 1px solid #fef3c7;">
-                    <strong style="text-transform: capitalize;">${field.replace(/_/g, ' ')}:</strong> 
+                    <strong style="text-transform: capitalize;">${label}:</strong> 
                     <span style="color: #991b1b; text-decoration: line-through;">${change.old || 'None'}</span> 
                     <span style="color: #166534;">→ ${change.new || 'None'}</span>
                 </li>
