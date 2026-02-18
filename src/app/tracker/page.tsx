@@ -401,9 +401,9 @@ export default function Tracker() {
         .sort((a, b) => {
             const statusOrder: Record<string, number> = {
                 'In Progress': 1,
-                'Forecast': 2,
-                'On Hold': 3,
-                'Yet to Start': 4,
+                'Yet to Start': 2,
+                'Forecast': 3,
+                'On Hold': 4,
                 'Being Developed': 5,
                 'Ready for QA': 6,
                 'Assigned to QA': 7,
