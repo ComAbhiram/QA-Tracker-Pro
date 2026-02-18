@@ -123,14 +123,10 @@ export async function PUT(request: NextRequest) {
         // Send email notification if date changed
         if (startDateChanged || endDateChanged) {
             try {
+                // ... existing Resend logic ...
                 // Fetch team name and assignee name separately
                 let teamName = 'Unknown Team';
-                // Determine assignee name (assigned_to stores the Name directly)
-                // Check updates first (in case it was changed), then fall back to existing task data
-                const currentAssignee = updates.assigned_to !== undefined
-                    ? updates.assigned_to
-                    : task.assigned_to;
-
+                const currentAssignee = updates.assigned_to !== undefined ? updates.assigned_to : task.assigned_to;
                 const assigneeName = currentAssignee || 'Unassigned';
 
                 if (task.team_id) {
@@ -141,7 +137,6 @@ export async function PUT(request: NextRequest) {
                         .single();
                     if (teamData) teamName = teamData.name;
                 }
-
 
                 const currentSubPhase = updates.sub_phase !== undefined ? updates.sub_phase : task.sub_phase;
                 const currentStatus = updates.status || task.status;
@@ -162,32 +157,76 @@ export async function PUT(request: NextRequest) {
                     pc: updates.pc || task.pc
                 };
 
-                // Construct absolute URL for email API (required in serverless environment)
                 const protocol = request.headers.get('x-forwarded-proto') || 'https';
                 const host = request.headers.get('host') || 'qa-tracker-pro.vercel.app';
                 const emailApiUrl = `${protocol}://${host}/api/send-date-change-email`;
 
-                // Send email synchronously (await to ensure it completes in serverless environment)
-                console.log('[API Update] Sending email notification to:', emailApiUrl);
-                try {
-                    const emailResponse = await fetch(emailApiUrl, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(emailPayload)
+                fetch(emailApiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(emailPayload)
+                }).catch(e => console.error('[API Update] Resend fetch failed:', e));
+            } catch (emailError) {
+                console.error('[API Update] Error preparing Resend email:', emailError);
+            }
+        }
+
+        // Trigger PC Notification (Brevo) if PC is assigned or changed
+        const pcChanged = updates.pc !== undefined && updates.pc !== task.pc;
+        const statusChanged = updates.status !== undefined && updates.status !== task.status;
+        const assigneeChanged = updates.assigned_to !== undefined && updates.assigned_to !== task.assigned_to;
+
+        // Notify if PC is assigned and something important changed (or PC themselves changed)
+        const targetPC = updates.pc || task.pc;
+        if (targetPC && (pcChanged || statusChanged || assigneeChanged || startDateChanged || endDateChanged)) {
+            try {
+                // Fetch PC email
+                const { data: pcData } = await supabaseServer
+                    .from('global_pcs')
+                    .select('email')
+                    .eq('name', targetPC)
+                    .single();
+
+                if (pcData?.email) {
+                    console.log(`[API Update] Triggering PC notification (Brevo) for ${targetPC}`);
+
+                    // Calculate changes for the email
+                    const changes: Record<string, { old: any, new: any }> = {};
+                    const fieldsToTrack = ['status', 'assigned_to', 'pc', 'start_date', 'end_date', 'priority', 'sub_phase'];
+
+                    fieldsToTrack.forEach(field => {
+                        if (updates[field] !== undefined && updates[field] !== task[field]) {
+                            changes[field] = {
+                                old: task[field],
+                                new: updates[field]
+                            };
+                        }
                     });
 
-                    if (emailResponse.ok) {
-                        console.log('[API Update] Email notification sent successfully');
-                    } else {
-                        const errorData = await emailResponse.json();
-                        console.error('[API Update] Email API error:', errorData);
-                    }
-                } catch (fetchError) {
-                    console.error('[API Update] Failed to call email API:', fetchError);
+                    const protocol = request.headers.get('x-forwarded-proto') || 'https';
+                    const host = request.headers.get('host') || 'qa-tracker-pro.vercel.app';
+                    const notificationUrl = `${protocol}://${host}/api/send-pc-notification`;
+
+                    fetch(notificationUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            type: 'updated',
+                            pcEmail: pcData.email,
+                            pcName: targetPC,
+                            projectName: task.project_name,
+                            taskName: updates.sub_phase || task.sub_phase || 'General Task',
+                            assignee: updates.assigned_to || task.assigned_to || 'Unassigned',
+                            status: updates.status || task.status,
+                            priority: updates.priority || task.priority,
+                            startDate: updates.start_date || task.start_date,
+                            endDate: updates.end_date || task.end_date,
+                            changes: changes
+                        })
+                    }).catch(e => console.error('[API Update] Failed to trigger PC notification:', e));
                 }
-            } catch (emailError) {
-                console.error('[API Update] Error preparing email:', emailError);
-                // Don't fail the update if email fails
+            } catch (err) {
+                console.error('[API Update] Error preparing PC notification:', err);
             }
         }
 

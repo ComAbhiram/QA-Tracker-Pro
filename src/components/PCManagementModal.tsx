@@ -8,6 +8,7 @@ import CloseButton from './ui/CloseButton';
 interface PC {
     id: number;
     name: string;
+    email?: string;
     created_at: string;
 }
 
@@ -20,6 +21,7 @@ export default function PCManagementModal({ isOpen, onClose }: PCManagementModal
     const [pcs, setPcs] = useState<PC[]>([]);
     const [loading, setLoading] = useState(false);
     const [newPCName, setNewPCName] = useState('');
+    const [newPCEmail, setNewPCEmail] = useState('');
     const [adding, setAdding] = useState(false);
     const [error, setError] = useState('');
     const [deleting, setDeleting] = useState<number | null>(null);
@@ -66,7 +68,10 @@ export default function PCManagementModal({ isOpen, onClose }: PCManagementModal
             const response = await fetch('/api/pcs', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name: newPCName.trim() })
+                body: JSON.stringify({
+                    name: newPCName.trim(),
+                    email: newPCEmail.trim() || null
+                })
             });
 
             const data = await response.json();
@@ -77,6 +82,7 @@ export default function PCManagementModal({ isOpen, onClose }: PCManagementModal
                     setPcs(prev => [...prev, data.pc].sort((a, b) => a.name.localeCompare(b.name)));
                 }
                 setNewPCName('');
+                setNewPCEmail('');
             } else {
                 setError(data.error || 'Failed to add PC');
             }
@@ -148,18 +154,33 @@ export default function PCManagementModal({ isOpen, onClose }: PCManagementModal
                     {/* Add PC Form */}
                     <form onSubmit={handleAddPC} className="bg-slate-50 p-4 rounded-xl border border-slate-200">
                         <label className="text-sm font-semibold text-slate-700 mb-2 block">Add New PC</label>
-                        <div className="flex gap-3">
-                            <input
-                                type="text"
-                                value={newPCName}
-                                onChange={(e) => setNewPCName(e.target.value)}
-                                placeholder="e.g., John Doe, Jane Smith..."
-                                className="flex-1 px-4 py-2.5 bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all placeholder:text-slate-400 font-medium text-slate-700"
-                            />
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div className="space-y-1">
+                                <label className="text-xs font-semibold text-slate-500 uppercase ml-1">PC Name</label>
+                                <input
+                                    type="text"
+                                    value={newPCName}
+                                    onChange={(e) => setNewPCName(e.target.value)}
+                                    placeholder="e.g., John Doe"
+                                    className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all placeholder:text-slate-400 font-medium text-slate-700"
+                                />
+                            </div>
+                            <div className="space-y-1">
+                                <label className="text-xs font-semibold text-slate-500 uppercase ml-1">Email Address</label>
+                                <input
+                                    type="email"
+                                    value={newPCEmail}
+                                    onChange={(e) => setNewPCEmail(e.target.value)}
+                                    placeholder="email@intersmart.in"
+                                    className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all placeholder:text-slate-400 font-medium text-slate-700"
+                                />
+                            </div>
+                        </div>
+                        <div className="mt-4 flex justify-end">
                             <button
                                 type="submit"
                                 disabled={adding || !newPCName.trim()}
-                                className="px-5 py-2.5 bg-emerald-600 text-white font-semibold rounded-lg hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                                className="px-6 py-2.5 bg-emerald-600 text-white font-semibold rounded-lg hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 shadow-sm"
                             >
                                 {adding ? (
                                     <>
@@ -169,7 +190,7 @@ export default function PCManagementModal({ isOpen, onClose }: PCManagementModal
                                 ) : (
                                     <>
                                         <Plus size={18} />
-                                        Add
+                                        Add PC
                                     </>
                                 )}
                             </button>
@@ -202,7 +223,12 @@ export default function PCManagementModal({ isOpen, onClose }: PCManagementModal
                                             <div className="p-2 bg-emerald-50 text-emerald-600 rounded-lg">
                                                 <User size={16} />
                                             </div>
-                                            <span className="font-medium text-slate-800">{pc.name}</span>
+                                            <div>
+                                                <div className="font-medium text-slate-800">{pc.name}</div>
+                                                {pc.email && (
+                                                    <div className="text-xs text-slate-500">{pc.email}</div>
+                                                )}
+                                            </div>
                                         </div>
                                         <button
                                             onClick={() => handleDeletePC(pc.id, pc.name)}

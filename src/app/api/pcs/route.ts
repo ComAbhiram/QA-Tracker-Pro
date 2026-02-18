@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
-        const { name } = body;
+        const { name, email } = body;
 
         if (!name) {
             return NextResponse.json(
@@ -69,7 +69,7 @@ export async function POST(request: NextRequest) {
         // Insert new PC
         const { data, error } = await supabase
             .from('global_pcs')
-            .insert([{ name }])
+            .insert([{ name, email }])
             .select()
             .single();
 

@@ -71,6 +71,46 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: error.message }, { status: 500 });
         }
 
+        // Trigger PC Notification if PC is assigned
+        if (data && data.pc) {
+            try {
+                // Fetch PC email from global_pcs
+                const { data: pcData } = await supabaseAdmin
+                    .from('global_pcs')
+                    .select('email')
+                    .eq('name', data.pc)
+                    .single();
+
+                if (pcData?.email) {
+                    console.log(`[API Tasks Create] Triggering PC notification for ${data.pc} (${pcData.email})`);
+
+                    const protocol = request.headers.get('x-forwarded-proto') || 'https';
+                    const host = request.headers.get('host') || 'qa-tracker-pro.vercel.app';
+                    const notificationUrl = `${protocol}://${host}/api/send-pc-notification`;
+
+                    // Non-blocking notification call
+                    fetch(notificationUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            type: 'created',
+                            pcEmail: pcData.email,
+                            pcName: data.pc,
+                            projectName: data.project_name,
+                            taskName: data.sub_phase || 'General Task',
+                            assignee: data.assigned_to || 'Unassigned',
+                            status: data.status,
+                            priority: data.priority,
+                            startDate: data.start_date,
+                            endDate: data.end_date
+                        })
+                    }).catch(e => console.error('[API Tasks Create] Failed to trigger notification:', e));
+                }
+            } catch (err) {
+                console.error('[API Tasks Create] Error preparing notification:', err);
+            }
+        }
+
         return NextResponse.json({ task: data }, { status: 201 });
 
     } catch (error: any) {
