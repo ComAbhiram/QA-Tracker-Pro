@@ -1,12 +1,13 @@
-const BREVO_API_KEY = process.env.BREVO_API_KEY;
-const BREVO_SENDER_EMAIL = process.env.BREVO_SENDER_EMAIL || 'notifications@intersmart.in';
-const BREVO_API_URL = 'https://api.brevo.com/v3/smtp/email';
+import nodemailer from 'nodemailer';
+
+const SMTP_USER = process.env.SMTP_USER;
+const SMTP_PASS = process.env.SMTP_PASS;
 
 const CC_RECIPIENTS = [
-    { email: 'abhiram@intersmart.in', name: 'Abhiram' },
-    { email: 'saneesh@intersmart.in', name: 'Saneesh' },
-    { email: 'steve@intersmart.in', name: 'Steve' },
-    { email: 'sunil@intersmart.in', name: 'Sunil' }
+    { address: 'abhiram@intersmart.in', name: 'Abhiram' },
+    { address: 'saneesh@intersmart.in', name: 'Saneesh' },
+    { address: 'steve@intersmart.in', name: 'Steve' },
+    { address: 'sunil@intersmart.in', name: 'Sunil' }
 ];
 
 interface PCNotificationParams {
@@ -24,9 +25,9 @@ interface PCNotificationParams {
 }
 
 export async function sendPCNotification(params: PCNotificationParams) {
-    if (!BREVO_API_KEY) {
-        console.error('[Notification Service] Brevo API Key missing');
-        return { success: false, error: 'API Key missing' };
+    if (!SMTP_USER || !SMTP_PASS) {
+        console.error('[Notification Service] SMTP credentials missing (SMTP_USER/SMTP_PASS)');
+        return { success: false, error: 'SMTP credentials missing' };
     }
 
     const {
@@ -91,31 +92,28 @@ export async function sendPCNotification(params: PCNotificationParams) {
     `;
 
     try {
-        const response = await fetch(BREVO_API_URL, {
-            method: 'POST',
-            headers: {
-                'accept': 'application/json',
-                'api-key': BREVO_API_KEY,
-                'content-type': 'application/json'
-            },
-            body: JSON.stringify({
-                sender: { name: 'Intersmart Team Tracker', email: BREVO_SENDER_EMAIL },
-                to: [{ email: pcEmail, name: pcName }],
-                cc: CC_RECIPIENTS,
-                subject: subject,
-                htmlContent: htmlContent
-            })
+        // Create SMTP transporter
+        const transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: SMTP_USER,
+                pass: SMTP_PASS
+            }
         });
 
-        if (!response.ok) {
-            const errorData = await response.json();
-            console.error('[Notification Service] Brevo Error:', errorData);
-            return { success: false, error: 'Brevo request failed' };
-        }
+        // Send mail
+        const info = await transporter.sendMail({
+            from: `"Intersmart Team Tracker" <${SMTP_USER}>`,
+            to: `"${pcName}" <${pcEmail}>`,
+            cc: CC_RECIPIENTS.map(cc => `"${cc.name}" <${cc.address}>`).join(', '),
+            subject: subject,
+            html: htmlContent
+        });
 
+        console.log('[Notification Service] Email sent via SMTP:', info.messageId);
         return { success: true };
     } catch (error) {
-        console.error('[Notification Service] Unexpected Error:', error);
-        return { success: false, error: 'Internal fetch error' };
+        console.error('[Notification Service] SMTP Error:', error);
+        return { success: false, error: 'SMTP send failed' };
     }
 }
