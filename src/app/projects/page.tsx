@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Project, mapProjectFromDB } from '@/lib/types';
 import { Plus, Search, Database, Globe, RefreshCw, Check } from 'lucide-react';
@@ -74,6 +74,15 @@ export default function ProjectsPage() {
 
     const [importingAll, setImportingAll] = useState(false);
 
+    const notImportedProjects = useMemo(() => {
+        return hubstaffProjects.filter(hp =>
+            !projects.some(p =>
+                (p.hubstaffId && p.hubstaffId === hp.id) ||
+                p.name.trim().toLowerCase() === hp.name.trim().toLowerCase()
+            )
+        );
+    }, [hubstaffProjects, projects]);
+
     const searchHubstaff = async (fetchAll: boolean = false, forceRefresh: boolean = false) => {
         if (!fetchAll && !hubstaffSearch.trim()) return;
         setIsSearching(true);
@@ -104,7 +113,9 @@ export default function ProjectsPage() {
 
     const importAllProjects = async () => {
         setLastError(null);
-        if (!confirm(`Are you sure you want to import ${hubstaffProjects.length} projects? This might take a moment.`)) return;
+        if (notImportedProjects.length === 0) return;
+
+        if (!confirm(`Are you sure you want to import ${notImportedProjects.length} new projects? This might take a moment.`)) return;
 
         if (!activeTeamId) {
             setLastError('Error: Team ID is missing. Please refresh the page.');
@@ -117,11 +128,7 @@ export default function ProjectsPage() {
         let lastErrorMsg = '';
 
         try {
-            for (const hp of hubstaffProjects) {
-                // Skip if already imported
-                const exists = projects.find(p => p.hubstaffId === hp.id || p.name === hp.name);
-                if (exists) continue;
-
+            for (const hp of notImportedProjects) {
                 const response = await fetch('/api/projects', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -152,10 +159,10 @@ export default function ProjectsPage() {
                 const msg = `Bulk import finished with errors.\nImported: ${importedCount}\nFailed: ${failedCount}\nLast Error: ${lastErrorMsg}`;
                 setLastError(msg);
             } else if (importedCount === 0) {
-                const msg = `No projects imported. All ${hubstaffProjects.length} projects already exist or skipped.`;
+                const msg = `No new projects were imported.`;
                 alert(msg);
             } else {
-                const msg = `Bulk import complete! Imported: ${importedCount}`;
+                const msg = `Bulk import complete! Imported: ${importedCount} new projects.`;
                 alert(msg);
             }
         } catch (error: any) {
@@ -393,7 +400,7 @@ export default function ProjectsPage() {
                             </button>
                         </div>
 
-                        {hubstaffProjects.length > 0 && (
+                        {notImportedProjects.length > 0 && (
                             <div className="flex justify-end mb-3">
                                 <button
                                     onClick={importAllProjects}
@@ -401,7 +408,7 @@ export default function ProjectsPage() {
                                     className="px-3 py-1.5 text-sm bg-emerald-600 text-white font-bold rounded-lg hover:bg-emerald-700 transition-colors disabled:opacity-50 flex items-center gap-2"
                                 >
                                     {importingAll ? <RefreshCw className="animate-spin" size={14} /> : <Database size={14} />}
-                                    Import All ({hubstaffProjects.length})
+                                    Import New Projects ({notImportedProjects.length})
                                 </button>
                             </div>
                         )}
