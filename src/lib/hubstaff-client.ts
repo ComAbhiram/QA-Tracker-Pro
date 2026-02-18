@@ -140,20 +140,32 @@ export class HubstaffClient {
             console.log('Force refresh requested, bypassing cache for projects.');
         }
 
-        console.log('Fetching projects from Hubstaff API...');
+        console.log(`[Hubstaff] Fetching projects for organization ${this.orgId}...`);
         let allProjects: any[] = [];
         let hasMore = true;
         let pageStartId = undefined;
+        let pageCount = 0;
 
         while (hasMore) {
-            let url = `${HUBSTAFF_API_BASE}/organizations/${this.orgId}/projects?status=active`;
+            pageCount++;
+            // Fetch all projects (including archived) to see if that's why they are missing
+            let url = `${HUBSTAFF_API_BASE}/organizations/${this.orgId}/projects?status=all&page_limit=500`;
             if (pageStartId) url += `&page_start_id=${pageStartId}`;
 
+            console.log(`[Hubstaff] Fetching page ${pageCount}, url: ${url}`);
             const response = await this.fetchWithRetry(url);
             if (!response.ok) throw new Error(`Failed to fetch projects: ${response.statusText}`);
 
             const data = await response.json();
-            allProjects = [...allProjects, ...(data.projects || [])];
+            const pageProjects = data.projects || [];
+            allProjects = [...allProjects, ...pageProjects];
+
+            console.log(`[Hubstaff] Page ${pageCount} returned ${pageProjects.length} projects. Total so far: ${allProjects.length}`);
+
+            // Log a few project statuses for debugging
+            if (pageProjects.length > 0) {
+                console.log(`[Hubstaff] Sample project status: ${pageProjects[0].name} -> ${pageProjects[0].status}`);
+            }
 
             if (data.pagination?.next_page_start_id) {
                 pageStartId = data.pagination.next_page_start_id;
@@ -161,6 +173,8 @@ export class HubstaffClient {
                 hasMore = false;
             }
         }
+
+        console.log(`[Hubstaff] Finished fetching all projects. Total: ${allProjects.length}`);
 
         // Create lookup map
         const projectMap = new Map<number, string>();
