@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Task, mapTaskFromDB } from '@/lib/types';
 import { getEffectiveStatus } from '@/utils/taskUtils';
-import { X, Camera, FileText, Calendar, ClipboardList, ChevronRight, Download, Eye } from 'lucide-react';
+import { X, Camera, FileText, Calendar, ClipboardList, ChevronRight, Download, Eye, Copy } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import Combobox from '@/components/ui/Combobox';
 import CloseButton from '@/components/ui/CloseButton';
@@ -24,6 +24,7 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
     const [teamName, setTeamName] = useState<string>('Team');
     const [showHubstaffConfirm, setShowHubstaffConfirm] = useState(false);
     const [hubstaffLoadingState, setHubstaffLoadingState] = useState<'show' | 'hide' | null>(null);
+    const [pendingImageAction, setPendingImageAction] = useState<'download' | 'copy'>('download');
     const [scheduleDate, setScheduleDate] = useState(() => {
         const d = new Date();
         d.setDate(d.getDate() + 1);
@@ -164,7 +165,19 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
         }
     };
 
-    const generateQAWorkStatusImage = async () => {
+    const copyImageFromCanvas = async (canvas: HTMLCanvasElement, successMessage: string) => {
+        try {
+            const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/png'));
+            if (!blob) { alert('Failed to generate image blob'); return; }
+            await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+            alert(successMessage);
+        } catch (err) {
+            console.error('Copy image failed:', err);
+            alert('Copy image is not supported in this browser. Please use the Download button instead.');
+        }
+    };
+
+    const generateQAWorkStatusImage = async (action: 'download' | 'copy' = 'download') => {
         if (!selectedQA) {
             alert('Please select a QA member');
             return;
@@ -301,20 +314,24 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
             // Remove the temporary container
             document.body.removeChild(container);
 
-            // Download the image
-            canvas.toBlob((blob) => {
-                if (blob) {
-                    const url = URL.createObjectURL(blob);
-                    const link = document.createElement('a');
-                    link.href = url;
-                    link.download = `qa_work_status_${selectedQA}_${selectedQADate}.png`;
-                    link.click();
-                    URL.revokeObjectURL(url);
-                    alert(`QA Work Status image for ${selectedQA} downloaded successfully!`);
-                } else {
-                    alert('Failed to generate image blob');
-                }
-            }, 'image/png');
+            // Download or copy the image
+            if (action === 'copy') {
+                await copyImageFromCanvas(canvas, `QA Work Status image for ${selectedQA} copied to clipboard!`);
+            } else {
+                canvas.toBlob((blob) => {
+                    if (blob) {
+                        const url = URL.createObjectURL(blob);
+                        const link = document.createElement('a');
+                        link.href = url;
+                        link.download = `qa_work_status_${selectedQA}_${selectedQADate}.png`;
+                        link.click();
+                        URL.revokeObjectURL(url);
+                        alert(`QA Work Status image for ${selectedQA} downloaded successfully!`);
+                    } else {
+                        alert('Failed to generate image blob');
+                    }
+                }, 'image/png');
+            }
         } catch (error) {
             console.error('Failed to generate QA work status image:', error);
             alert('Failed to generate QA work status image');
@@ -355,10 +372,16 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
     };
 
     const handleGenerateTodayWorkStatusClick = () => {
+        setPendingImageAction('download');
         setShowHubstaffConfirm(true);
     };
 
-    const generateTodayWorkStatus = async (includeHubstaff: boolean) => {
+    const handleCopyTodayWorkStatusImageClick = () => {
+        setPendingImageAction('copy');
+        setShowHubstaffConfirm(true);
+    };
+
+    const generateTodayWorkStatus = async (includeHubstaff: boolean, action: 'download' | 'copy' = 'download') => {
         // Do not close confirmation modal immediately
         // setShowHubstaffConfirm(false);
 
@@ -684,20 +707,24 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
             // Remove the temporary container
             document.body.removeChild(container);
 
-            // Download the image using blob for better compatibility
-            canvas.toBlob((blob) => {
-                if (blob) {
-                    const url = URL.createObjectURL(blob);
-                    const link = document.createElement('a');
-                    link.href = url;
-                    link.download = `todays_work_status_${today}.png`;
-                    link.click();
-                    URL.revokeObjectURL(url);
-                    alert('Today\'s Work Status image downloaded successfully!');
-                } else {
-                    alert('Failed to generate image blob');
-                }
-            }, 'image/png');
+            // Download or copy the image
+            if (action === 'copy') {
+                await copyImageFromCanvas(canvas, "Today's Work Status image copied to clipboard!");
+            } else {
+                canvas.toBlob((blob) => {
+                    if (blob) {
+                        const url = URL.createObjectURL(blob);
+                        const link = document.createElement('a');
+                        link.href = url;
+                        link.download = `todays_work_status_${today}.png`;
+                        link.click();
+                        URL.revokeObjectURL(url);
+                        alert('Today\'s Work Status image downloaded successfully!');
+                    } else {
+                        alert('Failed to generate image blob');
+                    }
+                }, 'image/png');
+            }
         } catch (error) {
             console.error('Failed to generate work status image:', error);
             alert('Failed to generate work status image');
@@ -735,7 +762,7 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
         alert('Today&apos;s Work Status text copied to clipboard!');
     };
 
-    const generateWorkScheduleImage = async () => {
+    const generateWorkScheduleImage = async (action: 'download' | 'copy' = 'download') => {
         setLoading(true);
         try {
             const scheduleTasks = tasks.filter(t => {
@@ -874,17 +901,21 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
 
             document.body.removeChild(container);
 
-            canvas.toBlob((blob) => {
-                if (blob) {
-                    const url = URL.createObjectURL(blob);
-                    const link = document.createElement('a');
-                    link.href = url;
-                    link.download = `work_schedule_preview_${new Date().toISOString().split('T')[0]}.png`;
-                    link.click();
-                    URL.revokeObjectURL(url);
-                    alert('Work Schedule image downloaded successfully!');
-                }
-            }, 'image/png');
+            if (action === 'copy') {
+                await copyImageFromCanvas(canvas, 'Work Schedule image copied to clipboard!');
+            } else {
+                canvas.toBlob((blob) => {
+                    if (blob) {
+                        const url = URL.createObjectURL(blob);
+                        const link = document.createElement('a');
+                        link.href = url;
+                        link.download = `work_schedule_preview_${new Date().toISOString().split('T')[0]}.png`;
+                        link.click();
+                        URL.revokeObjectURL(url);
+                        alert('Work Schedule image downloaded successfully!');
+                    }
+                }, 'image/png');
+            }
 
         } catch (error) {
             console.error('Failed to generate schedule image:', error);
@@ -927,7 +958,7 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
         alert('Work Schedule Text copied to clipboard!');
     };
 
-    const generateForecastImage = async () => {
+    const generateForecastImage = async (action: 'download' | 'copy' = 'download') => {
         setLoading(true);
         try {
             // Filter forecast tasks
@@ -1042,13 +1073,17 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
 
             document.body.removeChild(container);
 
-            canvas.toBlob((blob) => {
-                if (blob) {
-                    const url = URL.createObjectURL(blob);
-                    setPreviewImage(url);
-                    setPreviewTitle(`Forecast_Projects_${new Date().toISOString().split('T')[0]}`);
-                }
-            }, 'image/png');
+            if (action === 'copy') {
+                await copyImageFromCanvas(canvas, 'Forecast Projects image copied to clipboard!');
+            } else {
+                canvas.toBlob((blob) => {
+                    if (blob) {
+                        const url = URL.createObjectURL(blob);
+                        setPreviewImage(url);
+                        setPreviewTitle(`Forecast_Projects_${new Date().toISOString().split('T')[0]}`);
+                    }
+                }, 'image/png');
+            }
 
         } catch (error) {
             console.error('Failed to generate forecast image:', error);
@@ -1117,6 +1152,7 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                             <div className="border-t border-slate-200 bg-slate-50 p-3 space-y-2">
                                 <ReportActions
                                     onDownload={handleGenerateTodayWorkStatusClick}
+                                    onCopyImage={handleCopyTodayWorkStatusImageClick}
                                     onCopy={generateTodayWorkStatusText}
                                     loading={loading}
                                 />
@@ -1157,7 +1193,8 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
 
                                 <div className="space-y-2 pt-2">
                                     <ReportActions
-                                        onDownload={generateWorkScheduleImage}
+                                        onDownload={() => generateWorkScheduleImage('download')}
+                                        onCopyImage={() => generateWorkScheduleImage('copy')}
                                         onCopy={generateWorkScheduleText}
                                         loading={loading}
                                     />
@@ -1184,18 +1221,13 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
 
                         {expandedSection === 'forecast' && (
                             <div className="border-t border-slate-200 bg-slate-50 p-3 space-y-2">
-                                <button
-                                    onClick={generateForecastImage}
-                                    disabled={loading}
-                                    className="w-full flex items-center gap-3 p-3 bg-white hover:bg-sky-50 border border-slate-200 hover:border-sky-300 rounded-lg transition-all text-left"
-                                >
-                                    {loading ? (
-                                        <div className="w-4 h-4 border-2 border-sky-600 border-t-transparent rounded-full animate-spin"></div>
-                                    ) : (
-                                        <Camera className="text-sky-600" size={18} />
-                                    )}
-                                    <span className="text-sm font-medium text-slate-700">{loading ? 'Generating...' : 'Download as Image'}</span>
-                                </button>
+                                <ReportActions
+                                    onDownload={() => generateForecastImage('download')}
+                                    onCopyImage={() => generateForecastImage('copy')}
+                                    onCopy={() => alert('Text copy is not available for Forecast Projects. Use Download or Copy Image instead.')}
+                                    copyLabel="Copy as Text (N/A)"
+                                    loading={loading}
+                                />
                             </div>
                         )}
                     </div>
@@ -1251,7 +1283,8 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                                 {/* Action Buttons */}
                                 <div className="space-y-2 pt-2">
                                     <ReportActions
-                                        onDownload={generateQAWorkStatusImage}
+                                        onDownload={() => generateQAWorkStatusImage('download')}
+                                        onCopyImage={() => generateQAWorkStatusImage('copy')}
                                         onCopy={generateQAWorkStatusText}
                                         loading={loading}
                                         disabled={!selectedQA}
@@ -1291,7 +1324,7 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                             </div>
                             <div className="flex gap-3">
                                 <button
-                                    onClick={() => generateTodayWorkStatus(false)}
+                                    onClick={() => generateTodayWorkStatus(false, pendingImageAction)}
                                     disabled={hubstaffLoadingState !== null}
                                     className="flex-1 px-4 py-2 bg-slate-100 text-slate-700 font-medium rounded-lg hover:bg-slate-200 transition-colors flex justify-center items-center gap-2 disabled:opacity-50"
                                 >
@@ -1299,7 +1332,7 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                                     No, Hide It
                                 </button>
                                 <button
-                                    onClick={() => generateTodayWorkStatus(true)}
+                                    onClick={() => generateTodayWorkStatus(true, pendingImageAction)}
                                     disabled={hubstaffLoadingState !== null}
                                     className="btn btn-info flex-1 flex justify-center items-center gap-2 disabled:opacity-50"
                                 >
@@ -1343,6 +1376,23 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                                     className="px-5 py-2.5 text-slate-600 font-medium hover:bg-slate-100 rounded-xl transition-colors"
                                 >
                                     Close
+                                </button>
+                                <button
+                                    onClick={async () => {
+                                        if (!previewImage) return;
+                                        try {
+                                            const res = await fetch(previewImage);
+                                            const blob = await res.blob();
+                                            await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+                                            alert('Image copied to clipboard!');
+                                        } catch (err) {
+                                            console.error('Copy image failed:', err);
+                                            alert('Copy image is not supported in this browser. Please use the Download button instead.');
+                                        }
+                                    }}
+                                    className="px-5 py-2.5 bg-teal-600 text-white font-medium hover:bg-teal-700 rounded-xl shadow-lg shadow-teal-200 flex items-center gap-2 transition-all active:scale-95"
+                                >
+                                    <Copy size={18} /> Copy Image
                                 </button>
                                 <a
                                     href={previewImage}

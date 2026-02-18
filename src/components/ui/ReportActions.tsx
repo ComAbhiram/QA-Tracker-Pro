@@ -1,22 +1,26 @@
 import React from 'react';
-import { Camera, ClipboardList } from 'lucide-react';
+import { Camera, ClipboardList, Copy } from 'lucide-react';
 
 interface ReportActionsProps {
     onDownload: () => void;
     onCopy: () => void;
+    onCopyImage?: () => void;
     loading?: boolean;
     disabled?: boolean;
     downloadLabel?: string;
     copyLabel?: string;
+    copyImageLabel?: string;
 }
 
 export const ReportActions = ({
     onDownload,
     onCopy,
+    onCopyImage,
     loading = false,
     disabled = false,
     downloadLabel = 'Download as Image',
-    copyLabel = 'Copy as Text'
+    copyLabel = 'Copy as Text',
+    copyImageLabel = 'Copy Image'
 }: ReportActionsProps) => {
     return (
         <div className="flex flex-col bg-[#193f80] w-full p-2 rounded-3xl gap-1">
@@ -32,6 +36,18 @@ export const ReportActions = ({
                 )}
                 <span>{loading ? 'Generating...' : downloadLabel}</span>
             </button>
+
+            {onCopyImage && (
+                <button
+                    onClick={onCopyImage}
+                    disabled={disabled || loading}
+                    className="group relative bg-[#1a5c8a] hover:bg-[#1e6fa8] hover:scale-[1.02] px-6 py-3 rounded-2xl rounded-tl-lg rounded-tr-lg rounded-bl-lg rounded-br-lg transition-all text-center text-[#d8e5f9] hover:text-[#a8d4f0] font-medium cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:hover:scale-100"
+                >
+                    <Copy size={18} />
+                    <span>{copyImageLabel}</span>
+                </button>
+            )}
+
             <button
                 onClick={onCopy}
                 disabled={disabled || loading}
