@@ -80,6 +80,7 @@ export async function POST(request: NextRequest) {
                 }
 
                 // Fetch PC email (Case-insensitive)
+                console.log(`[API Tasks Create] Looking up email for PC: "${data.pc}"`);
                 const { data: pcData, error: pcFetchError } = await supabaseAdmin
                     .from('global_pcs')
                     .select('email')
@@ -88,6 +89,8 @@ export async function POST(request: NextRequest) {
 
                 if (pcFetchError) {
                     console.warn(`[API Tasks Create] PC email lookup error for "${data.pc}":`, pcFetchError.message);
+                } else {
+                    console.log(`[API Tasks Create] Lookup result for "${data.pc}":`, pcData);
                 }
 
                 if (pcData?.email) {

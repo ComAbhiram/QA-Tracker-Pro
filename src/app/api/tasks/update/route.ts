@@ -187,6 +187,7 @@ export async function PUT(request: NextRequest) {
                 }
 
                 // Fetch PC email (Case-insensitive)
+                console.log(`[API Update] Looking up email for PC: "${targetPC}"`);
                 const { data: pcData, error: pcFetchError } = await supabaseServer
                     .from('global_pcs')
                     .select('email')
@@ -195,6 +196,8 @@ export async function PUT(request: NextRequest) {
 
                 if (pcFetchError) {
                     console.warn(`[API Update] PC email lookup error for "${targetPC}":`, pcFetchError.message);
+                } else {
+                    console.log(`[API Update] Lookup result for "${targetPC}":`, pcData);
                 }
 
                 if (pcData?.email) {
