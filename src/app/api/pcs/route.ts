@@ -134,3 +134,51 @@ export async function DELETE(request: NextRequest) {
         );
     }
 }
+/**
+ * PUT /api/pcs
+ * Update an existing PC
+ * Body: { id: number, name?: string, email?: string }
+ */
+export async function PUT(request: NextRequest) {
+    try {
+        const body = await request.json();
+        const { id, name, email } = body;
+
+        if (!id) {
+            return NextResponse.json(
+                { error: 'id is required' },
+                { status: 400 }
+            );
+        }
+
+        const updates: any = {};
+        if (name !== undefined) updates.name = name;
+        if (email !== undefined) updates.email = email;
+
+        const { data, error } = await supabase
+            .from('global_pcs')
+            .update(updates)
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (error) {
+            console.error('Error updating PC:', error);
+            return NextResponse.json(
+                { error: error.message },
+                { status: 500 }
+            );
+        }
+
+        return NextResponse.json({
+            message: 'PC updated successfully',
+            pc: data
+        });
+    } catch (error: any) {
+        console.error('Unexpected error in PUT /api/pcs:', error);
+        return NextResponse.json(
+            { error: 'Internal server error' },
+            { status: 500 }
+        );
+    }
+}
