@@ -54,15 +54,19 @@ export default function Home() {
     timeline: 160
   });
 
-  // Fetch PC names from global_pcs on mount
+  // Fetch PC names via API (bypasses RLS for guest/manager/PC mode)
   useEffect(() => {
     async function fetchPCNames() {
-      const { data, error } = await supabase
-        .from('global_pcs')
-        .select('name')
-        .order('name', { ascending: true });
-      if (!error && data) {
-        setPcNames(data.map((r: any) => r.name));
+      try {
+        const res = await fetch('/api/pcs');
+        if (res.ok) {
+          const data = await res.json();
+          // API returns { pcs: [{id, name, ...}] } or { pcs: ['name1', 'name2'] }
+          const pcs = data.pcs || [];
+          setPcNames(pcs.map((r: any) => typeof r === 'string' ? r : r.name));
+        }
+      } catch (err) {
+        console.error('Error fetching PC names:', err);
       }
     }
     fetchPCNames();

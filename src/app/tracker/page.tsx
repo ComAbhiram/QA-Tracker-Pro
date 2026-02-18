@@ -111,12 +111,15 @@ export default function Tracker() {
 
     useEffect(() => {
         async function fetchPCNames() {
-            const { data, error } = await supabase
-                .from('global_pcs')
-                .select('name')
-                .order('name', { ascending: true });
-            if (!error && data) {
-                setPcNames(data.map((r: any) => r.name));
+            try {
+                const res = await fetch('/api/pcs');
+                if (res.ok) {
+                    const data = await res.json();
+                    const pcs = data.pcs || [];
+                    setPcNames(pcs.map((r: any) => typeof r === 'string' ? r : r.name));
+                }
+            } catch (err) {
+                console.error('Error fetching PC names:', err);
             }
         }
         fetchPCNames();
