@@ -172,15 +172,10 @@ export async function PUT(request: NextRequest) {
             }
         }
 
-        // Trigger PC Notification (Brevo) if PC is assigned or changed
-        const pcChanged = updates.pc !== undefined && updates.pc !== task.pc;
-        const statusChanged = updates.status !== undefined && updates.status !== task.status;
-        const assigneeChanged = updates.assigned_to !== undefined && updates.assigned_to !== task.assigned_to;
-
-        // Notify if PC is assigned and something important changed (or PC themselves changed)
+        // Trigger PC Notification whenever a task is saved and a PC is assigned
         const targetPC = updates.pc || task.pc;
-        if (targetPC && (pcChanged || statusChanged || assigneeChanged || startDateChanged || endDateChanged)) {
-            console.log(`[API Update] Notification eligibility met for PC: ${targetPC}. Fetching email...`);
+        if (targetPC) {
+            console.log(`[API Update] Task saved with PC: ${targetPC}. Sending notification...`);
             try {
                 if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
                     console.error('[API Update] CRITICAL: SUPABASE_SERVICE_ROLE_KEY is missing in environment!');

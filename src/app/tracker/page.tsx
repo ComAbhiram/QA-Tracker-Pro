@@ -303,30 +303,18 @@ export default function Tracker() {
             }
             success('Task updated successfully');
         } else {
-            // For insert, use API to bypass RLS for Managers
-            if (isGuest) {
-                const response = await fetch('/api/tasks/create', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(dbPayload)
-                });
+            // Always use API for task creation to ensure notifications fire
+            const response = await fetch('/api/tasks/create', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(dbPayload)
+            });
 
-                if (!response.ok) {
-                    const err = await response.json();
-                    console.error('Error creating task via API:', err);
-                    toastError(`Failed to create task: ${err.error || 'Server error'}`);
-                    return;
-                }
-            } else {
-                const { error } = await supabase
-                    .from('tasks')
-                    .insert([dbPayload]);
-
-                if (error) {
-                    console.error('Error creating task:', error);
-                    toastError(`Failed to create task: ${error.message}`);
-                    return;
-                }
+            if (!response.ok) {
+                const err = await response.json();
+                console.error('Error creating task via API:', err);
+                toastError(`Failed to create task: ${err.error || 'Server error'}`);
+                return;
             }
             success('Task created successfully');
         }
