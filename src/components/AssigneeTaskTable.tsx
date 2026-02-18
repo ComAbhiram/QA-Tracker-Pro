@@ -433,11 +433,14 @@ export default function AssigneeTaskTable({
                                 <td className={`px-2 py-1 border-r border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 ${cellClass}`} title={task.subPhase || ''}>{task.subPhase || '-'}</td>
                                 <td className={`px-2 py-1 border-r border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 ${cellClass}`}>{task.pc || '-'}</td>
 
-                                {/* Status - Editable Select */}
+                                {/* Status - Editable Select (read-only in PC Mode) */}
                                 <td className="px-2 py-1 border-r border-slate-200 dark:border-slate-800" onClick={e => e.stopPropagation()}>
                                     <div className="flex items-center gap-1.5 w-full min-w-0">
                                         <div className="flex-1 min-w-0">
-                                            <StatusSelectCell status={task.status} onSave={(val) => onFieldUpdate(task.id, 'status', val)} />
+                                            {isReadOnly
+                                                ? <StatusBadge status={task.status} />
+                                                : <StatusSelectCell status={task.status} onSave={(val) => onFieldUpdate(task.id, 'status', val)} />
+                                            }
                                         </div>
                                         {isTaskOverdue(task) && (
                                             <span className="flex-shrink-0 flex items-center gap-0.5 text-red-600 dark:text-red-400 font-bold text-[10px]" title={`${getOverdueDays(task)} days overdue`}>
@@ -447,48 +450,60 @@ export default function AssigneeTaskTable({
                                     </div>
                                 </td>
 
-                                {/* Start Date - Inline Edit */}
+                                {/* Start Date - Inline Edit (read-only in PC Mode) */}
                                 <td className="px-1 py-0.5 truncate border-r border-slate-200 dark:border-slate-800" onClick={(e) => e.stopPropagation()}>
-                                    <DatePicker
-                                        date={task.startDate ? new Date(task.startDate) : undefined}
-                                        setDate={(d) => handleDateChange(d, task.id, 'start_date')}
-                                        className="w-full h-full border-none shadow-none bg-transparent hover:bg-slate-100 dark:hover:bg-slate-800 rounded px-1 text-[11px] font-normal min-h-[24px] py-0 dark:text-slate-200"
-                                        placeholder="-"
-                                    />
+                                    {isReadOnly
+                                        ? <span className="px-1 text-[11px] text-slate-600 dark:text-slate-300">{task.startDate ? format(new Date(task.startDate), 'MMM d, yyyy') : '-'}</span>
+                                        : <DatePicker
+                                            date={task.startDate ? new Date(task.startDate) : undefined}
+                                            setDate={(d) => handleDateChange(d, task.id, 'start_date')}
+                                            className="w-full h-full border-none shadow-none bg-transparent hover:bg-slate-100 dark:hover:bg-slate-800 rounded px-1 text-[11px] font-normal min-h-[24px] py-0 dark:text-slate-200"
+                                            placeholder="-"
+                                        />
+                                    }
                                 </td>
 
-                                {/* End Date - Inline Edit */}
+                                {/* End Date - Inline Edit (read-only in PC Mode) */}
                                 <td className={`px-1 py-0.5 truncate border-r border-slate-200 dark:border-slate-800 transition-colors ${isTaskOverdue(task) ? 'bg-red-50 dark:bg-red-900/20' : ''}`} onClick={(e) => e.stopPropagation()}>
-                                    <DatePicker
-                                        date={task.endDate ? new Date(task.endDate) : undefined}
-                                        setDate={(d) => handleDateChange(d, task.id, 'end_date')}
-                                        className={`w-full h-full border-none shadow-none bg-transparent rounded px-1 text-[11px] font-normal min-h-[24px] py-0 ${isTaskOverdue(task) ? 'text-red-700 dark:text-red-400 font-semibold' : 'hover:bg-slate-100 dark:hover:bg-slate-800 dark:text-slate-200'}`}
-                                        placeholder="-"
-                                    />
+                                    {isReadOnly
+                                        ? <span className={`px-1 text-[11px] ${isTaskOverdue(task) ? 'text-red-700 dark:text-red-400 font-semibold' : 'text-slate-600 dark:text-slate-300'}`}>{task.endDate ? format(new Date(task.endDate), 'MMM d, yyyy') : '-'}</span>
+                                        : <DatePicker
+                                            date={task.endDate ? new Date(task.endDate) : undefined}
+                                            setDate={(d) => handleDateChange(d, task.id, 'end_date')}
+                                            className={`w-full h-full border-none shadow-none bg-transparent rounded px-1 text-[11px] font-normal min-h-[24px] py-0 ${isTaskOverdue(task) ? 'text-red-700 dark:text-red-400 font-semibold' : 'hover:bg-slate-100 dark:hover:bg-slate-800 dark:text-slate-200'}`}
+                                            placeholder="-"
+                                        />
+                                    }
                                 </td>
 
                                 <td className="px-2 py-1 truncate border-r border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400">
                                     {task.actualCompletionDate ? format(new Date(task.actualCompletionDate), 'MMM d') : '-'}
                                 </td>
 
-                                {/* Comments - Editable */}
+                                {/* Comments - Editable (read-only in PC Mode) */}
                                 <td className={`px-2 py-1 border-r border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 ${cellClass}`} title={task.comments || ''} onClick={e => e.stopPropagation()}>
-                                    <EditableCell
-                                        value={task.comments}
-                                        onSave={(val) => onFieldUpdate(task.id, 'comments', val)}
-                                        className="w-full"
-                                        isExpanded={isRowExpanded}
-                                    />
+                                    {isReadOnly
+                                        ? <span className="text-xs">{task.comments || '-'}</span>
+                                        : <EditableCell
+                                            value={task.comments}
+                                            onSave={(val) => onFieldUpdate(task.id, 'comments', val)}
+                                            className="w-full"
+                                            isExpanded={isRowExpanded}
+                                        />
+                                    }
                                 </td>
 
-                                {/* Deviation - Editable */}
+                                {/* Deviation - Editable (read-only in PC Mode) */}
                                 <td className={`px-2 py-1 border-r border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 ${cellClass}`} onClick={e => e.stopPropagation()}>
-                                    <EditableCell
-                                        value={task.deviation}
-                                        onSave={(val) => onFieldUpdate(task.id, 'deviation', val)}
-                                        className="w-full text-center"
-                                        isExpanded={isRowExpanded}
-                                    />
+                                    {isReadOnly
+                                        ? <span className="text-xs text-center block">{task.deviation || '-'}</span>
+                                        : <EditableCell
+                                            value={task.deviation}
+                                            onSave={(val) => onFieldUpdate(task.id, 'deviation', val)}
+                                            className="w-full text-center"
+                                            isExpanded={isRowExpanded}
+                                        />
+                                    }
                                 </td>
 
 
