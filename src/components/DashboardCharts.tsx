@@ -58,14 +58,7 @@ export default function DashboardCharts({ tasks }: DashboardChartsProps) {
     });
 
     const statusCounts = filteredTasksForStatus.reduce((acc, task) => {
-        if (task.status !== 'Completed') {
-            // Also exclude 'Rejected' if desired, but user only excluded Completed originally
-            // Screenshot shows 'Rejected' in the pie chart, so keep it.
-            // Wait, previous code excluded 'Completed'. Let's verify if we want that.
-            // Screenshot shows "Forecast", "In Progress", "On Hold", "Rejected", "Yet to Start".
-            // It does NOT show "Completed". So original logic stands.
-            acc[task.status] = (acc[task.status] || 0) + 1;
-        }
+        acc[task.status] = (acc[task.status] || 0) + 1;
         return acc;
     }, {} as Record<string, number>);
 
