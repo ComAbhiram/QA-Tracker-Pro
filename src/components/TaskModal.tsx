@@ -656,22 +656,31 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div className="space-y-3">
                             <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Status</label>
-                            <select
-                                name="status"
+                            <Combobox
+                                options={[
+                                    { id: 'Yet to Start', label: 'Yet to Start' },
+                                    { id: 'Being Developed', label: 'Being Developed' },
+                                    { id: 'Ready for QA', label: 'Ready for QA' },
+                                    { id: 'Assigned to QA', label: 'Assigned to QA' },
+                                    { id: 'In Progress', label: 'In Progress' },
+                                    { id: 'On Hold', label: 'On Hold' },
+                                    { id: 'Completed', label: 'Completed' },
+                                    { id: 'Forecast', label: 'Forecast' },
+                                    { id: 'Rejected', label: 'Rejected' }
+                                ]}
                                 value={formData.status || 'Yet to Start'}
-                                onChange={handleChange}
-                                className="w-full px-5 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all font-medium text-slate-700 dark:text-slate-200 appearance-none cursor-pointer"
-                            >
-                                <option value="Yet to Start" className="dark:bg-slate-900">Yet to Start</option>
-                                <option value="Being Developed" className="dark:bg-slate-900">Being Developed</option>
-                                <option value="Ready for QA" className="dark:bg-slate-900">Ready for QA</option>
-                                <option value="Assigned to QA" className="dark:bg-slate-900">Assigned to QA</option>
-                                <option value="In Progress" className="dark:bg-slate-900">In Progress</option>
-                                <option value="On Hold" className="dark:bg-slate-900">On Hold</option>
-                                <option value="Completed" className="dark:bg-slate-900">Completed</option>
-                                <option value="Forecast" className="dark:bg-slate-900">Forecast</option>
-                                <option value="Rejected" className="dark:bg-slate-900">Rejected</option>
-                            </select>
+                                onChange={(val) => {
+                                    const e = {
+                                        target: {
+                                            name: 'status',
+                                            value: val ? String(val) : 'Yet to Start'
+                                        }
+                                    } as React.ChangeEvent<HTMLSelectElement>;
+                                    handleChange(e);
+                                }}
+                                placeholder="Select status..."
+                                searchPlaceholder="Search status..."
+                            />
                         </div>
                         {formData.status === 'Rejected' && (
                             <div className="space-y-3">
