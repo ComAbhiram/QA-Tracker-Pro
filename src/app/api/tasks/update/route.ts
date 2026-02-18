@@ -143,19 +143,23 @@ export async function PUT(request: NextRequest) {
                 }
 
 
+                const currentSubPhase = updates.sub_phase !== undefined ? updates.sub_phase : task.sub_phase;
+                const currentStatus = updates.status || task.status;
+                const currentPriority = updates.priority || task.priority;
+
                 const emailPayload = {
                     taskId: id,
-                    taskName: task.sub_phase || 'N/A',
+                    taskName: currentSubPhase || 'N/A',
                     projectName: task.project_name,
                     assignee: assigneeName,
                     teamName: teamName,
                     dateField: startDateChanged ? 'start_date' : 'end_date',
                     oldDate: startDateChanged ? task.start_date : task.end_date,
                     newDate: startDateChanged ? updates.start_date : updates.end_date,
-                    status: updates.status || task.status,
-                    priority: task.priority,
-                    phase: task.sub_phase,
-                    pc: task.pc
+                    status: currentStatus,
+                    priority: currentPriority,
+                    phase: currentSubPhase,
+                    pc: updates.pc || task.pc
                 };
 
                 // Construct absolute URL for email API (required in serverless environment)
