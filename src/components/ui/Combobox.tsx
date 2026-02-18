@@ -127,7 +127,7 @@ export default function Combobox({
                                                 onClick={() => handleSelect(search)}
                                                 className="mt-2 w-full text-left px-3 py-2 text-sm bg-indigo-50 text-indigo-700 rounded-lg hover:bg-indigo-100 font-medium transition-colors"
                                             >
-                                                Use "{search}"
+                                                Use &quot;{search}&quot;
                                             </button>
                                         )}
                                     </div>
@@ -154,7 +154,7 @@ export default function Combobox({
                                         onClick={() => handleSelect(search)}
                                         className="w-full flex items-center gap-2 px-3 py-2.5 text-sm rounded-lg text-indigo-600 hover:bg-indigo-50 transition-colors border-t border-slate-100 mt-1"
                                     >
-                                        <span>Use "{search}"</span>
+                                        <span>Use &quot;{search}&quot;</span>
                                     </button>
                                 )}
                             </>

@@ -184,7 +184,22 @@ export default function Tracker() {
                     .eq('team_id', effectiveTeamId)
                     .order('display_order', { ascending: true });
 
-                if (!membersError && membersData) {
+                if (membersError) {
+                    // FALLBACK: If display_order column is missing (400 error), fetch without it
+                    if (membersError.code === 'PGRST204' || membersError.message.includes('display_order')) {
+                        console.warn('[Tracker] display_order column missing, falling back to name-based sorting');
+                        const { data: fallbackData } = await supabase
+                            .from('team_members')
+                            .select('id, name')
+                            .eq('team_id', effectiveTeamId);
+
+                        if (fallbackData) {
+                            setTeamMembers(fallbackData.map((m, i) => ({ ...m, display_order: i })));
+                        }
+                    } else {
+                        console.error('Error fetching team members:', membersError);
+                    }
+                } else if (membersData) {
                     setTeamMembers(membersData);
                 }
             }
@@ -433,28 +448,64 @@ export default function Tracker() {
         const { active, over } = event;
 
         if (over && active.id !== over.id) {
-            setTeamMembers((items) => {
-                const oldIndex = items.findIndex((item) => item.name === active.id);
-                const newIndex = items.findIndex((item) => item.name === over.id);
+            const oldIndex = sortedAssignees.indexOf(active.id as string);
+            const newIndex = sortedAssignees.indexOf(over.id as string);
 
-                const newItems = arrayMove(items, oldIndex, newIndex);
+            if (oldIndex !== -1 && newIndex !== -1) {
+                const newAssigneeOrder = arrayMove(sortedAssignees, oldIndex, newIndex);
 
-                // Update display_order in background
-                const updatedMembers = newItems.map((item, index) => ({
-                    id: item.id,
-                    display_order: index
-                }));
+                setTeamMembers((prev) => {
+                    const next = [...prev];
+                    // Update display_order for all members we have based on the new visual order
+                    newAssigneeOrder.forEach((name, index) => {
+                        const member = next.find(m => m.name === name);
+                        if (member) {
+                            member.display_order = index;
+                        }
+                    });
 
-                fetch('/api/team-members/reorder', {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ members: updatedMembers })
-                }).catch(err => console.error('Failed to save order:', err));
+                    // Filter to only those in the team_members table and with a valid ID for persistence
+                    const updatedMembers = next
+                        .filter(m => m.id > 0) // Only persist real DB members
+                        .map(m => ({
+                            id: m.id,
+                            display_order: m.display_order
+                        }));
 
-                return newItems;
-            });
+                    if (updatedMembers.length > 0) {
+                        fetch('/api/team-members/reorder', {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ members: updatedMembers })
+                        }).catch(err => console.error('Failed to save order:', err));
+                    }
+
+                    return next;
+                });
+            }
         }
     };
+
+    // Derive the final sorted list of assignees for rendering AND SortableContext
+    const sortedAssignees = Object.keys(groupedTasks).sort((a, b) => {
+        // 1. Unassigned always last
+        if (a === 'Unassigned') return 1;
+        if (b === 'Unassigned') return -1;
+
+        // 2. Check teamMembers order
+        const memberA = teamMembers.find(m => m.name === a);
+        const memberB = teamMembers.find(m => m.name === b);
+
+        if (memberA && memberB) {
+            return (memberA.display_order ?? 0) - (memberB.display_order ?? 0);
+        }
+
+        // 3. Fallback for members not in team_members table
+        if (memberA) return -1;
+        if (memberB) return 1;
+
+        return a.localeCompare(b);
+    });
 
     // Filter and Sort Tasks
     const processedTasks = tasks
@@ -788,51 +839,31 @@ export default function Tracker() {
                         onDragEnd={handleDragEnd}
                     >
                         <SortableContext
-                            items={teamMembers.map(m => m.name)}
+                            items={sortedAssignees}
                             strategy={verticalListSortingStrategy}
                         >
-                            {/* Sort based on teamMembers display_order */}
-                            {[...Object.keys(groupedTasks)]
-                                .sort((a, b) => {
-                                    // 1. Unassigned always last
-                                    if (a === 'Unassigned') return 1;
-                                    if (b === 'Unassigned') return -1;
-
-                                    // 2. Check teamMembers order
-                                    const memberA = teamMembers.find(m => m.name === a);
-                                    const memberB = teamMembers.find(m => m.name === b);
-
-                                    if (memberA && memberB) {
-                                        return (memberA.display_order ?? 0) - (memberB.display_order ?? 0);
-                                    }
-
-                                    // 3. Fallback for members not in team_members table (e.g. legacy/direct in JSON)
-                                    if (memberA) return -1;
-                                    if (memberB) return 1;
-
-                                    return a.localeCompare(b);
-                                })
-                                .map(assignee => (
-                                    <DraggableTableWrapper key={assignee} id={assignee}>
-                                        <AssigneeTaskTable
-                                            assignee={assignee}
-                                            tasks={groupedTasks[assignee]}
-                                            leaves={leaves}
-                                            columnWidths={columnWidths}
-                                            hideHeader={true}
-                                            isRowExpanded={isRowExpanded}
-                                            dateFilter={dateFilter}
-                                            selectedTeamId={isGuest ? selectedTeamId : (userProfile?.team_id || null)}
-                                            onResizeStart={startResizing}
-                                            onEditTask={handleEditTask}
-                                            onFieldUpdate={handleFieldUpdate}
-                                            onLeaveUpdate={() => {
-                                                // ... (existing refresh code)
-                                                // Note: I'm keeping the long inline onLeaveUpdate logic but wrapping it
-                                            }}
-                                        />
-                                    </DraggableTableWrapper>
-                                ))}
+                            {/* Render draggables in the determined order */}
+                            {sortedAssignees.map(assignee => (
+                                <DraggableTableWrapper key={assignee} id={assignee}>
+                                    <AssigneeTaskTable
+                                        assignee={assignee}
+                                        tasks={groupedTasks[assignee]}
+                                        leaves={leaves}
+                                        columnWidths={columnWidths}
+                                        hideHeader={true}
+                                        isRowExpanded={isRowExpanded}
+                                        dateFilter={dateFilter}
+                                        selectedTeamId={isGuest ? selectedTeamId : (userProfile?.team_id || null)}
+                                        onResizeStart={startResizing}
+                                        onEditTask={handleEditTask}
+                                        onFieldUpdate={handleFieldUpdate}
+                                        onLeaveUpdate={() => {
+                                            // ... (existing refresh code)
+                                            // Note: I'm keeping the long inline onLeaveUpdate logic but wrapping it
+                                        }}
+                                    />
+                                </DraggableTableWrapper>
+                            ))}
                         </SortableContext>
                     </DndContext>
                 )}
