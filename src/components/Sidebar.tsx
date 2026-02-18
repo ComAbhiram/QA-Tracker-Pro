@@ -54,7 +54,7 @@ interface NavSection {
 
 export function Sidebar() {
     const pathname = usePathname();
-    const { isGuest, selectedTeamName, setGuestSession, clearGuestSession } = useGuestMode();
+    const { isGuest, selectedTeamName, setGuestSession, clearGuestSession, isPCMode } = useGuestMode();
 
     // Hide sidebar on login and guest selection pages
     if (pathname === '/login' || pathname === '/guest') return null;
@@ -138,14 +138,14 @@ export function Sidebar() {
                 { label: 'Dashboard', icon: <LayoutDashboard size={18} />, href: '/' },
                 { label: 'Task Tracker', icon: <ClipboardList size={18} />, href: '/tracker' },
                 { label: 'Schedule', icon: <CalendarDays size={18} />, href: '/schedule' },
-                ...(userRole === 'super_admin' || isGuest ? [{ label: 'Super Admin', icon: <Shield size={18} />, href: '/super-admin' }] : []),
+                ...(!isPCMode && (userRole === 'super_admin' || isGuest) ? [{ label: 'Super Admin', icon: <Shield size={18} />, href: '/super-admin' }] : []),
             ]
         },
         projects: {
             title: 'PROJECTS',
             items: [
-                { label: 'Project Overview', icon: <FolderKanban size={18} />, href: '/project-overview' },
-                { label: 'Manage Projects', icon: <Database size={18} />, href: '/projects' },
+                ...(!isPCMode ? [{ label: 'Project Overview', icon: <FolderKanban size={18} />, href: '/project-overview' }] : []),
+                ...(!isPCMode ? [{ label: 'Manage Projects', icon: <Database size={18} />, href: '/projects' }] : []),
                 { label: 'On Hold', icon: <PauseCircle size={18} />, href: '/projects/on-hold' },
                 { label: 'Completed', icon: <CheckSquare size={18} />, href: '/projects/completed' },
                 { label: 'Rejected', icon: <XSquare size={18} />, href: '/projects/rejected' },
@@ -268,8 +268,8 @@ export function Sidebar() {
                     <div className="px-3">
                         <ModeToggle />
                     </div>
-                    {/* Allow Manage Team for Super Admin AND Managers (isGuest) */}
-                    {(userRole !== 'super_admin' || isGuest) && (
+                    {/* Allow Manage Team for Super Admin AND Managers (isGuest) but NOT PC Mode */}
+                    {!isPCMode && (userRole !== 'super_admin' || isGuest) && (
                         <button
                             onClick={() => setShowManageTeam(true)}
                             className={`flex items-center gap-3 w-full p-3 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-indigo-50 dark:hover:bg-slate-800/50 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all ${collapsed ? 'justify-center' : ''}`}
@@ -291,7 +291,7 @@ export function Sidebar() {
                         className={`flex items-center gap-3 w-full p-3 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-400 transition-all ${collapsed ? 'justify-center' : ''}`}
                     >
                         <LogOut size={20} />
-                        {!collapsed && <span className="font-medium">{isGuest ? 'Exit Manager Mode' : 'Sign Out'}</span>}
+                        {!collapsed && <span className="font-medium">{isPCMode ? 'Exit PC Mode' : isGuest ? 'Exit Manager Mode' : 'Sign Out'}</span>}
                     </button>
                 </div>
             </nav>
