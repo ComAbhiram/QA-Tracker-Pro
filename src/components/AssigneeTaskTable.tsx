@@ -19,7 +19,8 @@ import {
     Clock,
     Cloud,
     XCircle,
-    Edit2
+    Edit2,
+    GripVertical
 } from 'lucide-react';
 import Loader from '@/components/ui/Loader';
 import Pagination from '@/components/Pagination';
@@ -47,6 +48,7 @@ interface AssigneeTaskTableProps {
     // New prop to trigger parent refresh
     onLeaveUpdate?: () => void;
     selectedTeamId?: string | null;
+    dragHandleProps?: any; // For @dnd-kit
 }
 
 type SortKey = 'projectName' | 'projectType' | 'priority' | 'subPhase' | 'pc' | 'status' | 'startDate' | 'endDate' | 'actualCompletionDate' | 'deviation';
@@ -178,7 +180,8 @@ const StatusSelectCell = ({ status, onSave }: { status: string, onSave: (val: st
 
 export default function AssigneeTaskTable({
     assignee, tasks, leaves, columnWidths, hideHeader = false, isRowExpanded = false,
-    dateFilter, onEditTask, onFieldUpdate, onLeaveUpdate, selectedTeamId, onResizeStart
+    dateFilter, onEditTask, onFieldUpdate, onLeaveUpdate, selectedTeamId, onResizeStart,
+    dragHandleProps
 }: AssigneeTaskTableProps) {
     const [currentPage, setCurrentPage] = useState(1);
     const [sortConfig, setSortConfig] = useState<{ key: SortKey; direction: 'asc' | 'desc' } | null>(null);
@@ -329,6 +332,12 @@ export default function AssigneeTaskTable({
             {/* Header Section (Compact) - Always visible per assignee table */}
             <div className={`px-3 py-1.5 flex flex-col md:flex-row md:items-center justify-between gap-3 border-b dark:border-slate-800/50 ${headerColorClass} transition-colors group`}>
                 <div className="flex items-center gap-3">
+                    {/* Drag Handle */}
+                    {dragHandleProps && (
+                        <div {...dragHandleProps} className="cursor-grab active:cursor-grabbing p-1 hover:bg-black/5 rounded transition-colors text-slate-400">
+                            <GripVertical size={14} />
+                        </div>
+                    )}
                     <div className="w-6 h-6 rounded-full bg-white/60 dark:bg-black/20 backdrop-blur-sm border border-black/5 flex items-center justify-center font-bold text-xs shadow-sm dark:text-slate-200">
                         {assignee.charAt(0)}
                     </div>

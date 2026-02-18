@@ -47,7 +47,7 @@ export default function ManageTeamModal({ isOpen, onClose }: ManageTeamModalProp
             const { data, error } = await supabase
                 .from('team_members')
                 .select('*')
-                .order('name');
+                .order('display_order', { ascending: true });
 
             if (error) throw error;
             setMembers(data || []);
