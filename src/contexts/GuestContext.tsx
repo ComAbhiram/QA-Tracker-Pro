@@ -11,7 +11,9 @@ interface GuestSession {
 interface GuestContextType extends GuestSession {
     isLoading: boolean;
     isReadOnly: boolean;
+    isPCMode: boolean;
     setGuestSession: (teamId: string, teamName: string) => void;
+    setPCModeSession: (teamId: string, teamName: string) => void;
     clearGuestSession: () => void;
 }
 
@@ -36,6 +38,7 @@ function deleteCookie(name: string) {
 
 export function GuestProvider({ children }: { children: ReactNode }) {
     const [isLoading, setIsLoading] = useState(true);
+    const [isPCMode, setIsPCMode] = useState(false);
     const [guestSession, setGuestSessionState] = useState<GuestSession>({
         isGuest: false,
         selectedTeamId: null,
@@ -58,6 +61,10 @@ export function GuestProvider({ children }: { children: ReactNode }) {
                 if (parsed.isGuest) {
                     setCookie(GUEST_COOKIE_NAME, 'true');
                 }
+                // Detect PC mode from localStorage flag
+                if (parsed.isPCMode) {
+                    setIsPCMode(true);
+                }
             } catch (error) {
                 console.error('Failed to parse guest session:', error);
                 localStorage.removeItem(GUEST_SESSION_KEY);
@@ -74,13 +81,30 @@ export function GuestProvider({ children }: { children: ReactNode }) {
             selectedTeamName: teamName,
         };
         setGuestSessionState(session);
+        setIsPCMode(false);
         if (typeof window !== 'undefined') {
-            localStorage.setItem(GUEST_SESSION_KEY, JSON.stringify(session));
+            localStorage.setItem(GUEST_SESSION_KEY, JSON.stringify({ ...session, isPCMode: false }));
         }
         // Set cookie for server-side detection
         setCookie(GUEST_COOKIE_NAME, 'true');
         // Set a special guest token for API authentication
         setCookie('guest_token', 'manager_access_token_2026', 30); // 30 days
+    };
+
+    const setPCModeSession = (teamId: string, teamName: string) => {
+        const session: GuestSession = {
+            isGuest: true,
+            selectedTeamId: teamId,
+            selectedTeamName: teamName,
+        };
+        setGuestSessionState(session);
+        setIsPCMode(true);
+        if (typeof window !== 'undefined') {
+            localStorage.setItem(GUEST_SESSION_KEY, JSON.stringify({ ...session, isPCMode: true }));
+        }
+        setCookie(GUEST_COOKIE_NAME, 'true');
+        setCookie('guest_token', 'manager_access_token_2026', 30);
+        setCookie('pc_mode_token', 'pc_read_only_2026', 30);
     };
 
     const clearGuestSession = () => {
@@ -90,18 +114,22 @@ export function GuestProvider({ children }: { children: ReactNode }) {
             selectedTeamName: null,
         };
         setGuestSessionState(session);
+        setIsPCMode(false);
         if (typeof window !== 'undefined') {
             localStorage.removeItem(GUEST_SESSION_KEY);
         }
-        // Remove cookie
+        // Remove cookies
         deleteCookie(GUEST_COOKIE_NAME);
+        deleteCookie('pc_mode_token');
     };
 
     const value: GuestContextType = {
         ...guestSession,
         isLoading,
         isReadOnly: guestSession.isGuest,
+        isPCMode,
         setGuestSession,
+        setPCModeSession,
         clearGuestSession,
     };
 

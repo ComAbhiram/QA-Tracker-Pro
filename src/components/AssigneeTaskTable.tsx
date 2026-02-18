@@ -40,6 +40,7 @@ interface AssigneeTaskTableProps {
     columnWidths: Record<string, number>;
     hideHeader?: boolean;
     isRowExpanded?: boolean;
+    isReadOnly?: boolean;
     dateFilter?: Date | undefined;
     onEditTask: (task: Task) => void;
     onResizeStart?: (key: string, e: React.MouseEvent) => void;
@@ -181,7 +182,7 @@ const StatusSelectCell = ({ status, onSave }: { status: string, onSave: (val: st
 export default function AssigneeTaskTable({
     assignee, tasks, leaves, columnWidths, hideHeader = false, isRowExpanded = false,
     dateFilter, onEditTask, onFieldUpdate, onLeaveUpdate, selectedTeamId, onResizeStart,
-    dragHandleProps
+    dragHandleProps, isReadOnly = false
 }: AssigneeTaskTableProps) {
     const [currentPage, setCurrentPage] = useState(1);
     const [sortConfig, setSortConfig] = useState<{ key: SortKey; direction: 'asc' | 'desc' } | null>(null);
@@ -403,8 +404,8 @@ export default function AssigneeTaskTable({
                         {paginatedTasks.map(task => (
                             <tr
                                 key={task.id}
-                                onClick={() => onEditTask(task)}
-                                className="group hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer transition-colors"
+                                onClick={() => !isReadOnly && onEditTask(task)}
+                                className={`group hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors ${isReadOnly ? 'cursor-default' : 'cursor-pointer'}`}
                             >
                                 <td className="px-2 py-1 border-r border-slate-200 dark:border-slate-800 font-medium text-slate-700 dark:text-slate-200">
                                     <div className={cellClass} title={task.projectName}>{task.projectName}</div>

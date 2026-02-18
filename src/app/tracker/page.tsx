@@ -41,7 +41,7 @@ interface TeamMember {
 }
 
 export default function Tracker() {
-    const { isGuest, selectedTeamId, selectedTeamName, setGuestSession, isLoading: isGuestLoading } = useGuestMode();
+    const { isGuest, selectedTeamId, selectedTeamName, setGuestSession, isLoading: isGuestLoading, isPCMode } = useGuestMode();
     const [tasks, setTasks] = useState<Task[]>([]);
     const [leaves, setLeaves] = useState<Leave[]>([]);
     const [loading, setLoading] = useState(true);
@@ -681,13 +681,15 @@ export default function Tracker() {
                     </div>
 
                     <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
-                        <button
-                            onClick={() => setIsLeaveModalOpen(true)}
-                            className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-orange-50 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 hover:bg-orange-100 dark:hover:bg-orange-900/50 px-4 py-2 rounded-lg transition-all font-semibold border border-orange-100 dark:border-orange-800 text-sm"
-                        >
-                            <CalendarClock size={16} />
-                            Add Leave
-                        </button>
+                        {!isPCMode && (
+                            <button
+                                onClick={() => setIsLeaveModalOpen(true)}
+                                className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-orange-50 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 hover:bg-orange-100 dark:hover:bg-orange-900/50 px-4 py-2 rounded-lg transition-all font-semibold border border-orange-100 dark:border-orange-800 text-sm"
+                            >
+                                <CalendarClock size={16} />
+                                Add Leave
+                            </button>
+                        )}
                         <button
                             onClick={() => setIsAvailabilityCheckOpen(true)}
                             className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 px-4 py-2 rounded-lg transition-all font-semibold border border-indigo-100 dark:border-indigo-800 text-sm"
@@ -702,13 +704,15 @@ export default function Tracker() {
                             <ArrowUpRight size={16} />
                             Export
                         </button>
-                        <button
-                            onClick={() => { setEditingTask(null); setIsTaskModalOpen(true); }}
-                            className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg shadow-lg shadow-indigo-200 dark:shadow-none hover:shadow-indigo-300 transition-all font-bold text-sm"
-                        >
-                            <Plus size={18} />
-                            New Task
-                        </button>
+                        {!isPCMode && (
+                            <button
+                                onClick={() => { setEditingTask(null); setIsTaskModalOpen(true); }}
+                                className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg shadow-lg shadow-indigo-200 dark:shadow-none hover:shadow-indigo-300 transition-all font-bold text-sm"
+                            >
+                                <Plus size={18} />
+                                New Task
+                            </button>
+                        )}
                     </div>
                 </div>
             </header>
@@ -841,11 +845,12 @@ export default function Tracker() {
                                         columnWidths={columnWidths}
                                         hideHeader={true}
                                         isRowExpanded={isRowExpanded}
+                                        isReadOnly={isPCMode}
                                         dateFilter={dateFilter}
                                         selectedTeamId={isGuest ? selectedTeamId : (userProfile?.team_id || null)}
                                         onResizeStart={startResizing}
-                                        onEditTask={handleEditTask}
-                                        onFieldUpdate={handleFieldUpdate}
+                                        onEditTask={isPCMode ? () => { } : handleEditTask}
+                                        onFieldUpdate={isPCMode ? async () => { } : handleFieldUpdate}
                                         onLeaveUpdate={() => {
                                             // ... (existing refresh code)
                                             // Note: I'm keeping the long inline onLeaveUpdate logic but wrapping it

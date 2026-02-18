@@ -16,6 +16,8 @@ export default function LoginPage() {
     const [error, setError] = useState<string | null>(null);
     const [showManagerModal, setShowManagerModal] = useState(false);
     const [managerPassword, setManagerPassword] = useState('');
+    const [showPCModal, setShowPCModal] = useState(false);
+    const [pcPassword, setPCPassword] = useState('');
     const router = useRouter();
 
     const handleLogin = async (e: React.FormEvent) => {
@@ -44,7 +46,7 @@ export default function LoginPage() {
         }
     };
 
-    const { setGuestSession } = useGuestMode(); // Import hook at top level
+    const { setGuestSession, setPCModeSession } = useGuestMode(); // Import hook at top level
 
     const handleManagerLogin = async () => {
         if (managerPassword === 'inter223') {
@@ -110,6 +112,63 @@ export default function LoginPage() {
         }
     };
 
+    const handlePCLogin = async () => {
+        if (pcPassword === 'inter224') {
+            try {
+                const response = await fetch('/api/auth/pc-login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ passkey: pcPassword }),
+                });
+
+                if (!response.ok) {
+                    setError('Failed to authenticate PC mode');
+                    return;
+                }
+
+                // Auto-select "QA Team" same as manager mode
+                try {
+                    const teamsResponse = await fetch('/api/teams');
+                    const teamsData = await teamsResponse.json();
+
+                    if (teamsData.teams && Array.isArray(teamsData.teams)) {
+                        const teams: any[] = teamsData.teams;
+                        const qaTeam = teams.find(t => t.name.toLowerCase() === 'qa team');
+
+                        if (qaTeam) {
+                            let targetTeamId = qaTeam.id;
+                            let targetTeamName = qaTeam.name;
+
+                            if (targetTeamName.toLowerCase() === 'qa team') {
+                                const superAdminTeam = teams.find(t => t.name.toLowerCase() === 'super admin');
+                                if (superAdminTeam) {
+                                    targetTeamId = superAdminTeam.id;
+                                }
+                            }
+
+                            setPCModeSession(targetTeamId, targetTeamName);
+                            setShowPCModal(false);
+                            setPCPassword('');
+                            router.push('/');
+                            return;
+                        }
+                    }
+                } catch (teamErr) {
+                    console.error('Failed to auto-fetch teams for PC mode:', teamErr);
+                }
+
+                setShowPCModal(false);
+                setPCPassword('');
+                router.push('/guest');
+            } catch (err) {
+                console.error('PC login error:', err);
+                setError('Failed to authenticate PC mode');
+            }
+        } else {
+            setError('Invalid PC mode passkey');
+        }
+    };
+
     return (
         <div className="min-h-screen flex items-center justify-center p-6 md:p-10 bg-slate-100">
             {/* Manager Password Modal */}
@@ -156,6 +215,58 @@ export default function LoginPage() {
                             <button
                                 onClick={handleManagerLogin}
                                 className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-lg shadow-indigo-200 hover:shadow-indigo-300 transition-all active:scale-[0.98]"
+                            >
+                                Continue
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* PC Mode Password Modal */}
+            {showPCModal && (
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 relative animate-in zoom-in-95 duration-200">
+                        <CloseButton
+                            onClick={() => {
+                                setShowPCModal(false);
+                                setPCPassword('');
+                                setError(null);
+                            }}
+                            className="absolute top-4 right-4"
+                        />
+
+                        <div className="text-center mb-6 pt-2">
+                            <div className="bg-gradient-to-br from-emerald-500 to-emerald-700 w-14 h-14 rounded-2xl shadow-lg shadow-emerald-200 flex items-center justify-center mx-auto mb-4">
+                                <Lock className="text-white" size={28} />
+                            </div>
+                            <h2 className="text-xl font-bold text-slate-800 mb-1">PC Mode Access</h2>
+                            <p className="text-slate-500 text-sm">Read-only access to view all team data.</p>
+                        </div>
+
+                        {error && (
+                            <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl font-medium text-center">
+                                <span>{error}</span>
+                            </div>
+                        )}
+
+                        <div className="space-y-4">
+                            <div className="relative group">
+                                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-emerald-500 transition-colors" size={18} />
+                                <input
+                                    type="password"
+                                    value={pcPassword}
+                                    onChange={(e) => setPCPassword(e.target.value)}
+                                    onKeyPress={(e) => e.key === 'Enter' && handlePCLogin()}
+                                    placeholder="Enter passkey"
+                                    autoFocus
+                                    className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all text-slate-800 placeholder:text-slate-400 font-medium"
+                                />
+                            </div>
+
+                            <button
+                                onClick={handlePCLogin}
+                                className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg shadow-emerald-200 hover:shadow-emerald-300 transition-all active:scale-[0.98]"
                             >
                                 Continue
                             </button>
@@ -256,6 +367,16 @@ export default function LoginPage() {
                         >
                             <Users className="mr-2 h-4 w-4" />
                             Manager Access
+                        </button>
+
+                        {/* PC Mode Login Trigger */}
+                        <button
+                            type="button"
+                            onClick={() => { setShowPCModal(true); setError(null); }}
+                            className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 h-10 px-4 py-2 w-full border border-emerald-200 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 hover:text-emerald-900"
+                        >
+                            <Lock className="mr-2 h-4 w-4" />
+                            PC Mode
                         </button>
 
                         <p className="text-center text-xs text-slate-500 mt-4">
