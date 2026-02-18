@@ -83,7 +83,8 @@ export async function POST(request: NextRequest) {
                     .single();
 
                 if (pcData?.email) {
-                    // Use the shared notification service instead of a fetch call to ourselves
+                    console.log(`[API Tasks Create] Sending PC notification to ${data.pc} (${pcData.email})`);
+                    // Use the shared notification service
                     await sendPCNotification({
                         type: 'created',
                         pcEmail: pcData.email,
@@ -96,6 +97,8 @@ export async function POST(request: NextRequest) {
                         startDate: data.start_date,
                         endDate: data.end_date
                     });
+                } else {
+                    console.warn(`[API Tasks Create] No email found for PC: ${data.pc}. Notification skip.`);
                 }
             } catch (err) {
                 console.error('[API Tasks Create] Error preparing notification:', err);

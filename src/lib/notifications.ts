@@ -92,6 +92,7 @@ export async function sendPCNotification(params: PCNotificationParams) {
     `;
 
     try {
+        console.log(`[Notification Service] Attempting to send SMTP email to ${pcEmail}...`);
         // Create SMTP transporter
         const transporter = nodemailer.createTransport({
             service: 'gmail',
@@ -113,7 +114,7 @@ export async function sendPCNotification(params: PCNotificationParams) {
         console.log('[Notification Service] Email sent via SMTP:', info.messageId);
         return { success: true };
     } catch (error) {
-        console.error('[Notification Service] SMTP Error:', error);
+        console.error('[Notification Service] SMTP Error detailed:', error);
         return { success: false, error: 'SMTP send failed' };
     }
 }

@@ -189,7 +189,7 @@ export async function PUT(request: NextRequest) {
                     .single();
 
                 if (pcData?.email) {
-                    console.log(`[API Update] Triggering PC notification (Brevo) for ${targetPC}`);
+                    console.log(`[API Update] Triggering PC notification (SMTP) for ${targetPC} (${pcData.email})`);
 
                     // Calculate changes for the email
                     const changes: Record<string, { old: any, new: any }> = {};
@@ -217,6 +217,8 @@ export async function PUT(request: NextRequest) {
                         endDate: updates.end_date || task.end_date,
                         changes: changes
                     });
+                } else {
+                    console.warn(`[API Update] No email found for PC: ${targetPC}. Notification skip.`);
                 }
             } catch (err) {
                 console.error('[API Update] Error preparing PC notification:', err);
