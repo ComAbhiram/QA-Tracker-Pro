@@ -62,217 +62,193 @@ export async function POST(request: NextRequest) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         body { 
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background-color: #f8fafc;
-            color: #1e293b;
+            font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: #ffffff;
+            color: #1a1a1a;
             margin: 0;
             padding: 0;
             -webkit-font-smoothing: antialiased;
         }
         .wrapper {
             width: 100%;
-            table-layout: fixed;
-            background-color: #f8fafc;
-            padding: 40px 0;
+            padding: 48px 24px;
+            background-color: #ffffff;
         }
         .container {
-            max-width: 600px;
+            max-width: 560px;
             margin: 0 auto;
-            background-color: #ffffff;
-            border-radius: 12px;
-            border: 1px solid #e2e8f0;
-            overflow: hidden;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
-        .header {
-            padding: 32px;
-            border-bottom: 1px solid #f1f5f9;
-        }
-        .header h1 {
-            margin: 0;
-            font-size: 20px;
-            font-weight: 700;
-            color: #4f46e5;
-            letter-spacing: -0.025em;
-        }
-        .header p {
-            margin: 4px 0 0 0;
-            font-size: 14px;
-            color: #64748b;
-        }
-        .content {
-            padding: 32px;
-        }
-        .change-section {
-            background-color: #fdf2f2;
-            border-radius: 8px;
-            padding: 24px;
-            margin-bottom: 32px;
-            border: 1px solid #fee2e2;
-        }
-        .change-title {
+        .logo {
             font-size: 12px;
-            font-weight: 700;
-            color: #b91c1c;
+            font-weight: 800;
+            letter-spacing: 0.1em;
             text-transform: uppercase;
-            letter-spacing: 0.05em;
-            margin-bottom: 12px;
+            color: #666666;
+            margin-bottom: 48px;
         }
-        .change-grid {
-            display: flex;
-            align-items: center;
-            gap: 16px;
+        .title {
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            color: #000000;
+            margin-bottom: 8px;
         }
-        .change-item {
-            flex: 1;
+        .subtitle {
+            font-size: 15px;
+            color: #666666;
+            margin-bottom: 40px;
+        }
+        .change-card {
+            background-color: #f9f9f9;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 40px;
         }
         .change-label {
             font-size: 11px;
-            color: #991b1b;
+            font-weight: 700;
+            color: #999999;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 16px;
+        }
+        .change-comparison {
+            display: flex;
+            align-items: center;
+        }
+        .date-block {
+            flex: 1;
+        }
+        .date-label {
+            font-size: 12px;
+            color: #666666;
             margin-bottom: 4px;
         }
-        .change-value {
-            font-size: 16px;
+        .date-value {
+            font-size: 18px;
             font-weight: 600;
         }
-        .change-value.old {
-            color: #991b1b;
+        .date-value.old {
+            color: #999999;
             text-decoration: line-through;
-            opacity: 0.7;
         }
-        .change-value.new {
-            color: #15803d;
+        .date-value.new {
+            color: #000000;
         }
-        .arrow {
-            color: #ef4444;
-            font-size: 18px;
+        .separator {
+            padding: 0 20px;
+            color: #999999;
+            font-size: 20px;
         }
-        .details-section h2 {
-            font-size: 14px;
-            font-weight: 700;
-            color: #334155;
-            margin: 0 0 16px 0;
+        .details-grid {
+            border-top: 1px solid #eeeeee;
+            padding-top: 32px;
+            margin-bottom: 40px;
         }
-        .detail-row {
-            padding: 12px 0;
-            border-bottom: 1px solid #f1f5f9;
+        .detail-item {
             display: flex;
-            justify-content: space-between;
+            margin-bottom: 16px;
         }
-        .detail-row:last-child {
-            border-bottom: none;
-        }
-        .detail-label {
+        .detail-key {
+            width: 120px;
             font-size: 13px;
-            color: #64748b;
+            color: #999999;
+        }
+        .detail-val {
+            flex: 1;
+            font-size: 13px;
+            color: #1a1a1a;
             font-weight: 500;
         }
-        .detail-value {
-            font-size: 13px;
-            color: #1e293b;
-            font-weight: 600;
-            text-align: right;
-        }
-        .footer {
-            padding: 32px;
-            background-color: #f8fafc;
-            text-align: center;
-            border-top: 1px solid #f1f5f9;
+        .button-container {
+            margin-top: 48px;
         }
         .button {
             display: inline-block;
-            background-color: #4f46e5;
+            background-color: #000000;
             color: #ffffff !important;
-            padding: 12px 24px;
+            padding: 14px 28px;
             border-radius: 8px;
             font-size: 14px;
             font-weight: 600;
             text-decoration: none;
-            margin-top: 8px;
+            transition: opacity 0.2s;
+        }
+        .footer {
+            margin-top: 64px;
+            padding-top: 32px;
+            border-top: 1px solid #f0f0f0;
         }
         .footer-text {
-            margin-top: 24px;
-            font-size: 11px;
-            color: #94a3b8;
+            font-size: 12px;
+            color: #999999;
+            line-height: 1.6;
         }
     </style>
 </head>
 <body>
     <div class="wrapper">
         <div class="container">
-            <div class="header">
-                <h1>Task Date Updated</h1>
-                <p>Team ${teamName}</p>
+            <div class="logo">Intersmart Team Tracker</div>
+            <div class="title">Task Date Updated</div>
+            <div class="subtitle">A change was made to a task in the <strong>${teamName}</strong>.</div>
+
+            <div class="change-card">
+                <div class="change-label">${dateFieldLabel} Changed</div>
+                <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                    <tr>
+                        <td width="42%" valign="top">
+                            <div class="date-label">From</div>
+                            <div class="date-value old">${oldDateFormatted}</div>
+                        </td>
+                        <td width="16%" align="center" valign="middle">
+                            <div class="separator">→</div>
+                        </td>
+                        <td width="42%" valign="top">
+                            <div class="date-label">To</div>
+                            <div class="date-value new">${newDateFormatted}</div>
+                        </td>
+                    </tr>
+                </table>
             </div>
-            <div class="content">
-                <div class="change-section">
-                    <div class="change-title">${dateFieldLabel} Change</div>
-                    <table width="100%" border="0" cellspacing="0" cellpadding="0">
-                        <tr>
-                            <td width="42%" valign="top">
-                                <div class="change-label">Previous</div>
-                                <div class="change-value old">${oldDateFormatted}</div>
-                            </td>
-                            <td width="16%" align="center" valign="middle">
-                                <div class="arrow">→</div>
-                            </td>
-                            <td width="42%" valign="top">
-                                <div class="change-label">New Date</div>
-                                <div class="change-value new">${newDateFormatted}</div>
-                            </td>
-                        </tr>
-                    </table>
-                </div>
 
-                <div class="details-section">
-                    <h2>Task Details</h2>
-                    <div class="detail-row">
-                        <span class="detail-label">Project</span>
-                        <span class="detail-value">${projectName}</span>
-                    </div>
-                    <div class="detail-row">
-                        <span class="detail-label">Task</span>
-                        <span class="detail-value">${taskName || 'N/A'}</span>
-                    </div>
-                    <div class="detail-row">
-                        <span class="detail-label">Assignee</span>
-                        <span class="detail-value">${assignee}</span>
-                    </div>
-                    <div class="detail-row">
-                        <span class="detail-label">Status</span>
-                        <span class="detail-value">${status}</span>
-                    </div>
-                    ${priority ? `
-                    <div class="detail-row">
-                        <span class="detail-label">Priority</span>
-                        <span class="detail-value">${priority}</span>
-                    </div>
-                    ` : ''}
-                    ${phase ? `
-                    <div class="detail-row">
-                        <span class="detail-label">Phase</span>
-                        <span class="detail-value">${phase}</span>
-                    </div>
-                    ` : ''}
-                    ${pc ? `
-                    <div class="detail-row">
-                        <span class="detail-label">PC</span>
-                        <span class="detail-value">${pc}</span>
-                    </div>
-                    ` : ''}
-                    <div class="detail-row">
-                        <span class="detail-label">ID</span>
-                        <span class="detail-value">#${taskId}</span>
-                    </div>
+            <div class="details-grid">
+                <div class="detail-item">
+                    <div class="detail-key">Project</div>
+                    <div class="detail-val">${projectName}</div>
                 </div>
-
-                <div style="text-align: center; margin-top: 32px;">
-                    <a href="${taskLink}" class="button">View Task in Tracker</a>
+                <div class="detail-item">
+                    <div class="detail-key">Task</div>
+                    <div class="detail-val">${taskName || 'N/A'}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-key">Assignee</div>
+                    <div class="detail-val">${assignee}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-key">Status</div>
+                    <div class="detail-val">${status}</div>
+                </div>
+                ${priority ? `
+                <div class="detail-item">
+                    <div class="detail-key">Priority</div>
+                    <div class="detail-val">${priority}</div>
+                </div>
+                ` : ''}
+                <div class="detail-item">
+                    <div class="detail-key">Task ID</div>
+                    <div class="detail-val">#${taskId}</div>
                 </div>
             </div>
+
+            <div class="button-container">
+                <a href="${taskLink}" class="button">View Task</a>
+            </div>
+
             <div class="footer">
                 <div class="footer-text">
-                    This is an automated notification from Intersmart Team Tracker.
+                    Intersmart Team Tracker automated notification.<br/>
+                    Professional project tracking for efficient teams.
                 </div>
             </div>
         </div>
