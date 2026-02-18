@@ -486,27 +486,6 @@ export default function Tracker() {
         }
     };
 
-    // Derive the final sorted list of assignees for rendering AND SortableContext
-    const sortedAssignees = Object.keys(groupedTasks).sort((a, b) => {
-        // 1. Unassigned always last
-        if (a === 'Unassigned') return 1;
-        if (b === 'Unassigned') return -1;
-
-        // 2. Check teamMembers order
-        const memberA = teamMembers.find(m => m.name === a);
-        const memberB = teamMembers.find(m => m.name === b);
-
-        if (memberA && memberB) {
-            return (memberA.display_order ?? 0) - (memberB.display_order ?? 0);
-        }
-
-        // 3. Fallback for members not in team_members table
-        if (memberA) return -1;
-        if (memberB) return 1;
-
-        return a.localeCompare(b);
-    });
-
     // Filter and Sort Tasks
     const processedTasks = tasks
         // 1. Filter by View Mode
@@ -567,6 +546,28 @@ export default function Tracker() {
 
         return acc;
     }, {} as Record<string, Task[]>);
+
+    // Derive the final sorted list of assignees for rendering AND SortableContext
+    const sortedAssignees = Object.keys(groupedTasks).sort((a, b) => {
+        // 1. Unassigned always last
+        if (a === 'Unassigned') return 1;
+        if (b === 'Unassigned') return -1;
+
+        // 2. Check teamMembers order
+        const memberA = teamMembers.find(m => m.name === a);
+        const memberB = teamMembers.find(m => m.name === b);
+
+        if (memberA && memberB) {
+            return (memberA.display_order ?? 0) - (memberB.display_order ?? 0);
+        }
+
+        // 3. Fallback for members not in team_members table
+        if (memberA) return -1;
+        if (memberB) return 1;
+
+        return a.localeCompare(b);
+    });
+
 
     const exportCSV = () => {
         const headers = ['Project Name', 'Type', 'Priority', 'Phase', 'Status', 'Start Date', 'End Date', 'Actual End', 'Assignees', 'Bug Count', 'HTML Bugs', 'Functional Bugs', 'Comments', 'Current Updates'];
