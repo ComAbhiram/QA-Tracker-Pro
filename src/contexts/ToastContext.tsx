@@ -7,18 +7,18 @@ export type ToastType = 'success' | 'error' | 'warning' | 'info';
 
 export interface Toast {
     id: string;
-    message: string;
+    message: string | ReactNode;
     type: ToastType;
 }
 
 interface ToastContextType {
-    toasts: Toast[]; // Kept for type compatibility, though always empty with Sonner
-    showToast: (message: string, type: ToastType) => void;
+    toasts: Toast[]; // Kept for type compatibility
+    showToast: (message: string | ReactNode, type: ToastType) => void;
     removeToast: (id: string) => void;
-    success: (message: string) => void;
-    error: (message: string) => void;
-    warning: (message: string) => void;
-    info: (message: string) => void;
+    success: (message: string | ReactNode) => void;
+    error: (message: string | ReactNode) => void;
+    warning: (message: string | ReactNode) => void;
+    info: (message: string | ReactNode) => void;
 }
 
 const ToastContext = createContext<ToastContextType | undefined>(undefined);
@@ -33,7 +33,7 @@ export const useToast = () => {
 
 export const ToastProvider = ({ children }: { children: ReactNode }) => {
 
-    const showToast = (message: string, type: ToastType = 'info') => {
+    const showToast = (message: string | ReactNode, type: ToastType = 'info') => {
         switch (type) {
             case 'success':
                 toast.success(message);
@@ -51,10 +51,10 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
         }
     };
 
-    const success = (message: string) => toast.success(message);
-    const error = (message: string) => toast.error(message);
-    const warning = (message: string) => toast.warning(message);
-    const info = (message: string) => toast.info(message);
+    const success = (message: string | ReactNode) => toast.success(message);
+    const error = (message: string | ReactNode) => toast.error(message);
+    const warning = (message: string | ReactNode) => toast.warning(message);
+    const info = (message: string | ReactNode) => toast.info(message);
 
     const removeToast = (id: string) => {
         toast.dismiss(id);

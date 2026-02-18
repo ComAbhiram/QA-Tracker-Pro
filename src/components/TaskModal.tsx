@@ -1,9 +1,10 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { X, Save, Calendar, User, Briefcase, Activity, Layers, Plus } from 'lucide-react';
+import { X, Save, Calendar, User, Briefcase, Activity, Layers, Plus, CheckCircle2 } from 'lucide-react';
 import { Task, isValidProjectDate } from '@/lib/types';
 import { supabase } from '@/lib/supabase';
+import { toast } from 'sonner';
 import Combobox from './ui/Combobox';
 import Checkbox from './ui/Checkbox';
 import { getHubstaffNameFromQA } from '@/lib/hubstaff-name-mapping';
@@ -430,6 +431,36 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
             };
 
             await onSave(finalData);
+
+            // Show custom success toast
+            const isUpdate = !!task;
+            toast.custom((t) => (
+                <div className="w-full max-w-md bg-white dark:bg-slate-900 border-l-4 border-emerald-500 rounded-lg shadow-lg p-4 flex items-start gap-4 animate-in slide-in-from-right-5 duration-300">
+                    <div className="bg-emerald-100 dark:bg-emerald-900/30 p-2 rounded-full flex-shrink-0">
+                        <CheckCircle2 className="text-emerald-600 dark:text-emerald-400" size={20} />
+                    </div>
+                    <div className="flex-1">
+                        <h4 className="font-semibold text-slate-800 dark:text-slate-100">
+                            {isUpdate ? 'Task Updated Successfully' : 'New Task Created'}
+                        </h4>
+                        <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
+                            {formData.projectName}
+                            <span className="mx-2 text-slate-300 dark:text-slate-600">|</span>
+                            <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium 
+                                ${formData.status === 'Completed' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' :
+                                    formData.status === 'In Progress' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' :
+                                        formData.status === 'Yet to Start' ? 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400' :
+                                            'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400'}`}>
+                                {formData.status}
+                            </span>
+                        </p>
+                    </div>
+                    <button onClick={() => toast.dismiss(t)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors">
+                        <X size={18} />
+                    </button>
+                </div>
+            ), { duration: 4000 });
+
             if (!task) {
                 setFormData(initialState);
                 setAssignees([null]);
