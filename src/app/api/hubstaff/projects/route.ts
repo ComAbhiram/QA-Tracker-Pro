@@ -5,10 +5,13 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
     try {
-        console.log('[API] Fetching projects...');
+        const { searchParams } = new URL(request.url);
+        const forceRefresh = searchParams.get('refresh') === 'true';
+
+        console.log(`[API] Fetching projects (forceRefresh: ${forceRefresh})...`);
 
         // Fetch full projects from client
-        const projects = await hubstaffClient.getOrganizationProjects();
+        const projects = await hubstaffClient.getOrganizationProjects(forceRefresh);
 
         // Transform to simplified format expected by frontend
         const simplifiedProjects = projects.map((p: any) => ({

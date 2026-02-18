@@ -125,15 +125,19 @@ export class HubstaffClient {
      * Get all active projects for the organization.
      * Uses 1-hour in-memory cache.
      */
-    async getOrganizationProjects() {
+    async getOrganizationProjects(forceRefresh = false) {
         await this.ensureToken();
         const orgIdNum = parseInt(this.orgId!);
 
-        // Check cache
-        const cached = projectsCache.get(orgIdNum);
-        if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
-            console.log('Returning cached projects');
-            return cached.data;
+        // Check cache unless forceRefresh is true
+        if (!forceRefresh) {
+            const cached = projectsCache.get(orgIdNum);
+            if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+                console.log('Returning cached projects');
+                return cached.data;
+            }
+        } else {
+            console.log('Force refresh requested, bypassing cache for projects.');
         }
 
         console.log('Fetching projects from Hubstaff API...');

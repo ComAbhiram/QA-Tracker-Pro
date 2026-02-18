@@ -74,11 +74,16 @@ export default function ProjectsPage() {
 
     const [importingAll, setImportingAll] = useState(false);
 
-    const searchHubstaff = async (fetchAll: boolean = false) => {
+    const searchHubstaff = async (fetchAll: boolean = false, forceRefresh: boolean = false) => {
         if (!fetchAll && !hubstaffSearch.trim()) return;
         setIsSearching(true);
         try {
-            const response = await fetch('/api/hubstaff/projects');
+            let url = '/api/hubstaff/projects';
+            if (forceRefresh) {
+                url += '?refresh=true';
+            }
+
+            const response = await fetch(url);
             if (response.ok) {
                 const data = await response.json();
                 let filtered = data.projects;
@@ -379,9 +384,10 @@ export default function ProjectsPage() {
                                 {isSearching ? 'Searching...' : 'Search'}
                             </button>
                             <button
-                                onClick={() => searchHubstaff(true)}
+                                onClick={() => searchHubstaff(true, true)}
                                 disabled={isSearching}
                                 className="px-6 py-3 bg-slate-800 text-white font-bold rounded-xl hover:bg-slate-900 transition-colors disabled:opacity-50 whitespace-nowrap"
+                                title="Bypass cache and fetch latest projects from Hubstaff"
                             >
                                 {isSearching ? 'Fetching...' : 'Fetch All'}
                             </button>
