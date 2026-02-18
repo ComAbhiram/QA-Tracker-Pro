@@ -29,6 +29,8 @@ export default function Home() {
   const [filter, setFilter] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [showTodayOnly, setShowTodayOnly] = useState(false);
+  const [pcFilter, setPcFilter] = useState('All');
+  const [pcNames, setPcNames] = useState<string[]>([]);
 
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
@@ -51,6 +53,20 @@ export default function Home() {
     assignees: 100,
     timeline: 160
   });
+
+  // Fetch PC names from global_pcs on mount
+  useEffect(() => {
+    async function fetchPCNames() {
+      const { data, error } = await supabase
+        .from('global_pcs')
+        .select('name')
+        .order('name', { ascending: true });
+      if (!error && data) {
+        setPcNames(data.map((r: any) => r.name));
+      }
+    }
+    fetchPCNames();
+  }, []);
 
   // 1. Fetch Stats Data (Global logic for Charts & Stats Cards)
   // Fetches lightweight data for ALL tasks to populate charts/stats consistently
@@ -159,6 +175,11 @@ export default function Home() {
       }
     }
 
+    // Apply PC Filter
+    if (pcFilter !== 'All') {
+      query = query.eq('pc', pcFilter);
+    }
+
     // Apply Search
     if (search) {
       const term = `%${search}%`;
@@ -240,7 +261,7 @@ export default function Home() {
       }
     }
     setLoadingTasks(false);
-  }, [isGuest, selectedTeamId, itemsPerPage, isGuestLoading, showTodayOnly]);
+  }, [isGuest, selectedTeamId, itemsPerPage, isGuestLoading, showTodayOnly, pcFilter]);
 
 
   // Effects
@@ -271,7 +292,7 @@ export default function Home() {
   // Reset page when filter/search changes (This works by effect separation or logic)
   useEffect(() => {
     setCurrentPage(1);
-  }, [filter, searchQuery, showTodayOnly]);
+  }, [filter, searchQuery, showTodayOnly, pcFilter]);
 
 
   // Handlers
@@ -443,6 +464,24 @@ export default function Home() {
                 />
                 <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
               </div>
+
+              {/* PC Filter Dropdown */}
+              {pcNames.length > 0 && (
+                <div className="relative">
+                  <select
+                    value={pcFilter}
+                    onChange={(e) => setPcFilter(e.target.value)}
+                    className="appearance-none pl-3 pr-8 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 dark:text-slate-100 transition-colors cursor-pointer"
+                  >
+                    <option value="All">All PCs</option>
+                    {pcNames.map(name => (
+                      <option key={name} value={name}>{name}</option>
+                    ))}
+                  </select>
+                  <svg className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                </div>
+              )}
+
               <span className="text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 px-2 py-1 rounded-md whitespace-nowrap">
                 {totalItems} total results
               </span>

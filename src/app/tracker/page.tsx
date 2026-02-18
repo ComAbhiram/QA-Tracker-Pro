@@ -60,6 +60,8 @@ export default function Tracker() {
     const [viewMode, setViewMode] = useState<'active' | 'forecast'>('active');
     const [isRowExpanded, setIsRowExpanded] = useState(false);
     const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false);
+    const [pcFilter, setPcFilter] = useState('All');
+    const [pcNames, setPcNames] = useState<string[]>([]);
 
     // Team Selector State (Manager Mode)
     const { teams } = useTeams(isGuest);
@@ -105,6 +107,19 @@ export default function Tracker() {
         // Force reload to ensure context updates propogate clean
         window.location.reload();
     };
+
+    useEffect(() => {
+        async function fetchPCNames() {
+            const { data, error } = await supabase
+                .from('global_pcs')
+                .select('name')
+                .order('name', { ascending: true });
+            if (!error && data) {
+                setPcNames(data.map((r: any) => r.name));
+            }
+        }
+        fetchPCNames();
+    }, []);
 
     useEffect(() => {
         if (isGuestLoading) return; // Wait for guest session to initialize
@@ -172,6 +187,11 @@ export default function Tracker() {
                     });
                 }
 
+                // Apply PC filter client-side
+                if (pcFilter !== 'All') {
+                    filteredData = filteredData.filter(t => t.pc === pcFilter);
+                }
+
                 setTasks(filteredData.map(mapTaskFromDB));
             }
 
@@ -236,7 +256,7 @@ export default function Tracker() {
             setLoading(false);
         }
         fetchData();
-    }, [searchTerm, dateFilter, isGuest, selectedTeamId, isGuestLoading, userProfile?.team_id]);
+    }, [searchTerm, dateFilter, pcFilter, isGuest, selectedTeamId, isGuestLoading, userProfile?.team_id]);
 
     const handleAddTask = () => {
         setEditingTask(null);
@@ -662,6 +682,23 @@ export default function Tracker() {
                                 placeholder="Filter by date"
                                 className="w-[140px] bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 min-h-0 py-2 px-3 text-xs shadow-sm hover:bg-slate-50 dark:hover:bg-slate-700 rounded-md"
                             />
+
+                            {/* PC Filter Dropdown */}
+                            {pcNames.length > 0 && (
+                                <div className="relative">
+                                    <select
+                                        value={pcFilter}
+                                        onChange={(e) => setPcFilter(e.target.value)}
+                                        className="appearance-none pl-3 pr-8 py-2 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 rounded-md text-xs shadow-sm focus:outline-none focus:ring-1 focus:ring-slate-300 dark:focus:ring-slate-600 cursor-pointer transition-all hover:bg-slate-50 dark:hover:bg-slate-700"
+                                    >
+                                        <option value="All">All PCs</option>
+                                        {pcNames.map(name => (
+                                            <option key={name} value={name}>{name}</option>
+                                        ))}
+                                    </select>
+                                    <svg className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-slate-400" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                                </div>
+                            )}
 
                             <div className="bg-slate-100 dark:bg-slate-800 p-0.5 rounded-lg flex items-center border border-slate-200 dark:border-slate-700">
                                 <button
