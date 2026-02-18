@@ -207,7 +207,7 @@ export async function PUT(request: NextRequest) {
                     const host = request.headers.get('host') || 'qa-tracker-pro.vercel.app';
                     const notificationUrl = `${protocol}://${host}/api/send-pc-notification`;
 
-                    fetch(notificationUrl, {
+                    await fetch(notificationUrl, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({

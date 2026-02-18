@@ -88,8 +88,8 @@ export async function POST(request: NextRequest) {
                     const host = request.headers.get('host') || 'qa-tracker-pro.vercel.app';
                     const notificationUrl = `${protocol}://${host}/api/send-pc-notification`;
 
-                    // Non-blocking notification call
-                    fetch(notificationUrl, {
+                    // Await notification call to ensure it completes in serverless
+                    await fetch(notificationUrl, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({

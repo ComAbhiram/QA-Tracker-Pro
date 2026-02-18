@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 const BREVO_API_KEY = process.env.BREVO_API_KEY;
+const BREVO_SENDER_EMAIL = process.env.BREVO_SENDER_EMAIL || 'notifications@intersmart.in';
 const BREVO_API_URL = 'https://api.brevo.com/v3/smtp/email';
 
 const CC_RECIPIENTS = [
@@ -101,7 +102,7 @@ export async function POST(request: NextRequest) {
                 'content-type': 'application/json'
             },
             body: JSON.stringify({
-                sender: { name: 'Intersmart Team Tracker', email: 'notifications@intersmart.in' },
+                sender: { name: 'Intersmart Team Tracker', email: BREVO_SENDER_EMAIL },
                 to: [{ email: pcEmail, name: pcName }],
                 cc: CC_RECIPIENTS,
                 subject: subject,
