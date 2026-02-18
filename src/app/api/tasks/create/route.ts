@@ -75,12 +75,20 @@ export async function POST(request: NextRequest) {
         // Trigger PC Notification if PC is assigned
         if (data && data.pc) {
             try {
-                // Fetch PC email from global_pcs
-                const { data: pcData } = await supabaseAdmin
+                if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+                    console.error('[API Tasks Create] CRITICAL: SUPABASE_SERVICE_ROLE_KEY is missing in environment!');
+                }
+
+                // Fetch PC email (Case-insensitive)
+                const { data: pcData, error: pcFetchError } = await supabaseAdmin
                     .from('global_pcs')
                     .select('email')
-                    .eq('name', data.pc)
+                    .ilike('name', data.pc)
                     .single();
+
+                if (pcFetchError) {
+                    console.warn(`[API Tasks Create] PC email lookup error for "${data.pc}":`, pcFetchError.message);
+                }
 
                 if (pcData?.email) {
                     console.log(`[API Tasks Create] Sending PC notification to ${data.pc} (${pcData.email})`);

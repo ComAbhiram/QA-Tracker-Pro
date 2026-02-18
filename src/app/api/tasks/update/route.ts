@@ -182,12 +182,20 @@ export async function PUT(request: NextRequest) {
         if (targetPC && (pcChanged || statusChanged || assigneeChanged || startDateChanged || endDateChanged)) {
             console.log(`[API Update] Notification eligibility met for PC: ${targetPC}. Fetching email...`);
             try {
-                // Fetch PC email
-                const { data: pcData } = await supabaseServer
+                if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+                    console.error('[API Update] CRITICAL: SUPABASE_SERVICE_ROLE_KEY is missing in environment!');
+                }
+
+                // Fetch PC email (Case-insensitive)
+                const { data: pcData, error: pcFetchError } = await supabaseServer
                     .from('global_pcs')
                     .select('email')
-                    .eq('name', targetPC)
+                    .ilike('name', targetPC)
                     .single();
+
+                if (pcFetchError) {
+                    console.warn(`[API Update] PC email lookup error for "${targetPC}":`, pcFetchError.message);
+                }
 
                 if (pcData?.email) {
                     console.log(`[API Update] Triggering PC notification (SMTP) for ${targetPC} (${pcData.email})`);
