@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { X, Save, Calendar, User, Briefcase, Activity, Layers, Plus } from 'lucide-react';
 import { Task, isValidProjectDate } from '@/lib/types';
 import { supabase } from '@/lib/supabase';
@@ -24,6 +24,15 @@ interface TaskModalProps {
     onDelete?: (taskId: number) => Promise<void>;
 }
 
+const initialState: Partial<Task> = {
+    status: 'Yet to Start',
+    includeSaturday: false,
+    includeSunday: false,
+    startDate: null,
+    endDate: null,
+    actualCompletionDate: null,
+};
+
 export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: TaskModalProps) {
     const [loading, setLoading] = useState(false);
     const [projects, setProjects] = useState<{ id: string | number; label: string }[]>([]);
@@ -43,16 +52,6 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
     // Confirmation Modal State
     const [showEndDateWarning, setShowEndDateWarning] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
-
-    // Initial state ...
-    const initialState: Partial<Task> = {
-        status: 'Yet to Start',
-        includeSaturday: false,
-        includeSunday: false,
-        startDate: null,
-        endDate: null,
-        actualCompletionDate: null,
-    };
 
     const [formData, setFormData] = useState<Partial<Task>>(initialState);
 
@@ -108,76 +107,65 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
         if (isOpen) {
             fetchProjects();
         }
-    }, [isOpen]);
+    }, [isOpen, effectiveTeamId]);
 
 
 
     // Fetch Hubstaff users OR Team Members on open
-    useEffect(() => {
-        const fetchUsers = async () => {
-            setLoadingHubstaffUsers(true);
-            try {
-                // Helper function to fetch from API
-                const fetchFromAPI = async () => {
-                    console.log('[TaskModal] Fetching Hubstaff Users via API (Fallback/Global)...');
-                    const response = await fetch('/api/hubstaff/users');
-                    if (response.ok) {
-                        const data = await response.json();
-                        if (data.members) {
-                            return data.members.map((u: any) => ({
-                                id: u.name,
-                                name: u.name
-                            }));
-                        }
-                    }
-                    return [];
-                };
-
-                const { getCurrentUserTeam } = await import('@/utils/userUtils');
-                const userTeam = await getCurrentUserTeam();
-                const isSuperAdmin = userTeam?.role === 'super_admin';
-                const isQATeamGlobal = effectiveTeamId === 'ba60298b-8635-4cca-bcd5-7e470fad60e6';
-
-                // 1. Try fetching from Team Members DB first (unless Global/SuperAdmin)
-                let users: any[] = [];
-
-                if (!isSuperAdmin && !isGuest && !isQATeamGlobal && effectiveTeamId) {
-                    const { data, error } = await supabase
-                        .from('team_members')
-                        .select('name')
-                        .eq('team_id', effectiveTeamId)
-                        .order('name');
-
-                    if (data && data.length > 0) {
-                        users = data;
-                    }
+    const fetchUsers = useCallback(async () => {
+        setLoadingHubstaffUsers(true);
+        try {
+            // Helper function to fetch from API
+            const fetchFromAPI = async () => {
+                const response = await fetch('/api/hubstaff/users');
+                if (response.ok) {
+                    const data = await response.json();
+                    return data.members?.map((u: any) => ({ name: u.name })) || [];
                 }
+                return [];
+            };
 
-                // 2. Fallback or Global Logic
-                if (users.length === 0) {
-                    // If no DB members or we are Global/SuperAdmin, use API
-                    users = await fetchFromAPI();
+            const { getCurrentUserTeam } = await import('@/utils/userUtils');
+            const userTeam = await getCurrentUserTeam();
+            const isSuperAdmin = userTeam?.role === 'super_admin';
+            const isQATeamGlobal = effectiveTeamId === 'ba60298b-8635-4cca-bcd5-7e470fad60e6';
+
+            let users: any[] = [];
+
+            if (!isSuperAdmin && !isGuest && !isQATeamGlobal && effectiveTeamId) {
+                const { data } = await supabase
+                    .from('team_members')
+                    .select('name')
+                    .eq('team_id', effectiveTeamId)
+                    .order('name');
+
+                if (data && data.length > 0) {
+                    users = data;
                 }
-
-                // Dedup and format
-                const uniqueUserNames = Array.from(new Set(users.map((u: any) => u.name).filter(Boolean)));
-                const formattedUsers = uniqueUserNames.map((name: any) => ({
-                    id: name,
-                    label: name
-                }));
-                setHubstaffUsers(formattedUsers);
-
-            } catch (error) {
-                console.error('[TaskModal] Error fetching users:', error);
-            } finally {
-                setLoadingHubstaffUsers(false);
             }
-        };
 
+            if (users.length === 0) {
+                users = await fetchFromAPI();
+            }
+
+            const uniqueUserNames = Array.from(new Set(users.map((u: any) => u.name).filter(Boolean)));
+            const formattedUsers = uniqueUserNames.map((name: any) => ({
+                id: name,
+                label: name
+            }));
+            setHubstaffUsers(formattedUsers);
+        } catch (error) {
+            console.error('[TaskModal] Error fetching users:', error);
+        } finally {
+            setLoadingHubstaffUsers(false);
+        }
+    }, [effectiveTeamId, isGuest]);
+
+    useEffect(() => {
         if (isOpen) {
             fetchUsers();
         }
-    }, [isOpen, effectiveTeamId, isGuest]);
+    }, [isOpen, fetchUsers]);
 
     // Detect if user is super admin
     useEffect(() => {

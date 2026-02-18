@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { X, Plus, Trash2, Layers } from 'lucide-react';
 import Loader from './ui/Loader';
 import CloseButton from './ui/CloseButton';
@@ -27,13 +27,7 @@ export default function SubPhasesModal({ isOpen, onClose, teamId, teamName }: Su
     const [error, setError] = useState('');
     const [deleting, setDeleting] = useState<number | null>(null);
 
-    useEffect(() => {
-        if (isOpen) {
-            fetchSubPhases();
-        }
-    }, [isOpen, teamId]);
-
-    const fetchSubPhases = async () => {
+    const fetchSubPhases = useCallback(async () => {
         setLoading(true);
         setError('');
         try {
@@ -51,7 +45,13 @@ export default function SubPhasesModal({ isOpen, onClose, teamId, teamName }: Su
         } finally {
             setLoading(false);
         }
-    };
+    }, [teamId]);
+
+    useEffect(() => {
+        if (isOpen) {
+            fetchSubPhases();
+        }
+    }, [isOpen, fetchSubPhases]);
 
     const handleAddSubPhase = async (e: React.FormEvent) => {
         e.preventDefault();
