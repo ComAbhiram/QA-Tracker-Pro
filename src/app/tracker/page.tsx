@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 import { mapTaskFromDB, Task, Leave } from '@/lib/types';
 import { Search, Plus, Download, CalendarClock, X, ArrowUp, ArrowDown, Users, ArrowUpRight } from 'lucide-react';
@@ -62,6 +62,7 @@ export default function Tracker() {
     const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false);
     const [pcFilter, setPcFilter] = useState('All');
     const [pcNames, setPcNames] = useState<string[]>([]);
+    const [realtimeTick, setRealtimeTick] = useState(0); // incremented by real-time subscription
 
     // Team Selector State (Manager Mode)
     const { teams } = useTeams(isGuest);
@@ -256,7 +257,67 @@ export default function Tracker() {
             setLoading(false);
         }
         fetchData();
-    }, [searchTerm, dateFilter, pcFilter, isGuest, selectedTeamId, isGuestLoading, userProfile?.team_id]);
+    }, [searchTerm, dateFilter, pcFilter, isGuest, selectedTeamId, isGuestLoading, userProfile?.team_id, realtimeTick]);
+
+    // Standalone leave fetcher — called by onLeaveUpdate after HL/FL/WFH actions
+    const fetchLeaves = useCallback(async () => {
+        try {
+            const baseDate = dateFilter || new Date();
+            const pastWeek = new Date(baseDate);
+            pastWeek.setDate(pastWeek.getDate() - 14);
+            const startDateStr = pastWeek.toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
+            const nextMonth = new Date(baseDate);
+            nextMonth.setDate(nextMonth.getDate() + 45);
+            const endDateStr = nextMonth.toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
+
+            let url = `/api/leaves?start_date=${startDateStr}&end_date=${endDateStr}`;
+            const effectiveLeaveTeamId = isGuest ? selectedTeamId : (userProfile?.team_id || undefined);
+            if (effectiveLeaveTeamId) url += `&team_id=${effectiveLeaveTeamId}`;
+
+            const leavesRes = await fetch(url);
+            if (leavesRes.ok) {
+                const leavesData = await leavesRes.json();
+                setLeaves(leavesData.leaves || []);
+            }
+        } catch (error) {
+            console.error('Error refreshing leaves:', error);
+        }
+    }, [dateFilter, isGuest, selectedTeamId, userProfile?.team_id]);
+
+    // Real-time subscriptions: auto-refresh tasks & leaves when data changes on any device
+    const realtimeChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+    useEffect(() => {
+        if (isGuestLoading) return;
+
+        // Debounce rapid-fire events
+        let taskTimer: ReturnType<typeof setTimeout>;
+        let leaveTimer: ReturnType<typeof setTimeout>;
+
+        const channel = supabase
+            .channel('tracker-realtime')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'tasks' }, () => {
+                clearTimeout(taskTimer);
+                taskTimer = setTimeout(() => {
+                    // Re-trigger the main data fetch by toggling a refresh counter
+                    setRealtimeTick(t => t + 1);
+                }, 1500);
+            })
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'leaves' }, () => {
+                clearTimeout(leaveTimer);
+                leaveTimer = setTimeout(() => {
+                    fetchLeaves();
+                }, 1000);
+            })
+            .subscribe();
+
+        realtimeChannelRef.current = channel;
+
+        return () => {
+            clearTimeout(taskTimer);
+            clearTimeout(leaveTimer);
+            supabase.removeChannel(channel);
+        };
+    }, [isGuestLoading, fetchLeaves]);
 
     const handleAddTask = () => {
         setEditingTask(null);
@@ -893,10 +954,7 @@ export default function Tracker() {
                                         onResizeStart={startResizing}
                                         onEditTask={isPCMode ? () => { } : handleEditTask}
                                         onFieldUpdate={isPCMode ? async () => { } : handleFieldUpdate}
-                                        onLeaveUpdate={() => {
-                                            // ... (existing refresh code)
-                                            // Note: I'm keeping the long inline onLeaveUpdate logic but wrapping it
-                                        }}
+                                        onLeaveUpdate={fetchLeaves}
                                     />
                                 </DraggableTableWrapper>
                             ))}
