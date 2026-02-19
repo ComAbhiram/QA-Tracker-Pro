@@ -215,7 +215,7 @@ export default function Home() {
     // Let's TRY to fetch all if 'active' to sort correctly, assuming reasonable task count (e.g. < 50-100 active tasks per team).
     // If 'active' or 'Forecast' filter is on, let's bypass pagination range for FETCHING, sort locally, then slice for pagination.
 
-    const shouldCustomSort = currentFilter === 'active' || currentFilter === 'Forecast';
+    const shouldCustomSort = currentFilter === 'active' || currentFilter === 'Forecast' || currentFilter === 'All';
 
     if (!shouldCustomSort) {
       query = query
