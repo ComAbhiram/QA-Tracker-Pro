@@ -561,6 +561,7 @@ export default function ProjectOverviewPage() {
                 ) : activeTab === 'project' ? (
                     <ProjectTable
                         projects={filteredProjects}
+                        tasks={filteredTasks}
                         onEdit={(p) => { setSelectedProject(p); setIsModalOpen(true); }}
                         onDelete={handleDeleteProject}
                     />

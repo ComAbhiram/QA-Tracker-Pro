@@ -1,7 +1,10 @@
 'use client';
 
-import { Edit, Trash2, ArrowUpDown, ChevronLeft, ChevronRight } from 'lucide-react';
-import { useState } from 'react';
+import { Edit, Trash2, ArrowUpDown, ChevronDown, ChevronRight, CheckCircle, AlertCircle, Clock, ChevronLeft } from 'lucide-react';
+import { useState, useMemo } from 'react';
+import { Task } from '@/lib/types'; // Import Task type
+import ResizableHeader from '@/components/ui/ResizableHeader';
+import useColumnResizing from '@/hooks/useColumnResizing';
 
 interface ProjectTableProps {
     projects: Array<{
@@ -20,16 +23,15 @@ interface ProjectTableProps {
         activity_percentage?: number;
         deviation_calc?: number;
     }>;
+    tasks: Task[]; // Add tasks prop
     onEdit: (project: any) => void;
     onDelete: (projectId: string) => void;
 }
 
-import ResizableHeader from '@/components/ui/ResizableHeader';
-import useColumnResizing from '@/hooks/useColumnResizing';
-
-export default function ProjectTable({ projects, onEdit, onDelete }: ProjectTableProps) {
+export default function ProjectTable({ projects, tasks, onEdit, onDelete }: ProjectTableProps) {
     const [sortField, setSortField] = useState<string>('project_name');
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+    const [expandedProjects, setExpandedProjects] = useState<Set<string>>(new Set());
 
     // Column Resizing Hook
     const { columnWidths, startResizing } = useColumnResizing({
@@ -45,6 +47,80 @@ export default function ProjectTable({ projects, onEdit, onDelete }: ProjectTabl
         actions: 100
     });
 
+    const toggleExpand = (projectId: string) => {
+        setExpandedProjects(prev => {
+            const next = new Set(prev);
+            if (next.has(projectId)) {
+                next.delete(projectId);
+            } else {
+                next.add(projectId);
+            }
+            return next;
+        });
+    };
+
+    // Aggregate Data per Project
+    const projectsWithAggregates = useMemo(() => {
+        return projects.map(project => {
+            // Find tasks for this project
+            // Match primarily by project name (case-insensitive) as IDs might not link perfectly in this overview view
+            const projectTasks = tasks.filter(t =>
+                t.projectName?.trim().toLowerCase() === project.project_name?.trim().toLowerCase()
+            );
+
+            // Calculate Aggregates
+            const totalAllotted = projectTasks.reduce((sum, t) => sum + (Number(t.daysAllotted) || 0), 0);
+
+            let totalTimeTakenSeconds = 0;
+            projectTasks.forEach(t => {
+                if (t.timeTaken) {
+                    const parts = t.timeTaken.split(':').map(Number);
+                    if (parts.length === 3) {
+                        totalTimeTakenSeconds += (parts[0] * 3600) + (parts[1] * 60) + parts[2];
+                    }
+                }
+            });
+            const totalTimeTakenDays = totalTimeTakenSeconds / (3600 * 8); // Assuming 8 hour work day
+
+            // Calculate Deviation: Allotted - Taken (Positive = Under/On Time, Negative = Overdue/Late?) 
+            // WAIT: Deviation logic in Task is usually (Taken - Allotted) or vice versa?
+            // Existing code used: stats.totalAllottedDays - timeTakenDays. 
+            // Let's stick to that: Positive = Under Budget (Good), Negative = Over Budget (Bad).
+            const deviation = totalAllotted - totalTimeTakenDays;
+
+            // Activity %: Average? Or Weighted?
+            // Existing logic: Sum of activity percentage. That is weird for a % field. 
+            // Usually it should be Average. But existing API was doing SUM.
+            // Let's do Average for meaningful display, or Weighted by Days?
+            // For now, let's do Average of non-zero tasks field
+            const activeTasks = projectTasks.filter(t => t.activityPercentage !== null);
+            const avgActivity = activeTasks.length > 0
+                ? activeTasks.reduce((sum, t) => sum + (Number(t.activityPercentage) || 0), 0) / activeTasks.length
+                : 0;
+
+            // Resources: Collect unique assignees
+            const uniqueResources = new Set<string>();
+            projectTasks.forEach(t => {
+                if (t.assignedTo) uniqueResources.add(t.assignedTo);
+                if (t.assignedTo2) uniqueResources.add(t.assignedTo2);
+                if (t.additionalAssignees) t.additionalAssignees.forEach(a => uniqueResources.add(a));
+            });
+            const resourceString = Array.from(uniqueResources).sort().join(', ');
+
+            return {
+                ...project,
+                projectTasks, // Attach tasks for expanded view
+                // Override with calculated if we have tasks, else fallback
+                allotted_time_days_calc: projectTasks.length > 0 ? totalAllotted : project.allotted_time_days_calc,
+                hs_time_taken_days: projectTasks.length > 0 ? totalTimeTakenDays : project.hs_time_taken_days,
+                deviation_calc: projectTasks.length > 0 ? deviation : project.deviation_calc,
+                activity_percentage: projectTasks.length > 0 ? Math.round(avgActivity) : project.activity_percentage,
+                resources: projectTasks.length > 0 ? resourceString : project.resources
+            };
+        });
+    }, [projects, tasks]);
+
+
     const handleSort = (field: string) => {
         if (sortField === field) {
             setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
@@ -54,7 +130,7 @@ export default function ProjectTable({ projects, onEdit, onDelete }: ProjectTabl
         }
     };
 
-    const sortedProjects = [...projects].sort((a, b) => {
+    const sortedProjects = [...projectsWithAggregates].sort((a, b) => {
         let aVal: any = a[sortField as keyof typeof a];
         let bVal: any = b[sortField as keyof typeof b];
 
@@ -107,70 +183,161 @@ export default function ProjectTable({ projects, onEdit, onDelete }: ProjectTabl
                     <tbody className="divide-y divide-slate-100">
                         {currentProjects.map((project, index) => {
                             const deviation = project.deviation_calc;
+                            const isExpanded = expandedProjects.has(project.id);
+                            const hasTasks = project.projectTasks && project.projectTasks.length > 0;
 
                             return (
-                                <tr
-                                    key={`${project.id}-${index}`}
-                                    className={`hover:bg-slate-50 transition-colors border-b border-slate-400 ${index % 2 === 0 ? 'bg-white' : 'bg-slate-50/30'}`}
-                                >
-                                    <td className="px-2 py-2 truncate font-bold text-slate-900 border-r border-slate-400" title={project.project_name}>
-                                        {project.project_name}
-                                    </td>
-                                    <td className="px-2 py-2 truncate text-slate-800 border-r border-slate-400">
-                                        <div className="truncate" title={project.resources || ''}>
-                                            {project.resources || '-'}
-                                        </div>
-                                    </td>
-                                    <td className="px-2 py-2 text-center border-r border-slate-400">
-                                        <span className="inline-flex items-center justify-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-green-100 text-green-800 border border-green-200">
-                                            {project.activity_percentage != null ? `${project.activity_percentage}%` : '-'}
-                                        </span>
-                                    </td>
-                                    <td className="px-2 py-2 text-center text-slate-800 border-r border-slate-400">
-                                        {project.pc || '-'}
-                                    </td>
-                                    <td className="px-2 py-2 text-center font-medium text-slate-800 border-r border-slate-400">
-                                        {project.hs_time_taken_days != null ? project.hs_time_taken_days.toFixed(2) : '0.00'}
-                                    </td>
-                                    <td className="px-2 py-2 text-center font-medium text-slate-800 border-r border-slate-400">
-                                        {project.allotted_time_days_calc != null ? project.allotted_time_days_calc.toFixed(2) : '-'}
-                                    </td>
-                                    <td className="px-2 py-2 text-center font-bold border-r border-slate-400">
-                                        <span className={
-                                            deviation === null || deviation === undefined ? 'text-slate-400' :
-                                                deviation > 0 ? 'text-red-700' :
-                                                    deviation < 0 ? 'text-red-700' : 'text-green-700'
-                                        }>
-                                            {deviation !== null && deviation !== undefined ? deviation.toFixed(2) : '-'}
-                                        </span>
-                                    </td>
-                                    <td className="px-2 py-2 text-center font-medium text-slate-800 border-r border-slate-400">
-                                        {project.tl_confirmed_effort_days != null ? project.tl_confirmed_effort_days.toFixed(1) : '-'}
-                                    </td>
-                                    <td className="px-2 py-2 truncate text-slate-800 border-r border-slate-400">
-                                        <div className="truncate" title={project.blockers || ''}>
-                                            {project.blockers || '-'}
-                                        </div>
-                                    </td>
-                                    <td className="px-2 py-2 text-center">
-                                        <div className="flex items-center justify-center gap-1">
-                                            <button
-                                                onClick={() => onEdit(project)}
-                                                className="p-1 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded transition-colors"
-                                                title="Edit"
-                                            >
-                                                <Edit size={14} />
-                                            </button>
-                                            <button
-                                                onClick={() => onDelete(project.id)}
-                                                className="p-1 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
-                                                title="Delete"
-                                            >
-                                                <Trash2 size={14} />
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
+                                <>
+                                    <tr
+                                        key={`${project.id}-${index}`}
+                                        className={`hover:bg-slate-50 transition-colors border-b border-slate-400 ${index % 2 === 0 ? 'bg-white' : 'bg-slate-50/30'} ${isExpanded ? 'bg-indigo-50/50' : ''}`}
+                                    >
+                                        <td className="px-2 py-2 truncate font-bold text-slate-900 border-r border-slate-400">
+                                            <div className="flex items-center gap-2">
+                                                {hasTasks ? (
+                                                    <button
+                                                        onClick={() => toggleExpand(project.id)}
+                                                        className="p-1 hover:bg-slate-200 rounded text-slate-500 transition-colors"
+                                                    >
+                                                        {isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+                                                    </button>
+                                                ) : (
+                                                    <span className="w-6" /> // spacer
+                                                )}
+                                                <span title={project.project_name} className="truncate">{project.project_name}</span>
+                                            </div>
+                                        </td>
+                                        <td className="px-2 py-2 truncate text-slate-800 border-r border-slate-400">
+                                            <div className="truncate" title={project.resources || ''}>
+                                                {project.resources || '-'}
+                                            </div>
+                                        </td>
+                                        <td className="px-2 py-2 text-center border-r border-slate-400">
+                                            <span className="inline-flex items-center justify-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-green-100 text-green-800 border border-green-200">
+                                                {project.activity_percentage != null ? `${project.activity_percentage}%` : '-'}
+                                            </span>
+                                        </td>
+                                        <td className="px-2 py-2 text-center text-slate-800 border-r border-slate-400">
+                                            {project.pc || '-'}
+                                        </td>
+                                        <td className="px-2 py-2 text-center font-medium text-slate-800 border-r border-slate-400">
+                                            {project.hs_time_taken_days != null ? project.hs_time_taken_days.toFixed(2) : '0.00'}
+                                        </td>
+                                        <td className="px-2 py-2 text-center font-medium text-slate-800 border-r border-slate-400">
+                                            {project.allotted_time_days_calc != null ? project.allotted_time_days_calc.toFixed(2) : '-'}
+                                        </td>
+                                        <td className="px-2 py-2 text-center font-bold border-r border-slate-400">
+                                            <span className={
+                                                deviation === null || deviation === undefined ? 'text-slate-400' :
+                                                    deviation > 0 ? 'text-green-700' :
+                                                        deviation < 0 ? 'text-red-700' : 'text-slate-700'
+                                            }>
+                                                {deviation !== null && deviation !== undefined ? deviation.toFixed(2) : '-'}
+                                            </span>
+                                        </td>
+                                        <td className="px-2 py-2 text-center font-medium text-slate-800 border-r border-slate-400">
+                                            {project.tl_confirmed_effort_days != null ? project.tl_confirmed_effort_days.toFixed(1) : '-'}
+                                        </td>
+                                        <td className="px-2 py-2 truncate text-slate-800 border-r border-slate-400">
+                                            <div className="truncate" title={project.blockers || ''}>
+                                                {project.blockers || '-'}
+                                            </div>
+                                        </td>
+                                        <td className="px-2 py-2 text-center">
+                                            <div className="flex items-center justify-center gap-1">
+                                                <button
+                                                    onClick={() => onEdit(project)}
+                                                    className="p-1 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded transition-colors"
+                                                    title="Edit"
+                                                >
+                                                    <Edit size={14} />
+                                                </button>
+                                                <button
+                                                    onClick={() => onDelete(project.id)}
+                                                    className="p-1 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
+                                                    title="Delete"
+                                                >
+                                                    <Trash2 size={14} />
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+
+                                    {/* Expanded Tasks View */}
+                                    {isExpanded && hasTasks && (
+                                        <tr className="bg-slate-50 border-b border-slate-300">
+                                            <td colSpan={10} className="px-4 py-3 shadow-inner">
+                                                <div className="bg-white rounded border border-slate-200 overflow-hidden">
+                                                    <table className="w-full text-xs text-left">
+                                                        <thead className="bg-slate-100/50 text-slate-500 font-semibold border-b border-slate-200">
+                                                            <tr>
+                                                                <th className="px-3 py-2 w-8">#</th>
+                                                                <th className="px-3 py-2">Task / Sub-Phase</th>
+                                                                <th className="px-3 py-2">Assignee</th>
+                                                                <th className="px-3 py-2">Status</th>
+                                                                <th className="px-3 py-2 text-center">Start</th>
+                                                                <th className="px-3 py-2 text-center">End</th>
+                                                                <th className="px-3 py-2 text-center">Allotted</th>
+                                                                <th className="px-3 py-2 text-center">Taken</th>
+                                                                <th className="px-3 py-2 text-center">Dev</th>
+                                                                <th className="px-3 py-2">Bugs (H/F/T)</th>
+                                                                <th className="px-3 py-2">Comments</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody className="divide-y divide-slate-100">
+                                                            {project.projectTasks.map((task, tIndex) => {
+                                                                const taskDeviation = task.deviation || 0;
+                                                                return (
+                                                                    <tr key={task.id} className="hover:bg-slate-50 transition-colors">
+                                                                        <td className="px-3 py-2 text-slate-400">{tIndex + 1}</td>
+                                                                        <td className="px-3 py-2 font-medium text-slate-700">
+                                                                            {task.subPhase || task.projectType || 'Task'}
+                                                                        </td>
+                                                                        <td className="px-3 py-2 text-slate-600">
+                                                                            {[task.assignedTo, task.assignedTo2, ...(task.additionalAssignees || [])].filter(Boolean).join(', ')}
+                                                                        </td>
+                                                                        <td className="px-3 py-2">
+                                                                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium border ${task.status === 'Completed' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
+                                                                                task.status === 'In Progress' ? 'bg-blue-50 text-blue-700 border-blue-200' :
+                                                                                    'bg-slate-100 text-slate-600 border-slate-200'
+                                                                                }`}>
+                                                                                {task.status}
+                                                                            </span>
+                                                                        </td>
+                                                                        <td className="px-3 py-2 text-center text-slate-500 whitespace-nowrap">
+                                                                            {task.startDate ? new Date(task.startDate).toLocaleDateString() : '-'}
+                                                                        </td>
+                                                                        <td className="px-3 py-2 text-center text-slate-500 whitespace-nowrap">
+                                                                            {task.endDate ? new Date(task.endDate).toLocaleDateString() : '-'}
+                                                                        </td>
+                                                                        <td className="px-3 py-2 text-center text-slate-600">
+                                                                            {task.daysAllotted ? Number(task.daysAllotted).toFixed(2) : '-'}
+                                                                        </td>
+                                                                        <td className="px-3 py-2 text-center text-slate-600" title={task.timeTaken || ''}>
+                                                                            {task.daysTaken ? Number(task.daysTaken).toFixed(2) : '-'}
+                                                                        </td>
+                                                                        <td className={`px-3 py-2 text-center font-medium ${taskDeviation > 0 ? 'text-green-600' : taskDeviation < 0 ? 'text-red-600' : 'text-slate-400'
+                                                                            }`}>
+                                                                            {taskDeviation !== 0 ? taskDeviation.toFixed(2) : '-'}
+                                                                        </td>
+                                                                        <td className="px-3 py-2 text-slate-600">
+                                                                            <span className="text-[10px] bg-slate-100 px-1.5 py-0.5 rounded text-slate-500 border border-slate-200" title="HTML / Functional / Total">
+                                                                                {task.htmlBugs || 0} / {task.functionalBugs || 0} / {task.bugCount || 0}
+                                                                            </span>
+                                                                        </td>
+                                                                        <td className="px-3 py-2 text-slate-500 max-w-[200px] truncate" title={task.comments || ''}>
+                                                                            {task.comments || '-'}
+                                                                        </td>
+                                                                    </tr>
+                                                                );
+                                                            })}
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    )}
+                                </>
                             );
                         })}
                     </tbody>
