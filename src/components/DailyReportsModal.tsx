@@ -54,10 +54,19 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
     };
 
     const fetchTasks = async () => {
-        const { data, error } = await supabase
+        const { getCurrentUserTeam } = await import('@/utils/userUtils');
+        const currentUser = await getCurrentUserTeam();
+
+        let query = supabase
             .from('tasks')
             .select('*')
             .order('created_at', { ascending: false });
+
+        if (currentUser && currentUser.team_id && currentUser.role !== 'super_admin') {
+            query = query.eq('team_id', currentUser.team_id);
+        }
+
+        const { data, error } = await query;
 
         if (!error && data) {
             setTasks(data.map(mapTaskFromDB));
