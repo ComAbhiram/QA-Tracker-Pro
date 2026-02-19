@@ -1,14 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+export const dynamic = 'force-dynamic';
 
-// Using service role key to bypass RLS for API operations
-const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
 
 // GET - Fetch all sub-phases for a team
 export async function GET(request: NextRequest) {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
     try {
         const { searchParams } = new URL(request.url);
         const teamId = searchParams.get('team_id');
@@ -52,6 +53,9 @@ export async function GET(request: NextRequest) {
 
 // POST - Create a new sub-phase
 export async function POST(request: NextRequest) {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
     try {
         const body = await request.json();
         const { team_id, name } = body;
@@ -107,6 +111,9 @@ export async function POST(request: NextRequest) {
 
 // DELETE - Delete a sub-phase
 export async function DELETE(request: NextRequest) {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
     try {
         const { searchParams } = new URL(request.url);
         const id = searchParams.get('id');

@@ -1,16 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+export const dynamic = 'force-dynamic';
 
-const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
 
 /**
  * GET /api/pcs
  * Fetch all global PCs
  */
 export async function GET(request: NextRequest) {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
     try {
         const { data, error } = await supabase
             .from('global_pcs')
@@ -41,6 +43,9 @@ export async function GET(request: NextRequest) {
  * Body: { name: string }
  */
 export async function POST(request: NextRequest) {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
     try {
         const body = await request.json();
         const { name, email } = body;
@@ -99,6 +104,9 @@ export async function POST(request: NextRequest) {
  * Delete a PC by ID
  */
 export async function DELETE(request: NextRequest) {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
     try {
         const { searchParams } = new URL(request.url);
         const id = searchParams.get('id');
@@ -140,6 +148,9 @@ export async function DELETE(request: NextRequest) {
  * Body: { id: number, name?: string, email?: string }
  */
 export async function PUT(request: NextRequest) {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
     try {
         const body = await request.json();
         const { id, name, email } = body;

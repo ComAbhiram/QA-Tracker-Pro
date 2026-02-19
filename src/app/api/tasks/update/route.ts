@@ -4,6 +4,8 @@ import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { sendPCNotification } from '@/lib/notifications';
 
+export const dynamic = 'force-dynamic';
+
 export async function PUT(request: NextRequest) {
     try {
         const cookieStore = cookies();

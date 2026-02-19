@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-export const dynamic = 'force-dynamic';
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-const supabase = createClient(supabaseUrl, supabaseServiceKey);
+export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
     try {
         const body = await request.json();
         const { teamId, data } = body; // data contains { projects, tasks }
@@ -37,7 +38,7 @@ export async function POST(request: NextRequest) {
 
             if (fetchSubphasesError) throw fetchSubphasesError;
 
-            const existingPhaseNames = new Set(existingSubphases?.map(p => p.name.toLowerCase()) || []);
+            const existingPhaseNames = new Set(existingSubphases?.map((p: any) => p.name.toLowerCase()) || []);
 
             const phasesToInsert = subphases
                 .filter((p: any) => {
@@ -76,7 +77,7 @@ export async function POST(request: NextRequest) {
 
         if (fetchError) throw fetchError;
 
-        const existingNames = new Set(existingProjects?.map(p => p.name.toLowerCase()) || []);
+        const existingNames = new Set(existingProjects?.map((p: any) => p.name.toLowerCase()) || []);
 
         for (const project of projects) {
             const normalizedName = (project.name || '').trim();

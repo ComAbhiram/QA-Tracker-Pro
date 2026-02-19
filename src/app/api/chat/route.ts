@@ -1,6 +1,9 @@
+
 import { NextResponse } from 'next/server';
 import { createClient } from '@/utils/supabase/server';
 import type { SupabaseClient } from '@supabase/supabase-js';
+
+export const dynamic = 'force-dynamic';
 
 const GROQ_API_KEY = process.env.GROQ_API_KEY;
 const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
@@ -10,38 +13,38 @@ You are a helpful AI assistant for the "QA Project Tracker" application.
 Your goal is to help users navigate, use the app, and answer questions about specific projects based on the provided data.
 
 Application Overview:
-This is a Team Tracker application designed for managing QA (Quality Assurance) projects and tasks.
+This is a Team Tracker application designed for managing QA(Quality Assurance) projects and tasks.
 
 Key Features:
-- **Dashboard**: Overview of active projects, metrics, and charts.
-- **Task Management**: Create, edit, and track tasks.
-- **Reports**: Daily work status and Hubstaff activity.
-- **User Roles**: Admin/Lead (Editors) vs Guest (View-only).
+- ** Dashboard **: Overview of active projects, metrics, and charts.
+- ** Task Management **: Create, edit, and track tasks.
+- ** Reports **: Daily work status and Hubstaff activity.
+- ** User Roles **: Admin / Lead(Editors) vs Guest(View - only).
 
 Data Interpretation Rules:
-1. **Current Date**: Always use the "Current Date" provided in the context to answer time-relative questions (e.g., "overdue today", "scheduled for next week").
-2. **Status Meanings**:
-   - "Ready for QA": Dev done, waiting for QA.
+1. ** Current Date **: Always use the "Current Date" provided in the context to answer time - relative questions(e.g., "overdue today", "scheduled for next week").
+2. ** Status Meanings **:
+- "Ready for QA": Dev done, waiting for QA.
    - "In Progress": Currently being worked on.
    - "Forecasting": Planned for future.
-3. **Performance Queries**:
-   - If asked about "best performer", look at the "Completed Tasks" list and count who has the most completions or handled the most complex tasks (if priority/complexity is visible).
-   - If data is insufficient, say "Based on the recent data available to me...".
-4. **Specific Projects**:
-   - If asked about a project, look it up in the "Active Tasks" list.
+3. ** Performance Queries **:
+    - If asked about "best performer", look at the "Completed Tasks" list and count who has the most completions or handled the most complex tasks(if priority / complexity is visible).
+- If data is insufficient, say "Based on the recent data available to me...".
+4. ** Specific Projects **:
+- If asked about a project, look it up in the "Active Tasks" list.
    - If not found, check "Completed" or say "I don't see that project in the active list."
 
 Tone:
-- Professional, concise, and data-driven.
+- Professional, concise, and data - driven.
 
-Special Instructions for Schedule/Time Queries:
-- **Overdue Tasks**: Tasks marked with '[OVERDUE]' are past their due date but still active.
-- **"Today/Tomorrow" Queries**: If a user asks "what is scheduled for tomorrow" or "what do I have today", you **MUST** include relevant Overdue tasks in your answer, noting that they are overdue. Do not ignore them just because their due date was in the past.
+Special Instructions for Schedule / Time Queries:
+- ** Overdue Tasks **: Tasks marked with '[OVERDUE]' are past their due date but still active.
+- ** "Today/Tomorrow" Queries **: If a user asks "what is scheduled for tomorrow" or "what do I have today", you ** MUST ** include relevant Overdue tasks in your answer, noting that they are overdue.Do not ignore them just because their due date was in the past.
 `;
 
 async function getEnhancedSystemPrompt(supabase: SupabaseClient) {
     const today = new Date().toDateString();
-    let dataContext = `\n\n=== LIVE DATA CONTEXT (Current Date: ${today}) ===\n`;
+    let dataContext = `\n\n === LIVE DATA CONTEXT(Current Date: ${today}) ===\n`;
 
     try {
         // 1. Fetch Active Tasks
@@ -54,7 +57,7 @@ async function getEnhancedSystemPrompt(supabase: SupabaseClient) {
 
         if (activeError) throw activeError;
 
-        dataContext += `\n[Active Tasks] (Top 100 by due date):\n`;
+        dataContext += `\n[Active Tasks](Top 100 by due date): \n`;
         if (activeTasks && activeTasks.length > 0) {
             const now = new Date();
             now.setHours(0, 0, 0, 0); // Start of today
@@ -75,7 +78,7 @@ async function getEnhancedSystemPrompt(supabase: SupabaseClient) {
                     }
                 }
 
-                dataContext += `- **${t.project_name}**: Status=${t.status}${timeStatus}, Phase=${t.sub_phase || 'N/A'}, Assigned=[${assignees}], Due=${t.end_date || 'N/A'}\n`;
+                dataContext += `- ** ${t.project_name}**: Status = ${t.status}${timeStatus}, Phase = ${t.sub_phase || 'N/A'}, Assigned = [${assignees}], Due = ${t.end_date || 'N/A'} \n`;
             });
         } else {
             dataContext += "No active tasks found (Access might be restricted or list is empty).\n";
@@ -91,10 +94,10 @@ async function getEnhancedSystemPrompt(supabase: SupabaseClient) {
 
         if (completedError) throw completedError;
 
-        dataContext += `\n[Recently Completed Tasks] (Last 50):\n`;
+        dataContext += `\n[Recently Completed Tasks](Last 50): \n`;
         if (completedTasks && completedTasks.length > 0) {
             completedTasks.forEach((t: any) => {
-                dataContext += `- **${t.project_name}**: Completed by ${t.assigned_to} on ${t.actual_completion_date}\n`;
+                dataContext += `- ** ${t.project_name}**: Completed by ${t.assigned_to} on ${t.actual_completion_date} \n`;
             });
         }
 
@@ -135,7 +138,7 @@ export async function POST(req: Request) {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${GROQ_API_KEY}`
+                'Authorization': `Bearer ${GROQ_API_KEY} `
             },
             body: JSON.stringify({
                 model: 'llama-3.3-70b-versatile',
