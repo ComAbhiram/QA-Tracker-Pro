@@ -31,7 +31,364 @@ interface TeamMember {
 
 export default function ProjectStatusPage({ pageTitle, statusFilter, showAvailability = true, hideHeader = false }: ProjectStatusPageProps) {
     const { isGuest, selectedTeamId, isLoading: isGuestLoading } = useGuestMode();
-    // ... (lines 32-342 remain unchanged)
+    const router = useRouter();
+    const [tasks, setTasks] = useState<Task[]>([]);
+    const [leaves, setLeaves] = useState<Leave[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    // Filters
+    const [searchTerm, setSearchTerm] = useState('');
+    const [pcFilter, setPcFilter] = useState('All');
+    const [pcNames, setPcNames] = useState<string[]>([]);
+    const [dateRange, setDateRange] = useState<{ start: Date | undefined; end: Date | undefined }>({ start: undefined, end: undefined });
+
+    // Modals
+    const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
+    const [editingTask, setEditingTask] = useState<Task | null>(null);
+
+    const { success, error: toastError } = useToast();
+
+    // Team Data
+    const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
+
+    // Column Resizing
+    const { columnWidths, startResizing } = useColumnResizing({
+        projectName: 200,
+        projectType: 60,
+        priority: 65,
+        subPhase: 100,
+        pc: 50,
+        status: 110,
+        startDate: 90,
+        endDate: 90,
+        actualCompletionDate: 80,
+        comments: 120,
+        deviation: 60,
+        sprint: 50
+    });
+
+    // Fetch PC Names
+    useEffect(() => {
+        async function fetchPCNames() {
+            try {
+                const res = await fetch('/api/pcs');
+                if (res.ok) {
+                    const data = await res.json();
+                    const pcs = data.pcs || [];
+                    setPcNames(pcs.map((r: any) => typeof r === 'string' ? r : r.name));
+                }
+            } catch (err) {
+                console.error('Error fetching PC names:', err);
+            }
+        }
+        fetchPCNames();
+    }, []);
+
+    // Main Data Fetch
+    const fetchData = useCallback(async () => {
+        if (isGuestLoading) return;
+        setLoading(true);
+
+        try {
+            // 1. Fetch User Profile if not guest
+            let effectiveTeamId = selectedTeamId;
+            if (!isGuest) {
+                const profile = await getCurrentUserTeam();
+                if (profile) {
+                    effectiveTeamId = profile.team_id;
+                }
+            }
+
+            // 2. Fetch Tasks
+            let taskQuery = supabase
+                .from('tasks')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            // Apply Status Filter
+            if (statusFilter !== 'All') {
+                if (Array.isArray(statusFilter)) {
+                    taskQuery = taskQuery.in('status', statusFilter);
+                } else {
+                    taskQuery = taskQuery.eq('status', statusFilter);
+                }
+            } else {
+                // For 'All', usually we want to exclude some if strictly 'Active', but 'All' usually implies 'Overview'
+                // typically excludes 'Completed' / 'Rejected' in Tracker, 
+                // but here 'All' might mean EVERYTHING including historical?
+                // The 'Task Overview' usually mimics Tracker, so maybe exclude 'Rejected'?
+                // The current standard Tracker view excludes Completed/Rejected.
+                // However, for an Overview Report, often we want to see everything.
+                // But sticking to "Tracker UI" implies Active tasks.
+                // Let's stick strictly to "All" meaning ALL statuses for now, or match Tracker?
+                // User said "shows no data". If I filter out completed, and they have only completed, that's bad.
+                // I will NOT filter out anything if 'All'.
+            }
+
+            // Apply Team Filter
+            if (isGuest) {
+                if (selectedTeamId) {
+                    taskQuery = taskQuery.eq('team_id', selectedTeamId);
+                } else {
+                    // Manager mode safety
+                    taskQuery = taskQuery.eq('id', '00000000-0000-0000-0000-000000000000');
+                }
+            } else if (effectiveTeamId) {
+                // Optional: relying on RLS is standard, but explicit filter mimics Tracker logic
+                // taskQuery = taskQuery.eq('team_id', effectiveTeamId); 
+            }
+
+            const { data: taskData, error: taskError } = await taskQuery;
+
+            if (taskError) throw taskError;
+
+            let fetchedTasks = (taskData || []).map(mapTaskFromDB);
+
+            // Client-Side Filtering
+
+            // Search Filter
+            if (searchTerm) {
+                const lowerTerm = searchTerm.toLowerCase();
+                fetchedTasks = fetchedTasks.filter(t =>
+                    t.projectName?.toLowerCase().includes(lowerTerm) ||
+                    t.assignedTo?.toLowerCase().includes(lowerTerm) ||
+                    t.subPhase?.toLowerCase().includes(lowerTerm) ||
+                    t.comments?.toLowerCase().includes(lowerTerm) ||
+                    t.pc?.toLowerCase().includes(lowerTerm) ||
+                    t.status?.toLowerCase().includes(lowerTerm)
+                );
+            }
+
+            // PC Filter
+            if (pcFilter !== 'All') {
+                fetchedTasks = fetchedTasks.filter(t => t.pc === pcFilter);
+            }
+
+            // Date Range Filter
+            if (dateRange.start || dateRange.end) {
+                fetchedTasks = fetchedTasks.filter(t => {
+                    const taskStart = t.startDate ? new Date(t.startDate) : null;
+                    const taskEnd = t.endDate ? new Date(t.endDate) : null;
+
+                    // Standard overlap logic or simple range check?
+                    // Let's use Tracker logic: Start <= SelectedDate <= End
+                    // But here we have a Range.
+                    // Let's check if the Task's range overlaps with the Filter's range.
+                    // (TaskStart <= FilterEnd) and (TaskEnd >= FilterStart)
+
+                    const filterStart = dateRange.start ? new Date(dateRange.start) : new Date(0);
+                    const filterEnd = dateRange.end ? new Date(dateRange.end) : new Date(8640000000000000);
+
+                    // Sanitize times
+                    filterStart.setHours(0, 0, 0, 0);
+                    filterEnd.setHours(23, 59, 59, 999);
+
+                    // If task has no dates, decide policy. Usually exclude or include?
+                    // If filter is set, usually expect dates.
+                    if (!taskStart && !taskEnd) return false;
+
+                    const tStart = taskStart || new Date(0);
+                    const tEnd = taskEnd || new Date(8640000000000000);
+
+                    return tStart <= filterEnd && tEnd >= filterStart;
+                });
+            }
+
+            setTasks(fetchedTasks);
+
+            // 3. Fetch Team Members (for sorting)
+            if (effectiveTeamId) {
+                const { data: membersData } = await supabase
+                    .from('team_members')
+                    .select('id, name, display_order')
+                    .eq('team_id', effectiveTeamId)
+                    .order('display_order', { ascending: true });
+
+                if (membersData) setTeamMembers(membersData);
+            }
+
+            // 4. Fetch Leaves (for availability context in headers)
+            if (showAvailability) {
+                const today = new Date();
+                const past = new Date(today); past.setDate(today.getDate() - 14);
+                const future = new Date(today); future.setDate(today.getDate() + 45);
+
+                let leavesUrl = `/api/leaves?start_date=${past.toISOString().split('T')[0]}&end_date=${future.toISOString().split('T')[0]}`;
+                if (effectiveTeamId) leavesUrl += `&team_id=${effectiveTeamId}`;
+
+                const leavesRes = await fetch(leavesUrl);
+                if (leavesRes.ok) {
+                    const lData = await leavesRes.json();
+                    setLeaves(lData.leaves || []);
+                }
+            }
+
+        } catch (error) {
+            console.error('Error fetching data:', error);
+            toastError('Failed to load project data');
+        } finally {
+            setLoading(false);
+        }
+    }, [isGuestLoading, isGuest, selectedTeamId, statusFilter, searchTerm, pcFilter, dateRange, showAvailability, toastError]);
+
+    useEffect(() => {
+        fetchData();
+    }, [fetchData]);
+
+    // Handlers
+    const handleEditTask = (task: Task) => {
+        setEditingTask(task);
+        setIsTaskModalOpen(true);
+    };
+
+    const handleDeleteTask = async (taskId: number) => {
+        if (!confirm('Are you sure you want to delete this task?')) return;
+
+        try {
+            // Use API to ensure proper logging/permission checks
+            const response = await fetch(`/api/tasks/delete?id=${taskId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Manager-Mode': localStorage.getItem('qa_tracker_guest_session') ? 'true' : 'false',
+                },
+            });
+
+            if (!response.ok) throw new Error('Failed to delete task');
+
+            success('Task deleted successfully');
+            fetchData();
+            setIsTaskModalOpen(false);
+        } catch (error: any) {
+            console.error('Error deleting task:', error);
+            toastError(error.message || 'Failed to delete task');
+        }
+    };
+
+    const saveTask = async (taskData: Partial<Task> | Partial<Task>[]) => {
+        try {
+            const method = editingTask ? 'PUT' : 'POST';
+            const url = editingTask ? '/api/tasks/update' : '/api/tasks/create';
+
+            // Base payload
+            let body;
+            if (Array.isArray(taskData)) {
+                body = taskData;
+            } else {
+                body = { ...taskData };
+                if (editingTask) body.id = editingTask.id;
+            }
+
+            const response = await fetch(url, {
+                method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Manager-Mode': localStorage.getItem('qa_tracker_guest_session') ? 'true' : 'false',
+                },
+                body: JSON.stringify(body)
+            });
+
+            if (!response.ok) {
+                const err = await response.json();
+                throw new Error(err.error || 'Failed to save');
+            }
+
+            success('Task saved successfully');
+            fetchData();
+            setIsTaskModalOpen(false);
+            setEditingTask(null);
+        } catch (err: any) {
+            console.error('Error saving task:', err);
+            toastError(err.message);
+        }
+    };
+
+    const handleFieldUpdate = async (taskId: number, field: string, value: any) => {
+        try {
+            // Use API for consistency
+            const response = await fetch('/api/tasks/update', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Manager-Mode': localStorage.getItem('qa_tracker_guest_session') ? 'true' : 'false',
+                },
+                body: JSON.stringify({ id: taskId, [field]: value })
+            });
+
+            if (!response.ok) throw new Error('Failed to update task');
+
+            success('Task updated');
+            fetchData();
+        } catch (err) {
+            console.error('Error updating field:', err);
+            toastError('Failed to update field');
+        }
+    };
+
+    // Export CSV
+    const exportCSV = () => {
+        const headers = ['Project Name', 'Type', 'Priority', 'Phase', 'Status', 'Start Date', 'End Date', 'Actual End', 'Assignees', 'Bug Count', 'HTML Bugs', 'Functional Bugs', 'Comments'];
+        const csvContent = [
+            headers.join(','),
+            ...tasks.map(t => [
+                `"${t.projectName}"`,
+                `"${t.projectType || ''}"`,
+                `"${t.priority || ''}"`,
+                `"${t.subPhase || ''}"`,
+                `"${t.status}"`,
+                `"${t.startDate ? new Date(t.startDate).toLocaleDateString() : ''}"`,
+                `"${t.endDate ? new Date(t.endDate).toLocaleDateString() : ''}"`,
+                `"${t.actualCompletionDate ? new Date(t.actualCompletionDate).toLocaleDateString() : ''}"`,
+                `"${[t.assignedTo, t.assignedTo2].filter(Boolean).join(' & ')}"`,
+                `"${t.bugCount || 0}"`,
+                `"${t.htmlBugs || 0}"`,
+                `"${t.functionalBugs || 0}"`,
+                `"${t.comments || ''}"`
+            ].join(','))
+        ].join('\n');
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `${pageTitle.replace(' ', '_')}_Export_${new Date().toISOString().split('T')[0]}.csv`;
+        link.click();
+    };
+
+    // Grouping Logic
+    const groupedTasks = useMemo(() => {
+        return tasks.reduce((acc, task) => {
+            const assignees = new Set<string>();
+            if (task.assignedTo) assignees.add(task.assignedTo);
+            if (task.assignedTo2) assignees.add(task.assignedTo2);
+            if (task.additionalAssignees) task.additionalAssignees.forEach(a => assignees.add(a));
+
+            if (assignees.size === 0) {
+                const unassigned = 'Unassigned';
+                if (!acc[unassigned]) acc[unassigned] = [];
+                acc[unassigned].push(task);
+            } else {
+                assignees.forEach(assignee => {
+                    if (!acc[assignee]) acc[assignee] = [];
+                    acc[assignee].push(task);
+                });
+            }
+            return acc;
+        }, {} as Record<string, Task[]>);
+    }, [tasks]);
+
+    const sortedAssignees = useMemo(() => {
+        return Object.keys(groupedTasks).sort((a, b) => {
+            if (a === 'Unassigned') return 1;
+            if (b === 'Unassigned') return -1;
+            const memberA = teamMembers.find(m => m.name === a);
+            const memberB = teamMembers.find(m => m.name === b);
+            if (memberA && memberB) return (memberA.display_order ?? 0) - (memberB.display_order ?? 0);
+            return a.localeCompare(b);
+        });
+    }, [groupedTasks, teamMembers]);
+
+
+    // Render
     return (
         <div className="max-w-[1800px] mx-auto space-y-6 p-4 animate-in fade-in duration-500 pb-20">
             {/* Header */}
@@ -199,4 +556,3 @@ export default function ProjectStatusPage({ pageTitle, statusFilter, showAvailab
         </div>
     );
 }
-
