@@ -1,17 +1,15 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { LayoutGrid, List, Plus, RefreshCw, Download } from 'lucide-react';
+import { RefreshCw, Download, Plus } from 'lucide-react';
 import * as XLSX from 'xlsx';
-import ProjectTable from './components/ProjectTable';
-import ProjectStatusPage from '@/components/ProjectStatusPage'; // Import ProjectStatusPage
-import ProjectDetailsModal from './components/ProjectDetailsModal';
-import TaskModal from '@/components/TaskModal'; // Import TaskModal
+import BudgetTable from './components/BudgetTable';
+import ProjectDetailsModal from '@/app/project-overview/components/ProjectDetailsModal'; // Reusing modal
 import { supabase } from '@/lib/supabase';
 import { mapTaskFromDB, Task } from '@/lib/types'; // Import types and mapper
 import { useGuestMode } from '@/contexts/GuestContext';
-import TaskMigration from '@/components/TaskMigration';
 import Checkbox from '@/components/ui/Checkbox';
+import TaskMigration from '@/components/TaskMigration';
 
 interface ProjectOverview {
     id: string;
@@ -43,33 +41,12 @@ interface ProjectOverview {
     status?: string;
 }
 
-interface HubstaffData {
-    hs_time_taken_days: number;
-    activity_percentage: number;
-    team_breakdown: {
-        design_days: number;
-        fe_dev_days: number;
-        be_dev_days: number;
-        testing_days: number;
-    };
-    member_activities: Array<{
-        user_name: string;
-        team: string;
-        hours: number;
-        activity_percentage: number;
-    }>;
-    total_work_days: number;
-}
-
-export default function ProjectOverviewPage() {
-    const [activeTab, setActiveTab] = useState<'project' | 'task'>('project');
+export default function BudgetAndActivityPage() {
     const [projects, setProjects] = useState<ProjectOverview[]>([]);
     const [tasks, setTasks] = useState<Task[]>([]);
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
     const [selectedProject, setSelectedProject] = useState<ProjectOverview | null>(null);
-    const [selectedTask, setSelectedTask] = useState<Task | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
     const { isGuest, selectedTeamId } = useGuestMode();
 
@@ -84,9 +61,6 @@ export default function ProjectOverviewPage() {
     const uniqueQAs = Array.from(new Set(
         tasks.flatMap(t => [t.assignedTo, t.assignedTo2, ...(t.additionalAssignees || [])].filter(Boolean) as string[])
     )).sort();
-
-    // Filtering Tasks Logic (Moved up to be accessible if needed, or we reproduce logic)
-    // Actually, let's keep them separate but improve the logic.
 
     const filteredTasks = tasks.filter(t => {
         // Search
@@ -172,18 +146,6 @@ export default function ProjectOverviewPage() {
             }
 
             // Check 2: Project has ACTIVE TASKS in range
-            // We can check if ANY task in 'filteredTasks' belongs to this project
-            // Note: filteredTasks already enforces Date Range + Search + QA.
-            // But we need to separate Search/QA from Date for this "Has Activity" check?
-            // If I search for "John", I want projects assigned to John that are active today.
-            // filteredTasks already has (Search="John" && Date="Today").
-            // So if filteredTasks has a task for this project, the project IS active today AND matches search.
-
-            // However, filteredProjects also applies matchesSearch and matchesQA separately.
-            // So we just need to know if there is ANY task execution overlap.
-
-            // Let's look at the tasks list directly to check for date overlap for this project, 
-            // ignoring the global Search/QA (since we check project-level search/QA above).
             const hasTaskActivity = tasks.some(t => {
                 if (t.projectName?.trim().toLowerCase() !== p.project_name?.trim().toLowerCase()) return false;
 
@@ -191,8 +153,6 @@ export default function ProjectOverviewPage() {
                 const tStart = t.startDate ? new Date(t.startDate) : null;
                 const tEnd = t.endDate ? new Date(t.endDate) : null;
 
-                // If no dates on task, assuming it's NOT active in range? or IS?
-                // Usually tasks without dates appear in "All Time" but maybe not in specific range.
                 if (!tStart && !tEnd) return false;
 
                 const fStart = filterStartDate ? new Date(filterStartDate) : null;
@@ -219,52 +179,23 @@ export default function ProjectOverviewPage() {
     const handleExport = () => {
         const timestamp = new Date().toISOString().split('T')[0];
 
-        if (activeTab === 'project') {
-            const dataToExport = filteredProjects.map(p => ({
-                'Project Name': p.project_name,
-                'Resources': p.resources,
-                'Activity %': `${p.activity_percentage || 0}%`,
-                'PC': p.pc,
-                'HS Time (Days)': p.hs_time_taken_days?.toFixed(2) || '0.00',
-                'Allotted Days': p.allotted_time_days_calc?.toFixed(2) || '0.00',
-                'Deviation': p.deviation_calc?.toFixed(2) || '0.00',
-                'TL Effort': p.tl_confirmed_effort_days || '',
-                'Blockers': p.blockers || '',
-                'Status': p.status || ''
-            }));
+        const dataToExport = filteredProjects.map(p => ({
+            'Project Name': p.project_name,
+            'Resources': p.resources,
+            'Activity %': `${p.activity_percentage || 0}%`,
+            'PC': p.pc,
+            'HS Time (Days)': p.hs_time_taken_days?.toFixed(2) || '0.00',
+            'Allotted Days': p.allotted_time_days_calc?.toFixed(2) || '0.00',
+            'Deviation': p.deviation_calc?.toFixed(2) || '0.00',
+            'TL Effort': p.tl_confirmed_effort_days || '',
+            'Blockers': p.blockers || '',
+            'Status': p.status || ''
+        }));
 
-            const ws = XLSX.utils.json_to_sheet(dataToExport);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Projects");
-            XLSX.writeFile(wb, `projects_overview_${timestamp}.xlsx`);
-        } else {
-            const dataToExport = filteredTasks.map(t => ({
-                'ID': t.id,
-                'Project': t.projectName,
-                'Type': t.projectType,
-                'Priority': t.priority,
-                'Phase': t.subPhase,
-                'PC': t.pc,
-                'Assignee': t.assignedTo,
-                'Secondary Assignee': t.assignedTo2,
-                'Status': t.status,
-                'Start Date': t.startDate,
-                'End Date': t.endDate,
-                'Actual End': t.actualCompletionDate,
-                'Time Taken': t.timeTaken,
-                'Activity %': t.activityPercentage,
-                'Allotted Days': t.daysAllotted,
-                'Total Bugs': t.bugCount,
-                'HTML Bugs': t.htmlBugs,
-                'Func Bugs': t.functionalBugs,
-                'Comments': t.comments
-            }));
-
-            const ws = XLSX.utils.json_to_sheet(dataToExport);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Tasks");
-            XLSX.writeFile(wb, `tasks_overview_${timestamp}.xlsx`);
-        }
+        const ws = XLSX.utils.json_to_sheet(dataToExport);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Projects");
+        XLSX.writeFile(wb, `projects_overview_${timestamp}.xlsx`);
     };
 
     const fetchData = async () => {
@@ -356,116 +287,26 @@ export default function ProjectOverviewPage() {
         }
     };
 
-    const handleSaveTask = async (taskData: Partial<Task> | Partial<Task>[]) => {
-
-        const formatPayload = (t: Partial<Task>) => ({
-            project_name: t.projectName,
-            project_type: t.projectType,
-            sub_phase: t.subPhase || null,
-            status: t.status,
-            assigned_to: t.assignedTo || null,
-            assigned_to2: t.assignedTo2 || null,
-            additional_assignees: t.additionalAssignees || [],
-            pc: t.pc || null,
-            start_date: t.startDate || null,
-            end_date: t.endDate || null,
-            actual_completion_date: t.actualCompletionDate ? new Date(t.actualCompletionDate).toISOString() : null,
-            start_time: t.startTime || null,
-            end_time: t.endTime || null,
-            bug_count: t.bugCount ?? 0,
-            html_bugs: t.htmlBugs ?? 0,
-            functional_bugs: t.functionalBugs ?? 0,
-            deviation_reason: t.deviationReason || null,
-            comments: t.comments || null,
-            current_updates: t.currentUpdates, // Ensure this is saved
-            sprint_link: t.sprintLink || null,
-            days_allotted: t.daysAllotted ?? 0,
-            time_taken: t.timeTaken || '00:00:00',
-            days_taken: t.daysTaken ?? 0,
-            deviation: t.deviation ?? 0,
-            activity_percentage: t.activityPercentage ?? 0,
-            include_saturday: t.includeSaturday || false,
-            include_sunday: t.includeSunday || false,
-            team_id: t.teamId ?? null,
-        });
-
+    const handleUpdateProjectInline = async (id: string, data: any) => {
         try {
-            if (Array.isArray(taskData)) {
+            const response = await fetch('/api/project-overview', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id, ...data })
+            });
 
-                const payloads = taskData.map(formatPayload);
-
-                if (selectedTask) {
-                    // Update main + Create new
-                    const [first, ...rest] = payloads;
-
-                    if (first) {
-                        const { error } = await supabase
-                            .from('tasks')
-                            .update(first)
-                            .eq('id', selectedTask.id);
-                        if (error) throw error;
-                    }
-
-                    if (rest.length > 0) {
-                        const { error } = await supabase
-                            .from('tasks')
-                            .insert(rest);
-                        if (error) throw error;
-                    }
-
-                } else {
-                    // Bulk Create
-                    const { error } = await supabase
-                        .from('tasks')
-                        .insert(payloads);
-                    if (error) throw error;
-                }
-
+            if (response.ok) {
+                // Optimistic update
+                setProjects(prev => prev.map(p => p.id === id ? { ...p, ...data } : p));
             } else {
-                // Single Object Case
-                const dbPayload = formatPayload(taskData);
-
-                if (selectedTask) {
-                    const { error } = await supabase
-                        .from('tasks')
-                        .update(dbPayload)
-                        .eq('id', selectedTask.id);
-                    if (error) throw error;
-                } else {
-                    const { error } = await supabase
-                        .from('tasks')
-                        .insert([dbPayload]);
-                    if (error) throw error;
-                }
+                // Revert or alert
+                console.error('Failed to update inline');
+                fetchData(); // Refresh to ensure data consistency
             }
-
-            await fetchData();
-            setIsTaskModalOpen(false);
-
-        } catch (error: any) {
-            console.error('Error saving task:', error);
-            alert(`Failed to save task: ${error.message}`);
+        } catch (e) {
+            console.error('Error updating inline:', e);
         }
     };
-
-    const handleDeleteTask = async (taskId: number) => {
-        if (!confirm('Are you sure you want to delete this task?')) return;
-        try {
-            const { error } = await supabase
-                .from('tasks')
-                .delete()
-                .eq('id', taskId);
-
-            if (error) throw error;
-            await fetchData();
-            setIsTaskModalOpen(false);
-        } catch (error: any) {
-            console.error('Error deleting task:', error);
-            alert('Failed to delete task');
-        }
-    };
-
-
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-6">
@@ -475,10 +316,10 @@ export default function ProjectOverviewPage() {
                     <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
                         <div>
                             <h1 className="text-4xl font-bold text-slate-800 mb-2">
-                                Project Overview
+                                Budget and Activity
                             </h1>
                             <p className="text-slate-600">
-                                Manage projects and track detailed task progress
+                                Track project budgets, activity, and team performance
                             </p>
                         </div>
                         <div className="flex items-center gap-3">
@@ -496,15 +337,13 @@ export default function ProjectOverviewPage() {
                                 <RefreshCw size={18} />
                                 Refresh
                             </button>
-                            {activeTab === 'project' && (
-                                <button
-                                    onClick={() => { setSelectedProject(null); setIsModalOpen(true); }}
-                                    className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
-                                >
-                                    <Plus size={18} />
-                                    New Project
-                                </button>
-                            )}
+                            <button
+                                onClick={() => { setSelectedProject(null); setIsModalOpen(true); }}
+                                className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                            >
+                                <Plus size={18} />
+                                New Project
+                            </button>
                             {/* Migration Tools */}
                             <div className="border-l border-slate-300 pl-3 ml-1">
                                 <TaskMigration />
@@ -564,52 +403,18 @@ export default function ProjectOverviewPage() {
                                 Clear Filters
                             </button>
                         )}
+                        {/* Search */}
+                        <div className="ml-auto w-full max-w-sm">
+                            <input
+                                type="text"
+                                placeholder="Search projects..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                            />
+                        </div>
                     </div>
 
-                    {/* Tabs */}
-                    <div className="flex items-center gap-4 border-b border-slate-200 mb-6">
-                        <button
-                            onClick={() => setActiveTab('project')}
-                            className={`px-4 py-2 font-semibold text-sm transition-colors relative ${activeTab === 'project'
-                                ? 'text-indigo-600'
-                                : 'text-slate-500 hover:text-slate-700'
-                                }`}
-                        >
-                            <div className="flex items-center gap-2">
-                                <LayoutGrid size={18} />
-                                Project Overview
-                            </div>
-                            {activeTab === 'project' && (
-                                <div className="absolute bottom-0 left-0 w-full h-0.5 bg-indigo-600 rounded-t-full" />
-                            )}
-                        </button>
-                        <button
-                            onClick={() => setActiveTab('task')}
-                            className={`px-4 py-2 font-semibold text-sm transition-colors relative ${activeTab === 'task'
-                                ? 'text-indigo-600'
-                                : 'text-slate-500 hover:text-slate-700'
-                                }`}
-                        >
-                            <div className="flex items-center gap-2">
-                                <List size={18} />
-                                Task Overview
-                            </div>
-                            {activeTab === 'task' && (
-                                <div className="absolute bottom-0 left-0 w-full h-0.5 bg-indigo-600 rounded-t-full" />
-                            )}
-                        </button>
-                    </div>
-
-                    {/* Search (Optional, global) */}
-                    <div className="mb-6 max-w-md">
-                        <input
-                            type="text"
-                            placeholder={activeTab === 'project' ? "Search projects..." : "Search tasks..."}
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                        />
-                    </div>
                 </div>
 
                 {/* Content */}
@@ -617,22 +422,14 @@ export default function ProjectOverviewPage() {
                     <div className="flex items-center justify-center h-64">
                         <div className="animate-spin w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full" />
                     </div>
-                ) : activeTab === 'project' ? (
-                    <ProjectTable
+                ) : (
+                    <BudgetTable
                         projects={filteredProjects}
                         tasks={filteredTasks}
                         onEdit={(p) => { setSelectedProject(p); setIsModalOpen(true); }}
                         onDelete={handleDeleteProject}
+                        onUpdateProject={handleUpdateProjectInline}
                     />
-                ) : (
-                    <div className="-mt-6 -mx-4">
-                        <ProjectStatusPage
-                            pageTitle="Task Overview"
-                            statusFilter="All"
-                            hideHeader={true}
-                            showAvailability={false}
-                        />
-                    </div>
                 )}
             </div>
 
@@ -643,17 +440,6 @@ export default function ProjectOverviewPage() {
                 project={selectedProject}
                 onSave={handleSaveProject}
             />
-
-            {/* Task Modal (Reuse existing TaskModal) */}
-            {isTaskModalOpen && (
-                <TaskModal
-                    isOpen={isTaskModalOpen}
-                    onClose={() => setIsTaskModalOpen(false)}
-                    task={selectedTask}
-                    onSave={handleSaveTask}
-                    onDelete={handleDeleteTask}
-                />
-            )}
         </div>
     );
 }
