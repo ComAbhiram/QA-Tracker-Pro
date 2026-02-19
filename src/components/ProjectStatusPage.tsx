@@ -14,6 +14,7 @@ import { useTeams } from '@/hooks/useTeams';
 import { getCurrentUserTeam } from '@/utils/userUtils';
 import Loader from '@/components/ui/Loader';
 import { useRouter } from 'next/navigation';
+import ResizableHeader from '@/components/ui/ResizableHeader';
 
 interface ProjectStatusPageProps {
     pageTitle: string;
@@ -437,6 +438,42 @@ export default function ProjectStatusPage({ pageTitle, statusFilter, showAvailab
                 </div>
             ) : (
                 <div className="space-y-6">
+                    {/* STICKY HEADER for All Tables */}
+                    <div className="sticky top-0 z-40 bg-white dark:bg-slate-900 shadow-md border-b border-slate-200 dark:border-slate-700 mb-2 rounded-t-lg overflow-hidden transition-colors">
+                        <table className="w-full text-xs text-slate-800 dark:text-slate-200 border-collapse table-fixed">
+                            <colgroup>
+                                <col style={{ width: columnWidths.projectName }} />
+                                <col style={{ width: columnWidths.projectType }} />
+                                <col style={{ width: columnWidths.priority }} />
+                                <col style={{ width: columnWidths.subPhase }} />
+                                <col style={{ width: columnWidths.pc }} />
+                                <col style={{ width: columnWidths.status }} />
+                                <col style={{ width: columnWidths.startDate }} />
+                                <col style={{ width: columnWidths.endDate }} />
+                                <col style={{ width: columnWidths.actualCompletionDate }} />
+                                <col style={{ width: columnWidths.comments }} />
+                                <col style={{ width: columnWidths.deviation }} />
+                                <col style={{ width: columnWidths.sprint }} />
+                            </colgroup>
+                            <thead className="bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-bold uppercase tracking-wider backdrop-blur-md">
+                                <tr>
+                                    <ResizableHeader label="Project" widthKey="projectName" width={columnWidths.projectName} onResizeStart={startResizing} />
+                                    <ResizableHeader label="Type" widthKey="projectType" width={columnWidths.projectType} onResizeStart={startResizing} />
+                                    <ResizableHeader label="Priority" widthKey="priority" width={columnWidths.priority} onResizeStart={startResizing} />
+                                    <ResizableHeader label="Phase" widthKey="subPhase" width={columnWidths.subPhase} onResizeStart={startResizing} />
+                                    <ResizableHeader label="PC" widthKey="pc" width={columnWidths.pc} onResizeStart={startResizing} />
+                                    <ResizableHeader label="Status" widthKey="status" width={columnWidths.status} onResizeStart={startResizing} />
+                                    <ResizableHeader label="Start" widthKey="startDate" width={columnWidths.startDate} onResizeStart={startResizing} />
+                                    <ResizableHeader label="End" widthKey="endDate" width={columnWidths.endDate} onResizeStart={startResizing} />
+                                    <ResizableHeader label="Actual End" widthKey="actualCompletionDate" width={columnWidths.actualCompletionDate} onResizeStart={startResizing} />
+                                    <ResizableHeader label="Comments" widthKey="comments" width={columnWidths.comments} isSortable={false} onResizeStart={startResizing} />
+                                    <ResizableHeader label="Deviation" widthKey="deviation" width={columnWidths.deviation} onResizeStart={startResizing} />
+                                    <ResizableHeader label="Sprint" widthKey="sprint" width={columnWidths.sprint} isSortable={false} onResizeStart={startResizing} />
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
+
                     {sortedAssignees.map(assignee => (
                         <AssigneeTaskTable
                             key={assignee}
@@ -444,6 +481,7 @@ export default function ProjectStatusPage({ pageTitle, statusFilter, showAvailab
                             tasks={groupedTasks[assignee]}
                             leaves={leaves}
                             columnWidths={columnWidths}
+                            hideHeader={true}
                             onEditTask={handleEditTask}
                             onFieldUpdate={handleFieldUpdate}
                             onResizeStart={startResizing}
