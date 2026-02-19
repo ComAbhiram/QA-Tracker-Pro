@@ -177,6 +177,13 @@ export function Sidebar() {
         }
     };
 
+    const [isHovered, setIsHovered] = useState(false);
+
+    // Derived state for visual expansion
+    // On desktop: Expand if not collapsed (pinned) OR if collapsed but hovered
+    // On mobile: Ignore hover, rely on collapsed state (which is handled by overlay/toggle)
+    const showExpanded = !isCollapsed || isHovered;
+
     return (
         <div id="app-sidebar-container">
             {/* Floating Toggle Button (Visible only when collapsed on mobile) */}
@@ -194,13 +201,15 @@ export function Sidebar() {
             <nav
                 className={`
                     fixed top-0 left-0 h-full flex flex-col z-50 bg-white border-r border-slate-100 dark:bg-slate-900 dark:border-slate-800 transition-all duration-300 ease-in-out
-                    ${isCollapsed ? '-translate-x-full lg:translate-x-0 lg:w-20' : 'translate-x-0 w-[16.25rem]'}
+                    ${showExpanded ? 'translate-x-0 w-[16.25rem]' : '-translate-x-full lg:translate-x-0 lg:w-20'}
                 `}
+                onMouseEnter={() => setIsHovered(true)}
+                onMouseLeave={() => setIsHovered(false)}
             >
-                <div className={`p-4 border-b border-transparent shrink-0 flex items-center justify-between gap-3 ${isCollapsed ? 'justify-center px-2' : ''}`}>
+                <div className={`p-4 border-b border-transparent shrink-0 flex items-center justify-between gap-3 ${!showExpanded ? 'justify-center px-2' : ''}`}>
 
                     {/* Logo Area */}
-                    {!isCollapsed && (
+                    {showExpanded && (
                         <div className="logo flex-1 min-w-0">
                             <div className="flex items-center gap-2">
                                 <div className="p-1.5 bg-yellow-500 rounded-lg text-white shrink-0">
@@ -243,20 +252,21 @@ export function Sidebar() {
                         </div>
                     )}
 
-                    {/* Collapsed Logo (Icon Only) */}
-                    {isCollapsed && (
+                    {/* Collapsed Logo (Icon Only) - Show only when strictly collapsed AND not hovered */}
+                    {!showExpanded && (
                         <div className="p-1.5 bg-yellow-500 rounded-lg text-white shrink-0 mb-4 cursor-pointer" onClick={toggleSidebar}>
                             {isGuest ? <Eye size={24} /> : <LayoutDashboard size={24} />}
                         </div>
                     )}
 
-                    {/* Toggle Button (Desktop) */}
-                    {!isCollapsed && (
+                    {/* Toggle Button (Desktop) - Show if expanded */}
+                    {showExpanded && (
                         <button
                             onClick={toggleSidebar}
                             className="hidden lg:flex p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
                         >
-                            <ChevronLeft size={20} />
+                            {/* If visually expanded but logic collapsed (hover state), show 'Pin' icon or similar? keeping sidebar chevron for now which toggles logic state */}
+                            {isCollapsed ? <ChevronRight size={20} className="rotate-180" /> : <ChevronLeft size={20} />}
                         </button>
                     )}
 
@@ -268,14 +278,14 @@ export function Sidebar() {
 
                 <div className="flex-1 overflow-y-auto custom-scrollbar p-3 space-y-1">
                     {Object.entries(navSections).map(([key, section]) => (
-                        <div key={key} className={`mb-2 ${isCollapsed ? 'mb-4 text-center' : ''}`}>
-                            {!isCollapsed && (
+                        <div key={key} className={`mb-2 ${!showExpanded ? 'mb-4 text-center' : ''}`}>
+                            {showExpanded && (
                                 <div className="text-xs font-semibold uppercase tracking-wider text-slate-400 mt-4 mb-2 px-3">
                                     <span>{section.title}</span>
                                 </div>
                             )}
                             {/* In collapsed mode, maybe show a separator or just space */}
-                            {isCollapsed && <div className="h-px bg-slate-100 dark:bg-slate-800 my-2 mx-2"></div>}
+                            {!showExpanded && <div className="h-px bg-slate-100 dark:bg-slate-800 my-2 mx-2"></div>}
 
                             <div className="space-y-1">
                                 {section.items.map((item) => {
@@ -287,28 +297,28 @@ export function Sidebar() {
                                             className={`
                                                 flex items-center rounded-lg cursor-pointer transition-all duration-200 font-medium text-slate-500 dark:text-slate-400 text-sm hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:text-slate-800 dark:hover:text-slate-100 relative overflow-hidden group
                                                 ${isActive ? 'text-yellow-600 dark:text-yellow-500 bg-yellow-50 dark:bg-yellow-900/20 font-semibold active-nav-item' : ''}
-                                                ${isCollapsed ? 'justify-center p-3' : 'px-3 py-2.5'}
+                                                ${!showExpanded ? 'justify-center p-3' : 'px-3 py-2.5'}
                                             `}
-                                            title={isCollapsed ? item.label : ''}
+                                            title={!showExpanded ? item.label : ''}
                                         >
-                                            {isActive && !isCollapsed && (
+                                            {isActive && showExpanded && (
                                                 <span className="absolute left-0 top-0 bottom-0 w-1 bg-yellow-500 dark:bg-yellow-600 rounded-r-full" />
                                             )}
 
-                                            <span className={`nav-icon flex items-center justify-center ${!isCollapsed ? 'mr-3' : ''} ${isActive ? 'text-yellow-600 dark:text-yellow-500' : ''}`}>
+                                            <span className={`nav-icon flex items-center justify-center ${showExpanded ? 'mr-3' : ''} ${isActive ? 'text-yellow-600 dark:text-yellow-500' : ''}`}>
                                                 {item.icon}
                                             </span>
 
-                                            {!isCollapsed && <span className="nav-text truncate">{item.label}</span>}
+                                            {showExpanded && <span className="nav-text truncate">{item.label}</span>}
 
-                                            {!isCollapsed && item.badge && (
+                                            {showExpanded && item.badge && (
                                                 <span className="ml-auto bg-sky-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md">
                                                     {item.badge}
                                                 </span>
                                             )}
 
-                                            {/* Tooltip on hover when collapsed */}
-                                            {isCollapsed && (
+                                            {/* Tooltip on hover when collapsed - ONLY when NOT expanded (which implies not hovered, so this practically never shows on desktop if hover-expand is on, but keeps for mobile/edge cases) */}
+                                            {!showExpanded && (
                                                 <div className="absolute left-full ml-2 px-2 py-1 bg-slate-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50 shadow-lg">
                                                     {item.label}
                                                 </div>
@@ -321,8 +331,8 @@ export function Sidebar() {
                     ))}
                 </div>
 
-                <div className={`mt-auto border-t border-slate-100 dark:border-slate-800 p-4 space-y-2 ${isCollapsed ? 'px-2' : ''}`}>
-                    {!isCollapsed && (
+                <div className={`mt-auto border-t border-slate-100 dark:border-slate-800 p-4 space-y-2 ${!showExpanded ? 'px-2' : ''}`}>
+                    {showExpanded && (
                         <div className="px-2 mb-2">
                             <ModeToggle />
                         </div>
@@ -332,11 +342,11 @@ export function Sidebar() {
                     {!isPCMode && (userRole !== 'super_admin' || isGuest) && (
                         <button
                             onClick={() => setShowManageTeam(true)}
-                            className={`flex items-center gap-3 w-full p-2.5 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-indigo-50 dark:hover:bg-slate-800/50 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all ${isCollapsed ? 'justify-center' : ''}`}
-                            title={isCollapsed ? "Manage Team" : ""}
+                            className={`flex items-center gap-3 w-full p-2.5 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-indigo-50 dark:hover:bg-slate-800/50 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all ${!showExpanded ? 'justify-center' : ''}`}
+                            title={!showExpanded ? "Manage Team" : ""}
                         >
                             <Users size={20} className="transition-colors" />
-                            {!isCollapsed && <span className="font-medium text-sm">Manage Team</span>}
+                            {showExpanded && <span className="font-medium text-sm">Manage Team</span>}
                         </button>
                     )}
 
@@ -350,14 +360,14 @@ export function Sidebar() {
                                 window.location.href = '/login';
                             }
                         }}
-                        className={`flex items-center gap-3 w-full p-2.5 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-400 transition-all ${isCollapsed ? 'justify-center' : ''}`}
-                        title={isCollapsed ? (isPCMode ? 'Exit PC Mode' : isGuest ? 'Exit Manager Mode' : 'Sign Out') : ""}
+                        className={`flex items-center gap-3 w-full p-2.5 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-400 transition-all ${!showExpanded ? 'justify-center' : ''}`}
+                        title={!showExpanded ? (isPCMode ? 'Exit PC Mode' : isGuest ? 'Exit Manager Mode' : 'Sign Out') : ""}
                     >
                         <LogOut size={20} />
-                        {!isCollapsed && <span className="font-medium text-sm">{isPCMode ? 'Exit Mode' : isGuest ? 'Exit Mode' : 'Sign Out'}</span>}
+                        {showExpanded && <span className="font-medium text-sm">{isPCMode ? 'Exit Mode' : isGuest ? 'Exit Mode' : 'Sign Out'}</span>}
                     </button>
 
-                    {isCollapsed && (
+                    {!showExpanded && (
                         <div className="flex justify-center pt-2">
                             <button onClick={toggleSidebar} className="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800">
                                 <ChevronRight size={20} />
