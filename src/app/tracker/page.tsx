@@ -208,24 +208,82 @@ export default function Tracker() {
                     .eq('team_id', effectiveTeamId)
                     .order('display_order', { ascending: true });
 
-                if (membersError) {
-                    // FALLBACK: If display_order column is missing (400 error), fetch without it
-                    if (membersError.code === 'PGRST204' || membersError.message.includes('display_order')) {
-                        console.warn('[Tracker] display_order column missing, falling back to name-based sorting');
-                        const { data: fallbackData } = await supabase
-                            .from('team_members')
-                            .select('id, name')
-                            .eq('team_id', effectiveTeamId);
 
-                        if (fallbackData) {
-                            setTeamMembers(fallbackData.map((m, i) => ({ ...m, display_order: i })));
-                        }
-                    } else {
-                        console.error('Error fetching team members:', membersError);
+                // Identify if display_order column exists based on error
+                const isDisplayOrderMissing = membersError && (membersError.code === 'PGRST204' || membersError.message.includes('display_order'));
+
+                let finalMembers = membersData;
+
+                if (isDisplayOrderMissing) {
+                    console.warn('[Tracker] display_order column missing, falling back.');
+                    const { data: fallbackData } = await supabase
+                        .from('team_members')
+                        .select('id, name')
+                        .eq('team_id', effectiveTeamId);
+
+                    if (fallbackData) {
+                        // Add dummy display_order for frontend sorting
+                        finalMembers = fallbackData.map((m, i) => ({ ...m, display_order: i }));
                     }
-                } else if (membersData) {
-                    setTeamMembers(membersData);
+                } else if (membersError) {
+                    console.error('Error fetching team members:', membersError);
                 }
+
+                // Sync missing assignees to team_members
+                // Use taskData (raw DB tasks) to find all assignees
+                if (taskData && finalMembers) {
+                    const existingNames = new Set(finalMembers.map(m => m.name));
+                    const neededNames = new Set<string>();
+
+                    taskData.forEach((t: any) => {
+                        if (t.assigned_to && !existingNames.has(t.assigned_to)) neededNames.add(t.assigned_to);
+                        if (t.assigned_to2 && !existingNames.has(t.assigned_to2)) neededNames.add(t.assigned_to2);
+                        if (t.additional_assignees) {
+                            t.additional_assignees.forEach((a: string) => {
+                                if (!existingNames.has(a)) neededNames.add(a);
+                            });
+                        }
+                    });
+
+                    if (neededNames.size > 0) {
+                        // Only include display_order in insert if column is known to exist
+                        const newMembers = Array.from(neededNames).map(name => {
+                            const m: any = { team_id: effectiveTeamId, name: name };
+                            if (!isDisplayOrderMissing) m.display_order = 0;
+                            return m;
+                        });
+
+                        // Insert missing members
+                        const { error: insertError } = await supabase
+                            .from('team_members')
+                            .insert(newMembers);
+
+                        if (!insertError && !isDisplayOrderMissing) {
+                            // Refetch to get IDs and Order
+                            const { data: refreshedMembers } = await supabase
+                                .from('team_members')
+                                .select('id, name, display_order')
+                                .eq('team_id', effectiveTeamId)
+                                .order('display_order', { ascending: true });
+
+                            if (refreshedMembers) {
+                                finalMembers = refreshedMembers;
+                            }
+                        } else if (!insertError && isDisplayOrderMissing) {
+                            // If we inserted but can't sort by order, just fetch names
+                            const { data: refreshedFallback } = await supabase
+                                .from('team_members')
+                                .select('id, name')
+                                .eq('team_id', effectiveTeamId);
+
+                            if (refreshedFallback) {
+                                finalMembers = refreshedFallback.map((m, i) => ({ ...m, display_order: i }));
+                            }
+                        }
+                    }
+                }
+
+                if (finalMembers) setTeamMembers(finalMembers);
             }
 
             // 2. Fetch Leaves (Active team only)
@@ -703,6 +761,8 @@ export default function Tracker() {
         // 2. Check teamMembers order
         const memberA = teamMembers.find(m => m.name === a);
         const memberB = teamMembers.find(m => m.name === b);
+
+        /* console.log('Sorting:', { a, b, foundA: !!memberA, foundB: !!memberB, orderA: memberA?.display_order, orderB: memberB?.display_order }); */
 
         if (memberA && memberB) {
             return (memberA.display_order ?? 0) - (memberB.display_order ?? 0);

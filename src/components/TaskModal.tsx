@@ -129,11 +129,29 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
         const fetchUsers = async () => {
             setLoadingHubstaffUsers(true);
             try {
-                const response = await fetch('/api/hubstaff/users');
-                if (response.ok) {
-                    const data = await response.json();
-                    const members = data.members?.map((u: any) => ({ id: u.name, label: u.name })) || [];
-                    setHubstaffUsers(members);
+                // QA Team (Super Admin View) or No Team Context -> Fetch All Hubstaff Users
+                // QA Team ID: ba60298b-8635-4cca-bcd5-7e470fad60e6
+                const isQATeamContext = effectiveTeamId === 'ba60298b-8635-4cca-bcd5-7e470fad60e6';
+
+                if (isQATeamContext || !effectiveTeamId) {
+                    const response = await fetch('/api/hubstaff/users');
+                    if (response.ok) {
+                        const data = await response.json();
+                        const members = data.members?.map((u: any) => ({ id: u.name, label: u.name })) || [];
+                        setHubstaffUsers(members);
+                    }
+                } else {
+                    // Specific Team Context -> Fetch only team members
+                    const { data: teamMembers, error } = await supabase
+                        .from('team_members')
+                        .select('name')
+                        .eq('team_id', effectiveTeamId);
+
+                    if (error) {
+                        console.error('[TaskModal] Error fetching team members:', error);
+                    } else if (teamMembers) {
+                        setHubstaffUsers(teamMembers.map(m => ({ id: m.name, label: m.name })));
+                    }
                 }
             } catch (error) {
                 console.error('[TaskModal] Error fetching users:', error);
@@ -142,7 +160,7 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
             }
         };
         if (isOpen) fetchUsers();
-    }, [isOpen]);
+    }, [isOpen, effectiveTeamId]);
 
     // Fetch PCs
     useEffect(() => {

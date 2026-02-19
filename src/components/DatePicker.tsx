@@ -34,8 +34,8 @@ export function DatePicker({ date, setDate, className, placeholder = "Pick a dat
                         className
                     )}
                 >
-                    <span className="flex items-center justify-between w-full h-full">
-                        {date && !isNaN(date.getTime()) ? <span>{format(date, "MMM d, yyyy")}</span> : <span className="text-slate-400">{placeholder}</span>}
+                    <span className="flex items-center justify-between w-full h-full overflow-hidden">
+                        {date && !isNaN(date.getTime()) ? <span className="truncate">{format(date, "MMM d, yyyy")}</span> : <span className="text-slate-400 truncate">{placeholder}</span>}
                         <ChevronDownIcon className="ml-2 h-4 w-4 opacity-50 shrink-0" />
                     </span>
                 </Button>
