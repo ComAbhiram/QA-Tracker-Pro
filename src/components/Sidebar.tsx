@@ -145,7 +145,7 @@ export function Sidebar() {
             title: 'PROJECTS',
             items: [
                 // ...(!isPCMode ? [{ label: 'Project Overview', icon: <FolderKanban size={18} />, href: '/project-overview' }] : []),
-                ...(!isPCMode ? [{ label: 'Budget and Activity', icon: <FolderKanban size={18} />, href: '/budget-and-activity' }] : []),
+                // ...(!isPCMode ? [{ label: 'Budget and Activity', icon: <FolderKanban size={18} />, href: '/budget-and-activity' }] : []),
                 ...(!isPCMode ? [{ label: 'Manage Projects', icon: <Database size={18} />, href: '/projects' }] : []),
                 { label: 'On Hold', icon: <PauseCircle size={18} />, href: '/projects/on-hold' },
                 { label: 'Completed', icon: <CheckSquare size={18} />, href: '/projects/completed' },
