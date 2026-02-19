@@ -330,24 +330,25 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
             }
 
             // Common data for all tasks
+            // Common data for all tasks
             const sharedData = {
-                project_name: formData.projectName,
-                project_type: formData.projectType,
-                sub_phase: formData.subPhase,
+                projectName: formData.projectName,
+                projectType: formData.projectType,
+                subPhase: formData.subPhase,
                 priority: formData.priority,
                 pc: formData.pc,
-                bug_count: formData.bugCount,
-                html_bugs: formData.htmlBugs,
-                functional_bugs: formData.functionalBugs,
-                deviation_reason: formData.deviationReason,
+                bugCount: formData.bugCount,
+                htmlBugs: formData.htmlBugs,
+                functionalBugs: formData.functionalBugs,
+                deviationReason: formData.deviationReason,
                 comments: formData.comments,
-                current_updates: formData.currentUpdates,
-                sprint_link: formData.sprintLink,
-                days_allotted: formData.daysAllotted,
-                time_taken: formData.timeTaken,
-                days_taken: formData.daysTaken,
+                currentUpdates: formData.currentUpdates,
+                sprintLink: formData.sprintLink,
+                daysAllotted: formData.daysAllotted,
+                timeTaken: formData.timeTaken,
+                daysTaken: formData.daysTaken,
                 deviation: formData.deviation,
-                activity_percentage: formData.activityPercentage,
+                activityPercentage: formData.activityPercentage,
                 teamId
             };
 
@@ -600,6 +601,7 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
                                                             handleDynamicAssigneeChange(index, 'endDate', dateStr);
                                                         }}
                                                         placeholder="End"
+                                                        align="end"
                                                     />
                                                 </div>
                                             </div>
@@ -623,6 +625,7 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
                                                                 handleDynamicAssigneeChange(index, 'actualCompletionDate', dateStr);
                                                             }}
                                                             placeholder="Actual Completion"
+                                                            align="end"
                                                         />
                                                     </div>
                                                 )}

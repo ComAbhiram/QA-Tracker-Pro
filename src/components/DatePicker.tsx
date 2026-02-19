@@ -20,7 +20,7 @@ interface DatePickerProps {
     placeholder?: string
 }
 
-export function DatePicker({ date, setDate, className, placeholder = "Pick a date" }: DatePickerProps) {
+export function DatePicker({ date, setDate, className, placeholder = "Pick a date", align = "start" }: DatePickerProps & { align?: "center" | "start" | "end" }) {
     const [open, setOpen] = React.useState(false)
 
     return (
@@ -40,7 +40,7 @@ export function DatePicker({ date, setDate, className, placeholder = "Pick a dat
                     </span>
                 </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-auto p-0 z-[300]" align="start">
+            <PopoverContent className="w-auto p-0 z-[300]" align={align}>
                 <div className="p-2 border-b border-slate-100 flex justify-between items-center">
                     <span className="text-xs font-medium text-slate-500">Pick a date</span>
                     <button
