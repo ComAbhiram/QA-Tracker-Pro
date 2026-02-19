@@ -62,6 +62,9 @@ export function DatePicker({ date, setDate, className, placeholder = "Pick a dat
                         setOpen(false);
                     }}
                     initialFocus
+                    classNames={{
+                        day_selected: "bg-indigo-600 text-white hover:bg-indigo-700 focus:bg-indigo-700"
+                    }}
                 />
             </PopoverContent>
         </Popover>

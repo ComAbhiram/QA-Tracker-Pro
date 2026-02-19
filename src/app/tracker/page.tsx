@@ -10,6 +10,7 @@ import AssigneeTaskTable from '@/components/AssigneeTaskTable';
 import { useGuestMode } from '@/contexts/GuestContext';
 import { calculateAvailability } from '@/lib/availability';
 import { useToast } from '@/contexts/ToastContext';
+import { toast } from 'sonner';
 import { DatePicker } from '@/components/DatePicker';
 import useColumnResizing from '@/hooks/useColumnResizing';
 import ResizableHeader from '@/components/ui/ResizableHeader';
@@ -678,11 +679,24 @@ export default function Tracker() {
                         }));
 
                     if (updatedMembers.length > 0) {
-                        fetch('/api/team-members/reorder', {
-                            method: 'PUT',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ members: updatedMembers })
-                        }).catch(err => console.error('Failed to save order:', err));
+                        try {
+                            fetch('/api/team-members/reorder', {
+                                method: 'PUT',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ members: updatedMembers })
+                            }).then(async (res) => {
+                                if (!res.ok) {
+                                    const errData = await res.json();
+                                    console.error('Reorder failed:', errData);
+                                    toast.error('Failed to save order. Migration might be missing.');
+                                }
+                            });
+                        } catch (err) {
+                            console.error('Failed to call reorder API:', err);
+                            toast.error('Network error saving order.');
+                        }
+                    } else {
+                        console.warn('No valid members to reorder (IDs missing).');
                     }
 
                     return next;
