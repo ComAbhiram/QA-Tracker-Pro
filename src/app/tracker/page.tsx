@@ -403,6 +403,7 @@ export default function Tracker() {
             assigned_to2: t.assignedTo2,
             additional_assignees: t.additionalAssignees || [],
             pc: t.pc,
+            priority: t.priority,
             start_date: t.startDate || null,
             end_date: t.endDate || null,
             actual_completion_date: t.actualCompletionDate ? new Date(t.actualCompletionDate).toISOString() : null,
