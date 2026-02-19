@@ -51,11 +51,13 @@ export async function GET(request: NextRequest) {
             .from('projects')
             .select('*');
 
+        /*
         if (profile.role !== 'super_admin' && !isGuestMode) {
             projectsQuery = projectsQuery.eq('team_id', profile.team_id);
         } else if (requestedTeamId) {
             projectsQuery = projectsQuery.eq('team_id', requestedTeamId);
         }
+        */
 
         let { data: projects, error: projectsError } = await projectsQuery.order('created_at', { ascending: false });
 
