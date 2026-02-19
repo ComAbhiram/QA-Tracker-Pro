@@ -85,7 +85,50 @@ export default function ProjectOverviewPage() {
         tasks.flatMap(t => [t.assignedTo, t.assignedTo2, ...(t.additionalAssignees || [])].filter(Boolean) as string[])
     )).sort();
 
-    // Filtering Logic
+    // Filtering Tasks Logic (Moved up to be accessible if needed, or we reproduce logic)
+    // Actually, let's keep them separate but improve the logic.
+
+    const filteredTasks = tasks.filter(t => {
+        // Search
+        const pName = t.projectName || '';
+        const matchesSearch = pName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (t.assignedTo && t.assignedTo.toLowerCase().includes(searchTerm.toLowerCase()));
+
+        // Date Range (using startDate and endDate overlap)
+        let matchesDate = true;
+        if (filterStartDate && filterEndDate) {
+            // Check for overlap: (StartA <= EndB) and (EndA >= StartB)
+            const filterStart = new Date(filterStartDate);
+            const filterEnd = new Date(filterEndDate);
+            // Set filterEnd to end of day
+            filterEnd.setHours(23, 59, 59, 999);
+
+            const taskStart = t.startDate ? new Date(t.startDate) : null;
+            const taskEnd = t.endDate ? new Date(t.endDate) : null;
+
+            if (taskStart && taskEnd) {
+                matchesDate = taskStart <= filterEnd && taskEnd >= new Date(filterStartDate);
+            }
+        } else if (filterStartDate) {
+            const taskEnd = t.endDate ? new Date(t.endDate) : null;
+            matchesDate = taskEnd ? taskEnd >= new Date(filterStartDate) : true;
+        } else if (filterEndDate) {
+            const taskStart = t.startDate ? new Date(t.startDate) : null;
+            const filterEnd = new Date(filterEndDate);
+            filterEnd.setHours(23, 59, 59, 999);
+            matchesDate = taskStart ? taskStart <= filterEnd : true;
+        }
+
+        // QA Filter
+        let matchesQA = true;
+        if (filterQA) {
+            const assignees = [t.assignedTo, t.assignedTo2, ...(t.additionalAssignees || [])];
+            matchesQA = assignees.includes(filterQA);
+        }
+
+        return matchesSearch && matchesDate && matchesQA;
+    });
+
     const filteredProjects = projects.filter(p => {
         if (!p) return false;
         // Search
@@ -93,12 +136,6 @@ export default function ProjectOverviewPage() {
         const resources = p.resources || '';
         const matchesSearch = name.toLowerCase().includes(searchTerm.toLowerCase()) ||
             resources.toLowerCase().includes(searchTerm.toLowerCase());
-
-        // Date Range (using started_date or created_at)
-        let matchesDate = true;
-        const projectDate = p.started_date || p.created_at;
-        if (filterStartDate) matchesDate = matchesDate && projectDate >= filterStartDate;
-        if (filterEndDate) matchesDate = matchesDate && projectDate <= filterEndDate;
 
         // QA Filter (using resources string)
         let matchesQA = true;
@@ -113,44 +150,66 @@ export default function ProjectOverviewPage() {
             matchesAssigned = !!(resources && resources.trim().length > 0 && resources !== '-');
         }
 
-        return matchesSearch && matchesDate && matchesQA && matchesAssigned;
-    });
-
-    const filteredTasks = tasks.filter(t => {
-        // Search
-        // Search
-        const pName = t.projectName || '';
-        const matchesSearch = pName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            (t.assignedTo && t.assignedTo.toLowerCase().includes(searchTerm.toLowerCase()));
-
-        // Date Range (using startDate and endDate overlap)
+        // Date Range
         let matchesDate = true;
-        if (filterStartDate && filterEndDate) {
-            // Check for overlap: (StartA <= EndB) and (EndA >= StartB)
-            const filterStart = new Date(filterStartDate);
-            const filterEnd = new Date(filterEndDate);
-            const taskStart = t.startDate ? new Date(t.startDate) : null;
-            const taskEnd = t.endDate ? new Date(t.endDate) : null;
+        if (filterStartDate || filterEndDate) {
+            // Check 1: Project Created/Started in range
+            const projectDateStr = p.started_date || p.created_at;
+            let projectInRange = true;
+            if (projectDateStr) {
+                const projectDate = new Date(projectDateStr);
 
-            if (taskStart && taskEnd) {
-                matchesDate = taskStart <= filterEnd && taskEnd >= filterStart;
+                if (filterStartDate) {
+                    projectInRange = projectInRange && projectDate >= new Date(filterStartDate);
+                }
+                if (filterEndDate) {
+                    const end = new Date(filterEndDate);
+                    end.setHours(23, 59, 59, 999);
+                    projectInRange = projectInRange && projectDate <= end;
+                }
+            } else {
+                projectInRange = false;
             }
-        } else if (filterStartDate) {
-            const taskEnd = t.endDate ? new Date(t.endDate) : null;
-            matchesDate = taskEnd ? taskEnd >= new Date(filterStartDate) : true;
-        } else if (filterEndDate) {
-            const taskStart = t.startDate ? new Date(t.startDate) : null;
-            matchesDate = taskStart ? taskStart <= new Date(filterEndDate) : true;
+
+            // Check 2: Project has ACTIVE TASKS in range
+            // We can check if ANY task in 'filteredTasks' belongs to this project
+            // Note: filteredTasks already enforces Date Range + Search + QA.
+            // But we need to separate Search/QA from Date for this "Has Activity" check?
+            // If I search for "John", I want projects assigned to John that are active today.
+            // filteredTasks already has (Search="John" && Date="Today").
+            // So if filteredTasks has a task for this project, the project IS active today AND matches search.
+
+            // However, filteredProjects also applies matchesSearch and matchesQA separately.
+            // So we just need to know if there is ANY task execution overlap.
+
+            // Let's look at the tasks list directly to check for date overlap for this project, 
+            // ignoring the global Search/QA (since we check project-level search/QA above).
+            const hasTaskActivity = tasks.some(t => {
+                if (t.projectName?.trim().toLowerCase() !== p.project_name?.trim().toLowerCase()) return false;
+
+                // Check Date Overlap
+                const tStart = t.startDate ? new Date(t.startDate) : null;
+                const tEnd = t.endDate ? new Date(t.endDate) : null;
+
+                // If no dates on task, assuming it's NOT active in range? or IS?
+                // Usually tasks without dates appear in "All Time" but maybe not in specific range.
+                if (!tStart && !tEnd) return false;
+
+                const fStart = filterStartDate ? new Date(filterStartDate) : null;
+                const fEnd = filterEndDate ? new Date(filterEndDate) : null;
+                if (fEnd) fEnd.setHours(23, 59, 59, 999);
+
+                let overlap = true;
+                if (fStart && tEnd) overlap = overlap && (tEnd >= fStart);
+                if (fEnd && tStart) overlap = overlap && (tStart <= fEnd);
+
+                return overlap;
+            });
+
+            matchesDate = projectInRange || hasTaskActivity;
         }
 
-        // QA Filter
-        let matchesQA = true;
-        if (filterQA) {
-            const assignees = [t.assignedTo, t.assignedTo2, ...(t.additionalAssignees || [])];
-            matchesQA = assignees.includes(filterQA);
-        }
-
-        return matchesSearch && matchesDate && matchesQA;
+        return matchesSearch && matchesDate && matchesQA && matchesAssigned;
     });
 
     useEffect(() => {
