@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase-admin';
 
 export async function PUT(request: NextRequest) {
     try {
@@ -13,7 +13,7 @@ export async function PUT(request: NextRequest) {
         // Use a loop for now as Supabase doesn't have a built-in bulk update for different values per row easily without complex RPC
         // Given the team size is small (usually < 20), individual updates are okay, but we can wrap them in a Promise.all
         const updates = members.map(m =>
-            supabase
+            supabaseAdmin
                 .from('team_members')
                 .update({ display_order: m.display_order })
                 .eq('id', m.id)
