@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { LayoutGrid, List, Plus, RefreshCw, Download } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import ProjectTable from './components/ProjectTable';
-import TaskOverviewTable from './components/TaskOverviewTable'; // Import new table
+import ProjectStatusPage from '@/components/ProjectStatusPage'; // Import ProjectStatusPage
 import ProjectDetailsModal from './components/ProjectDetailsModal';
 import TaskModal from '@/components/TaskModal'; // Import TaskModal
 import { supabase } from '@/lib/supabase';
@@ -565,10 +565,14 @@ export default function ProjectOverviewPage() {
                         onDelete={handleDeleteProject}
                     />
                 ) : (
-                    <TaskOverviewTable
-                        tasks={filteredTasks}
-                        onEdit={(t) => { setSelectedTask(t); setIsTaskModalOpen(true); }}
-                    />
+                    <div className="-mt-6 -mx-4">
+                        <ProjectStatusPage
+                            pageTitle="Task Overview"
+                            statusFilter="All"
+                            hideHeader={true}
+                            showAvailability={false}
+                        />
+                    </div>
                 )}
             </div>
 
