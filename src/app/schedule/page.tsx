@@ -326,70 +326,107 @@ export default function Schedule() {
         setIsTaskModalOpen(true);
     };
 
-    const saveTask = async (taskData: Partial<Task>) => {
-        // if (!editingTask) return; // Removed to allow creation
-
-        const payloadACD = taskData.actualCompletionDate ? new Date(taskData.actualCompletionDate).toISOString() : null;
-
-        const dbPayload: any = {
-            project_name: taskData.projectName,
-            project_type: taskData.projectType,
-            sub_phase: taskData.subPhase,
-            priority: taskData.priority,
-            pc: taskData.pc,
-            status: taskData.status,
-            assigned_to: taskData.assignedTo,
-            assigned_to2: taskData.assignedTo2,
-            start_date: taskData.startDate || null,
-            end_date: taskData.endDate || null,
-            actual_completion_date: payloadACD,
-            comments: taskData.comments,
-            current_updates: taskData.currentUpdates,
-            bug_count: taskData.bugCount,
-            html_bugs: taskData.htmlBugs,
-            functional_bugs: taskData.functionalBugs,
-            deviation_reason: taskData.deviationReason,
-            sprint_link: taskData.sprintLink,
-            days_allotted: Number(taskData.daysAllotted) || 0,
-            time_taken: taskData.timeTaken || '00:00:00',
-            days_taken: Number(taskData.daysTaken) || 0,
-            deviation: Number(taskData.deviation) || 0,
-            activity_percentage: Number(taskData.activityPercentage) || 0,
-            include_saturday: taskData.includeSaturday || false,
-            include_sunday: taskData.includeSunday || false,
-            team_id: taskData.teamId
+    const saveTask = async (taskData: Partial<Task> | Partial<Task>[]) => {
+        // Helper to format payload
+        const formatPayload = (t: Partial<Task>) => {
+            const payloadACD = t.actualCompletionDate ? new Date(t.actualCompletionDate).toISOString() : null;
+            return {
+                project_name: t.projectName,
+                project_type: t.projectType,
+                sub_phase: t.subPhase,
+                priority: t.priority,
+                pc: t.pc,
+                status: t.status,
+                assigned_to: t.assignedTo,
+                assigned_to2: t.assignedTo2,
+                start_date: t.startDate || null,
+                end_date: t.endDate || null,
+                actual_completion_date: payloadACD,
+                comments: t.comments,
+                current_updates: t.currentUpdates,
+                bug_count: t.bugCount,
+                html_bugs: t.htmlBugs,
+                functional_bugs: t.functionalBugs,
+                deviation_reason: t.deviationReason,
+                sprint_link: t.sprintLink,
+                days_allotted: Number(t.daysAllotted) || 0,
+                time_taken: t.timeTaken || '00:00:00',
+                days_taken: Number(t.daysTaken) || 0,
+                deviation: Number(t.deviation) || 0,
+                activity_percentage: Number(t.activityPercentage) || 0,
+                include_saturday: t.includeSaturday || false,
+                include_sunday: t.includeSunday || false,
+                team_id: t.teamId
+            };
         };
 
-        if (editingTask) {
-            // UPDATE existing task
-            const { team_id, ...updatePayload } = dbPayload;
-            const { error } = await supabase
-                .from('tasks')
-                .update(updatePayload)
-                .eq('id', editingTask.id);
+        try {
+            if (Array.isArray(taskData)) {
+                // Bulk Operation
+                const payloads = taskData.map(formatPayload);
 
-            if (error) {
-                console.error('Error updating task:', error);
-                alert(`Failed to save task: ${error.message}`);
-                return;
-            }
-        } else {
-            // CREATE new task
-            const { error } = await supabase
-                .from('tasks')
-                .insert([dbPayload]);
+                if (editingTask) {
+                    // Update main + Create others
+                    const [first, ...rest] = payloads;
+                    if (first) {
+                        const { team_id, ...updatePayload } = first;
+                        const { error } = await supabase
+                            .from('tasks')
+                            .update(updatePayload)
+                            .eq('id', editingTask.id);
+                        if (error) throw error;
+                    }
+                    if (rest.length > 0) {
+                        const { error } = await supabase
+                            .from('tasks')
+                            .insert(rest);
+                        if (error) throw error;
+                    }
+                } else {
+                    // Bulk Create
+                    const { error } = await supabase
+                        .from('tasks')
+                        .insert(payloads);
+                    if (error) throw error;
+                }
 
-            if (error) {
-                console.error('Error creating task:', error);
-                alert(`Failed to create task: ${error.message}`);
-                return;
+            } else {
+                // Single Operation
+                const dbPayload = formatPayload(taskData);
+
+                if (editingTask) {
+                    // UPDATE existing task
+                    const { team_id, ...updatePayload } = dbPayload;
+                    const { error } = await supabase
+                        .from('tasks')
+                        .update(updatePayload)
+                        .eq('id', editingTask.id);
+
+                    if (error) {
+                        console.error('Error updating task:', error);
+                        alert(`Failed to save task: ${error.message}`);
+                        return;
+                    }
+                } else {
+                    // CREATE new task
+                    const { error } = await supabase
+                        .from('tasks')
+                        .insert([dbPayload]);
+
+                    if (error) {
+                        console.error('Error creating task:', error);
+                        alert(`Failed to create task: ${error.message}`);
+                        return;
+                    }
+                }
             }
+
+            await fetchTasks();
+            setIsTaskModalOpen(false);
+        } catch (error: any) {
+            console.error('Error saving task:', error);
+            alert(`Failed to save task: ${error.message}`);
         }
-
-
-
-        await fetchTasks();
-        setIsTaskModalOpen(false);
     };
 
     const handleDeleteTask = async (taskId: number) => {

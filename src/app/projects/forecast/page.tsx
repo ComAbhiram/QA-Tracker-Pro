@@ -87,38 +87,124 @@ export default function ForecastProjects() {
         setIsModalOpen(true);
     };
 
-    const handleSaveTask = async (updatedTask: Partial<Task>) => {
+    const handleSaveTask = async (updatedTask: Partial<Task> | Partial<Task>[]) => {
         try {
-            const { error } = await supabase
-                .from('tasks')
-                .update({
-                    project_name: updatedTask.projectName,
-                    project_type: updatedTask.projectType,
-                    sub_phase: updatedTask.subPhase,
-                    priority: updatedTask.priority,
-                    pc: updatedTask.pc,
-                    assigned_to: updatedTask.assignedTo,
-                    assigned_to2: updatedTask.assignedTo2,
-                    additional_assignees: updatedTask.additionalAssignees || [],
-                    status: updatedTask.status,
-                    start_date: updatedTask.startDate || null,
-                    end_date: updatedTask.endDate || null,
-                    actual_completion_date: updatedTask.actualCompletionDate || null,
-                    comments: updatedTask.comments,
-                    current_updates: updatedTask.currentUpdates,
-                    bug_count: updatedTask.bugCount,
-                    html_bugs: updatedTask.htmlBugs,
-                    functional_bugs: updatedTask.functionalBugs,
-                    deviation_reason: updatedTask.deviationReason,
-                    sprint_link: updatedTask.sprintLink,
-                    include_saturday: updatedTask.includeSaturday || false,
-                    include_sunday: updatedTask.includeSunday || false
-                })
-                .eq('id', selectedTask?.id);
+            if (Array.isArray(updatedTask)) {
+                // Bulk / Split
+                const [first, ...rest] = updatedTask;
 
-            if (error) throw error;
+                // Update main task
+                if (first) {
+                    const { error } = await supabase
+                        .from('tasks')
+                        .update({
+                            project_name: first.projectName,
+                            project_type: first.projectType,
+                            sub_phase: first.subPhase,
+                            priority: first.priority,
+                            pc: first.pc,
+                            assigned_to: first.assignedTo,
+                            assigned_to2: first.assignedTo2,
+                            additional_assignees: first.additionalAssignees || [],
+                            status: first.status,
+                            start_date: first.startDate || null,
+                            end_date: first.endDate || null,
+                            actual_completion_date: first.actualCompletionDate || null,
+                            comments: first.comments,
+                            current_updates: first.currentUpdates,
+                            bug_count: first.bugCount,
+                            html_bugs: first.htmlBugs,
+                            functional_bugs: first.functionalBugs,
+                            deviation_reason: first.deviationReason,
+                            sprint_link: first.sprintLink,
+                            include_saturday: first.includeSaturday || false,
+                            include_sunday: first.includeSunday || false
+                        })
+                        .eq('id', selectedTask?.id);
 
-            setTasks(tasks.map(t => t.id === selectedTask?.id ? { ...t, ...updatedTask } : t));
+                    if (error) throw error;
+                }
+
+                // Insert new tasks if any
+                if (rest.length > 0) {
+                    // Need to map frontend Task to DB Task for insertion
+                    const dbRest = rest.map(t => ({
+                        project_name: t.projectName,
+                        project_type: t.projectType,
+                        sub_phase: t.subPhase,
+                        priority: t.priority,
+                        pc: t.pc,
+                        assigned_to: t.assignedTo,
+                        assigned_to2: t.assignedTo2,
+                        additional_assignees: t.additionalAssignees || [],
+                        status: t.status,
+                        start_date: t.startDate || null,
+                        end_date: t.endDate || null,
+                        actual_completion_date: t.actualCompletionDate || null,
+                        comments: t.comments,
+                        current_updates: t.currentUpdates,
+                        bug_count: t.bugCount,
+                        html_bugs: t.htmlBugs,
+                        functional_bugs: t.functionalBugs,
+                        deviation_reason: t.deviationReason,
+                        sprint_link: t.sprintLink,
+                        include_saturday: t.includeSaturday || false,
+                        include_sunday: t.includeSunday || false,
+                        team_id: t.teamId || selectedTask?.teamId // Ensure Team ID
+                    }));
+
+                    const { data: newTasksDB, error: insertError } = await supabase
+                        .from('tasks')
+                        .insert(dbRest)
+                        .select(); // Select to get IDs for local state
+
+                    if (insertError) throw insertError;
+
+                    // Update local state with new tasks
+                    if (newTasksDB) {
+                        const newTasksMapped = newTasksDB.map(mapTaskFromDB);
+                        setTasks(prev => [...prev, ...newTasksMapped]);
+                    }
+                }
+
+                // Update local state for the main task
+                if (first) {
+                    setTasks(prev => prev.map(t => t.id === selectedTask?.id ? { ...t, ...first } : t));
+                }
+
+            } else {
+                // Single Update
+                const { error } = await supabase
+                    .from('tasks')
+                    .update({
+                        project_name: updatedTask.projectName,
+                        project_type: updatedTask.projectType,
+                        sub_phase: updatedTask.subPhase,
+                        priority: updatedTask.priority,
+                        pc: updatedTask.pc,
+                        assigned_to: updatedTask.assignedTo,
+                        assigned_to2: updatedTask.assignedTo2,
+                        additional_assignees: updatedTask.additionalAssignees || [],
+                        status: updatedTask.status,
+                        start_date: updatedTask.startDate || null,
+                        end_date: updatedTask.endDate || null,
+                        actual_completion_date: updatedTask.actualCompletionDate || null,
+                        comments: updatedTask.comments,
+                        current_updates: updatedTask.currentUpdates,
+                        bug_count: updatedTask.bugCount,
+                        html_bugs: updatedTask.htmlBugs,
+                        functional_bugs: updatedTask.functionalBugs,
+                        deviation_reason: updatedTask.deviationReason,
+                        sprint_link: updatedTask.sprintLink,
+                        include_saturday: updatedTask.includeSaturday || false,
+                        include_sunday: updatedTask.includeSunday || false
+                    })
+                    .eq('id', selectedTask?.id);
+
+                if (error) throw error;
+                setTasks(tasks.map(t => t.id === selectedTask?.id ? { ...t, ...updatedTask } : t));
+            }
+
             setIsModalOpen(false);
         } catch (error) {
             console.error('Error updating task:', error);

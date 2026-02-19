@@ -21,9 +21,15 @@ interface TaskModalProps {
     isOpen: boolean;
     onClose: () => void;
     task?: Task | null;
-    onSave: (task: Partial<Task>) => Promise<void>;
+    onSave: (task: Partial<Task> | Partial<Task>[]) => Promise<void>;
     onDelete?: (taskId: number) => Promise<void>;
 }
+
+type AssigneeData = {
+    name: string | null;
+    startDate: string | null;
+    endDate: string | null;
+};
 
 const initialState: Partial<Task> = {
     status: 'Yet to Start',
@@ -45,18 +51,14 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
     const [loadingSubPhases, setLoadingSubPhases] = useState(false);
     const [globalPCs, setGlobalPCs] = useState<{ id: string; label: string }[]>([]);
     const [loadingPCs, setLoadingPCs] = useState(false);
-
     const { isGuest, selectedTeamId } = useGuestMode();
     const [userTeamId, setUserTeamId] = useState<string | null>(null);
     const { error: toastError } = useToast();
-
-    // Confirmation Modal State
     const [showEndDateWarning, setShowEndDateWarning] = useState(false);
-    const [isSaving, setIsSaving] = useState(false);
-
     const [formData, setFormData] = useState<Partial<Task>>(initialState);
+    const [assignees, setAssignees] = useState<AssigneeData[]>([{ name: null, startDate: null, endDate: null }]);
 
-    // Fetch Team ID on mount
+    // Fetch Team ID
     useEffect(() => {
         const fetchTeam = async () => {
             const { getCurrentUserTeam } = await import('@/utils/userUtils');
@@ -68,34 +70,21 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
 
     const effectiveTeamId = isGuest ? selectedTeamId : userTeamId;
 
-    // Fetch projects on mount or when team changes
+    // Fetch Projects
     useEffect(() => {
         const fetchProjects = async () => {
             setIsFetchingProjects(true);
             try {
-                // Use new API route to bypass RLS and ensure Managers get all projects
                 let url = '/api/projects';
-
-                // CRITICAL FIX: Pass team_id for ALL users (guest mode AND regular users)
-                // This ensures consistent filtering across Manage Projects and Task Creation
                 if (effectiveTeamId) {
                     url += `?team_id=${effectiveTeamId}`;
-                    console.log('[TaskModal] Fetching projects with team_id:', effectiveTeamId);
                 }
-
                 const response = await fetch(url);
                 if (response.ok) {
                     const data = await response.json();
                     if (data.projects) {
-                        setProjects(data.projects.map((p: any) => ({
-                            id: p.id,
-                            label: p.name
-                        })));
+                        setProjects(data.projects.map((p: any) => ({ id: p.id, label: p.name })));
                     }
-                } else {
-                    console.error('[TaskModal] Failed to fetch projects via API');
-                    // Fallback to empty or previous state
-                    setProjects([]);
                 }
             } catch (error) {
                 console.error('[TaskModal] Error fetching projects:', error);
@@ -103,114 +92,62 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
                 setIsFetchingProjects(false);
             }
         };
-
-        // projects are now global, fetch as soon as modal opens
-        if (isOpen) {
-            fetchProjects();
-        }
+        if (isOpen) fetchProjects();
     }, [isOpen, effectiveTeamId]);
 
-
-
-    // Fetch Hubstaff users OR Team Members on open
-    const fetchUsers = useCallback(async () => {
-        setLoadingHubstaffUsers(true);
-        try {
-            // Helper function to fetch from API
-            const fetchFromAPI = async () => {
+    // Fetch Users
+    useEffect(() => {
+        const fetchUsers = async () => {
+            setLoadingHubstaffUsers(true);
+            try {
                 const response = await fetch('/api/hubstaff/users');
                 if (response.ok) {
                     const data = await response.json();
-                    return data.members?.map((u: any) => ({ name: u.name })) || [];
+                    const members = data.members?.map((u: any) => ({ id: u.name, label: u.name })) || [];
+                    setHubstaffUsers(members);
                 }
-                return [];
-            };
-
-            const { getCurrentUserTeam } = await import('@/utils/userUtils');
-            const userTeam = await getCurrentUserTeam();
-            const isSuperAdmin = userTeam?.role === 'super_admin';
-            const isQATeamGlobal = effectiveTeamId === 'ba60298b-8635-4cca-bcd5-7e470fad60e6';
-
-            let users: any[] = [];
-
-            if (!isSuperAdmin && !isGuest && !isQATeamGlobal && effectiveTeamId) {
-                const { data } = await supabase
-                    .from('team_members')
-                    .select('name')
-                    .eq('team_id', effectiveTeamId)
-                    .order('name');
-
-                if (data && data.length > 0) {
-                    users = data;
-                }
-            }
-
-            if (users.length === 0) {
-                users = await fetchFromAPI();
-            }
-
-            const uniqueUserNames = Array.from(new Set(users.map((u: any) => u.name).filter(Boolean)));
-            const formattedUsers = uniqueUserNames.map((name: any) => ({
-                id: name,
-                label: name
-            }));
-            setHubstaffUsers(formattedUsers);
-        } catch (error) {
-            console.error('[TaskModal] Error fetching users:', error);
-        } finally {
-            setLoadingHubstaffUsers(false);
-        }
-    }, [effectiveTeamId, isGuest]);
-
-    useEffect(() => {
-        if (isOpen) {
-            fetchUsers();
-        }
-    }, [isOpen, fetchUsers]);
-
-    // Detect if user is super admin
-    useEffect(() => {
-        const checkRole = async () => {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (user) {
-                const { data: profile } = await supabase
-                    .from('user_profiles')
-                    .select('role')
-                    .eq('id', user.id)
-                    .single();
-
-                setIsQATeam(profile?.role === 'super_admin');
+            } catch (error) {
+                console.error('[TaskModal] Error fetching users:', error);
+            } finally {
+                setLoadingHubstaffUsers(false);
             }
         };
-
-        if (isOpen) {
-            checkRole();
-        }
+        if (isOpen) fetchUsers();
     }, [isOpen]);
 
-    // Fetch sub-phases for team
+    // Fetch PCs
+    useEffect(() => {
+        const fetchPCs = async () => {
+            setLoadingPCs(true);
+            try {
+                const response = await fetch('/api/pcs');
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.pcs) {
+                        setGlobalPCs(data.pcs.map((pc: any) => ({ id: pc.name, label: pc.name })));
+                    }
+                }
+            } catch (error) {
+                console.error('[TaskModal] Error fetching PCs:', error);
+            } finally {
+                setLoadingPCs(false);
+            }
+        };
+        if (isOpen) fetchPCs();
+    }, [isOpen]);
+
+    // Fetch Subphases
     useEffect(() => {
         const fetchSubPhases = async () => {
-            if (!effectiveTeamId || effectiveTeamId === 'undefined') {
-                setSubPhases([]);
-                setLoadingSubPhases(false);
-                return;
-            }
-
+            if (!effectiveTeamId) return;
             setLoadingSubPhases(true);
             try {
                 const response = await fetch(`/api/subphases?team_id=${effectiveTeamId}`);
                 if (response.ok) {
                     const data = await response.json();
                     if (data.subphases) {
-                        const formattedPhases = data.subphases.map((sp: any) => ({
-                            id: sp.name,
-                            label: sp.name
-                        }));
-                        setSubPhases(formattedPhases);
+                        setSubPhases(data.subphases.map((sp: any) => ({ id: sp.name, label: sp.name })));
                     }
-                } else {
-                    console.error('[TaskModal] Failed to fetch sub-phases');
                 }
             } catch (error) {
                 console.error('[TaskModal] Error fetching sub-phases:', error);
@@ -218,59 +155,22 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
                 setLoadingSubPhases(false);
             }
         };
-
-        if (isOpen) {
-            fetchSubPhases();
-        }
+        if (isOpen) fetchSubPhases();
     }, [isOpen, effectiveTeamId]);
 
-    // Fetch global PCs with timeout protection
+    // Check Role
     useEffect(() => {
-        const fetchGlobalPCs = async () => {
-            setLoadingPCs(true);
-            try {
-                // Add timeout to prevent hanging requests
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
-
-                const response = await fetch('/api/pcs', {
-                    signal: controller.signal
-                });
-
-                clearTimeout(timeoutId);
-
-                if (response.ok) {
-                    const data = await response.json();
-                    if (data.pcs) {
-                        const formattedPCs = data.pcs.map((pc: any) => ({
-                            id: pc.name,
-                            label: pc.name
-                        }));
-                        setGlobalPCs(formattedPCs);
-                    }
-                } else {
-                    console.error('[TaskModal] Failed to fetch PCs');
-                    setGlobalPCs([]); // Set empty array on error
-                }
-            } catch (error: any) {
-                if (error.name === 'AbortError') {
-                    console.error('[TaskModal] PC fetch timeout');
-                } else {
-                    console.error('[TaskModal] Error fetching PCs:', error);
-                }
-                setGlobalPCs([]); // Set empty array on error
-            } finally {
-                setLoadingPCs(false);
+        const checkRole = async () => {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+                const { data: profile } = await supabase.from('user_profiles').select('role').eq('id', user.id).single();
+                setIsQATeam(profile?.role === 'super_admin');
             }
         };
-
-        if (isOpen) {
-            fetchGlobalPCs();
-        }
+        if (isOpen) checkRole();
     }, [isOpen]);
 
-
-    // Populate form data when task changes
+    // Initialize Form Data
     useEffect(() => {
         if (isOpen && task) {
             setFormData({
@@ -294,7 +194,6 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
                 deviationReason: task.deviationReason,
                 comments: task.comments,
                 currentUpdates: task.currentUpdates,
-
                 sprintLink: task.sprintLink,
                 daysAllotted: task.daysAllotted || 0,
                 timeTaken: task.timeTaken || '00:00:00',
@@ -302,137 +201,155 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
                 deviation: task.deviation || 0,
                 activityPercentage: task.activityPercentage || 0,
                 includeSaturday: task.includeSaturday || false,
-                includeSunday: task.includeSunday || false
+                includeSunday: task.includeSunday || false,
+                teamId: task.teamId
             });
 
-            // Initialize dynamic assignees list
-            const initialAssignees = [
-                task.assignedTo,
-                task.assignedTo2,
-                ...(task.additionalAssignees || [])
-            ]
-                .filter(Boolean)
-                .map(shortName => getHubstaffNameFromQA(shortName!) || shortName) as string[];
+            const initialAssignees: AssigneeData[] = [
+                { name: task.assignedTo, startDate: task.startDate || null, endDate: task.endDate || null },
+                { name: task.assignedTo2, startDate: task.startDate || null, endDate: task.endDate || null },
+                ...(task.additionalAssignees || []).map(a => ({ name: a, startDate: task.startDate || null, endDate: task.endDate || null }))
+            ].filter(a => a.name).map(a => ({
+                ...a,
+                name: getHubstaffNameFromQA(a.name!) || a.name
+            })) as AssigneeData[];
 
-            if (initialAssignees.length === 0) setAssignees([null]);
+            if (initialAssignees.length === 0) setAssignees([{ name: null, startDate: null, endDate: null }]);
             else setAssignees(initialAssignees);
 
         } else if (isOpen && !task) {
             setFormData(initialState);
-            setAssignees([null]); // Start with one empty slot
+            setAssignees([{ name: null, startDate: null, endDate: null }]);
         }
     }, [isOpen, task]);
 
-    const [assignees, setAssignees] = useState<(string | null)[]>([]);
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+        const { name, value } = e.target;
+        setFormData(prev => {
+            const newData = { ...prev, [name]: value };
+            if (e.target.type === 'checkbox') {
+                newData[name as keyof Task] = (e.target as HTMLInputElement).checked as any;
+            }
+            // Auto-calc logic
+            if (name === 'timeTaken' || name === 'daysAllotted') {
+                // ... calculations usually here, keeping simple for now or restoring full logic
+                // Restore full logic:
+                const timeStr = name === 'timeTaken' ? value : (newData.timeTaken || '00:00:00');
+                const daysAllottedStr = name === 'daysAllotted' ? value : (newData.daysAllotted || 0);
+                const [hours, minutes, seconds] = (timeStr as string).split(':').map(Number);
+                const totalHours = (hours || 0) + (minutes || 0) / 60 + (seconds || 0) / 3600;
+                const daysTakenVal = parseFloat((totalHours / 8).toFixed(2));
+                const deviationVal = parseFloat((daysTakenVal - Number(daysAllottedStr)).toFixed(2));
+                newData.daysTaken = daysTakenVal;
+                newData.deviation = deviationVal;
+            }
+            if (name === 'status' && value === 'Completed' && !prev.actualCompletionDate) {
+                const today = new Date().toISOString().split('T')[0];
+                newData.actualCompletionDate = today;
+                if (prev.endDate && today < prev.endDate) newData.endDate = today;
+            }
+            return newData;
+        });
+    };
 
-    const handleDynamicAssigneeChange = (index: number, value: string | number | null) => {
+    const handleDateChange = (field: 'startDate' | 'endDate' | 'actualCompletionDate', date?: Date) => {
+        const dateStr = date && !isNaN(date.getTime()) ? format(date, 'yyyy-MM-dd') : null;
+        setFormData(prev => ({ ...prev, [field]: dateStr }));
+        if (field === 'startDate' || field === 'endDate') {
+            setAssignees(prev => {
+                const next = [...prev];
+                if (next[0]) next[0] = { ...next[0], [field]: dateStr };
+                return next;
+            });
+        }
+    };
+
+    const handleDynamicAssigneeChange = (index: number, field: keyof AssigneeData, value: string | null) => {
         const newAssignees = [...assignees];
-        newAssignees[index] = value ? String(value) : null;
+        newAssignees[index] = { ...newAssignees[index], [field]: value };
         setAssignees(newAssignees);
+        if (index === 0) {
+            if (field === 'startDate') handleDateChange('startDate', value ? new Date(value) : undefined);
+            if (field === 'endDate') handleDateChange('endDate', value ? new Date(value) : undefined);
+        }
     };
 
     const addAssignee = () => {
-        setAssignees([...assignees, null]);
+        setAssignees([...assignees, { name: null, startDate: formData.startDate || null, endDate: formData.endDate || null }]);
     };
 
     const removeAssignee = (index: number) => {
         const newAssignees = assignees.filter((_, i) => i !== index);
-        setAssignees(newAssignees.length ? newAssignees : [null]);
-    };
-
-    // ... existing handlers
-
-
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-        const { name, value } = e.target;
-
-        setFormData(prev => {
-            const newData = {
-                ...prev,
-                [name]: ['bugCount', 'htmlBugs', 'functionalBugs', 'activityPercentage'].includes(name)
-                    ? parseInt(value) || 0
-                    : ['daysAllotted'].includes(name)
-                        ? parseFloat(value) || 0
-                        : ['daysAllotted'].includes(name)
-                            ? parseFloat(value) || 0
-                            : value,
-            };
-
-            if (e.target.type === 'checkbox') {
-                const { checked } = e.target as HTMLInputElement;
-                newData[name as keyof Task] = checked as any;
-            }
-
-            // Auto-calculation logic for Time/Days/Deviation
-            if (name === 'timeTaken' || name === 'daysAllotted') {
-                const timeStr = name === 'timeTaken' ? value : (newData.timeTaken || '00:00:00');
-                const daysAllottedStr = name === 'daysAllotted' ? value : (newData.daysAllotted || 0);
-
-                // Parse time string "HH:MM:SS"
-                const [hours, minutes, seconds] = (timeStr as string).split(':').map(Number);
-                const totalHours = (hours || 0) + (minutes || 0) / 60 + (seconds || 0) / 3600;
-
-                // Calculate Days Taken (8 hours per day)
-                const daysTakenVal = parseFloat((totalHours / 8).toFixed(2));
-
-                // Calculate Deviation
-                const deviationVal = parseFloat((daysTakenVal - Number(daysAllottedStr)).toFixed(2));
-
-                newData.daysTaken = daysTakenVal;
-                newData.deviation = deviationVal;
-            }
-
-            // Auto-fill actualCompletionDate when status changes to "Completed"
-            if (name === 'status' && value === 'Completed' && !prev.actualCompletionDate) {
-                const today = new Date().toISOString().split('T')[0];
-                newData.actualCompletionDate = today;
-
-                // If completed before end date, update end date to match completion date
-                if (prev.endDate && today < prev.endDate) {
-                    newData.endDate = today;
-                }
-            }
-
-            return newData;
-        });
+        setAssignees(newAssignees.length ? newAssignees : [{ name: null, startDate: null, endDate: null }]);
     };
 
     const executeSave = async () => {
         setLoading(true);
         try {
-            // Use locally fetched teamId if not present in task
             let teamId = task?.teamId || effectiveTeamId;
-
             if (!teamId) {
-                // Fallback try one last time
                 const { getCurrentUserTeam } = await import('@/utils/userUtils');
                 const userTeam = await getCurrentUserTeam();
                 if (userTeam) teamId = userTeam.team_id;
             }
-
             if (!teamId) {
-                toastError('Error: Could not determine your Team ID. Please refresh the page.');
+                toastError('Error: Could not determine Team ID.');
                 setLoading(false);
                 setShowEndDateWarning(false);
                 return;
             }
 
-            // Map assignees array back to individual fields
-            const validAssignees = assignees.filter((a): a is string => !!a);
+            const validAssignees = assignees.filter(a => !!a.name);
+            if (validAssignees.length === 0) {
+                validAssignees.push({ name: null, startDate: formData.startDate || null, endDate: formData.endDate || null });
+            }
 
-            const finalData = {
+            const sharedData = {
                 ...formData,
-                assignedTo: validAssignees[0] || null,
-                assignedTo2: validAssignees[1] || null,
-                additionalAssignees: validAssignees.slice(2),
                 includeSaturday: formData.includeSaturday || false,
                 includeSunday: formData.includeSunday || false,
                 teamId
             };
 
-            await onSave(finalData);
+            const payloads: any[] = [];
+            if (task) {
+                const first = validAssignees[0];
+                const mainTaskPayload = {
+                    ...sharedData,
+                    assignedTo: first?.name || null,
+                    assignedTo2: null,
+                    additionalAssignees: [],
+                    startDate: first?.startDate || sharedData.startDate,
+                    endDate: first?.endDate || sharedData.endDate,
+                };
+                payloads.push(mainTaskPayload);
+                for (let i = 1; i < validAssignees.length; i++) {
+                    const assignee = validAssignees[i];
+                    payloads.push({
+                        ...sharedData,
+                        id: undefined,
+                        assignedTo: assignee.name,
+                        assignedTo2: null,
+                        additionalAssignees: [],
+                        startDate: assignee.startDate || sharedData.startDate,
+                        endDate: assignee.endDate || sharedData.endDate,
+                    });
+                }
+            } else {
+                validAssignees.forEach(assignee => {
+                    payloads.push({
+                        ...sharedData,
+                        assignedTo: assignee.name,
+                        assignedTo2: null,
+                        additionalAssignees: [],
+                        startDate: assignee.startDate || sharedData.startDate,
+                        endDate: assignee.endDate || sharedData.endDate,
+                    });
+                });
+            }
 
-            // Show custom success toast
+            await onSave(payloads as any);
+
             const isUpdate = !!task;
             toast.custom((t) => (
                 <div className="w-full max-w-md bg-white dark:bg-slate-900 border-l-4 border-emerald-500 rounded-lg shadow-lg p-4 flex items-start gap-4 animate-in slide-in-from-right-5 duration-300">
@@ -441,19 +358,9 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
                     </div>
                     <div className="flex-1">
                         <h4 className="font-semibold text-slate-800 dark:text-slate-100">
-                            {isUpdate ? 'Task Updated Successfully' : 'New Task Created'}
+                            {isUpdate ? 'Task Updated Successfully' : (payloads.length > 1 ? `${payloads.length} Tasks Created` : 'Task Created Successfully')}
                         </h4>
-                        <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
-                            {formData.projectName}
-                            <span className="mx-2 text-slate-300 dark:text-slate-600">|</span>
-                            <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium 
-                                ${formData.status === 'Completed' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' :
-                                    formData.status === 'In Progress' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' :
-                                        formData.status === 'Yet to Start' ? 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400' :
-                                            'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400'}`}>
-                                {formData.status}
-                            </span>
-                        </p>
+                        <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">{formData.projectName}</p>
                     </div>
                     <button onClick={() => toast.dismiss(t)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors">
                         <X size={18} />
@@ -463,12 +370,12 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
 
             if (!task) {
                 setFormData(initialState);
-                setAssignees([null]);
+                setAssignees([{ name: null, startDate: null, endDate: null }]);
             }
             setShowEndDateWarning(false);
         } catch (error) {
             console.error('Error saving task:', error);
-            toastError('Failed to save task. Please try again.');
+            toastError('Failed to save task.');
         } finally {
             setLoading(false);
         }
@@ -476,75 +383,46 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-
-        // Warn if Start Date is present but End Date is missing
-        if (formData.startDate && !formData.endDate) {
+        if (formData.startDate && !formData.endDate && !showEndDateWarning) {
             setShowEndDateWarning(true);
             return;
         }
-
         await executeSave();
-    };
-
-    const handleDateChange = (field: 'startDate' | 'endDate' | 'actualCompletionDate', date?: Date) => {
-        setFormData(prev => ({
-            ...prev,
-            [field]: date && !isNaN(date.getTime()) ? format(date, 'yyyy-MM-dd') : null
-        }));
-    };
-
-    const handleProjectChange = (value: string | number | null) => {
-        const selectedProject = projects.find(p => p.id == value);
-        setFormData(prev => ({
-            ...prev,
-            projectName: selectedProject ? selectedProject.label : (value ? String(value) : null!)
-        }));
-    };
-
-    const handleAssigneeChange = (field: 'assignedTo' | 'assignedTo2', value: string | number | null) => {
-        setFormData(prev => ({
-            ...prev,
-            [field]: value ? String(value) : null
-        }));
     };
 
     if (!isOpen) return null;
 
     return (
         <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200 p-4">
-            {/* End Date Warning Modal */}
             <ConfirmationModal
                 isOpen={showEndDateWarning}
                 onClose={() => setShowEndDateWarning(false)}
                 onConfirm={executeSave}
                 title="End date missing"
-                message="End date is not selected. If you continue without selecting an end date, this task won't appear on the Schedule page, but can be found on the Project Overview and Dashboard pages."
+                message="End date is not selected. Task won't appear on Schedule."
                 confirmText="Continue Anyway"
                 cancelText="Go Back"
                 type="warning"
                 isLoading={loading}
             />
 
-            <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl w-full max-w-2xl max-h-[85dvh] overflow-y-auto animate-in zoom-in-95 duration-200 custom-scrollbar border border-slate-100 dark:border-slate-800 transition-colors duration-300">
-
+            <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl w-full max-w-2xl max-h-[85dvh] overflow-y-auto custom-scrollbar border border-slate-100 dark:border-slate-800 transition-colors duration-300">
                 {/* Header */}
-                <div className="sticky top-0 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md z-10 flex items-center justify-between p-4 md:p-6 border-b border-slate-100 dark:border-slate-800 bg-gradient-to-r from-white to-slate-50 dark:from-slate-900 dark:to-slate-800 transition-colors duration-300">
+                <div className="sticky top-0 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md z-10 flex items-center justify-between p-4 md:p-6 border-b border-slate-100 dark:border-slate-800 bg-gradient-to-r from-white to-slate-50 dark:from-slate-900 dark:to-slate-800">
                     <div className="flex items-center gap-4">
                         <div className={`p-3 rounded-2xl ${task ? 'bg-indigo-50 text-indigo-600' : 'bg-emerald-50 text-emerald-600'} shadow-sm`}>
                             {task ? <Activity size={24} /> : <Briefcase size={24} />}
                         </div>
                         <div>
                             <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100 tracking-tight">{task ? 'Edit Task' : 'New Project Task'}</h2>
-                            <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">{task ? 'Update task details below' : 'Kickoff a new project tracking item'}</p>
+                            <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">{task ? 'Update task details' : 'Kickoff a new project'}</p>
                         </div>
                     </div>
                     <CloseButton onClick={onClose} />
                 </div>
 
-                {/* Content */}
                 <form onSubmit={handleSubmit} className="p-4 pb-10 md:p-6 space-y-8">
-
-                    {/* 1. Project Name & 2. Project Type */}
+                    {/* Project & Type */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div className="space-y-3">
                             <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
@@ -553,80 +431,46 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
                             <Combobox
                                 options={projects}
                                 value={projects.find(p => p.label === formData.projectName)?.id || formData.projectName}
-                                onChange={handleProjectChange}
-                                placeholder={isFetchingProjects ? "Loading projects..." : "Select Project..."}
+                                onChange={(val) => {
+                                    const selected = projects.find(p => p.id == val);
+                                    setFormData(prev => ({ ...prev, projectName: selected ? selected.label : (val ? String(val) : null!) }));
+                                }}
+                                placeholder={isFetchingProjects ? "Loading..." : "Select Project..."}
                                 searchPlaceholder="Search projects..."
-                                emptyMessage="No projects found."
-                                isLoading={isFetchingProjects}
                                 allowCustomValue={true}
+                                isLoading={isFetchingProjects}
                             />
                         </div>
                         <div className="space-y-3">
                             <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
                                 <Activity size={16} className="text-indigo-500" /> Project Type
                             </label>
-                            <input
-                                type="text"
-                                name="projectType"
-                                value={formData.projectType || ''}
-                                onChange={handleChange}
-                                className="w-full px-5 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500 font-medium text-slate-700 dark:text-slate-200"
-                                placeholder="e.g. Web Development, Mobile App"
-                            />
+                            <input type="text" name="projectType" value={formData.projectType || ''} onChange={handleChange} className="w-full px-5 py-3 bg-slate-50 dark:bg-slate-800 border-slate-200 rounded-xl outline-none" placeholder="e.g. Web Development" />
                         </div>
                     </div>
 
-                    {/* 3. Priority & 4. PC */}
+                    {/* Priority & PC */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div className="space-y-3">
                             <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Priority</label>
                             <Combobox
-                                options={[
-                                    { id: 'Low', label: 'Low' },
-                                    { id: 'Medium', label: 'Medium' },
-                                    { id: 'High', label: 'High' },
-                                    { id: 'Urgent', label: 'Urgent' }
-                                ]}
+                                options={[{ id: 'Low', label: 'Low' }, { id: 'Medium', label: 'Medium' }, { id: 'High', label: 'High' }, { id: 'Urgent', label: 'Urgent' }]}
                                 value={formData.priority || ''}
                                 onChange={(val) => setFormData(prev => ({ ...prev, priority: val ? String(val) : null }))}
-                                placeholder="Select or type priority..."
-                                searchPlaceholder="Search or type custom priority..."
-                                emptyMessage="No matching priority. Press Enter to use custom value."
+                                placeholder="Select priority..."
                                 allowCustomValue={true}
                             />
                         </div>
                         <div className="space-y-3">
-                            <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
-                                <User size={16} className="text-indigo-500" /> Project Coordinator (PC)
-                            </label>
-                            <Combobox
-                                options={globalPCs}
-                                value={formData.pc || ''}
-                                onChange={(val) => setFormData(prev => ({ ...prev, pc: val ? String(val) : '' }))}
-                                placeholder={loadingPCs ? "Loading PCs..." : "Select or type PC..."}
-                                searchPlaceholder="Search or type PC name..."
-                                emptyMessage="No matching PC. Press Enter to use custom value."
-                                allowCustomValue={true}
-                                isLoading={loadingPCs}
-                            />
+                            <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2"><User size={16} className="text-indigo-500" /> PC</label>
+                            <Combobox options={globalPCs} value={formData.pc || ''} onChange={(val) => setFormData(prev => ({ ...prev, pc: val ? String(val) : '' }))} placeholder="Select PC..." allowCustomValue={true} isLoading={loadingPCs} />
                         </div>
                     </div>
 
-                    {/* 4.5. Phase/Task */}
+                    {/* Phase */}
                     <div className="space-y-3">
-                        <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
-                            <Layers size={16} className="text-indigo-500" /> Phase/Task
-                        </label>
-                        <Combobox
-                            options={subPhases}
-                            value={formData.subPhase || ''}
-                            onChange={(val) => setFormData(prev => ({ ...prev, subPhase: val ? String(val) : '' }))}
-                            placeholder={loadingSubPhases ? "Loading phases..." : "Select or type phase..."}
-                            searchPlaceholder="Search or type custom phase..."
-                            emptyMessage="No matching phase. Press Enter to use custom value."
-                            allowCustomValue={true}
-                            isLoading={loadingSubPhases}
-                        />
+                        <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2"><Layers size={16} className="text-indigo-500" /> Phase/Task</label>
+                        <Combobox options={subPhases} value={formData.subPhase || ''} onChange={(val) => setFormData(prev => ({ ...prev, subPhase: val ? String(val) : '' }))} placeholder="Select phase..." allowCustomValue={true} isLoading={loadingSubPhases} />
                     </div>
 
                     {/* Dynamic Assignees */}
@@ -636,347 +480,159 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
                         </label>
                         <div className="space-y-3">
                             {assignees.map((assignee, index) => (
-                                <div key={index} className="flex items-center gap-3 animate-in fade-in slide-in-from-top-2 duration-200">
-                                    <div className="flex-1">
+                                <div key={index} className="flex flex-col sm:flex-row items-start sm:items-center gap-3 bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl border border-slate-100 dark:border-slate-800">
+                                    <div className="flex-1 w-full sm:w-auto">
                                         <Combobox
                                             options={hubstaffUsers}
-                                            value={assignee || ''}
-                                            onChange={(val) => handleDynamicAssigneeChange(index, val)}
+                                            value={assignee.name || ''}
+                                            onChange={(val) => handleDynamicAssigneeChange(index, 'name', val ? String(val) : null)}
                                             placeholder={`Assignee ${index + 1}...`}
                                             searchPlaceholder="Search developers..."
-                                            emptyMessage="No users found."
                                             allowCustomValue={true}
                                             isLoading={loadingHubstaffUsers}
                                         />
                                     </div>
+                                    <div className="flex items-center gap-2 w-full sm:w-auto">
+                                        <DatePicker
+                                            date={assignee.startDate ? new Date(assignee.startDate) : undefined}
+                                            setDate={(date) => {
+                                                const dateStr = date ? format(date, 'yyyy-MM-dd') : null;
+                                                handleDynamicAssigneeChange(index, 'startDate', dateStr);
+                                            }}
+                                            placeholder="Start"
+                                            className="w-full sm:w-[130px]"
+                                        />
+                                        <span className="text-slate-400">to</span>
+                                        <DatePicker
+                                            date={assignee.endDate ? new Date(assignee.endDate) : undefined}
+                                            setDate={(date) => {
+                                                const dateStr = date ? format(date, 'yyyy-MM-dd') : null;
+                                                handleDynamicAssigneeChange(index, 'endDate', dateStr);
+                                            }}
+                                            placeholder="End"
+                                            className="w-full sm:w-[130px]"
+                                        />
+                                    </div>
                                     {assignees.length > 1 && (
-                                        <button
-                                            type="button"
-                                            onClick={() => removeAssignee(index)}
-                                            className="p-2 text-slate-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-                                            title="Remove Assignee"
-                                        >
+                                        <button type="button" onClick={() => removeAssignee(index)} className="p-2 text-slate-400 hover:text-red-500">
                                             <X size={18} />
                                         </button>
                                     )}
                                 </div>
                             ))}
                         </div>
-                        <button
-                            type="button"
-                            onClick={addAssignee}
-                            className="text-sm font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 flex items-center gap-2 px-2 py-1 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-colors"
-                        >
+                        <button type="button" onClick={addAssignee} className="text-sm font-semibold text-indigo-600 flex items-center gap-2 px-2 py-1 hover:bg-indigo-50 rounded-lg">
                             <Plus size={16} /> <span>Add Assignee</span>
                         </button>
                     </div>
 
-                    {/* 7. Status */}
+                    {/* Status */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div className="space-y-3">
                             <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Status</label>
                             <Combobox
-                                options={[
-                                    { id: 'Yet to Start', label: 'Yet to Start' },
-                                    { id: 'Being Developed', label: 'Being Developed' },
-                                    { id: 'Ready for QA', label: 'Ready for QA' },
-                                    { id: 'Assigned to QA', label: 'Assigned to QA' },
-                                    { id: 'In Progress', label: 'In Progress' },
-                                    { id: 'On Hold', label: 'On Hold' },
-                                    { id: 'Completed', label: 'Completed' },
-                                    { id: 'Forecast', label: 'Forecast' },
-                                    { id: 'Rejected', label: 'Rejected' }
-                                ]}
-                                value={formData.status || 'Yet to Start'}
-                                onChange={(val) => {
-                                    const e = {
-                                        target: {
-                                            name: 'status',
-                                            value: val ? String(val) : 'Yet to Start'
-                                        }
-                                    } as React.ChangeEvent<HTMLSelectElement>;
-                                    handleChange(e);
-                                }}
+                                options={['Yet to Start', 'Being Developed', 'Ready for QA', 'Assigned to QA', 'In Progress', 'On Hold', 'Completed', 'Forecast', 'Rejected'].map(s => ({ id: s, label: s }))}
+                                value={formData.status || ''}
+                                onChange={(val) => setFormData(prev => ({ ...prev, status: val ? String(val) : undefined }))}
                                 placeholder="Select status..."
-                                searchPlaceholder="Search status..."
                             />
                         </div>
                         {formData.status === 'Rejected' && (
                             <div className="space-y-3">
-                                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
-                                    Reason for Rejection <span className="text-red-500">*</span>
-                                </label>
-                                <textarea
-                                    name="deviationReason"
-                                    required
-                                    value={formData.deviationReason || ''}
-                                    onChange={handleChange}
-                                    className="w-full px-5 py-3 bg-red-50 border border-red-200 rounded-xl focus:ring-2 focus:ring-red-500/20 focus:border-red-500 outline-none transition-all placeholder:text-red-300 font-medium text-slate-700 min-h-[100px]"
-                                    placeholder="Please explain why this task was rejected..."
-                                />
+                                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Reason</label>
+                                <textarea name="deviationReason" value={formData.deviationReason || ''} onChange={handleChange} className="w-full px-5 py-3 bg-red-50 border border-red-200 rounded-xl outline-none" />
                             </div>
                         )}
                     </div>
 
-                    {/* 8. Start Date & 9. End Date */}
+                    {/* Dates */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div className="space-y-3">
-                            <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
-                                <Calendar size={16} className="text-indigo-500" /> Start Date
-                            </label>
-                            <DatePicker
-                                date={formData.startDate ? new Date(formData.startDate) : undefined}
-                                setDate={(date) => handleDateChange('startDate', date)}
-                                placeholder="Pick a start date"
-                            />
+                            <label className="text-sm font-semibold text-slate-700 dark:text-slate-300"><Calendar size={16} className="inline mr-2 text-indigo-500" /> Start Date</label>
+                            <DatePicker date={formData.startDate ? new Date(formData.startDate) : undefined} setDate={(d) => handleDateChange('startDate', d)} placeholder="Start Date" />
                         </div>
                         <div className="space-y-3">
-                            <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
-                                <Calendar size={16} className="text-indigo-500" /> End Date
-                            </label>
-                            <DatePicker
-                                date={formData.endDate ? new Date(formData.endDate) : undefined}
-                                setDate={(date) => handleDateChange('endDate', date)}
-                                placeholder="Pick an end date"
-                            />
+                            <label className="text-sm font-semibold text-slate-700 dark:text-slate-300"><Calendar size={16} className="inline mr-2 text-indigo-500" /> End Date</label>
+                            <DatePicker date={formData.endDate ? new Date(formData.endDate) : undefined} setDate={(d) => handleDateChange('endDate', d)} placeholder="End Date" />
                         </div>
                     </div>
 
-                    {/* Weekend Schedule & Actual Completion Date */}
+                    {/* Weekend & Actual Completion */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div className="space-y-3">
-                            <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 block">Weekend Schedule</label>
+                            <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Weekend Schedule</label>
                             <div className="flex gap-4">
-                                <div className="flex items-center gap-2 cursor-pointer bg-slate-50 dark:bg-slate-800 px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors flex-1 justify-center">
-                                    <Checkbox
-                                        checked={formData.includeSaturday || false}
-                                        onChange={(checked) => setFormData(prev => ({ ...prev, includeSaturday: checked }))}
-                                        label="Sat"
-                                    />
-                                </div>
-                                <div className="flex items-center gap-2 cursor-pointer bg-slate-50 dark:bg-slate-800 px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors flex-1 justify-center">
-                                    <Checkbox
-                                        checked={formData.includeSunday || false}
-                                        onChange={(checked) => setFormData(prev => ({ ...prev, includeSunday: checked }))}
-                                        label="Sun"
-                                    />
-                                </div>
+                                <Checkbox checked={formData.includeSaturday || false} onChange={c => setFormData(prev => ({ ...prev, includeSaturday: c }))} label="Sat" />
+                                <Checkbox checked={formData.includeSunday || false} onChange={c => setFormData(prev => ({ ...prev, includeSunday: c }))} label="Sun" />
                             </div>
                         </div>
-
                         {formData.status !== 'Rejected' && (
                             <div className="space-y-3">
-                                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
-                                    <Calendar size={16} className="text-emerald-500" /> Actual Completion Date
-                                    {formData.status === 'Completed' && <span className="text-xs text-emerald-600 dark:text-emerald-400">(Auto-filled)</span>}
-                                </label>
-                                <DatePicker
-                                    date={formData.actualCompletionDate ? new Date(formData.actualCompletionDate) : undefined}
-                                    setDate={(date) => handleDateChange('actualCompletionDate', date)}
-                                    placeholder="Pick completion date"
-                                    className="bg-emerald-50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-900/50"
-                                />
+                                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Actual Completion</label>
+                                <DatePicker date={formData.actualCompletionDate ? new Date(formData.actualCompletionDate) : undefined} setDate={(d) => handleDateChange('actualCompletionDate', d)} placeholder="Completion Date" />
                             </div>
                         )}
                     </div>
 
-                    {/* 11. Comments & 12. Current Updates */}
-                    <div className="grid grid-cols-1 gap-8">
-                        <div className="space-y-3">
-                            <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Comments</label>
-                            <textarea
-                                name="comments"
-                                value={formData.comments || ''}
-                                onChange={handleChange}
-                                className="w-full px-5 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500 font-medium text-slate-700 dark:text-slate-200 min-h-[100px]"
-                                placeholder="General comments about the task..."
-                            />
-                        </div>
-                        <div className="space-y-3">
-                            <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Current Updates</label>
-                            <textarea
-                                name="currentUpdates"
-                                value={formData.currentUpdates || ''}
-                                onChange={handleChange}
-                                className="w-full px-5 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500 font-medium text-slate-700 dark:text-slate-200 min-h-[100px]"
-                                placeholder="Current status updates..."
-                            />
-                        </div>
+                    {/* Comments */}
+                    <div className="space-y-3">
+                        <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Comments</label>
+                        <textarea name="comments" value={formData.comments || ''} onChange={handleChange} className="w-full px-5 py-3 bg-slate-50 dark:bg-slate-800 border-slate-200 rounded-xl outline-none min-h-[100px]" />
+                    </div>
+                    <div className="space-y-3">
+                        <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Updates</label>
+                        <textarea name="currentUpdates" value={formData.currentUpdates || ''} onChange={handleChange} className="w-full px-5 py-3 bg-slate-50 dark:bg-slate-800 border-slate-200 rounded-xl outline-none min-h-[100px]" />
                     </div>
 
-                    {/* 13. Deviation Reason & 14. Sprint Link */}
+                    {/* Deviation & Sprint */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div className="space-y-3">
                             <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Deviation Reason</label>
-                            <textarea
-                                name="deviationReason"
-                                // task.deviationReason hidden for image as requested
-                                value={formData.deviationReason || ''}
-                                onChange={handleChange}
-                                className="w-full px-5 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500 font-medium text-slate-700 dark:text-slate-200 min-h-[100px]"
-                                placeholder="Reason for any deviations..."
-                            />
+                            <textarea name="deviationReason" value={formData.deviationReason || ''} onChange={handleChange} className="w-full px-5 py-3 bg-slate-50 dark:bg-slate-800 border-slate-200 rounded-xl outline-none" />
                         </div>
                         <div className="space-y-3">
                             <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Sprint Link</label>
-                            <input
-                                type="text"
-                                name="sprintLink"
-                                value={formData.sprintLink || ''}
-                                onChange={handleChange}
-                                className="w-full px-5 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500 font-medium text-slate-700 dark:text-slate-200"
-                                placeholder="Sprint or task tracking link..."
-                            />
+                            <input type="text" name="sprintLink" value={formData.sprintLink || ''} onChange={handleChange} className="w-full px-5 py-3 bg-slate-50 dark:bg-slate-800 border-slate-200 rounded-xl outline-none" />
                         </div>
                     </div>
 
-                    {/* EDIT MODE ONLY FIELDS: Days Allotted, Time Taken, etc. */}
+                    {/* Edit Mode Fields */}
                     {task && (
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-6 border-t border-slate-100 dark:border-slate-800">
                             <div className="space-y-3">
                                 <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Days Allotted</label>
-                                <input
-                                    type="number"
-                                    name="daysAllotted"
-                                    step="0.01"
-                                    min="0"
-                                    value={formData.daysAllotted || 0}
-                                    onChange={handleChange}
-                                    className="w-full px-5 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all font-mono text-slate-700 dark:text-slate-200 font-medium"
-                                />
+                                <input type="number" name="daysAllotted" step="0.01" value={formData.daysAllotted || 0} onChange={handleChange} className="w-full px-5 py-3 bg-slate-50 dark:bg-slate-800 border-slate-200 rounded-xl outline-none" />
                             </div>
                             <div className="space-y-3">
-                                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Time Taken (HH:MM:SS)</label>
-                                <input
-                                    type="text"
-                                    name="timeTaken"
-                                    value={formData.timeTaken || '00:00:00'}
-                                    onChange={handleChange}
-                                    placeholder="00:00:00"
-                                    pattern="[0-9]{2}:[0-9]{2}:[0-9]{2}"
-                                    className="w-full px-5 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all font-mono text-slate-700 dark:text-slate-200 font-medium"
-                                />
-                            </div>
-
-                            <div className="space-y-3">
-                                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Days Taken (Auto)</label>
-                                <input
-                                    type="number"
-                                    name="daysTaken"
-                                    readOnly
-                                    value={formData.daysTaken || 0}
-                                    className="w-full px-5 py-3 bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl outline-none font-mono text-slate-600 dark:text-slate-500 font-medium cursor-not-allowed"
-                                />
-                            </div>
-                            <div className="space-y-3">
-                                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Deviation (Auto)</label>
-                                <input
-                                    type="number"
-                                    name="deviation"
-                                    readOnly
-                                    value={formData.deviation || 0}
-                                    className={`w-full px-5 py-3 bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl outline-none font-mono font-medium cursor-not-allowed ${(formData.deviation || 0) > 0 ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400'
-                                        }`}
-                                />
+                                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Time Taken</label>
+                                <input type="text" name="timeTaken" value={formData.timeTaken || '00:00:00'} onChange={handleChange} className="w-full px-5 py-3 bg-slate-50 dark:bg-slate-800 border-slate-200 rounded-xl outline-none" />
                             </div>
                             <div className="space-y-3">
                                 <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Activity %</label>
-                                <input
-                                    type="number"
-                                    name="activityPercentage"
-                                    min="0"
-                                    max="100"
-                                    value={formData.activityPercentage || 0}
-                                    onChange={handleChange}
-                                    className="w-full px-5 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all font-mono text-slate-700 dark:text-slate-200 font-medium"
-                                />
+                                <input type="number" name="activityPercentage" min="0" max="100" value={formData.activityPercentage || 0} onChange={handleChange} className="w-full px-5 py-3 bg-slate-50 dark:bg-slate-800 border-slate-200 rounded-xl outline-none" />
                             </div>
                         </div>
                     )}
 
-                    {/* Bug Fields - QA Team Only */}
+                    {/* QA Fields */}
                     {isQATeam && (
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-6 border-t border-slate-100 dark:border-slate-800">
-                            <div className="space-y-3">
-                                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Total Bugs</label>
-                                <input
-                                    type="number"
-                                    name="bugCount"
-                                    min="0"
-                                    value={formData.bugCount || 0}
-                                    onChange={handleChange}
-                                    className="w-full px-5 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all font-mono text-slate-700 dark:text-slate-200 font-medium"
-                                />
-                            </div>
-                            <div className="space-y-3">
-                                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">HTML Bugs</label>
-                                <input
-                                    type="number"
-                                    name="htmlBugs"
-                                    min="0"
-                                    value={formData.htmlBugs || 0}
-                                    onChange={handleChange}
-                                    className="w-full px-5 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all font-mono text-slate-700 dark:text-slate-200 font-medium"
-                                />
-                            </div>
-                            <div className="space-y-3">
-                                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Func. Bugs</label>
-                                <input
-                                    type="number"
-                                    name="functionalBugs"
-                                    min="0"
-                                    value={formData.functionalBugs || 0}
-                                    onChange={handleChange}
-                                    className="w-full px-5 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all font-mono text-slate-700 dark:text-slate-200 font-medium"
-                                />
-                            </div>
+                            <div className="space-y-3"> <label className="text-sm">Total Bugs</label> <input type="number" name="bugCount" value={formData.bugCount || 0} onChange={handleChange} className="w-full px-5 py-3 bg-slate-50 border-slate-200 rounded-xl outline-none" /> </div>
+                            <div className="space-y-3"> <label className="text-sm">HTML Bugs</label> <input type="number" name="htmlBugs" value={formData.htmlBugs || 0} onChange={handleChange} className="w-full px-5 py-3 bg-slate-50 border-slate-200 rounded-xl outline-none" /> </div>
+                            <div className="space-y-3"> <label className="text-sm">Func. Bugs</label> <input type="number" name="functionalBugs" value={formData.functionalBugs || 0} onChange={handleChange} className="w-full px-5 py-3 bg-slate-50 border-slate-200 rounded-xl outline-none" /> </div>
                         </div>
                     )}
 
-                    {/* Footer Actions */}
+                    {/* Footer */}
                     <div className="pt-6 flex items-center justify-end gap-3 border-t border-slate-100 dark:border-slate-800 mt-8">
-                        <button
-                            type="button"
-                            onClick={onClose}
-                            className="btn btn-secondary px-6 py-3 rounded-xl text-sm h-auto"
-                        >
-                            Cancel
-                        </button>
+                        <button type="button" onClick={onClose} className="btn btn-secondary px-6 py-3 rounded-xl text-sm h-auto">Cancel</button>
                         {task && onDelete && (
-                            <Button
-                                type="button"
-                                variant="destructive"
-                                onClick={async () => {
-                                    if (confirm('Are you sure you want to delete this task? This action cannot be undone.')) {
-                                        setLoading(true);
-                                        await onDelete(task.id);
-                                        setLoading(false);
-                                    }
-                                }}
-                                className="btn btn-danger px-6 py-3 rounded-xl shadow-none h-auto"
-                            >
-                                Delete
-                            </Button>
+                            <Button type="button" variant="destructive" onClick={async () => { if (confirm('Delete?')) { setLoading(true); await onDelete(task.id); setLoading(false); } }} className="btn btn-danger px-6 py-3 rounded-xl shadow-none h-auto">Delete</Button>
                         )}
-                        <button
-                            type="submit"
-                            disabled={loading}
-                            className="btn btn-primary px-8 py-3 w-auto h-auto rounded-xl shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed text-sm active:scale-95 duration-200"
-                        >
-                            <span className="flex items-center justify-center gap-2">
-                                <Save size={18} />
-                                {loading ? (
-                                    <span className="flex items-center gap-2">
-                                        <Loader size="xs" color="white" />
-                                        <span>Saving...</span>
-                                    </span>
-                                ) : (
-                                    <span>Save Task</span>
-                                )}
-                            </span>
+                        <button type="submit" disabled={loading} className="btn btn-primary px-8 py-3 w-auto h-auto rounded-xl shadow-md hover:shadow-lg disabled:opacity-50 text-sm active:scale-95 duration-200">
+                            <span className="flex items-center justify-center gap-2"> <Save size={18} /> <span>{loading ? 'Saving...' : 'Save Task'}</span> </span>
                         </button>
                     </div>
-
                 </form>
             </div>
         </div>

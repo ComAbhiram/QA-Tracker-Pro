@@ -332,75 +332,150 @@ export default function Tracker() {
         setIsTaskModalOpen(true);
     };
 
-    const saveTask = async (taskData: Partial<Task>) => {
-        const dbPayload: any = {
-            project_name: taskData.projectName,
-            project_type: taskData.projectType, // Added missing field
-            sub_phase: taskData.subPhase,
-            status: taskData.status,
-            assigned_to: taskData.assignedTo,
-            assigned_to2: taskData.assignedTo2,
-            additional_assignees: taskData.additionalAssignees || [],
-            pc: taskData.pc,
-            start_date: taskData.startDate || null,
-            end_date: taskData.endDate || null,
-            actual_completion_date: taskData.actualCompletionDate ? new Date(taskData.actualCompletionDate).toISOString() : null,
-            start_time: taskData.startTime || null,
-            end_time: taskData.endTime || null,
-            bug_count: taskData.bugCount,
-            html_bugs: taskData.htmlBugs,
-            functional_bugs: taskData.functionalBugs,
-            deviation_reason: taskData.deviationReason,
-            sprint_link: taskData.sprintLink,
-            days_allotted: Number(taskData.daysAllotted) || 0,
-            time_taken: taskData.timeTaken || '00:00:00',
-            days_taken: Number(taskData.daysTaken) || 0,
-            deviation: Number(taskData.deviation) || 0,
-            activity_percentage: Number(taskData.activityPercentage) || 0,
-            comments: taskData.comments,
-            current_updates: taskData.currentUpdates, // Ensure this is saved
-            include_saturday: taskData.includeSaturday || false,
-            include_sunday: taskData.includeSunday || false,
-            team_id: isGuest ? selectedTeamId : taskData.teamId,
-        };
+    const saveTask = async (taskData: Partial<Task> | Partial<Task>[]) => {
 
-        if (editingTask) {
-            const { team_id, ...updatePayload } = dbPayload;
+        // Helper to formatting payload
+        const formatPayload = (t: Partial<Task>) => ({
+            project_name: t.projectName,
+            project_type: t.projectType,
+            sub_phase: t.subPhase,
+            status: t.status,
+            assigned_to: t.assignedTo,
+            assigned_to2: t.assignedTo2,
+            additional_assignees: t.additionalAssignees || [],
+            pc: t.pc,
+            start_date: t.startDate || null,
+            end_date: t.endDate || null,
+            actual_completion_date: t.actualCompletionDate ? new Date(t.actualCompletionDate).toISOString() : null,
+            start_time: t.startTime || null,
+            end_time: t.endTime || null,
+            bug_count: t.bugCount,
+            html_bugs: t.htmlBugs,
+            functional_bugs: t.functionalBugs,
+            deviation_reason: t.deviationReason,
+            sprint_link: t.sprintLink,
+            days_allotted: Number(t.daysAllotted) || 0,
+            time_taken: t.timeTaken || '00:00:00',
+            days_taken: Number(t.daysTaken) || 0,
+            deviation: Number(t.deviation) || 0,
+            activity_percentage: Number(t.activityPercentage) || 0,
+            comments: t.comments,
+            current_updates: t.currentUpdates,
+            include_saturday: t.includeSaturday || false,
+            include_sunday: t.includeSunday || false,
+            team_id: isGuest ? selectedTeamId : t.teamId,
+        });
 
-            // Use API to bypass RLS for Super Admins in Manager Mode
-            // Send manager mode indicator in header
-            const response = await fetch('/api/tasks/update', {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Manager-Mode': localStorage.getItem('qa_tracker_guest_session') ? 'true' : 'false',
-                },
-                credentials: 'include',
-                body: JSON.stringify({ id: editingTask.id, ...updatePayload })
-            });
+        if (Array.isArray(taskData)) {
+            // Bulk Creation / Update Case
+            // Note: Update usually comes as single object from inline edits, but from Modal "Edit" it might come as array if we split tasks.
+            // If editingTask is set, the first element is the update, others are new.
 
-            if (!response.ok) {
-                const err = await response.json();
-                console.error('Error updating task:', err);
-                toastError(`Failed to save task: ${err.error || 'Server error'}`);
-                return;
+            const payloads = taskData.map(formatPayload);
+
+            // If we are editing, we might want to split the update and create logic?
+            // The API /api/tasks/create handles array. 
+            // The API /api/tasks/update handles single object usually? Let's check.
+            // My update to /create route handles arrays.
+            // If we are "Updating" a task and splitting it, the `TaskModal` sends an array.
+            // The first item in array corresponds to the original task (if editing).
+
+            if (editingTask) {
+                // First item is the update
+                const [first, ...rest] = payloads;
+
+                // Update the main task
+                const { team_id, ...updatePayload } = first;
+                const updateResponse = await fetch('/api/tasks/update', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Manager-Mode': localStorage.getItem('qa_tracker_guest_session') ? 'true' : 'false',
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({ id: editingTask.id, ...updatePayload })
+                });
+
+                if (!updateResponse.ok) {
+                    const err = await updateResponse.json();
+                    console.error('Error updating task:', err);
+                    toastError(`Failed to update task: ${err.error || 'Server error'}`);
+                    return;
+                }
+
+                // Create the rest
+                if (rest.length > 0) {
+                    const createResponse = await fetch('/api/tasks/create', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(rest)
+                    });
+
+                    if (!createResponse.ok) {
+                        const err = await createResponse.json();
+                        console.error('Error creating split tasks:', err);
+                        toastError(`Task updated, but failed to create new split tasks: ${err.error || 'Server error'}`);
+                    }
+                }
+                success('Task updated successfully');
+
+            } else {
+                // Bulk Create
+                const response = await fetch('/api/tasks/create', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payloads)
+                });
+
+                if (!response.ok) {
+                    const err = await response.json();
+                    console.error('Error creating tasks via API:', err);
+                    toastError(`Failed to create tasks: ${err.error || 'Server error'}`);
+                    return;
+                }
+                success('Tasks created successfully');
             }
-            success('Task updated successfully');
+
         } else {
-            // Always use API for task creation to ensure notifications fire
-            const response = await fetch('/api/tasks/create', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(dbPayload)
-            });
+            // Legacy / Single Object Case
+            const dbPayload = formatPayload(taskData);
 
-            if (!response.ok) {
-                const err = await response.json();
-                console.error('Error creating task via API:', err);
-                toastError(`Failed to create task: ${err.error || 'Server error'}`);
-                return;
+            if (editingTask) {
+                const { team_id, ...updatePayload } = dbPayload;
+                // ... existing update logic ...
+                const response = await fetch('/api/tasks/update', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Manager-Mode': localStorage.getItem('qa_tracker_guest_session') ? 'true' : 'false',
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({ id: editingTask.id, ...updatePayload })
+                });
+
+                if (!response.ok) {
+                    const err = await response.json();
+                    console.error('Error updating task:', err);
+                    toastError(`Failed to save task: ${err.error || 'Server error'}`);
+                    return;
+                }
+                success('Task updated successfully');
+            } else {
+                // ... existing create logic ...
+                const response = await fetch('/api/tasks/create', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(dbPayload)
+                });
+
+                if (!response.ok) {
+                    const err = await response.json();
+                    console.error('Error creating task via API:', err);
+                    toastError(`Failed to create task: ${err.error || 'Server error'}`);
+                    return;
+                }
+                success('Task created successfully');
             }
-            success('Task created successfully');
         }
 
         // Refresh tasks

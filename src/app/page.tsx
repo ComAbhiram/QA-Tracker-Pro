@@ -314,67 +314,102 @@ export default function Home() {
     setIsTaskModalOpen(true);
   };
 
-  const saveTask = async (taskData: Partial<Task>) => {
-    // Map frontend Task format back to DBTask format
-    const dbPayload: any = {
-      project_name: taskData.projectName,
-      project_type: taskData.projectType,
-      sub_phase: taskData.subPhase,
-      priority: taskData.priority,
-      pc: taskData.pc,
-      status: taskData.status,
-      assigned_to: taskData.assignedTo,
-      assigned_to2: taskData.assignedTo2,
-      start_date: taskData.startDate || null,
-      end_date: taskData.endDate || null,
-      actual_completion_date: taskData.actualCompletionDate || null,
-      start_time: taskData.startTime || null,
-      end_time: taskData.endTime || null,
-      comments: taskData.comments,
-      current_updates: taskData.currentUpdates,
-      bug_count: taskData.bugCount,
-      html_bugs: taskData.htmlBugs,
-      functional_bugs: taskData.functionalBugs,
-      deviation_reason: taskData.deviationReason,
-      sprint_link: taskData.sprintLink,
-      days_allotted: Number(taskData.daysAllotted) || 0,
-      time_taken: taskData.timeTaken || '00:00:00',
-      days_taken: Number(taskData.daysTaken) || 0,
-      deviation: Number(taskData.deviation) || 0,
-      activity_percentage: Number(taskData.activityPercentage) || 0,
-      include_saturday: taskData.includeSaturday || false,
-      include_sunday: taskData.includeSunday || false,
-      team_id: taskData.teamId
-    };
+  const saveTask = async (taskData: Partial<Task> | Partial<Task>[]) => {
 
-    if (editingTask) {
-      const { team_id, ...updatePayload } = dbPayload;
-      const { error } = await supabase
-        .from('tasks')
-        .update(updatePayload)
-        .eq('id', editingTask.id);
+    // Helper to map frontend Task to DB payload
+    const formatPayload = (t: Partial<Task>) => ({
+      project_name: t.projectName,
+      project_type: t.projectType,
+      sub_phase: t.subPhase,
+      priority: t.priority,
+      pc: t.pc,
+      status: t.status,
+      assigned_to: t.assignedTo,
+      assigned_to2: t.assignedTo2,
+      start_date: t.startDate || null,
+      end_date: t.endDate || null,
+      actual_completion_date: t.actualCompletionDate || null,
+      start_time: t.startTime || null,
+      end_time: t.endTime || null,
+      comments: t.comments,
+      current_updates: t.currentUpdates,
+      bug_count: t.bugCount,
+      html_bugs: t.htmlBugs,
+      functional_bugs: t.functionalBugs,
+      deviation_reason: t.deviationReason,
+      sprint_link: t.sprintLink,
+      days_allotted: Number(t.daysAllotted) || 0,
+      time_taken: t.timeTaken || '00:00:00',
+      days_taken: Number(t.daysTaken) || 0,
+      deviation: Number(t.deviation) || 0,
+      activity_percentage: Number(t.activityPercentage) || 0,
+      include_saturday: t.includeSaturday || false,
+      include_sunday: t.includeSunday || false,
+      team_id: t.teamId
+    });
 
-      if (error) {
-        console.error('Error updating task:', error);
-        alert('Failed to update task: ' + error.message);
-        return;
+    try {
+      if (Array.isArray(taskData)) {
+        // Bulk Operation
+        const payloads = taskData.map(formatPayload);
+
+        if (editingTask) {
+          // Update Main + Create Others
+          const [first, ...rest] = payloads;
+
+          if (first) {
+            const { team_id, ...updatePayload } = first;
+            const { error } = await supabase
+              .from('tasks')
+              .update(updatePayload)
+              .eq('id', editingTask.id);
+            if (error) throw error;
+          }
+          if (rest.length > 0) {
+            const { error } = await supabase
+              .from('tasks')
+              .insert(rest);
+            if (error) throw error;
+          }
+
+        } else {
+          // Bulk Create
+          const { error } = await supabase
+            .from('tasks')
+            .insert(payloads);
+          if (error) throw error;
+        }
+
+      } else {
+        // Single Operation
+        const dbPayload = formatPayload(taskData);
+
+        if (editingTask) {
+          const { team_id, ...updatePayload } = dbPayload;
+          const { error } = await supabase
+            .from('tasks')
+            .update(updatePayload)
+            .eq('id', editingTask.id);
+
+          if (error) throw error;
+        } else {
+          const { error } = await supabase
+            .from('tasks')
+            .insert([dbPayload]);
+
+          if (error) throw error;
+        }
       }
-    } else {
-      const { error } = await supabase
-        .from('tasks')
-        .insert([dbPayload]);
 
-      if (error) {
-        console.error('Error creating task:', error);
-        alert('Failed to create task: ' + error.message);
-        return;
-      }
+      // Refresh data
+      setIsTaskModalOpen(false); // Close first to stabilize DOM
+      fetchTableData(currentPage, filter, searchQuery);
+      fetchStatsData();
+
+    } catch (error: any) {
+      console.error('Error saving task:', error);
+      alert('Failed to save task: ' + error.message);
     }
-
-    // Refresh data
-    setIsTaskModalOpen(false); // Close first to stabilize DOM
-    fetchTableData(currentPage, filter, searchQuery);
-    fetchStatsData();
   };
 
   const handleDeleteTask = async (taskId: number) => {

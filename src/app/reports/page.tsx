@@ -185,60 +185,98 @@ export default function Reports() {
         setIsTaskModalOpen(true);
     };
 
-    const saveTask = async (taskData: Partial<Task>) => {
+    const saveTask = async (taskData: Partial<Task> | Partial<Task>[]) => {
         if (!editingTask) return;
 
         try {
-            const dbPayload: any = {
-                project_name: taskData.projectName,
-                sub_phase: taskData.subPhase,
-                status: taskData.status,
-                assigned_to: taskData.assignedTo,
-                assigned_to2: taskData.assignedTo2,
-                additional_assignees: taskData.additionalAssignees || [],
-                pc: taskData.pc,
-                start_date: taskData.startDate || null,
-                end_date: taskData.endDate || null,
-                actual_completion_date: taskData.actualCompletionDate ? new Date(taskData.actualCompletionDate).toISOString() : null,
-                start_time: taskData.startTime || null,
-                end_time: taskData.endTime || null,
-                bug_count: taskData.bugCount,
-                html_bugs: taskData.htmlBugs,
-                functional_bugs: taskData.functionalBugs,
-                deviation_reason: taskData.deviationReason,
-                sprint_link: taskData.sprintLink,
-                days_allotted: Number(taskData.daysAllotted) || 0,
-                time_taken: taskData.timeTaken || '00:00:00',
-                days_taken: Number(taskData.daysTaken) || 0,
-                deviation: Number(taskData.deviation) || 0,
-                activity_percentage: Number(taskData.activityPercentage) || 0,
-                comments: taskData.comments,
-                include_saturday: taskData.includeSaturday || false,
-                include_sunday: taskData.includeSunday || false,
-                team_id: taskData.teamId,
+            // Helper to handle single update/insert
+            const processTask = async (t: Partial<Task>, isUpdate: boolean, id?: number) => {
+                const dbPayload: any = {
+                    project_name: t.projectName,
+                    sub_phase: t.subPhase,
+                    status: t.status,
+                    assigned_to: t.assignedTo,
+                    assigned_to2: t.assignedTo2,
+                    additional_assignees: t.additionalAssignees || [],
+                    pc: t.pc,
+                    start_date: t.startDate || null,
+                    end_date: t.endDate || null,
+                    actual_completion_date: t.actualCompletionDate ? new Date(t.actualCompletionDate).toISOString() : null,
+                    start_time: t.startTime || null,
+                    end_time: t.endTime || null,
+                    bug_count: t.bugCount,
+                    html_bugs: t.htmlBugs,
+                    functional_bugs: t.functionalBugs,
+                    deviation_reason: t.deviationReason,
+                    sprint_link: t.sprintLink,
+                    days_allotted: Number(t.daysAllotted) || 0,
+                    time_taken: t.timeTaken || '00:00:00',
+                    days_taken: Number(t.daysTaken) || 0,
+                    deviation: Number(t.deviation) || 0,
+                    activity_percentage: Number(t.activityPercentage) || 0,
+                    comments: t.comments,
+                    include_saturday: t.includeSaturday || false,
+                    include_sunday: t.includeSunday || false,
+                    team_id: t.teamId,
+                };
+
+                if (isUpdate && id) {
+                    const { data, error } = await supabase
+                        .from('tasks')
+                        .update(dbPayload)
+                        .eq('id', id)
+                        .select()
+                        .single();
+                    if (error) throw error;
+                    return mapTaskFromDB(data);
+                } else {
+                    const { data, error } = await supabase
+                        .from('tasks')
+                        .insert([dbPayload])
+                        .select()
+                        .single();
+                    if (error) throw error;
+                    return mapTaskFromDB(data);
+                }
             };
 
-            const { data, error } = await supabase
-                .from('tasks')
-                .update(dbPayload)
-                .eq('id', editingTask.id)
-                .select()
-                .single();
+            let updatedMainTask: Task | null = null;
+            let newTasks: Task[] = [];
 
-            if (error) throw error;
+            if (Array.isArray(taskData)) {
+                const [first, ...rest] = taskData;
+
+                // Update Main
+                if (first) {
+                    updatedMainTask = await processTask(first, true, editingTask.id);
+                }
+
+                // Create New
+                if (rest.length > 0) {
+                    // Since mapTaskFromDB returns Task, and processTask returns Promise<Task>
+                    // We can use Promise.all
+                    const results = await Promise.all(rest.map(t => processTask(t, false)));
+                    newTasks = results;
+                }
+
+            } else {
+                updatedMainTask = await processTask(taskData, true, editingTask.id);
+            }
 
             // Update local state
-            const updatedTask = mapTaskFromDB(data);
+            if (updatedMainTask) {
+                const finalizedTask = updatedMainTask; // Capture for closure
+                setTasks(prev => {
+                    const mapped = prev.map(t => t.id === finalizedTask.id ? finalizedTask : t);
+                    return [...mapped, ...newTasks];
+                });
 
-            // Update main tasks list
-            setTasks(prev => prev.map(t => t.id === updatedTask.id ? updatedTask : t));
-
-            // Update filtered modal tasks if open
-            setFilteredModal(prev => ({
-                ...prev,
-                isOpen: prev.isOpen, // Keep open
-                tasks: prev.tasks.map(t => t.id === updatedTask.id ? updatedTask : t)
-            }));
+                setFilteredModal(prev => ({
+                    ...prev,
+                    isOpen: prev.isOpen,
+                    tasks: prev.tasks.map(t => t.id === finalizedTask.id ? finalizedTask : t).concat(newTasks)
+                }));
+            }
 
             setIsTaskModalOpen(false);
             setEditingTask(null);

@@ -297,49 +297,87 @@ export default function ProjectOverviewPage() {
         }
     };
 
-    const handleSaveTask = async (taskData: Partial<Task>) => {
+    const handleSaveTask = async (taskData: Partial<Task> | Partial<Task>[]) => {
+
+        const formatPayload = (t: Partial<Task>) => ({
+            project_name: t.projectName,
+            project_type: t.projectType,
+            sub_phase: t.subPhase || null,
+            status: t.status,
+            assigned_to: t.assignedTo || null,
+            assigned_to2: t.assignedTo2 || null,
+            additional_assignees: t.additionalAssignees || [],
+            pc: t.pc || null,
+            start_date: t.startDate || null,
+            end_date: t.endDate || null,
+            actual_completion_date: t.actualCompletionDate ? new Date(t.actualCompletionDate).toISOString() : null,
+            start_time: t.startTime || null,
+            end_time: t.endTime || null,
+            bug_count: t.bugCount ?? 0,
+            html_bugs: t.htmlBugs ?? 0,
+            functional_bugs: t.functionalBugs ?? 0,
+            deviation_reason: t.deviationReason || null,
+            comments: t.comments || null,
+            current_updates: t.currentUpdates, // Ensure this is saved
+            sprint_link: t.sprintLink || null,
+            days_allotted: t.daysAllotted ?? 0,
+            time_taken: t.timeTaken || '00:00:00',
+            days_taken: t.daysTaken ?? 0,
+            deviation: t.deviation ?? 0,
+            activity_percentage: t.activityPercentage ?? 0,
+            include_saturday: t.includeSaturday || false,
+            include_sunday: t.includeSunday || false,
+            team_id: t.teamId ?? null,
+        });
+
         try {
-            const dbPayload: any = {
-                project_name: taskData.projectName,
-                sub_phase: taskData.subPhase || null,
-                status: taskData.status,
-                assigned_to: taskData.assignedTo || null,
-                assigned_to2: taskData.assignedTo2 || null,
-                additional_assignees: taskData.additionalAssignees || [],
-                pc: taskData.pc || null,
-                start_date: taskData.startDate || null,
-                end_date: taskData.endDate || null,
-                actual_completion_date: taskData.actualCompletionDate ? new Date(taskData.actualCompletionDate).toISOString() : null,
-                bug_count: taskData.bugCount ?? 0,
-                html_bugs: taskData.htmlBugs ?? 0,
-                functional_bugs: taskData.functionalBugs ?? 0,
-                deviation_reason: taskData.deviationReason || null,
-                sprint_link: taskData.sprintLink || null,
-                days_allotted: taskData.daysAllotted ?? 0,
-                time_taken: taskData.timeTaken || '00:00:00',
-                days_taken: taskData.daysTaken ?? 0,
-                deviation: taskData.deviation ?? 0,
-                activity_percentage: taskData.activityPercentage ?? 0,
-                comments: taskData.comments || null,
-                include_saturday: taskData.includeSaturday || false,
-                include_sunday: taskData.includeSunday || false,
-                team_id: taskData.teamId ?? null,
-                start_time: taskData.startTime || null,
-                end_time: taskData.endTime || null,
-            };
+            if (Array.isArray(taskData)) {
 
-            if (selectedTask) {
-                const { error } = await supabase
-                    .from('tasks')
-                    .update(dbPayload)
-                    .eq('id', selectedTask.id);
+                const payloads = taskData.map(formatPayload);
 
-                if (error) throw error;
+                if (selectedTask) {
+                    // Update main + Create new
+                    const [first, ...rest] = payloads;
+
+                    if (first) {
+                        const { error } = await supabase
+                            .from('tasks')
+                            .update(first)
+                            .eq('id', selectedTask.id);
+                        if (error) throw error;
+                    }
+
+                    if (rest.length > 0) {
+                        const { error } = await supabase
+                            .from('tasks')
+                            .insert(rest);
+                        if (error) throw error;
+                    }
+
+                } else {
+                    // Bulk Create
+                    const { error } = await supabase
+                        .from('tasks')
+                        .insert(payloads);
+                    if (error) throw error;
+                }
+
             } else {
-                const { error } = await supabase
-                    .from('tasks')
-                    .insert([dbPayload]);
-                if (error) throw error;
+                // Single Object Case
+                const dbPayload = formatPayload(taskData);
+
+                if (selectedTask) {
+                    const { error } = await supabase
+                        .from('tasks')
+                        .update(dbPayload)
+                        .eq('id', selectedTask.id);
+                    if (error) throw error;
+                } else {
+                    const { error } = await supabase
+                        .from('tasks')
+                        .insert([dbPayload]);
+                    if (error) throw error;
+                }
             }
 
             await fetchData();

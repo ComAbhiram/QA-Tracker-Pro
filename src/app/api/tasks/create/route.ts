@@ -45,78 +45,88 @@ export async function POST(request: NextRequest) {
         }
 
         const body = await request.json();
-        const { ...taskData } = body;
+
+        // Handle both single object and array of objects
+        const tasksToCreate = Array.isArray(body) ? body : [body];
+
+        if (tasksToCreate.length === 0) {
+            return NextResponse.json({ error: 'No task data provided' }, { status: 400 });
+        }
 
         // Determine effective team_id
         const isSuperAdmin = (profile as any)?.role === 'super_admin';
         const canOverride = isSuperAdmin || isManagerMode;
+        const defaultTeamId = profile?.team_id;
 
-        const effectiveTeamId = (canOverride && taskData.team_id) ? taskData.team_id : profile?.team_id;
+        // Process each task to add team_id
+        const formattedTasks = tasksToCreate.map((taskData: any) => {
+            const effectiveTeamId = (canOverride && taskData.team_id) ? taskData.team_id : defaultTeamId;
 
-        if (!effectiveTeamId) {
-            return NextResponse.json({ error: 'Team ID is required' }, { status: 400 });
-        }
+            if (!effectiveTeamId) {
+                throw new Error('Team ID is required for all tasks');
+            }
 
-        // Perform Insert using Admin Client (Bypass RLS)
-        const { data, error } = await supabaseAdmin
-            .from('tasks')
-            .insert([{
+            return {
                 ...taskData,
                 team_id: effectiveTeamId
-            }])
-            .select()
-            .single();
+            };
+        });
+
+        // Perform Bulk Insert using Admin Client (Bypass RLS)
+        const { data, error } = await supabaseAdmin
+            .from('tasks')
+            .insert(formattedTasks)
+            .select();
 
         if (error) {
             console.error('[API Tasks Create] Insert Error:', error);
             return NextResponse.json({ error: error.message }, { status: 500 });
         }
 
-        // Trigger PC Notification if PC is assigned
-        if (data && data.pc) {
-            try {
-                if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
-                    console.error('[API Tasks Create] CRITICAL: SUPABASE_SERVICE_ROLE_KEY is missing in environment!');
-                }
+        // Trigger PC Notification if PC is assigned (for each created task)
+        // We do this asynchronously to not block the response
+        (async () => {
+            if (!data) return;
 
-                // Fetch PC email (Case-insensitive)
-                console.log(`[API Tasks Create] Looking up email for PC: "${data.pc}"`);
-                const { data: pcData, error: pcFetchError } = await supabaseAdmin
-                    .from('global_pcs')
-                    .select('email')
-                    .ilike('name', data.pc)
-                    .single();
+            for (const task of data) {
+                if (task.pc) {
+                    try {
+                        if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+                            console.error('[API Tasks Create] CRITICAL: SUPABASE_SERVICE_ROLE_KEY is missing in environment!');
+                            continue;
+                        }
 
-                if (pcFetchError) {
-                    console.warn(`[API Tasks Create] PC email lookup error for "${data.pc}":`, pcFetchError.message);
-                } else {
-                    console.log(`[API Tasks Create] Lookup result for "${data.pc}":`, pcData);
-                }
+                        // Fetch PC email (Case-insensitive)
+                        // console.log(`[API Tasks Create] Looking up email for PC: "${task.pc}"`);
+                        const { data: pcData, error: pcFetchError } = await supabaseAdmin
+                            .from('global_pcs')
+                            .select('email')
+                            .ilike('name', task.pc)
+                            .single();
 
-                if (pcData?.email) {
-                    console.log(`[API Tasks Create] Sending PC notification to ${data.pc} (${pcData.email})`);
-                    // Use the shared notification service
-                    await sendPCNotification({
-                        type: 'created',
-                        pcEmail: pcData.email,
-                        pcName: data.pc,
-                        projectName: data.project_name,
-                        taskName: data.sub_phase || 'General Task',
-                        assignee: data.assigned_to || 'Unassigned',
-                        status: data.status,
-                        priority: data.priority,
-                        startDate: data.start_date,
-                        endDate: data.end_date
-                    });
-                } else {
-                    console.warn(`[API Tasks Create] No email found for PC: ${data.pc}. Notification skip.`);
+                        if (pcData?.email) {
+                            // console.log(`[API Tasks Create] Sending PC notification to ${task.pc} (${pcData.email})`);
+                            await sendPCNotification({
+                                type: 'created',
+                                pcEmail: pcData.email,
+                                pcName: task.pc,
+                                projectName: task.project_name,
+                                taskName: task.sub_phase || 'General Task',
+                                assignee: task.assigned_to || 'Unassigned',
+                                status: task.status,
+                                priority: task.priority,
+                                startDate: task.start_date,
+                                endDate: task.end_date
+                            });
+                        }
+                    } catch (err) {
+                        console.error('[API Tasks Create] Error preparing notification:', err);
+                    }
                 }
-            } catch (err) {
-                console.error('[API Tasks Create] Error preparing notification:', err);
             }
-        }
+        })();
 
-        return NextResponse.json({ task: data }, { status: 201 });
+        return NextResponse.json({ tasks: data }, { status: 201 });
 
     } catch (error: any) {
         console.error('[API Tasks Create] Error:', error);
