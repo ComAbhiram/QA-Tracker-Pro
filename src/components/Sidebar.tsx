@@ -1,7 +1,6 @@
-
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
@@ -178,11 +177,30 @@ export function Sidebar() {
     };
 
     const [isHovered, setIsHovered] = useState(false);
+    const [ignoreHover, setIgnoreHover] = useState(false);
 
     // Derived state for visual expansion
-    // On desktop: Expand if not collapsed (pinned) OR if collapsed but hovered
+    // On desktop: Expand if not collapsed (pinned) OR if collapsed but hovered (unless ignored)
     // On mobile: Ignore hover, rely on collapsed state (which is handled by overlay/toggle)
-    const showExpanded = !isCollapsed || isHovered;
+    const showExpanded = !isCollapsed || (isHovered && !ignoreHover);
+
+    // Reset ignoreHover when mouse interactions occur
+    const handleMouseEnter = () => {
+        setIsHovered(true);
+        setIgnoreHover(false);
+    };
+
+    const handleMouseLeave = () => {
+        setIsHovered(false);
+        setIgnoreHover(false);
+    };
+
+    // When collapsing, temporarily ignore hover to allow visual shrinking
+    useEffect(() => {
+        if (isCollapsed) {
+            setIgnoreHover(true);
+        }
+    }, [isCollapsed]);
 
     return (
         <div id="app-sidebar-container">
@@ -203,8 +221,8 @@ export function Sidebar() {
                     fixed top-0 left-0 h-full flex flex-col z-50 bg-white border-r border-slate-100 dark:bg-slate-900 dark:border-slate-800 transition-all duration-300 ease-in-out
                     ${showExpanded ? 'translate-x-0 w-[16.25rem]' : '-translate-x-full lg:translate-x-0 lg:w-20'}
                 `}
-                onMouseEnter={() => setIsHovered(true)}
-                onMouseLeave={() => setIsHovered(false)}
+                onMouseEnter={handleMouseEnter}
+                onMouseLeave={handleMouseLeave}
             >
                 <div className={`p-4 border-b border-transparent shrink-0 flex items-center justify-between gap-3 ${!showExpanded ? 'justify-center px-2' : ''}`}>
 
