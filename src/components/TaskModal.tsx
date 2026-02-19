@@ -98,6 +98,7 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
     }, []);
 
     const effectiveTeamId = isGuest ? selectedTeamId : userTeamId;
+    console.log('[TaskModal] useEffect Debug:', { isGuest, selectedTeamId, userTeamId, effectiveTeamId });
 
     // Fetch Projects
     useEffect(() => {
@@ -142,6 +143,7 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
                     }
                 } else {
                     // Specific Team Context -> Fetch only team members
+                    // Fallback to all users if team members are empty (Safety net for Manager Mode)
                     const { data: teamMembers, error } = await supabase
                         .from('team_members')
                         .select('name')
@@ -149,8 +151,19 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
 
                     if (error) {
                         console.error('[TaskModal] Error fetching team members:', error);
-                    } else if (teamMembers) {
+                    }
+
+                    if (teamMembers && teamMembers.length > 0) {
                         setHubstaffUsers(teamMembers.map(m => ({ id: m.name, label: m.name })));
+                    } else {
+                        // FALLBACK: If no team members found, fetch all Hubstaff users to avoid empty dropdown
+                        console.warn('[TaskModal] No team members found for ID:', effectiveTeamId, 'Falling back to all users.');
+                        const response = await fetch('/api/hubstaff/users');
+                        if (response.ok) {
+                            const data = await response.json();
+                            const members = data.members?.map((u: any) => ({ id: u.name, label: u.name })) || [];
+                            setHubstaffUsers(members);
+                        }
                     }
                 }
             } catch (error) {
@@ -533,7 +546,12 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
                             <Combobox
                                 options={[{ id: 'Low', label: 'Low' }, { id: 'Medium', label: 'Medium' }, { id: 'High', label: 'High' }, { id: 'Urgent', label: 'Urgent' }]}
                                 value={formData.priority || ''}
-                                onChange={(val) => setFormData(prev => ({ ...prev, priority: val ? String(val) : null }))}
+                                onChange={(val) => {
+                                    // Ensure value is treated as string and state is updated
+                                    const newPriority = val ? String(val) : null;
+                                    console.log('[TaskModal] Setting Priority:', newPriority);
+                                    setFormData(prev => ({ ...prev, priority: newPriority }));
+                                }}
                                 placeholder="Select priority..."
                                 allowCustomValue={true}
                             />

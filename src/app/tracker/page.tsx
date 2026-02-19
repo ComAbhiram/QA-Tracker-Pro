@@ -458,8 +458,7 @@ export default function Tracker() {
                 if (!updateResponse.ok) {
                     const err = await updateResponse.json();
                     console.error('Error updating task:', err);
-                    toastError(`Failed to update task: ${err.error || 'Server error'}`);
-                    return;
+                    throw new Error(err.error || 'Server error');
                 }
 
                 // Create the rest
@@ -473,10 +472,12 @@ export default function Tracker() {
                     if (!createResponse.ok) {
                         const err = await createResponse.json();
                         console.error('Error creating split tasks:', err);
-                        toastError(`Task updated, but failed to create new split tasks: ${err.error || 'Server error'}`);
+                        // Partial failure - we might want to warn but not throw completely if main update worked?
+                        // But TaskModal expects full success. Let's throw.
+                        throw new Error(`Task updated, but failed to create split tasks: ${err.error || 'Server error'}`);
                     }
                 }
-                success('Task updated successfully');
+                // Success managed by TaskModal
 
             } else {
                 // Bulk Create
@@ -489,10 +490,9 @@ export default function Tracker() {
                 if (!response.ok) {
                     const err = await response.json();
                     console.error('Error creating tasks via API:', err);
-                    toastError(`Failed to create tasks: ${err.error || 'Server error'}`);
-                    return;
+                    throw new Error(err.error || 'Server error');
                 }
-                success('Tasks created successfully');
+                // Success managed by TaskModal
             }
 
         } else {
@@ -515,10 +515,9 @@ export default function Tracker() {
                 if (!response.ok) {
                     const err = await response.json();
                     console.error('Error updating task:', err);
-                    toastError(`Failed to save task: ${err.error || 'Server error'}`);
-                    return;
+                    throw new Error(err.error || 'Server error');
                 }
-                success('Task updated successfully');
+                // Success managed by TaskModal
             } else {
                 // ... existing create logic ...
                 const response = await fetch('/api/tasks/create', {
@@ -530,10 +529,9 @@ export default function Tracker() {
                 if (!response.ok) {
                     const err = await response.json();
                     console.error('Error creating task via API:', err);
-                    toastError(`Failed to create task: ${err.error || 'Server error'}`);
-                    return;
+                    throw new Error(err.error || 'Server error');
                 }
-                success('Task created successfully');
+                // Success managed by TaskModal
             }
         }
 

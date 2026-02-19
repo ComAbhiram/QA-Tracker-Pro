@@ -140,8 +140,8 @@ export async function PUT(request: NextRequest) {
                 }
 
                 const currentSubPhase = updates.sub_phase !== undefined ? updates.sub_phase : task.sub_phase;
-                const currentStatus = updates.status || task.status;
-                const currentPriority = updates.priority || task.priority;
+                const currentStatus = updates.status !== undefined ? updates.status : task.status;
+                const currentPriority = updates.priority !== undefined ? updates.priority : task.priority;
 
                 const emailPayload = {
                     taskId: id,
