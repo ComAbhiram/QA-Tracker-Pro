@@ -391,7 +391,6 @@ export default function ProjectStatusPage({ pageTitle, statusFilter, showAvailab
                             <option value="All">All PCs</option>
                             {pcNames.map(pc => <option key={pc} value={pc}>{pc}</option>)}
                         </select>
-                        <sl-icon name="person" className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></sl-icon> {/* Using placeholder icon logic */}
                         <SlidersHorizontal size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                     </div>
 
