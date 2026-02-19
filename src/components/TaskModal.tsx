@@ -599,7 +599,7 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
                                         {/* Dates & Schedule */}
                                         <div className="space-y-4">
                                             <div className="flex flex-col sm:flex-row gap-4">
-                                                <div className="flex-1 space-y-2">
+                                                <div className="flex-1 space-y-2 min-w-0">
                                                     <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Start Date</label>
                                                     <DatePicker
                                                         date={assignee.startDate ? new Date(assignee.startDate) : undefined}
@@ -610,7 +610,7 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
                                                         placeholder="Start"
                                                     />
                                                 </div>
-                                                <div className="flex-1 space-y-2">
+                                                <div className="flex-1 space-y-2 min-w-0">
                                                     <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">End Date</label>
                                                     <DatePicker
                                                         date={assignee.endDate ? new Date(assignee.endDate) : undefined}
