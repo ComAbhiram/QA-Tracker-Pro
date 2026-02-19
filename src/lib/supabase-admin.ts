@@ -9,7 +9,9 @@ if (!supabaseUrl || !supabaseServiceRoleKey) {
     console.warn('Missing Supabase URL or Service Role Key in environment variables');
 }
 
-export const supabaseAdmin = createClient(supabaseUrl || '', supabaseServiceRoleKey || '', {
+// SAFE INITIALIZATION: Pass a dummy key if missing to prevent crash on import.
+// Operations using this client will fail if the key is invalid, but the app won't crash on startup.
+export const supabaseAdmin = createClient(supabaseUrl || '', supabaseServiceRoleKey || 'placeholder-key', {
     auth: {
         autoRefreshToken: false,
         persistSession: false
