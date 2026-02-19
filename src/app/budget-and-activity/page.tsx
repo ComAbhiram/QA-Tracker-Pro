@@ -52,8 +52,14 @@ export default function BudgetAndActivityPage() {
 
 
     // Filter State
-    const [filterStartDate, setFilterStartDate] = useState('');
-    const [filterEndDate, setFilterEndDate] = useState('');
+    const [filterStartDate, setFilterStartDate] = useState(() => {
+        const date = new Date();
+        return new Date(date.getFullYear(), date.getMonth(), 1).toISOString().split('T')[0];
+    });
+    const [filterEndDate, setFilterEndDate] = useState(() => {
+        const date = new Date();
+        return new Date(date.getFullYear(), date.getMonth() + 1, 0).toISOString().split('T')[0];
+    });
     const [filterQA, setFilterQA] = useState('');
     const [filterAssignedOnly, setFilterAssignedOnly] = useState(false);
 
