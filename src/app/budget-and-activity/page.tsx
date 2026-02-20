@@ -5,7 +5,7 @@ import { supabase } from '@/lib/supabase';
 import { mapTaskFromDB, Task } from '@/lib/types';
 import { Search, Plus, Download, CalendarClock, X, ArrowUp, ArrowDown, ArrowUpRight } from 'lucide-react';
 import TaskModal from '@/components/TaskModal';
-import ProjectTaskTable from '@/components/ProjectTaskTable';
+import CollapsibleProjectRow from '@/components/CollapsibleProjectRow';
 import { useGuestMode } from '@/contexts/GuestContext';
 import { useToast } from '@/contexts/ToastContext';
 import { toast } from 'sonner';
@@ -412,8 +412,8 @@ export default function BudgetAndActivityPage() {
                 ) : (
                     <div className="relative">
                         <div className="space-y-4 pt-4">
-                            {/* Sticky Header */}
-                            <div className="sticky top-0 z-40 bg-white dark:bg-slate-900 shadow-md border-b border-slate-200 dark:border-slate-700 mb-2 rounded-t-lg overflow-x-auto no-scrollbar transition-colors">
+                            {/* Master Table */}
+                            <div className="bg-white dark:bg-slate-900 shadow-md border border-slate-200 dark:border-slate-700 rounded-lg overflow-x-auto no-scrollbar transition-colors">
                                 <table className="w-full text-xs text-slate-800 dark:text-slate-200 border-collapse table-fixed">
                                     <colgroup>
                                         <col style={{ width: columnWidths.projectName }} />
@@ -423,7 +423,7 @@ export default function BudgetAndActivityPage() {
                                         <col style={{ width: columnWidths.activityPercentage }} />
                                         <col style={{ width: columnWidths.deviation }} />
                                     </colgroup>
-                                    <thead className="bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-bold uppercase tracking-wider backdrop-blur-md">
+                                    <thead className="bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-bold uppercase tracking-wider backdrop-blur-md sticky top-0 z-40 border-b border-slate-200 dark:border-slate-700 drop-shadow-sm">
                                         <tr>
                                             <ResizableHeader label="Project" widthKey="projectName" width={columnWidths.projectName} onResizeStart={startResizing} isSortable={false} />
                                             <ResizableHeader label="Assignees" widthKey="assignees" width={columnWidths.assignees} onResizeStart={startResizing} isSortable={false} />
@@ -433,24 +433,22 @@ export default function BudgetAndActivityPage() {
                                             <ResizableHeader label="Deviation" widthKey="deviation" width={columnWidths.deviation} onResizeStart={startResizing} isSortable={false} />
                                         </tr>
                                     </thead>
+                                    <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                                        {sortedProjects.map(project => (
+                                            <CollapsibleProjectRow
+                                                key={project}
+                                                projectName={project}
+                                                tasks={groupedTasks[project]}
+                                                columnWidths={columnWidths}
+                                                onEditTask={handleEditTask}
+                                                onFieldUpdate={handleFieldUpdate}
+                                                selectedTeamId={selectedTeamId}
+                                                isReadOnly={isPCMode}
+                                            />
+                                        ))}
+                                    </tbody>
                                 </table>
                             </div>
-
-                            {/* Tables */}
-                            {sortedProjects.map(project => (
-                                <ProjectTaskTable
-                                    key={project}
-                                    projectName={project}
-                                    tasks={groupedTasks[project]}
-                                    columnWidths={columnWidths}
-                                    hideHeader={true}
-                                    isRowExpanded={isRowExpanded}
-                                    onEditTask={handleEditTask}
-                                    onFieldUpdate={handleFieldUpdate}
-                                    selectedTeamId={selectedTeamId}
-                                    isReadOnly={isPCMode}
-                                />
-                            ))}
 
                             {sortedProjects.length === 0 && (
                                 <div className="p-12 text-center bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800">
