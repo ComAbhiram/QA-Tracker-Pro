@@ -447,7 +447,7 @@ export default function Home() {
           <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-100">Team Tracker</h1>
           <p className="text-slate-500 dark:text-slate-400">Overview of all active team projects</p>
         </div>
-        <div className="flex flex-wrap gap-3 w-full md:w-auto">
+        <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
           <button
             onClick={() => setIsReportModalOpen(true)}
             className="flex-1 sm:flex-none btn btn-secondary flex items-center justify-center gap-2"
@@ -487,19 +487,19 @@ export default function Home() {
         {/* Main Task List - Powered by Paginated Fetch */}
         <div className="w-full bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden flex flex-col transition-colors duration-300">
           <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <h3 className="font-bold text-lg text-slate-800 dark:text-slate-100 flex items-center gap-2">
+            <h3 className="font-bold text-lg text-slate-800 dark:text-slate-100 flex items-center gap-2 mb-2 sm:mb-0">
               <Layers size={20} className="text-indigo-600 dark:text-indigo-400" />
               All Tasks
             </h3>
 
-            <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
+            <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-3 w-full sm:w-auto">
               <div className="relative w-full sm:w-auto">
                 <input
                   type="text"
                   placeholder="Search tasks..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-9 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 dark:text-slate-100 w-full sm:w-64 transition-colors"
+                  className="pl-9 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 dark:text-slate-100 w-full md:w-64 transition-colors"
                 />
                 <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
               </div>
@@ -526,19 +526,21 @@ export default function Home() {
                 <svg className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
               </div>
 
-              <span className="text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 px-2 py-1 rounded-md whitespace-nowrap">
-                {totalItems} total results
-              </span>
-              <button
-                onClick={() => setShowTodayOnly(!showTodayOnly)}
-                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${showTodayOnly
-                  ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm shadow-indigo-200 dark:shadow-indigo-900/20'
-                  : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700'
-                  }`}
-              >
-                <CalendarClock size={14} />
-                {showTodayOnly ? 'Today Only' : 'Present Day'}
-              </button>
+              <div className="flex flex-wrap items-center justify-between sm:justify-start gap-3 w-full sm:w-auto">
+                <span className="text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 px-2 py-1 rounded-md whitespace-nowrap">
+                  {totalItems} total results
+                </span>
+                <button
+                  onClick={() => setShowTodayOnly(!showTodayOnly)}
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${showTodayOnly
+                    ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm shadow-indigo-200 dark:shadow-indigo-900/20'
+                    : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700'
+                    }`}
+                >
+                  <CalendarClock size={14} />
+                  {showTodayOnly ? 'Today Only' : 'Present Day'}
+                </button>
+              </div>
             </div>
           </div>
 

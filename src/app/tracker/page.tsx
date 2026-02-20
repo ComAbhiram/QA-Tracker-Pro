@@ -865,7 +865,7 @@ export default function Tracker() {
 
                     {/* Manager Mode Team Selector - Aligned with Title */}
                     {isGuest && teams.length > 0 && (
-                        <div className="flex-1 flex justify-end min-w-0 overflow-x-auto no-scrollbar ml-4">
+                        <div className="flex-1 flex justify-start md:justify-end min-w-0 overflow-x-auto no-scrollbar md:ml-4">
                             <TeamSelectorPill
                                 teams={teams}
                                 selectedTeamName={selectedTeamName}
@@ -875,8 +875,8 @@ export default function Tracker() {
                     )}
                 </div>
 
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                    <div className="flex flex-wrap items-center gap-2">
+                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                    <div className="flex flex-col sm:flex-row flex-wrap items-start sm:items-center gap-3 w-full md:w-auto">
                         <div className="relative group w-full sm:w-auto">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-slate-600 transition-colors" size={14} />
                             <input
@@ -888,13 +888,15 @@ export default function Tracker() {
                             />
                         </div>
 
-                        <div className="w-full sm:w-auto flex flex-wrap justify-between sm:justify-start items-center gap-2">
-                            <DatePicker
-                                date={dateFilter}
-                                setDate={setDateFilter}
-                                placeholder="Filter by date"
-                                className="w-[140px] bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 min-h-0 py-2 px-3 text-xs shadow-sm hover:bg-slate-50 dark:hover:bg-slate-700 rounded-md"
-                            />
+                        <div className="w-full sm:w-auto flex flex-col sm:flex-row justify-start items-stretch sm:items-center gap-3">
+                            <div className="w-full sm:w-auto">
+                                <DatePicker
+                                    date={dateFilter}
+                                    setDate={setDateFilter}
+                                    placeholder="Filter by date"
+                                    className="w-full sm:w-[140px] bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 min-h-0 py-2 px-3 text-xs shadow-sm hover:bg-slate-50 dark:hover:bg-slate-700 rounded-md"
+                                />
+                            </div>
 
                             {/* PC Filter Dropdown */}
                             <div className="relative w-full sm:w-[220px] z-50">
@@ -910,16 +912,16 @@ export default function Tracker() {
                                 />
                             </div>
 
-                            <div className="bg-slate-100 dark:bg-slate-800 p-0.5 rounded-lg flex items-center border border-slate-200 dark:border-slate-700">
+                            <div className="bg-slate-100 dark:bg-slate-800 p-0.5 rounded-lg flex items-center border border-slate-200 dark:border-slate-700 w-full sm:w-auto">
                                 <button
                                     onClick={() => setViewMode('active')}
-                                    className={`px-3 py-1.5 text-xs font-bold rounded-md transition-all ${viewMode === 'active' ? 'bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
+                                    className={`flex-1 sm:flex-none px-3 py-1.5 text-xs font-bold rounded-md transition-all ${viewMode === 'active' ? 'bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
                                 >
                                     Active
                                 </button>
                                 <button
                                     onClick={() => setViewMode('forecast')}
-                                    className={`px-3 py-1.5 text-xs font-bold rounded-md transition-all ${viewMode === 'forecast' ? 'bg-white dark:bg-slate-700 text-purple-600 dark:text-purple-400 shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
+                                    className={`flex-1 sm:flex-none px-3 py-1.5 text-xs font-bold rounded-md transition-all ${viewMode === 'forecast' ? 'bg-white dark:bg-slate-700 text-purple-600 dark:text-purple-400 shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
                                 >
                                     Forecast
                                 </button>
@@ -927,7 +929,7 @@ export default function Tracker() {
                         </div>
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+                    <div className="grid grid-cols-2 sm:flex sm:flex-row items-center gap-2 w-full md:w-auto mt-2 md:mt-0">
                         {!isPCMode && (
                             <button
                                 onClick={() => setIsLeaveModalOpen(true)}
@@ -954,7 +956,7 @@ export default function Tracker() {
                         {!isPCMode && (
                             <button
                                 onClick={() => { setEditingTask(null); setIsTaskModalOpen(true); }}
-                                className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg shadow-lg shadow-indigo-200 dark:shadow-none hover:shadow-indigo-300 transition-all font-bold text-sm"
+                                className="col-span-2 sm:col-span-1 flex-1 sm:flex-none flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg shadow-lg shadow-indigo-200 dark:shadow-none hover:shadow-indigo-300 transition-all font-bold text-sm"
                             >
                                 <Plus size={18} />
                                 New Task

@@ -276,11 +276,11 @@ export default function LoginPage() {
             )}
 
             {/* Main Split Card */}
-            <div className="w-full max-w-sm md:max-w-4xl bg-white rounded-2xl shadow-xl overflow-hidden grid md:grid-cols-2 min-h-[500px] md:min-h-[600px] border border-slate-200/50">
+            <div className="w-full max-w-sm sm:max-w-md md:max-w-4xl bg-white rounded-2xl shadow-xl overflow-hidden grid md:grid-cols-2 min-h-[500px] md:min-h-[600px] border border-slate-200/50 mx-auto">
 
                 {/* Left Column: Form Section */}
-                <div className="flex flex-col justify-center p-8 md:p-12 h-full relative">
-                    <div className="flex flex-col gap-6 w-full max-w-md mx-auto">
+                <div className="flex flex-col justify-center p-6 sm:p-8 md:p-12 h-full relative">
+                    <div className="flex flex-col gap-6 w-full max-w-sm mx-auto">
 
                         {/* Header */}
                         <div className="text-center md:text-left space-y-2">
