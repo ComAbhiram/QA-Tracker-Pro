@@ -371,55 +371,51 @@
 }
 
 .ai-chat-btn {
-  padding: 12px 20px;
-  border: none;
-  font-size: 1rem;
+  padding: 10px 18px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  font-size: 0.95rem;
+  font-weight: 600;
   cursor: pointer;
   position: relative;
-  background: linear-gradient(90deg, #5bfcc4, #f593e4, #71a4f0);
-  @apply dark:from-emerald-400 dark:to-cyan-400;
-  border-radius: 12px;
+  background: linear-gradient(135deg, #6366f1, #a855f7, #ec4899);
+  border-radius: 9999px;
+  /* Fully rounded pill shape */
   color: #fff;
-  transition: all 0.3s ease;
-  box-shadow:
-    inset 0px 0px 5px #ffffffa9,
-    inset 0px 35px 30px #000,
-    0px 5px 10px #000000cc;
-  @apply dark:shadow-none;
-  text-shadow: 1px 1px 1px #000;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 15px -3px rgba(168, 85, 247, 0.4), 0 2px 6px -2px rgba(168, 85, 247, 0.2);
+  outline: none;
+  overflow: hidden;
 }
 
 .ai-chat-btn::before {
   content: "";
   position: absolute;
   inset: 0;
-  margin: auto;
-  border-radius: 12px;
-  filter: blur(0);
-  z-index: -1;
-  box-shadow: none;
-  background: conic-gradient(#00000000 80deg,
-      #40baf7,
-      #f34ad7,
-      #5bfcc4,
-      #00000000 280deg);
-  transition: all 0.3s ease;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, #ec4899, #a855f7, #6366f1);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 0;
+}
+
+.ai-chat-btn:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 25px -5px rgba(168, 85, 247, 0.6), 0 4px 10px -4px rgba(168, 85, 247, 0.3);
 }
 
 .ai-chat-btn:hover::before {
-  filter: blur(15px);
+  opacity: 1;
 }
 
-.ai-chat-btn:active::before {
-  filter: blur(5px);
-  transform: translateY(1px);
+.ai-chat-btn>* {
+  /* Ensure text and icon stay above the ::before pseudo-element */
+  position: relative;
+  z-index: 1;
 }
 
 .ai-chat-btn:active {
-  box-shadow:
-    inset 0px 0px 5px #ffffffa9,
-    inset 0px 35px 30px #000;
-  margin-top: 3px;
+  transform: translateY(1px) scale(0.98);
+  box-shadow: 0 2px 10px -3px rgba(168, 85, 247, 0.4);
 }
 
 /* Custom Checkbox Design */
