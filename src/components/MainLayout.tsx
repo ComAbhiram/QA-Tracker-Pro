@@ -3,16 +3,18 @@
 import { ReactNode } from 'react';
 import { useSidebar } from '@/contexts/SidebarContext';
 import { Sidebar } from '@/components/Sidebar';
+import { usePathname } from 'next/navigation';
 
 export default function MainLayout({ children }: { children: ReactNode }) {
     const { isCollapsed } = useSidebar();
+    const pathname = usePathname();
+    const isAuthPage = pathname === '/login' || pathname === '/guest';
 
     return (
         <>
             <Sidebar />
             <main
-                className={`main-content flex flex-col transition-[margin] duration-300 ease-in-out`}
-                style={{ marginLeft: isCollapsed ? '5rem' : '16.25rem' }}
+                className={`main-content flex flex-col transition-[margin] duration-300 ease-in-out ${!isAuthPage ? (isCollapsed ? 'lg:ml-20' : 'lg:ml-[16.25rem]') : ''} ${!isAuthPage ? 'pt-16 lg:pt-0' : ''}`}
             >
                 <div className="flex-1">
                     {children}
