@@ -849,11 +849,7 @@
   flex-direction: column;
   justify-content: space-between;
   background-color: var(--card-bg-color);
-  /* Dynamic background color */
   color: #1e293b;
-  /* Dark Slate 800 for contrast */
-  /* Dark text for vibrant BG */
-  @apply dark:text-slate-100;
   padding: 15px;
   flex: 1;
   min-width: 180px;
@@ -862,28 +858,33 @@
   user-select: none;
   -moz-user-select: none;
   -webkit-user-select: none;
-  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   will-change: transform;
-  /* Safari Smoothness Fixes */
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
   transform: translateZ(0);
   -webkit-font-smoothing: subpixel-antialiased;
-
   border: 1px solid transparent;
-  /* No border for vibrant card */
   cursor: pointer;
+}
+
+/* Dark Mode Default Style */
+.dark .status {
+  background-color: #1e293b;
+  /* slate-800 */
+  border: 1px solid var(--card-hover-color);
 }
 
 .status span {
   font-size: 2rem;
   font-weight: 900;
-  transition: color 0.2s ease, transform 0.2s ease;
+  transition: color 0.2s ease, transform 0.2s ease, font-size 0.2s ease;
   line-height: 1;
   color: #0f172a;
-  /* Slate 900 for number */
-  /* Dark number for vibrant BG */
-  @apply dark:text-white;
+}
+
+.dark .status span {
+  color: var(--card-hover-color);
 }
 
 .status p {
@@ -893,31 +894,38 @@
   text-transform: uppercase;
   letter-spacing: 1px;
   font-weight: 700;
-  /* Bolder for visibility */
 }
 
+.dark .status p {
+  color: var(--card-hover-color);
+}
+
+/* Light Mode Hover */
 .status:hover {
-  @apply bg-white dark:bg-slate-800 transition-colors duration-300;
-  @apply dark:text-white;
+  background-color: #ffffff;
   transform: scale(1.05);
-  /* Slightly increased scale for impact */
   border: 1px solid var(--card-hover-color);
-  /* Dynamic matte color border */
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  /* Softer shadow */
+}
+
+/* Dark Mode Hover */
+.dark .status:hover {
+  background-color: #334155;
+  /* slate-700 for subtle elevation */
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
+  border-color: var(--card-hover-color);
+  transform: scale(1.05);
 }
 
 .status:hover p {
   font-size: 15px;
   font-weight: 600;
   color: var(--card-hover-color);
-  /* Dynamic matte color text */
 }
 
 .status:hover span {
   font-size: 2.2rem;
   color: var(--card-hover-color);
-  /* Slight grow */
 }
 
 .mac-header {
