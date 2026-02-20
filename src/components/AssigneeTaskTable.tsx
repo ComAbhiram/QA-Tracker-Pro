@@ -362,7 +362,7 @@ export default function AssigneeTaskTable({
                 </div>
 
                 <div className="flex items-center gap-3 text-slate-700 dark:text-slate-300">
-                    <div className="flex items-center gap-2 bg-white/50 dark:bg-black/20 px-2 py-0.5 rounded-md border border-black/5">
+                    <div className="flex items-center gap-2 bg-white/50 dark:bg-slate-800/80 px-2 py-0.5 rounded-md border border-black/5 dark:border-slate-700">
                         <CalendarClock size={12} className="text-red-600 dark:text-red-400" />
                         <span className="text-[10px] font-bold text-slate-700 dark:text-slate-200">
                             Available: {format(availabilityDate, 'MMM d')}

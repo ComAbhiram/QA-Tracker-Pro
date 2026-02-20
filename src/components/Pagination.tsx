@@ -59,11 +59,11 @@ export default function Pagination({ currentPage, totalItems, itemsPerPage, onPa
     };
 
     return (
-        <div className="flex items-center justify-between px-6 py-4 border-t border-slate-100 bg-slate-50/50">
-            <div className="text-sm text-slate-600">
-                Showing <span className="font-semibold text-slate-800">{startItem}</span> to{' '}
-                <span className="font-semibold text-slate-800">{endItem}</span> of{' '}
-                <span className="font-semibold text-slate-800">{totalItems}</span> results
+        <div className="flex items-center justify-between px-6 py-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
+            <div className="text-sm text-slate-600 dark:text-slate-400">
+                Showing <span className="font-semibold text-slate-800 dark:text-slate-200">{startItem}</span> to{' '}
+                <span className="font-semibold text-slate-800 dark:text-slate-200">{endItem}</span> of{' '}
+                <span className="font-semibold text-slate-800 dark:text-slate-200">{totalItems}</span> results
             </div>
 
             <ShadcnPagination className="mx-0 w-auto justify-end">

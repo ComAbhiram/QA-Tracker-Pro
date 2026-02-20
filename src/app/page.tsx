@@ -542,7 +542,7 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-transparent">
+          <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-slate-300 dark:scrollbar-thumb-slate-700 scrollbar-track-transparent">
             <table className="w-full text-left text-sm text-slate-600 dark:text-slate-400 border-collapse">
               <thead className="bg-slate-50 dark:bg-slate-800 border-b-2 border-slate-200 dark:border-slate-700">
                 <tr>
@@ -586,7 +586,7 @@ export default function Home() {
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                 {loadingTasks ? (
                   <tr><td colSpan={6} className="p-12 text-center"><div className="flex justify-center"><Loader size="md" /></div></td></tr>
                 ) : tasks.length === 0 ? (

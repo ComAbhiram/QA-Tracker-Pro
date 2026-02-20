@@ -535,7 +535,7 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
                             <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
                                 <Activity size={16} className="text-indigo-500" /> Project Type
                             </label>
-                            <input type="text" name="projectType" value={formData.projectType || ''} onChange={handleChange} className="w-full px-5 py-3 bg-slate-50 dark:bg-slate-800 border-slate-200 rounded-xl outline-none" placeholder="e.g. Web Development" />
+                            <input type="text" name="projectType" value={formData.projectType || ''} onChange={handleChange} className="w-full px-5 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 dark:text-slate-200 dark:placeholder-slate-500 rounded-xl outline-none" placeholder="e.g. Web Development" />
                         </div>
                     </div>
 
@@ -676,22 +676,22 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
                     {/* Comments */}
                     <div className="space-y-3">
                         <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Comments</label>
-                        <textarea name="comments" value={formData.comments || ''} onChange={handleChange} className="w-full px-5 py-3 bg-slate-50 dark:bg-slate-800 border-slate-200 rounded-xl outline-none min-h-[100px]" />
+                        <textarea name="comments" value={formData.comments || ''} onChange={handleChange} className="w-full px-5 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 dark:text-slate-200 rounded-xl outline-none min-h-[100px]" />
                     </div>
                     <div className="space-y-3">
                         <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Updates</label>
-                        <textarea name="currentUpdates" value={formData.currentUpdates || ''} onChange={handleChange} className="w-full px-5 py-3 bg-slate-50 dark:bg-slate-800 border-slate-200 rounded-xl outline-none min-h-[100px]" />
+                        <textarea name="currentUpdates" value={formData.currentUpdates || ''} onChange={handleChange} className="w-full px-5 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 dark:text-slate-200 rounded-xl outline-none min-h-[100px]" />
                     </div>
 
                     {/* Deviation & Sprint */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div className="space-y-3">
                             <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Deviation Reason</label>
-                            <textarea name="deviationReason" value={formData.deviationReason || ''} onChange={handleChange} className="w-full px-5 py-3 bg-slate-50 dark:bg-slate-800 border-slate-200 rounded-xl outline-none" />
+                            <textarea name="deviationReason" value={formData.deviationReason || ''} onChange={handleChange} className="w-full px-5 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 dark:text-slate-200 rounded-xl outline-none" />
                         </div>
                         <div className="space-y-3">
                             <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Sprint Link</label>
-                            <input type="text" name="sprintLink" value={formData.sprintLink || ''} onChange={handleChange} className="w-full px-5 py-3 bg-slate-50 dark:bg-slate-800 border-slate-200 rounded-xl outline-none" />
+                            <input type="text" name="sprintLink" value={formData.sprintLink || ''} onChange={handleChange} className="w-full px-5 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 dark:text-slate-200 rounded-xl outline-none" />
                         </div>
                     </div>
 
@@ -700,15 +700,15 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-6 border-t border-slate-100 dark:border-slate-800">
                             <div className="space-y-3">
                                 <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Days Allotted</label>
-                                <input type="number" name="daysAllotted" step="0.01" value={formData.daysAllotted || 0} onChange={handleChange} className="w-full px-5 py-3 bg-slate-50 dark:bg-slate-800 border-slate-200 rounded-xl outline-none" />
+                                <input type="number" name="daysAllotted" step="0.01" value={formData.daysAllotted || 0} onChange={handleChange} className="w-full px-5 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 dark:text-slate-200 rounded-xl outline-none" />
                             </div>
                             <div className="space-y-3">
                                 <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Time Taken</label>
-                                <input type="text" name="timeTaken" value={formData.timeTaken || '00:00:00'} onChange={handleChange} className="w-full px-5 py-3 bg-slate-50 dark:bg-slate-800 border-slate-200 rounded-xl outline-none" />
+                                <input type="text" name="timeTaken" value={formData.timeTaken || '00:00:00'} onChange={handleChange} className="w-full px-5 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 dark:text-slate-200 rounded-xl outline-none" />
                             </div>
                             <div className="space-y-3">
                                 <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Activity %</label>
-                                <input type="number" name="activityPercentage" min="0" max="100" value={formData.activityPercentage || 0} onChange={handleChange} className="w-full px-5 py-3 bg-slate-50 dark:bg-slate-800 border-slate-200 rounded-xl outline-none" />
+                                <input type="number" name="activityPercentage" min="0" max="100" value={formData.activityPercentage || 0} onChange={handleChange} className="w-full px-5 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 dark:text-slate-200 rounded-xl outline-none" />
                             </div>
                         </div>
                     )}
@@ -716,9 +716,9 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
                     {/* QA Fields */}
                     {isQATeam && (
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-6 border-t border-slate-100 dark:border-slate-800">
-                            <div className="space-y-3"> <label className="text-sm">Total Bugs</label> <input type="number" name="bugCount" value={formData.bugCount || 0} onChange={handleChange} className="w-full px-5 py-3 bg-slate-50 border-slate-200 rounded-xl outline-none" /> </div>
-                            <div className="space-y-3"> <label className="text-sm">HTML Bugs</label> <input type="number" name="htmlBugs" value={formData.htmlBugs || 0} onChange={handleChange} className="w-full px-5 py-3 bg-slate-50 border-slate-200 rounded-xl outline-none" /> </div>
-                            <div className="space-y-3"> <label className="text-sm">Func. Bugs</label> <input type="number" name="functionalBugs" value={formData.functionalBugs || 0} onChange={handleChange} className="w-full px-5 py-3 bg-slate-50 border-slate-200 rounded-xl outline-none" /> </div>
+                            <div className="space-y-3"> <label className="text-sm dark:text-slate-300">Total Bugs</label> <input type="number" name="bugCount" value={formData.bugCount || 0} onChange={handleChange} className="w-full px-5 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 dark:text-slate-200 rounded-xl outline-none" /> </div>
+                            <div className="space-y-3"> <label className="text-sm dark:text-slate-300">HTML Bugs</label> <input type="number" name="htmlBugs" value={formData.htmlBugs || 0} onChange={handleChange} className="w-full px-5 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 dark:text-slate-200 rounded-xl outline-none" /> </div>
+                            <div className="space-y-3"> <label className="text-sm dark:text-slate-300">Func. Bugs</label> <input type="number" name="functionalBugs" value={formData.functionalBugs || 0} onChange={handleChange} className="w-full px-5 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 dark:text-slate-200 rounded-xl outline-none" /> </div>
                         </div>
                     )}
 

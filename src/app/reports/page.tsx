@@ -39,15 +39,15 @@ export default function Reports() {
     // Helper for status colors
     const getStatusColor = (status: string) => {
         const s = status.toLowerCase();
-        if (s === 'completed') return 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:border-emerald-300';
-        if (s === 'in progress') return 'bg-blue-50 text-blue-700 border-blue-200 hover:border-blue-300';
-        if (s === 'overdue') return 'bg-red-50 text-red-700 border-red-200 hover:border-red-300';
-        if (s === 'rejected' || s.includes('rejected')) return 'bg-rose-50 text-rose-700 border-rose-200 hover:border-rose-300';
-        if (s === 'on hold') return 'bg-amber-50 text-amber-700 border-amber-200 hover:border-amber-300';
-        if (s === 'forecast') return 'bg-slate-50 text-slate-700 border-slate-200 hover:border-slate-300';
-        if (s === 'yet to start') return 'bg-gray-50 text-gray-700 border-gray-200 hover:border-gray-300';
-        if (s === 'being developed') return 'bg-indigo-50 text-indigo-700 border-indigo-200 hover:border-indigo-300';
-        return 'bg-slate-50 text-slate-700 border-slate-200 hover:border-slate-300';
+        if (s === 'completed') return 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800 hover:border-emerald-300 dark:hover:border-emerald-700';
+        if (s === 'in progress') return 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-800 hover:border-blue-300 dark:hover:border-blue-700';
+        if (s === 'overdue') return 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 border-red-200 dark:border-red-800 hover:border-red-300 dark:hover:border-red-700';
+        if (s === 'rejected' || s.includes('rejected')) return 'bg-rose-50 dark:bg-rose-900/20 text-rose-700 dark:text-rose-400 border-rose-200 dark:border-rose-800 hover:border-rose-300 dark:hover:border-rose-700';
+        if (s === 'on hold') return 'bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800 hover:border-amber-300 dark:hover:border-amber-700';
+        if (s === 'forecast') return 'bg-slate-50 dark:bg-slate-800/50 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600';
+        if (s === 'yet to start') return 'bg-gray-50 dark:bg-gray-800/50 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600';
+        if (s === 'being developed') return 'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-400 border-indigo-200 dark:border-indigo-800 hover:border-indigo-300 dark:hover:border-indigo-700';
+        return 'bg-slate-50 dark:bg-slate-800/50 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600';
     };
 
     const handleMetricClick = (type: 'total' | 'completed' | 'inProgress' | 'overdue' | 'assignee' | 'status', assignee?: string, status?: string) => {
@@ -397,8 +397,8 @@ export default function Reports() {
             {/* Header */}
             <div className="flex justify-between items-center">
                 <div>
-                    <h1 className="text-3xl font-bold text-slate-800">Reports & Analytics</h1>
-                    <p className="text-slate-500 mt-1">Comprehensive overview of project metrics</p>
+                    <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-100">Reports & Analytics</h1>
+                    <p className="text-slate-500 dark:text-slate-400 mt-1">Comprehensive overview of project metrics</p>
                 </div>
                 <button
                     onClick={exportReport}
@@ -410,28 +410,28 @@ export default function Reports() {
             </div>
 
             {/* Filters */}
-            <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
+            <div className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm transition-colors">
                 <div className="flex flex-col md:flex-row gap-4 items-end">
                     <div className="flex-1 w-full">
-                        <label className="text-sm font-medium text-slate-600 mb-1 block">Date Range</label>
+                        <label className="text-sm font-medium text-slate-600 dark:text-slate-300 mb-1 block">Date Range</label>
                         <div className="flex gap-2">
                             <input
                                 type="date"
                                 value={dateRange.start}
                                 onChange={e => setDateRange(prev => ({ ...prev, start: e.target.value }))}
-                                className="w-full px-3 py-2 border rounded-lg text-sm"
+                                className="w-full px-3 py-2 border dark:border-slate-700 bg-white dark:bg-slate-900 rounded-lg text-sm text-slate-900 dark:text-slate-200 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 outline-none transition-colors"
                             />
-                            <span className="self-center text-slate-400">-</span>
+                            <span className="self-center text-slate-400 dark:text-slate-500">-</span>
                             <input
                                 type="date"
                                 value={dateRange.end}
                                 onChange={e => setDateRange(prev => ({ ...prev, end: e.target.value }))}
-                                className="w-full px-3 py-2 border rounded-lg text-sm"
+                                className="w-full px-3 py-2 border dark:border-slate-700 bg-white dark:bg-slate-900 rounded-lg text-sm text-slate-900 dark:text-slate-200 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 outline-none transition-colors"
                             />
                         </div>
                     </div>
                     <div className="flex-1 w-full">
-                        <label className="text-sm font-medium text-slate-600 mb-1 block">Member</label>
+                        <label className="text-sm font-medium text-slate-600 dark:text-slate-300 mb-1 block">Member</label>
                         <Combobox
                             options={[{ id: '', label: 'All Members' }, ...teamMembers.map(m => ({ id: m.name, label: m.name }))]}
                             value={selectedQA}
@@ -442,7 +442,7 @@ export default function Reports() {
                         />
                     </div>
                     <div className="flex-1 w-full">
-                        <label className="text-sm font-medium text-slate-600 mb-1 block">Project</label>
+                        <label className="text-sm font-medium text-slate-600 dark:text-slate-300 mb-1 block">Project</label>
                         <Combobox
                             options={[{ id: '', label: 'All Projects' }, ...projects]}
                             value={selectedProject}
@@ -471,76 +471,76 @@ export default function Reports() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <div
                     onClick={() => handleMetricClick('total')}
-                    className="bg-white rounded-xl p-6 border border-slate-100 shadow-sm cursor-pointer hover:shadow-md transition-all hover:border-sky-200 group"
+                    className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-100 dark:border-slate-700 shadow-sm cursor-pointer hover:shadow-md transition-all hover:border-sky-200 dark:hover:border-sky-800 group"
                 >
                     <div className="flex items-center justify-between mb-4">
-                        <div className="text-slate-500 group-hover:text-sky-600 transition-colors">Total Tasks</div>
-                        <BarChart3 className="text-sky-500" size={24} />
+                        <div className="text-slate-500 dark:text-slate-400 group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">Total Tasks</div>
+                        <BarChart3 className="text-sky-500 dark:text-sky-400" size={24} />
                     </div>
-                    <div className="text-3xl font-bold text-slate-800">{stats.total}</div>
+                    <div className="text-3xl font-bold text-slate-800 dark:text-slate-100">{stats.total}</div>
                 </div>
 
                 <div
                     onClick={() => handleMetricClick('completed')}
-                    className="bg-white rounded-xl p-6 border border-slate-100 shadow-sm cursor-pointer hover:shadow-md transition-all hover:border-emerald-200 group"
+                    className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-100 dark:border-slate-700 shadow-sm cursor-pointer hover:shadow-md transition-all hover:border-emerald-200 dark:hover:border-emerald-800 group"
                 >
                     <div className="flex items-center justify-between mb-4">
-                        <div className="text-slate-500 group-hover:text-emerald-600 transition-colors">Completed</div>
-                        <TrendingUp className="text-emerald-500" size={24} />
+                        <div className="text-slate-500 dark:text-slate-400 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">Completed</div>
+                        <TrendingUp className="text-emerald-500 dark:text-emerald-400" size={24} />
                     </div>
-                    <div className="text-3xl font-bold text-emerald-600">{stats.completed}</div>
-                    <div className="text-sm text-slate-500 mt-1">
+                    <div className="text-3xl font-bold text-emerald-600 dark:text-emerald-400">{stats.completed}</div>
+                    <div className="text-sm text-slate-500 dark:text-slate-400 mt-1">
                         {stats.total > 0 ? Math.round((stats.completed / stats.total) * 100) : 0}% completion rate
                     </div>
                 </div>
 
                 <div
                     onClick={() => handleMetricClick('inProgress')}
-                    className="bg-white rounded-xl p-6 border border-slate-100 shadow-sm cursor-pointer hover:shadow-md transition-all hover:border-blue-200 group"
+                    className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-100 dark:border-slate-700 shadow-sm cursor-pointer hover:shadow-md transition-all hover:border-blue-200 dark:hover:border-blue-800 group"
                 >
                     <div className="flex items-center justify-between mb-4">
-                        <div className="text-slate-500 group-hover:text-blue-600 transition-colors">In Progress</div>
-                        <Calendar className="text-blue-500" size={24} />
+                        <div className="text-slate-500 dark:text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">In Progress</div>
+                        <Calendar className="text-blue-500 dark:text-blue-400" size={24} />
                     </div>
-                    <div className="text-3xl font-bold text-blue-600">{stats.inProgress}</div>
+                    <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">{stats.inProgress}</div>
                 </div>
 
                 <div
                     onClick={() => handleMetricClick('overdue')}
-                    className="bg-white rounded-xl p-6 border border-slate-100 shadow-sm cursor-pointer hover:shadow-md transition-all hover:border-red-200 group"
+                    className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-100 dark:border-slate-700 shadow-sm cursor-pointer hover:shadow-md transition-all hover:border-red-200 dark:hover:border-red-800 group"
                 >
                     <div className="flex items-center justify-between mb-4">
-                        <div className="text-slate-500 group-hover:text-red-600 transition-colors">Overdue</div>
-                        <Users className="text-red-500" size={24} />
+                        <div className="text-slate-500 dark:text-slate-400 group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors">Overdue</div>
+                        <Users className="text-red-500 dark:text-red-400" size={24} />
                     </div>
-                    <div className="text-3xl font-bold text-red-600">{stats.overdue}</div>
+                    <div className="text-3xl font-bold text-red-600 dark:text-red-400">{stats.overdue}</div>
                 </div>
             </div>
 
             {/* By Assignee */}
-            <div className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
-                <div className="p-6 border-b border-slate-100">
-                    <h2 className="text-xl font-bold text-slate-800">Tasks by Assignee</h2>
+            <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm overflow-hidden transition-colors">
+                <div className="p-6 border-b border-slate-100 dark:border-slate-700">
+                    <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">Tasks by Assignee</h2>
                 </div>
                 <div className="overflow-x-auto">
                     <table className="w-full">
-                        <thead className="bg-slate-50 border-b-2 border-slate-200">
+                        <thead className="bg-slate-50 dark:bg-slate-800/80 border-b-2 border-slate-200 dark:border-slate-700">
                             <tr>
-                                <th className="px-6 py-4 text-left font-semibold text-slate-600 border-r border-slate-100">Assignee</th>
-                                <th className="px-6 py-4 text-left font-semibold text-slate-600 border-r border-slate-100">Total</th>
-                                <th className="px-6 py-4 text-left font-semibold text-slate-600 border-r border-slate-100">Completed</th>
-                                <th className="px-6 py-4 text-left font-semibold text-slate-600">In Progress</th>
+                                <th className="px-6 py-4 text-left font-semibold text-slate-600 dark:text-slate-300 border-r border-slate-100 dark:border-slate-700/50">Assignee</th>
+                                <th className="px-6 py-4 text-left font-semibold text-slate-600 dark:text-slate-300 border-r border-slate-100 dark:border-slate-700/50">Total</th>
+                                <th className="px-6 py-4 text-left font-semibold text-slate-600 dark:text-slate-300 border-r border-slate-100 dark:border-slate-700/50">Completed</th>
+                                <th className="px-6 py-4 text-left font-semibold text-slate-600 dark:text-slate-300">In Progress</th>
                             </tr>
                         </thead>
                         <tbody>
                             {Object.entries(tasksByAssignee).map(([assignee, data]) => (
-                                <tr key={assignee} className="border-b border-slate-100 hover:bg-slate-50/50 transition-colors">
-                                    <td className="px-6 py-4 font-medium text-slate-800 border-r border-slate-50">{assignee}</td>
+                                <tr key={assignee} className="border-b border-slate-100 dark:border-slate-700/50 hover:bg-slate-50/50 dark:hover:bg-slate-700/50 transition-colors">
+                                    <td className="px-6 py-4 font-medium text-slate-800 dark:text-slate-200 border-r border-slate-50 dark:border-slate-700/30">{assignee}</td>
 
                                     {/* Total Column Clickable */}
                                     <td
                                         onClick={() => handleMetricClick('assignee', assignee)}
-                                        className="px-6 py-4 border-r border-slate-50 cursor-pointer hover:bg-sky-50 transition-colors text-sky-600 font-bold"
+                                        className="px-6 py-4 border-r border-slate-50 dark:border-slate-700/30 cursor-pointer hover:bg-sky-50 dark:hover:bg-sky-900/20 transition-colors text-sky-600 dark:text-sky-400 font-bold"
                                         title="View All Tasks for Assignee"
                                     >
                                         {data.total}
@@ -549,10 +549,10 @@ export default function Reports() {
                                     {/* Completed Column Clickable */}
                                     <td
                                         onClick={() => handleMetricClick('assignee', assignee, 'Completed')}
-                                        className="px-6 py-4 border-r border-slate-50 cursor-pointer hover:bg-emerald-50 transition-colors"
+                                        className="px-6 py-4 border-r border-slate-50 dark:border-slate-700/30 cursor-pointer hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-colors"
                                         title="View Completed Tasks"
                                     >
-                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-100">
+                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-800/50">
                                             {data.completed}
                                         </span>
                                     </td>
@@ -560,10 +560,10 @@ export default function Reports() {
                                     {/* In Progress Column Clickable */}
                                     <td
                                         onClick={() => handleMetricClick('assignee', assignee, 'In Progress')}
-                                        className="px-6 py-4 cursor-pointer hover:bg-blue-50 transition-colors"
+                                        className="px-6 py-4 cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
                                         title="View In Progress Tasks"
                                     >
-                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-100">
+                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border border-blue-100 dark:border-blue-800/50">
                                             {data.inProgress}
                                         </span>
                                     </td>
@@ -575,9 +575,9 @@ export default function Reports() {
             </div>
 
             {/* By Status */}
-            <div className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
-                <div className="p-6 border-b border-slate-100">
-                    <h2 className="text-xl font-bold text-slate-800">Tasks by Status</h2>
+            <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm overflow-hidden transition-colors">
+                <div className="p-6 border-b border-slate-100 dark:border-slate-700">
+                    <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">Tasks by Status</h2>
                 </div>
                 <div className="p-6">
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -598,15 +598,15 @@ export default function Reports() {
             {/* Drill-down Modal */}
             {filteredModal.isOpen && (
                 <div className="fixed inset-0 z-[150] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-                    <div className="bg-white rounded-2xl shadow-2xl w-[95vw] max-w-7xl max-h-[90vh] flex flex-col animate-in zoom-in-95 duration-200">
+                    <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-[95vw] max-w-7xl max-h-[90vh] flex flex-col animate-in zoom-in-95 duration-200">
                         {/* Modal Header */}
-                        <div className="flex items-center justify-between p-6 border-b border-slate-100">
-                            <h2 className="text-2xl font-bold text-slate-800">{filteredModal.title}</h2>
+                        <div className="flex items-center justify-between p-6 border-b border-slate-100 dark:border-slate-700/50">
+                            <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100">{filteredModal.title}</h2>
                             <CloseButton onClick={() => setFilteredModal(prev => ({ ...prev, isOpen: false }))} />
                         </div>
 
                         {/* Modal Content */}
-                        <div className="flex-1 overflow-y-auto p-6 bg-slate-50/50">
+                        <div className="flex-1 overflow-y-auto p-6 bg-slate-50/50 dark:bg-slate-900/50">
                             <TaskOverviewTable
                                 tasks={filteredModal.tasks}
                                 onEdit={handleEditTask}

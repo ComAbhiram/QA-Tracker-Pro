@@ -68,7 +68,7 @@ export default function AIChatAssistant() {
         <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-4">
             {/* Chat Window */}
             {isOpen && (
-                <div className="w-[calc(100vw-48px)] sm:w-[400px] h-[500px] max-h-[80vh] bg-white rounded-2xl shadow-2xl border border-slate-200 flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-5 duration-300">
+                <div className="w-[calc(100vw-48px)] sm:w-[400px] h-[500px] max-h-[80vh] bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-5 duration-300">
 
                     {/* Header */}
                     <div className="bg-yellow-500 p-4 flex items-center justify-between text-white">
@@ -85,7 +85,7 @@ export default function AIChatAssistant() {
                     </div>
 
                     {/* Messages Area */}
-                    <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50 scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent">
+                    <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50 dark:bg-slate-900/50 scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-700 scrollbar-track-transparent">
                         {messages.map((msg, idx) => (
                             <div
                                 key={idx}
@@ -98,7 +98,7 @@ export default function AIChatAssistant() {
 
                                 <div className={`max-w-[80%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed shadow-sm ${msg.role === 'user'
                                     ? 'bg-yellow-500 text-white rounded-tr-none prose-invert'
-                                    : 'bg-white text-slate-700 border border-slate-100 rounded-tl-none'
+                                    : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-100 dark:border-slate-700 rounded-tl-none'
                                     }`}>
                                     {msg.role === 'user' ? (
                                         <p>{msg.content}</p>
@@ -129,14 +129,14 @@ export default function AIChatAssistant() {
                     </div>
 
                     {/* Input Area */}
-                    <form onSubmit={handleSubmit} className="p-3 bg-white border-t border-slate-100">
+                    <form onSubmit={handleSubmit} className="p-3 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800">
                         <div className="relative flex items-center">
                             <input
                                 type="text"
                                 value={input}
                                 onChange={(e) => setInput(e.target.value)}
                                 placeholder="Ask me anything..."
-                                className="w-full pl-4 pr-12 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500/20 focus:border-yellow-500 transition-all placeholder:text-slate-400"
+                                className="w-full pl-4 pr-12 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500/20 focus:border-yellow-500 transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500 dark:text-slate-200"
                             />
                             <button
                                 type="submit"

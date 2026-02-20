@@ -302,20 +302,20 @@ export default function LeavePage() {
             </header>
 
             {/* Content Area */}
-            <div className={`bg-white rounded-2xl shadow-xl shadow-slate-200/50 border border-white/20 backdrop-blur-xl ${viewMode === 'calendar' ? 'h-[calc(100vh-220px)] overflow-y-auto custom-scrollbar' : 'min-h-[600px]'}`}>
+            <div className={`bg-white dark:bg-slate-900 rounded-2xl shadow-xl shadow-slate-200/50 dark:shadow-none border border-white/20 dark:border-slate-800 backdrop-blur-xl transition-colors ${viewMode === 'calendar' ? 'h-[calc(100vh-220px)] overflow-y-auto custom-scrollbar' : 'min-h-[600px]'}`}>
 
                 {viewMode === 'calendar' && (
                     <div className="min-h-full flex flex-col">
-                        <div className="grid grid-cols-7 border-b border-slate-200 bg-slate-50/80 sticky top-0 z-10 shadow-sm">
+                        <div className="grid grid-cols-7 border-b border-slate-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-800/80 sticky top-0 z-10 shadow-sm transition-colors">
                             {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-                                <div key={day} className="py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider backdrop-blur-md bg-slate-50/90">
+                                <div key={day} className="py-4 text-center text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider backdrop-blur-md bg-slate-50/90 dark:bg-slate-800/90 transition-colors">
                                     {day}
                                 </div>
                             ))}
                         </div>
                         <div className="grid grid-cols-7 auto-rows-[minmax(160px,1fr)] flex-1">
                             {startPadding.map((_, i) => (
-                                <div key={`empty-${i}`} className="bg-slate-50/30 border-r border-b border-slate-100"></div>
+                                <div key={`empty-${i}`} className="bg-slate-50/30 dark:bg-slate-800/30 border-r border-b border-slate-100 dark:border-slate-800 transition-colors"></div>
                             ))}
                             {days.map(day => {
                                 const dayLeaves = leaves.filter(leave => {
@@ -330,13 +330,13 @@ export default function LeavePage() {
                                     <div
                                         key={day.toString()}
                                         onClick={() => { setCurrentDate(day); setViewMode('day'); }}
-                                        className={`border-r border-b border-slate-100 p-2 transition-all hover:bg-indigo-50/50 cursor-pointer group relative flex flex-col
-                                            ${!isSameMonth(day, currentDate) ? 'bg-slate-50/50 text-slate-400' : ''} 
-                                            ${isToday(day) ? 'bg-blue-50/30' : ''}
+                                        className={`border-r border-b border-slate-100 dark:border-slate-800 p-2 transition-all hover:bg-indigo-50/50 dark:hover:bg-indigo-900/30 cursor-pointer group relative flex flex-col
+                                            ${!isSameMonth(day, currentDate) ? 'bg-slate-50/50 dark:bg-slate-800/50 text-slate-400 dark:text-slate-600' : ''} 
+                                            ${isToday(day) ? 'bg-blue-50/30 dark:bg-blue-900/20' : ''}
                                         `}
                                     >
                                         <div className="flex justify-between items-start mb-1">
-                                            <span className={`text-sm font-medium w-7 h-7 flex items-center justify-center rounded-full transition-colors ${isToday(day) ? 'bg-indigo-600 text-white shadow-md shadow-indigo-200' : 'text-slate-700 group-hover:bg-white group-hover:shadow-sm'}`}>
+                                            <span className={`text-sm font-medium w-7 h-7 flex items-center justify-center rounded-full transition-colors ${isToday(day) ? 'bg-indigo-600 text-white shadow-md shadow-indigo-200 dark:shadow-none' : 'text-slate-700 dark:text-slate-300 group-hover:bg-white dark:group-hover:bg-slate-700 group-hover:shadow-sm'}`}>
                                                 {format(day, 'd')}
                                             </span>
                                         </div>
@@ -374,15 +374,15 @@ export default function LeavePage() {
                     <div className="p-8">
                         <div className="flex justify-between items-end mb-6">
                             <div>
-                                <h2 className="text-xl font-bold text-slate-800">Leaves for {format(currentDate, 'MMMM d')}</h2>
-                                <p className="text-slate-500">{dayViewLeaves.length} leave request(s)</p>
+                                <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">Leaves for {format(currentDate, 'MMMM d')}</h2>
+                                <p className="text-slate-500 dark:text-slate-400">{dayViewLeaves.length} leave request(s)</p>
                             </div>
                         </div>
 
                         {dayViewLeaves.length === 0 ? (
-                            <div className="flex flex-col items-center justify-center py-20 text-slate-400">
-                                <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4 text-3xl">📅</div>
-                                <p className="text-lg font-medium text-slate-600">No leaves scheduled for this day</p>
+                            <div className="flex flex-col items-center justify-center py-20 text-slate-400 dark:text-slate-500">
+                                <div className="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mb-4 text-3xl">📅</div>
+                                <p className="text-lg font-medium text-slate-600 dark:text-slate-400">No leaves scheduled for this day</p>
                                 <p className="text-sm">All team members are available</p>
                             </div>
                         ) : (

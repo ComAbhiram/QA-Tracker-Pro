@@ -315,74 +315,74 @@ export default function BudgetAndActivityPage() {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-6">
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 p-6 transition-colors">
             <div className="max-w-[1920px] mx-auto">
                 {/* Header */}
                 <div className="mb-8">
                     <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
                         <div>
-                            <h1 className="text-4xl font-bold text-slate-800 mb-2">
+                            <h1 className="text-4xl font-bold text-slate-800 dark:text-slate-100 mb-2">
                                 Budget and Activity
                             </h1>
-                            <p className="text-slate-600">
+                            <p className="text-slate-600 dark:text-slate-400">
                                 Track project budgets, activity, and team performance
                             </p>
                         </div>
                         <div className="flex items-center gap-3">
                             <button
                                 onClick={handleExport}
-                                className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors shadow-sm"
+                                className="flex items-center gap-2 px-4 py-2 bg-emerald-600 dark:bg-emerald-500 text-white rounded-lg hover:bg-emerald-700 dark:hover:bg-emerald-600 transition-colors shadow-sm"
                             >
                                 <Download size={18} />
                                 Export CSV
                             </button>
                             <button
                                 onClick={fetchData}
-                                className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
+                                className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors shadow-sm"
                             >
                                 <RefreshCw size={18} />
                                 Refresh
                             </button>
                             <button
                                 onClick={() => { setSelectedProject(null); setIsModalOpen(true); }}
-                                className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                                className="flex items-center gap-2 px-4 py-2 bg-indigo-600 dark:bg-indigo-500 text-white rounded-lg hover:bg-indigo-700 dark:hover:bg-indigo-600 transition-colors shadow-sm"
                             >
                                 <Plus size={18} />
                                 New Project
                             </button>
                             {/* Migration Tools */}
-                            <div className="border-l border-slate-300 pl-3 ml-1">
+                            <div className="border-l border-slate-300 dark:border-slate-700 pl-3 ml-1">
                                 <TaskMigration />
                             </div>
                         </div>
                     </div>
 
                     {/* Filters Bar */}
-                    <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-6 flex flex-wrap items-center gap-4">
+                    <div className="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 mb-6 flex flex-wrap items-center gap-4 transition-colors">
                         <div className="flex items-center gap-2">
-                            <label className="text-sm font-semibold text-slate-700">From:</label>
+                            <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">From:</label>
                             <input
                                 type="date"
                                 value={filterStartDate}
                                 onChange={(e) => setFilterStartDate(e.target.value)}
-                                className="px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                className="px-3 py-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400"
                             />
                         </div>
                         <div className="flex items-center gap-2">
-                            <label className="text-sm font-semibold text-slate-700">To:</label>
+                            <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">To:</label>
                             <input
                                 type="date"
                                 value={filterEndDate}
                                 onChange={(e) => setFilterEndDate(e.target.value)}
-                                className="px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                className="px-3 py-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400"
                             />
                         </div>
                         <div className="flex items-center gap-2">
-                            <label className="text-sm font-semibold text-slate-700">Members:</label>
+                            <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Members:</label>
                             <select
                                 value={filterQA}
                                 onChange={(e) => setFilterQA(e.target.value)}
-                                className="px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white min-w-[150px]"
+                                className="px-3 py-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 min-w-[150px]"
                             >
                                 <option value="">All Members</option>
                                 {uniqueQAs.map(qa => (
@@ -392,7 +392,7 @@ export default function BudgetAndActivityPage() {
                         </div>
 
                         <div className="flex items-center gap-2">
-                            <label className="flex items-center gap-2 text-sm font-semibold text-slate-700 cursor-pointer select-none">
+                            <label className="flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-300 cursor-pointer select-none">
                                 <Checkbox
                                     checked={filterAssignedOnly}
                                     onChange={(checked) => setFilterAssignedOnly(checked)}
@@ -404,7 +404,7 @@ export default function BudgetAndActivityPage() {
                         {(filterStartDate || filterEndDate || filterQA || filterAssignedOnly) && (
                             <button
                                 onClick={() => { setFilterStartDate(''); setFilterEndDate(''); setFilterQA(''); setFilterAssignedOnly(false); }}
-                                className="text-sm text-red-600 hover:text-red-700 font-medium ml-auto"
+                                className="text-sm text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 font-medium ml-auto"
                             >
                                 Clear Filters
                             </button>
@@ -416,7 +416,7 @@ export default function BudgetAndActivityPage() {
                                 placeholder="Search projects..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                className="w-full px-4 py-2 border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400"
                             />
                         </div>
                     </div>

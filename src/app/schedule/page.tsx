@@ -446,13 +446,13 @@ export default function Schedule() {
 
     return (
         <div className="max-w-[1600px] mx-auto space-y-6">
-            <header className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-6">
+            <header className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 space-y-6">
 
                 {/* Vertical Stack: Title/Desc then Status Guide */}
                 <div className="flex flex-col gap-4">
                     <div>
-                        <h1 className="text-3xl font-bold text-slate-800">Work Schedule</h1>
-                        <p className="text-slate-500">Manage project timelines and daily tasks</p>
+                        <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-100">Work Schedule</h1>
+                        <p className="text-slate-500 dark:text-slate-400">Manage project timelines and daily tasks</p>
                     </div>
                     <div className="overflow-x-auto max-w-full pb-2">
                         <StatusLegend />
@@ -460,37 +460,37 @@ export default function Schedule() {
                 </div>
 
                 {/* Row 2: Controls & Navigation */}
-                <div className="flex flex-col xl:flex-row items-center justify-between gap-4 pt-4 border-t border-slate-100">
+                <div className="flex flex-col xl:flex-row items-center justify-between gap-4 pt-4 border-t border-slate-100 dark:border-slate-800">
 
                     {/* Left: View Toggles */}
                     <div className="flex items-center gap-4 w-full xl:w-auto">
-                        <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-lg">
+                        <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-lg">
                             <button
                                 onClick={() => { setViewMode('calendar'); setShowTableView(false); }}
-                                className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-all ${viewMode === 'calendar' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                                className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-all ${viewMode === 'calendar' ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'}`}
                             >
                                 <CalendarIcon size={16} /> Monthly
                             </button>
                             <button
                                 onClick={() => { setViewMode('day'); setShowTableView(false); }}
-                                className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-all ${viewMode === 'day' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                                className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-all ${viewMode === 'day' ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'}`}
                             >
                                 <List size={16} /> Daily
                             </button>
                         </div>
 
-                        <div className="h-8 w-px bg-slate-200 hidden md:block"></div>
+                        <div className="h-8 w-px bg-slate-200 dark:bg-slate-700 hidden md:block"></div>
 
-                        <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-lg">
+                        <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-lg">
                             <button
                                 onClick={() => setShowTableView(false)}
-                                className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-all ${!showTableView ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                                className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-all ${!showTableView ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'}`}
                             >
                                 <LayoutGrid size={16} /> Grid
                             </button>
                             <button
                                 onClick={() => setShowTableView(true)}
-                                className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-all ${showTableView ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                                className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-all ${showTableView ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'}`}
                             >
                                 <Table2 size={16} /> List
                             </button>
@@ -500,22 +500,22 @@ export default function Schedule() {
                     {/* Right: Navigation & Action */}
                     <div className="flex items-center gap-4 w-full xl:w-auto justify-between xl:justify-end">
                         <div className="flex items-center gap-2">
-                            <button onClick={prevPeriod} className="p-2 hover:bg-slate-50 rounded-lg text-slate-600 border border-slate-200 hover:border-indigo-300 transition-all">
+                            <button onClick={prevPeriod} className="p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-indigo-300 dark:hover:border-indigo-500 transition-all">
                                 <ChevronLeft size={20} />
                             </button>
-                            <div className="min-w-[160px] text-center font-bold text-lg text-slate-800">
+                            <div className="min-w-[160px] text-center font-bold text-lg text-slate-800 dark:text-slate-100">
                                 {viewMode === 'calendar' ? format(currentDate, 'MMMM yyyy') : format(currentDate, 'MMM d, yyyy')}
                             </div>
-                            <button onClick={nextPeriod} className="p-2 hover:bg-slate-50 rounded-lg text-slate-600 border border-slate-200 hover:border-indigo-300 transition-all">
+                            <button onClick={nextPeriod} className="p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-indigo-300 dark:hover:border-indigo-500 transition-all">
                                 <ChevronRight size={20} />
                             </button>
                         </div>
 
-                        <button onClick={goToToday} className="text-sm font-medium text-indigo-600 hover:bg-indigo-50 px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap">
+                        <button onClick={goToToday} className="text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap">
                             Today
                         </button>
 
-                        <div className="h-8 w-px bg-slate-200 hidden md:block"></div>
+                        <div className="h-8 w-px bg-slate-200 dark:bg-slate-700 hidden md:block"></div>
 
                         <button
                             onClick={handleAddTask}
@@ -528,20 +528,20 @@ export default function Schedule() {
             </header>
 
             {/* Content Area */}
-            <div className={`bg-white rounded-2xl shadow-xl shadow-slate-200/50 border border-white/20 backdrop-blur-xl ${viewMode === 'calendar' && !showTableView ? 'h-[calc(100vh-220px)] overflow-y-auto custom-scrollbar' : 'min-h-[600px]'}`}>
+            <div className={`bg-white dark:bg-slate-900 rounded-2xl shadow-xl shadow-slate-200/50 dark:shadow-slate-900/50 border border-white/20 dark:border-slate-800 backdrop-blur-xl ${viewMode === 'calendar' && !showTableView ? 'h-[calc(100vh-220px)] overflow-y-auto custom-scrollbar' : 'min-h-[600px]'}`}>
 
                 {viewMode === 'calendar' && !showTableView && (
                     <div className="min-h-full flex flex-col">
-                        <div className="grid grid-cols-7 border-b border-slate-400 bg-slate-50/80 sticky top-0 z-10 shadow-sm">
+                        <div className="grid grid-cols-7 border-b border-slate-400 dark:border-slate-700 bg-slate-50/80 dark:bg-slate-800/80 sticky top-0 z-10 shadow-sm">
                             {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-                                <div key={day} className="py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider backdrop-blur-md bg-slate-50/90">
+                                <div key={day} className="py-4 text-center text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider backdrop-blur-md bg-slate-50/90 dark:bg-slate-800/90">
                                     {day}
                                 </div>
                             ))}
                         </div>
                         <div className="grid grid-cols-7 auto-rows-[minmax(160px,1fr)] flex-1">
                             {startPadding.map((_, i) => (
-                                <div key={`empty-${i}`} className="bg-slate-50/30 border-r border-b border-slate-400"></div>
+                                <div key={`empty-${i}`} className="bg-slate-50/30 dark:bg-slate-800/30 border-r border-b border-slate-400 dark:border-slate-700"></div>
                             ))}
                             {days.map(day => {
                                 const dayTasks = tasks.filter(task => {
@@ -604,13 +604,13 @@ export default function Schedule() {
                                     <div
                                         key={day.toString()}
                                         onClick={() => { setCurrentDate(day); setViewMode('day'); }}
-                                        className={`border-r border-b border-slate-400 p-2 transition-all hover:bg-indigo-50/50 cursor-pointer group relative flex flex-col
-                                            ${!isSameMonth(day, currentDate) ? 'bg-slate-50/50 text-slate-400' : ''} 
-                                            ${isToday(day) ? 'bg-blue-50/30' : ''}
+                                        className={`border-r border-b border-slate-400 dark:border-slate-700 p-2 transition-all hover:bg-indigo-50/50 dark:hover:bg-indigo-900/30 cursor-pointer group relative flex flex-col
+                                            ${!isSameMonth(day, currentDate) ? 'bg-slate-50/50 dark:bg-slate-900/50 text-slate-400 dark:text-slate-600' : ''} 
+                                            ${isToday(day) ? 'bg-blue-50/30 dark:bg-indigo-900/20' : ''}
                                         `}
                                     >
                                         <div className="flex justify-between items-start mb-1">
-                                            <span className={`text-sm font-medium w-7 h-7 flex items-center justify-center rounded-full transition-colors ${isToday(day) ? 'bg-indigo-600 text-white shadow-md shadow-indigo-200' : 'text-slate-700 group-hover:bg-white group-hover:shadow-sm'}`}>
+                                            <span className={`text-sm font-medium w-7 h-7 flex items-center justify-center rounded-full transition-colors ${isToday(day) ? 'bg-indigo-600 text-white shadow-md shadow-indigo-200 dark:shadow-none' : 'text-slate-700 dark:text-slate-300 group-hover:bg-white dark:group-hover:bg-slate-800 group-hover:shadow-sm'}`}>
                                                 {format(day, 'd')}
                                             </span>
                                         </div>
@@ -636,18 +636,18 @@ export default function Schedule() {
                                                 );
                                             })}
                                             {dayTasks.length > 3 && (
-                                                <div className="text-[10px] text-slate-400 font-medium pl-1">+{dayTasks.length - 3} more</div>
+                                                <div className="text-[10px] text-slate-400 dark:text-slate-500 font-medium pl-1">+{dayTasks.length - 3} more</div>
                                             )}
                                         </div>
 
                                         {/* Hover Popup - Shows ALL tasks for the day */}
                                         {dayTasks.length > 0 && (
                                             <div className="absolute left-0 top-0 w-[120%] min-w-[280px] z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 delay-150 transform translate-x-4 translate-y-4 pointer-events-none group-hover:pointer-events-auto">
-                                                <div className="bg-white rounded-xl shadow-2xl border border-slate-200 p-3 flex flex-col gap-2 max-h-[300px] overflow-y-auto custom-scrollbar">
-                                                    <div className="sticky top-0 bg-white pb-2 border-b border-slate-100 mb-1 z-10">
-                                                        <h4 className="font-bold text-slate-800 text-sm flex items-center justify-between">
+                                                <div className="bg-white dark:bg-slate-900 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-800 p-3 flex flex-col gap-2 max-h-[300px] overflow-y-auto custom-scrollbar">
+                                                    <div className="sticky top-0 bg-white dark:bg-slate-900 pb-2 border-b border-slate-100 dark:border-slate-800 mb-1 z-10">
+                                                        <h4 className="font-bold text-slate-800 dark:text-slate-100 text-sm flex items-center justify-between">
                                                             {format(day, 'MMMM d')}
-                                                            <span className="text-xs font-normal text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">{dayTasks.length} tasks</span>
+                                                            <span className="text-xs font-normal text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-full">{dayTasks.length} tasks</span>
                                                         </h4>
                                                     </div>
                                                     {dayTasks.map(task => {
@@ -656,9 +656,9 @@ export default function Schedule() {
                                                         const isOverdue = statusInfo.baseStatus === 'Overdue' || statusInfo.status.includes('Completed (Overdue)');
 
                                                         return (
-                                                            <div key={`popup-${task.id}`} className="p-2 rounded-lg bg-slate-50 border border-slate-100 hover:border-indigo-200 transition-colors">
+                                                            <div key={`popup-${task.id}`} className="p-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 hover:border-indigo-200 dark:hover:border-indigo-500 transition-colors">
                                                                 <div className="flex items-start justify-between gap-2 mb-1">
-                                                                    <span className="font-semibold text-xs text-slate-800 line-clamp-2 leading-tight">{task.projectName}</span>
+                                                                    <span className="font-semibold text-xs text-slate-800 dark:text-slate-200 line-clamp-2 leading-tight">{task.projectName}</span>
                                                                     {isOverdue && (
                                                                         <AlertCircle size={12} className="text-rose-500 flex-shrink-0" />
                                                                     )}
@@ -668,7 +668,7 @@ export default function Schedule() {
                                                                         {statusInfo.status}
                                                                     </span>
                                                                     {task.assignedTo && (
-                                                                        <div className="flex items-center gap-1 text-[10px] text-slate-500" title={`Assigned to ${task.assignedTo}`}>
+                                                                        <div className="flex items-center gap-1 text-[10px] text-slate-500 dark:text-slate-400" title={`Assigned to ${task.assignedTo}`}>
                                                                             <User size={10} />
                                                                             <span className="truncate max-w-[60px]">{task.assignedTo}</span>
                                                                         </div>
@@ -690,8 +690,8 @@ export default function Schedule() {
                 {viewMode === 'calendar' && showTableView && (
                     <div className="p-8 overflow-x-auto">
                         <div className="mb-6">
-                            <h2 className="text-xl font-bold text-slate-800">Tasks for {format(currentDate, 'MMMM yyyy')}</h2>
-                            <p className="text-slate-500">{tasks.length} total tasks</p>
+                            <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">Tasks for {format(currentDate, 'MMMM yyyy')}</h2>
+                            <p className="text-slate-500 dark:text-slate-400">{tasks.length} total tasks</p>
                         </div>
                         <div className={StandardTableStyles.container}>
                             <table className="w-full">
@@ -709,10 +709,10 @@ export default function Schedule() {
                                 <tbody>
                                     {tasks.length === 0 ? (
                                         <tr>
-                                            <td colSpan={7} className="px-6 py-12 text-center text-slate-400">
+                                            <td colSpan={7} className="px-6 py-12 text-center text-slate-400 dark:text-slate-500">
                                                 <div className="flex flex-col items-center">
-                                                    <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4 text-3xl">📅</div>
-                                                    <p className="text-lg font-medium text-slate-600">No tasks for this month</p>
+                                                    <div className="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mb-4 text-3xl">📅</div>
+                                                    <p className="text-lg font-medium text-slate-600 dark:text-slate-400">No tasks for this month</p>
                                                 </div>
                                             </td>
                                         </tr>
@@ -754,8 +754,8 @@ export default function Schedule() {
                     <div className="p-8">
                         <div className="flex justify-between items-end mb-6">
                             <div>
-                                <h2 className="text-xl font-bold text-slate-800">Tasks for {format(currentDate, 'MMMM d')}</h2>
-                                <p className="text-slate-500">{dayViewTasks.length} tasks scheduled</p>
+                                <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">Tasks for {format(currentDate, 'MMMM d')}</h2>
+                                <p className="text-slate-500 dark:text-slate-400">{dayViewTasks.length} tasks scheduled</p>
                             </div>
                             {/* Legend could go here if requested vertically, but horizontal is cleaner */}
                         </div>
@@ -840,13 +840,13 @@ export default function Schedule() {
                 {viewMode === 'day' && showTableView && (
                     <div className="p-8 overflow-x-auto">
                         <div className="mb-6">
-                            <h2 className="text-xl font-bold text-slate-800">Tasks for {format(currentDate, 'MMMM d')}</h2>
-                            <p className="text-slate-500">{dayViewTasks.length} tasks scheduled</p>
+                            <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">Tasks for {format(currentDate, 'MMMM d')}</h2>
+                            <p className="text-slate-500 dark:text-slate-400">{dayViewTasks.length} tasks scheduled</p>
                         </div>
                         {dayViewTasks.length === 0 ? (
-                            <div className="flex flex-col items-center justify-center py-20 text-slate-400">
-                                <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4 text-3xl">☕</div>
-                                <p className="text-lg font-medium text-slate-600">No tasks scheduled for this day</p>
+                            <div className="flex flex-col items-center justify-center py-20 text-slate-400 dark:text-slate-500">
+                                <div className="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mb-4 text-3xl">☕</div>
+                                <p className="text-lg font-medium text-slate-600 dark:text-slate-400">No tasks scheduled for this day</p>
                                 <p className="text-sm">Enjoy your free time!</p>
                             </div>
                         ) : (

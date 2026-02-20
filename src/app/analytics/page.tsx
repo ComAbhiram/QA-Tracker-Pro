@@ -134,16 +134,16 @@ export default function AnalyticsPage() {
     }
 
     return (
-        <div className="min-h-screen bg-slate-50 p-6">
+        <div className="min-h-screen bg-slate-50 dark:bg-slate-900 transition-colors p-6">
             <div className="max-w-[1920px] mx-auto">
                 <div className="flex items-center justify-between mb-8">
                     <div>
-                        <h1 className="text-3xl font-bold text-slate-800">Analytics Dashboard</h1>
-                        <p className="text-slate-600 mt-1">Real-time insights and performance metrics</p>
+                        <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-100">Analytics Dashboard</h1>
+                        <p className="text-slate-600 dark:text-slate-400 mt-1">Real-time insights and performance metrics</p>
                     </div>
                     <button
                         onClick={fetchData}
-                        className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors shadow-sm"
+                        className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition-colors shadow-sm"
                     >
                         <RefreshCw size={18} />
                         Refresh Data
@@ -155,35 +155,35 @@ export default function AnalyticsPage() {
                     <SummaryCard
                         title="Total Tasks"
                         value={totalTasks}
-                        icon={<LayoutDashboard className="text-blue-600" />}
-                        bg="bg-blue-50"
+                        icon={<LayoutDashboard className="text-blue-600 dark:text-blue-400" />}
+                        bg="bg-blue-50 dark:bg-blue-900/20"
                     />
                     <SummaryCard
                         title="Completion Rate"
                         value={`${completionRate}%`}
-                        icon={<CheckCircle2 className="text-emerald-600" />}
-                        bg="bg-emerald-50"
+                        icon={<CheckCircle2 className="text-emerald-600 dark:text-emerald-400" />}
+                        bg="bg-emerald-50 dark:bg-emerald-900/20"
                     />
                     <SummaryCard
                         title="Total Bugs"
                         value={totalBugs}
-                        icon={<Bug className="text-red-600" />}
-                        bg="bg-red-50"
+                        icon={<Bug className="text-red-600 dark:text-red-400" />}
+                        bg="bg-red-50 dark:bg-red-900/20"
                     />
                     <SummaryCard
                         title="Overdue Tasks"
                         value={overdueTasks}
-                        icon={<AlertCircle className="text-orange-600" />}
-                        bg="bg-orange-50"
+                        icon={<AlertCircle className="text-orange-600 dark:text-orange-400" />}
+                        bg="bg-orange-50 dark:bg-orange-900/20"
                     />
                 </div>
 
                 {/* Charts Grid */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
                     {/* Status Distribution */}
-                    <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-                        <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-                            <TrendingUp size={20} className="text-indigo-600" />
+                    <div className="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm transition-colors">
+                        <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-4 flex items-center gap-2">
+                            <TrendingUp size={20} className="text-indigo-600 dark:text-indigo-400" />
                             Task Status Distribution
                         </h3>
                         <div className="h-[300px]">
@@ -203,25 +203,25 @@ export default function AnalyticsPage() {
                                             <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                                         ))}
                                     </Pie>
-                                    <Tooltip />
+                                    <Tooltip contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '8px', color: '#fff' }} itemStyle={{ color: '#fff' }} />
                                 </PieChart>
                             </ResponsiveContainer>
                         </div>
                     </div>
 
                     {/* Bugs by Project */}
-                    <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-                        <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-                            <Bug size={20} className="text-red-600" />
+                    <div className="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm transition-colors">
+                        <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-4 flex items-center gap-2">
+                            <Bug size={20} className="text-red-600 dark:text-red-400" />
                             Top Projects by Bugs
                         </h3>
                         <div className="h-[300px]">
                             <ResponsiveContainer width="100%" height="100%">
                                 <BarChart data={bugsData}>
-                                    <CartesianGrid strokeDasharray="3 3" />
-                                    <XAxis dataKey="name" fontSize={12} tickFormatter={(val) => val.slice(0, 10) + '...'} />
-                                    <YAxis />
-                                    <Tooltip />
+                                    <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
+                                    <XAxis dataKey="name" fontSize={12} tickFormatter={(val) => val.slice(0, 10) + '...'} tick={{ fill: 'currentColor' }} className="text-slate-600 dark:text-slate-400" />
+                                    <YAxis tick={{ fill: 'currentColor' }} className="text-slate-600 dark:text-slate-400" />
+                                    <Tooltip contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '8px', color: '#fff' }} itemStyle={{ color: '#fff' }} />
                                     <Legend />
                                     <Bar dataKey="html" name="HTML Bugs" stackId="a" fill="#fb923c" />
                                     <Bar dataKey="functional" name="Functional Bugs" stackId="a" fill="#ef4444" />
@@ -231,18 +231,18 @@ export default function AnalyticsPage() {
                     </div>
 
                     {/* Team Workload */}
-                    <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-                        <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-                            <Clock size={20} className="text-blue-600" />
+                    <div className="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm transition-colors">
+                        <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-4 flex items-center gap-2">
+                            <Clock size={20} className="text-blue-600 dark:text-blue-400" />
                             Team Workload (Tasks Assigned)
                         </h3>
                         <div className="h-[300px]">
                             <ResponsiveContainer width="100%" height="100%">
                                 <BarChart data={workloadData}>
-                                    <CartesianGrid strokeDasharray="3 3" />
-                                    <XAxis dataKey="name" />
-                                    <YAxis />
-                                    <Tooltip />
+                                    <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
+                                    <XAxis dataKey="name" tick={{ fill: 'currentColor' }} className="text-slate-600 dark:text-slate-400" />
+                                    <YAxis tick={{ fill: 'currentColor' }} className="text-slate-600 dark:text-slate-400" />
+                                    <Tooltip contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '8px', color: '#fff' }} itemStyle={{ color: '#fff' }} />
                                     <Bar dataKey="tasks" fill="#4f46e5" radius={[4, 4, 0, 0]} />
                                 </BarChart>
                             </ResponsiveContainer>
@@ -250,18 +250,18 @@ export default function AnalyticsPage() {
                     </div>
 
                     {/* Priority Breakdown */}
-                    <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-                        <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-                            <AlertCircle size={20} className="text-purple-600" />
+                    <div className="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm transition-colors">
+                        <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-4 flex items-center gap-2">
+                            <AlertCircle size={20} className="text-purple-600 dark:text-purple-400" />
                             Tasks by Priority
                         </h3>
                         <div className="h-[300px]">
                             <ResponsiveContainer width="100%" height="100%">
                                 <BarChart data={priorityData} layout="vertical">
-                                    <CartesianGrid strokeDasharray="3 3" />
-                                    <XAxis type="number" />
-                                    <YAxis dataKey="name" type="category" width={100} />
-                                    <Tooltip />
+                                    <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
+                                    <XAxis type="number" tick={{ fill: 'currentColor' }} className="text-slate-600 dark:text-slate-400" />
+                                    <YAxis dataKey="name" type="category" width={100} tick={{ fill: 'currentColor' }} className="text-slate-600 dark:text-slate-400" />
+                                    <Tooltip contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '8px', color: '#fff' }} itemStyle={{ color: '#fff' }} />
                                     <Bar dataKey="count" fill="#8b5cf6" radius={[0, 4, 4, 0]} />
                                 </BarChart>
                             </ResponsiveContainer>
@@ -275,13 +275,13 @@ export default function AnalyticsPage() {
 
 function SummaryCard({ title, value, icon, bg }: { title: string, value: string | number, icon: React.ReactNode, bg: string }) {
     return (
-        <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex items-center gap-4 hover:shadow-md transition-shadow">
+        <div className="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex items-center gap-4 hover:shadow-md transition-all">
             <div className={`w-12 h-12 rounded-full ${bg} flex items-center justify-center flex-shrink-0`}>
                 {icon}
             </div>
             <div>
-                <p className="text-sm font-medium text-slate-500">{title}</p>
-                <h3 className="text-2xl font-bold text-slate-800 mt-1">{value}</h3>
+                <p className="text-sm font-medium text-slate-500 dark:text-slate-400">{title}</p>
+                <h3 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mt-1">{value}</h3>
             </div>
         </div>
     );

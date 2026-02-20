@@ -264,18 +264,18 @@ export default function Attendance() {
             {/* Header */}
             <div className="flex justify-between items-center">
                 <div>
-                    <h1 className="text-3xl font-bold text-slate-800">Team Attendance & Activity <span className="text-xs font-normal text-slate-400 align-middle ml-2">v2.2</span></h1>
-                    <p className="text-slate-500 mt-1">Hubstaff time tracking integration</p>
+                    <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-100">Team Attendance & Activity <span className="text-xs font-normal text-slate-400 align-middle ml-2">v2.2</span></h1>
+                    <p className="text-slate-500 dark:text-slate-400 mt-1">Hubstaff time tracking integration</p>
                 </div>
             </div>
 
             {/* View Mode Tabs */}
-            <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-2 flex gap-2">
+            <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm p-2 flex flex-wrap md:flex-nowrap gap-2 transition-colors">
                 <button
                     onClick={() => setViewMode('daily')}
                     className={`flex-1 px-4 py-2 rounded-lg font-medium transition-colors ${viewMode === 'daily'
                         ? 'bg-sky-500 text-white'
-                        : 'text-slate-600 hover:bg-slate-50'
+                        : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'
                         }`}
                 >
                     Daily View
@@ -284,7 +284,7 @@ export default function Attendance() {
                     onClick={() => setViewMode('monthly')}
                     className={`flex-1 px-4 py-2 rounded-lg font-medium transition-colors ${viewMode === 'monthly'
                         ? 'bg-sky-500 text-white'
-                        : 'text-slate-600 hover:bg-slate-50'
+                        : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'
                         }`}
                 >
                     Monthly View
@@ -293,7 +293,7 @@ export default function Attendance() {
                     onClick={() => setViewMode('hr-daily')}
                     className={`flex-1 px-4 py-2 rounded-lg font-medium transition-colors ${viewMode === 'hr-daily'
                         ? 'bg-sky-500 text-white'
-                        : 'text-slate-600 hover:bg-slate-50'
+                        : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'
                         }`}
                 >
                     For HR (Daily)
@@ -302,7 +302,7 @@ export default function Attendance() {
                     onClick={() => setViewMode('custom-range')}
                     className={`flex-1 px-4 py-2 rounded-lg font-medium transition-colors ${viewMode === 'custom-range'
                         ? 'bg-sky-500 text-white'
-                        : 'text-slate-600 hover:bg-slate-50'
+                        : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'
                         }`}
                 >
                     Custom Range
@@ -313,16 +313,16 @@ export default function Attendance() {
             {viewMode === 'daily' && (
                 <>
                     {/* Date and Team Member Selectors */}
-                    <div className="bg-white rounded-xl p-6 border border-slate-100 shadow-sm">
+                    <div className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-100 dark:border-slate-700 shadow-sm transition-colors">
                         <div className="flex flex-col md:flex-row gap-4 items-end">
                             <div className="flex-1">
-                                <label className="block text-sm font-medium text-slate-700 mb-2">
+                                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                                     Team Member
                                 </label>
                                 <select
                                     value={selectedUserId}
                                     onChange={(e) => setSelectedUserId(e.target.value)}
-                                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 bg-white"
+                                    className="w-full px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 dark:focus:ring-sky-400 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200"
                                 >
                                     <option value="">All Members</option>
                                     {teamMembers.map((member) => (
@@ -333,7 +333,7 @@ export default function Attendance() {
                                 </select>
                             </div>
                             <div className="flex-1">
-                                <label className="block text-sm font-medium text-slate-700 mb-2">
+                                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                                     Select Date
                                 </label>
                                 <input
@@ -341,7 +341,7 @@ export default function Attendance() {
                                     value={selectedDate}
                                     onChange={(e) => setSelectedDate(e.target.value)}
                                     max={new Date().toISOString().split('T')[0]}
-                                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500"
+                                    className="w-full px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 dark:focus:ring-sky-400 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200"
                                 />
                             </div>
                             <button
@@ -356,9 +356,9 @@ export default function Attendance() {
 
                     {/* Error Message */}
                     {error && (
-                        <div className="bg-red-50 border border-red-200 rounded-xl p-6">
-                            <h3 className="font-semibold text-red-900 mb-2">Error</h3>
-                            <p className="text-sm text-red-700">{error}</p>
+                        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-6">
+                            <h3 className="font-semibold text-red-900 dark:text-red-400 mb-2">Error</h3>
+                            <p className="text-sm text-red-700 dark:text-red-300">{error}</p>
                         </div>
                     )}
 
@@ -367,53 +367,48 @@ export default function Attendance() {
                         <>
                             {/* Summary Cards */}
                             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                                <div className="bg-white rounded-xl p-6 border border-slate-100 shadow-sm">
+                                <div className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-100 dark:border-slate-700 shadow-sm transition-colors">
                                     <div className="flex items-center justify-between mb-4">
-                                        <div className="text-slate-500">Total Time</div>
+                                        <div className="text-slate-500 dark:text-slate-400">Total Time</div>
                                         <Clock className="text-sky-500" size={24} />
                                     </div>
-                                    <div className="text-3xl font-bold text-slate-800">
+                                    <div className="text-3xl font-bold text-slate-800 dark:text-slate-100">
                                         {formatDuration(activityData.totalTime)}
                                     </div>
                                 </div>
 
-                                <div className="bg-white rounded-xl p-6 border border-slate-100 shadow-sm">
+                                <div className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-100 dark:border-slate-700 shadow-sm transition-colors">
                                     <div className="flex items-center justify-between mb-4">
-                                        <div className="text-slate-500">Team Members</div>
+                                        <div className="text-slate-500 dark:text-slate-400">Team Members</div>
                                         <Users className="text-purple-500" size={24} />
                                     </div>
-                                    <div className="text-3xl font-bold text-slate-800">
+                                    <div className="text-3xl font-bold text-slate-800 dark:text-slate-100">
                                         {activityData.activities.length}
                                     </div>
                                 </div>
 
-                                <div className="bg-white rounded-xl p-6 border border-slate-100 shadow-sm">
+                                <div className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-100 dark:border-slate-700 shadow-sm transition-colors">
                                     <div className="flex items-center justify-between mb-4">
-                                        <div className="text-slate-500">Avg Activity</div>
+                                        <div className="text-slate-500 dark:text-slate-400">Avg Activity</div>
                                         <TrendingUp className="text-emerald-500" size={24} />
                                     </div>
-                                    <div className="text-3xl font-bold text-slate-800">
+                                    <div className="text-3xl font-bold text-slate-800 dark:text-slate-100">
                                         {(() => {
-                                            // Calculate average activity matching Hubstaff's method:
-                                            // Use weighted average of ONLY ACTIVE time (excluding 0% activities like meetings)
-                                            // to match the Daily Report / Work Status logic
                                             const weightedActivity = activityData.activities.reduce((sum, a) => sum + (a.activityPercentage * a.timeWorked), 0);
                                             const activeTime = activityData.activities.reduce((sum, a) => sum + (a.activityPercentage > 0 ? a.timeWorked : 0), 0);
-
                                             if (activeTime === 0) return '0';
-
                                             return Math.round(weightedActivity / activeTime);
                                         })()}
                                         %
                                     </div>
                                 </div>
 
-                                <div className="bg-white rounded-xl p-6 border border-slate-100 shadow-sm">
+                                <div className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-100 dark:border-slate-700 shadow-sm transition-colors">
                                     <div className="flex items-center justify-between mb-4">
-                                        <div className="text-slate-500">Date</div>
+                                        <div className="text-slate-500 dark:text-slate-400">Date</div>
                                         <Calendar className="text-blue-500" size={24} />
                                     </div>
-                                    <div className="text-lg font-bold text-slate-800">
+                                    <div className="text-lg font-bold text-slate-800 dark:text-slate-100">
                                         {new Date(selectedDate).toLocaleDateString('en-US', {
                                             month: 'short',
                                             day: 'numeric',
@@ -424,12 +419,12 @@ export default function Attendance() {
                             </div>
 
                             {/* Team Activity Table */}
-                            <div className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
-                                <div className="p-6 border-b border-slate-100 flex justify-between items-center">
-                                    <h2 className="text-xl font-bold text-slate-800">Team Activity Breakdown</h2>
+                            <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm overflow-hidden transition-colors">
+                                <div className="p-6 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center">
+                                    <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">Team Activity Breakdown</h2>
                                     <button
                                         onClick={exportReport}
-                                        className="flex items-center gap-2 px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700 transition-colors shadow-sm"
+                                        className="flex items-center gap-2 px-4 py-2 bg-slate-600 dark:bg-slate-500 text-white rounded-lg hover:bg-slate-700 dark:hover:bg-slate-600 transition-colors shadow-sm"
                                     >
                                         <Download size={18} />
                                         Export Report
@@ -437,30 +432,30 @@ export default function Attendance() {
                                 </div>
                                 <div className="overflow-x-auto">
                                     <table className="w-full">
-                                        <thead className="bg-slate-50 border-b-2 border-slate-200">
+                                        <thead className="bg-slate-50 dark:bg-slate-800/80 border-b-2 border-slate-200 dark:border-slate-700">
                                             <tr>
-                                                <th className="px-6 py-4 text-left font-semibold text-slate-600 border-r border-slate-100">Team Member</th>
-                                                <th className="px-6 py-4 text-left font-semibold text-slate-600 border-r border-slate-100">Project</th>
-                                                <th className="px-6 py-4 text-left font-semibold text-slate-600 border-r border-slate-100">Time Worked</th>
-                                                <th className="px-6 py-4 text-left font-semibold text-slate-600">Activity Level</th>
+                                                <th className="px-6 py-4 text-left font-semibold text-slate-600 dark:text-slate-300 border-r border-slate-100 dark:border-slate-700">Team Member</th>
+                                                <th className="px-6 py-4 text-left font-semibold text-slate-600 dark:text-slate-300 border-r border-slate-100 dark:border-slate-700">Project</th>
+                                                <th className="px-6 py-4 text-left font-semibold text-slate-600 dark:text-slate-300 border-r border-slate-100 dark:border-slate-700">Time Worked</th>
+                                                <th className="px-6 py-4 text-left font-semibold text-slate-600 dark:text-slate-300">Activity Level</th>
                                             </tr>
                                         </thead>
-                                        <tbody>
+                                        <tbody className="divide-y divide-slate-100 dark:divide-slate-700/50">
                                             {activityData.activities.map((activity, index) => (
-                                                <tr key={index} className="border-b border-slate-100 hover:bg-slate-50/50 transition-colors">
-                                                    <td className="px-6 py-4 font-medium text-slate-800 border-r border-slate-50">
+                                                <tr key={index} className="hover:bg-slate-50/50 dark:hover:bg-slate-700/30 transition-colors">
+                                                    <td className="px-6 py-4 font-medium text-slate-800 dark:text-slate-200 border-r border-slate-50 dark:border-slate-700/50">
                                                         {activity.userName}
                                                     </td>
-                                                    <td className="px-6 py-4 text-slate-600 border-r border-slate-50">
+                                                    <td className="px-6 py-4 text-slate-600 dark:text-slate-400 border-r border-slate-50 dark:border-slate-700/50">
                                                         {activity.projectName || 'N/A'}
                                                     </td>
-                                                    <td className="px-6 py-4 border-r border-slate-50">
-                                                        <span className="font-medium text-slate-800">
+                                                    <td className="px-6 py-4 border-r border-slate-50 dark:border-slate-700/50">
+                                                        <span className="font-medium text-slate-800 dark:text-slate-200">
                                                             {formatDuration(activity.timeWorked)}
                                                         </span>
                                                     </td>
                                                     <td className="px-6 py-4">
-                                                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${getActivityColor(activity.activityPercentage)}`}>
+                                                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${getActivityColor(activity.activityPercentage).replace('bg-emerald-50 text-emerald-700 border-emerald-200', 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/50').replace('bg-blue-50 text-blue-700 border-blue-200', 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-800/50').replace('bg-amber-50 text-amber-700 border-amber-200', 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800/50').replace('bg-red-50 text-red-700 border-red-200', 'bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400 border-red-200 dark:border-red-800/50')}`}>
                                                             {activity.activityPercentage}%
                                                         </span>
                                                     </td>
@@ -475,10 +470,10 @@ export default function Attendance() {
 
                     {/* Empty State */}
                     {!activityData && !loading && !error && (
-                        <div className="bg-white rounded-xl p-12 text-center border border-slate-100">
-                            <Users className="mx-auto text-slate-300 mb-4" size={64} />
-                            <h3 className="text-xl font-semibold text-slate-700 mb-2">No Activity Data</h3>
-                            <p className="text-slate-500">Select a date and click "Fetch Activity" to view team attendance data</p>
+                        <div className="bg-white dark:bg-slate-800 rounded-xl p-12 text-center border border-slate-100 dark:border-slate-700 transition-colors">
+                            <Users className="mx-auto text-slate-300 dark:text-slate-600 mb-4" size={64} />
+                            <h3 className="text-xl font-semibold text-slate-700 dark:text-slate-200 mb-2">No Activity Data</h3>
+                            <p className="text-slate-500 dark:text-slate-400">Select a date and click "Fetch Activity" to view team attendance data</p>
                         </div>
                     )}
                 </>
@@ -488,16 +483,16 @@ export default function Attendance() {
             {viewMode === 'monthly' && (
                 <>
                     {/* Month/Year Selectors */}
-                    <div className="bg-white rounded-xl p-6 border border-slate-100 shadow-sm">
+                    <div className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-100 dark:border-slate-700 shadow-sm transition-colors">
                         <div className="flex flex-col md:flex-row gap-4 items-end">
                             <div className="flex-1">
-                                <label className="block text-sm font-medium text-slate-700 mb-2">
+                                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                                     Month
                                 </label>
                                 <select
                                     value={selectedMonth}
                                     onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
-                                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 bg-white"
+                                    className="w-full px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 dark:focus:ring-sky-400 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200"
                                 >
                                     {Array.from({ length: 12 }, (_, i) => i + 1).map(month => (
                                         <option key={month} value={month}>
@@ -507,13 +502,13 @@ export default function Attendance() {
                                 </select>
                             </div>
                             <div className="flex-1">
-                                <label className="block text-sm font-medium text-slate-700 mb-2">
+                                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                                     Year
                                 </label>
                                 <select
                                     value={selectedYear}
                                     onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-                                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 bg-white"
+                                    className="w-full px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 dark:focus:ring-sky-400 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200"
                                 >
                                     {Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i).map(year => (
                                         <option key={year} value={year}>
@@ -534,9 +529,9 @@ export default function Attendance() {
 
                     {/* Error Message */}
                     {error && (
-                        <div className="bg-red-50 border border-red-200 rounded-xl p-6">
-                            <h3 className="font-semibold text-red-900 mb-2">Error</h3>
-                            <p className="text-sm text-red-700">{error}</p>
+                        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-6">
+                            <h3 className="font-semibold text-red-900 dark:text-red-400 mb-2">Error</h3>
+                            <p className="text-sm text-red-700 dark:text-red-300">{error}</p>
                         </div>
                     )}
 
@@ -545,81 +540,81 @@ export default function Attendance() {
                         <>
                             {/* Monthly Summary Cards */}
                             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                                <div className="bg-white rounded-xl p-6 border border-slate-100 shadow-sm">
+                                <div className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-100 dark:border-slate-700 shadow-sm transition-colors">
                                     <div className="flex items-center justify-between mb-4">
-                                        <div className="text-slate-500">Total Time</div>
+                                        <div className="text-slate-500 dark:text-slate-400">Total Time</div>
                                         <Clock className="text-sky-500" size={24} />
                                     </div>
-                                    <div className="text-3xl font-bold text-slate-800">
+                                    <div className="text-3xl font-bold text-slate-800 dark:text-slate-100">
                                         {formatTime(monthlyData.totalTime)}
                                     </div>
                                 </div>
 
-                                <div className="bg-white rounded-xl p-6 border border-slate-100 shadow-sm">
+                                <div className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-100 dark:border-slate-700 shadow-sm transition-colors">
                                     <div className="flex items-center justify-between mb-4">
-                                        <div className="text-slate-500">Active QAs</div>
+                                        <div className="text-slate-500 dark:text-slate-400">Active QAs</div>
                                         <Users className="text-purple-500" size={24} />
                                     </div>
-                                    <div className="text-3xl font-bold text-slate-800">
+                                    <div className="text-3xl font-bold text-slate-800 dark:text-slate-100">
                                         {monthlyData.qaBreakdown.length}
                                     </div>
                                 </div>
 
-                                <div className="bg-white rounded-xl p-6 border border-slate-100 shadow-sm">
+                                <div className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-100 dark:border-slate-700 shadow-sm transition-colors">
                                     <div className="flex items-center justify-between mb-4">
-                                        <div className="text-slate-500">Avg Activity</div>
+                                        <div className="text-slate-500 dark:text-slate-400">Avg Activity</div>
                                         <TrendingUp className="text-emerald-500" size={24} />
                                     </div>
-                                    <div className="text-3xl font-bold text-slate-800">
+                                    <div className="text-3xl font-bold text-slate-800 dark:text-slate-100">
                                         {monthlyData.avgActivity}%
                                     </div>
                                 </div>
 
-                                <div className="bg-white rounded-xl p-6 border border-slate-100 shadow-sm">
+                                <div className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-100 dark:border-slate-700 shadow-sm transition-colors">
                                     <div className="flex items-center justify-between mb-4">
-                                        <div className="text-slate-500">Active Days</div>
+                                        <div className="text-slate-500 dark:text-slate-400">Active Days</div>
                                         <Calendar className="text-blue-500" size={24} />
                                     </div>
-                                    <div className="text-3xl font-bold text-slate-800">
+                                    <div className="text-3xl font-bold text-slate-800 dark:text-slate-100">
                                         {monthlyData.totalDays}
                                     </div>
                                 </div>
                             </div>
 
                             {/* QA Breakdown Table */}
-                            <div className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
-                                <div className="p-6 border-b border-slate-100">
-                                    <h2 className="text-xl font-bold text-slate-800">QA Monthly Breakdown - {getMonthName(selectedMonth)} {selectedYear}</h2>
+                            <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm overflow-hidden transition-colors">
+                                <div className="p-6 border-b border-slate-100 dark:border-slate-700">
+                                    <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">QA Monthly Breakdown - {getMonthName(selectedMonth)} {selectedYear}</h2>
                                 </div>
                                 <div className="overflow-x-auto">
                                     <table className="w-full">
-                                        <thead className="bg-slate-50 border-b-2 border-slate-200">
+                                        <thead className="bg-slate-50 dark:bg-slate-800/80 border-b-2 border-slate-200 dark:border-slate-700">
                                             <tr>
-                                                <th className="px-6 py-4 text-left font-semibold text-slate-600 border-r border-slate-100">QA Name</th>
-                                                <th className="px-6 py-4 text-left font-semibold text-slate-600 border-r border-slate-100">Total Time</th>
-                                                <th className="px-6 py-4 text-left font-semibold text-slate-600 border-r border-slate-100">Avg Activity</th>
-                                                <th className="px-6 py-4 text-left font-semibold text-slate-600 border-r border-slate-100">Days Active</th>
-                                                <th className="px-6 py-4 text-left font-semibold text-slate-600">Top Projects</th>
+                                                <th className="px-6 py-4 text-left font-semibold text-slate-600 dark:text-slate-300 border-r border-slate-100 dark:border-slate-700">QA Name</th>
+                                                <th className="px-6 py-4 text-left font-semibold text-slate-600 dark:text-slate-300 border-r border-slate-100 dark:border-slate-700">Total Time</th>
+                                                <th className="px-6 py-4 text-left font-semibold text-slate-600 dark:text-slate-300 border-r border-slate-100 dark:border-slate-700">Avg Activity</th>
+                                                <th className="px-6 py-4 text-left font-semibold text-slate-600 dark:text-slate-300 border-r border-slate-100 dark:border-slate-700">Days Active</th>
+                                                <th className="px-6 py-4 text-left font-semibold text-slate-600 dark:text-slate-300">Top Projects</th>
                                             </tr>
                                         </thead>
-                                        <tbody>
+                                        <tbody className="divide-y divide-slate-100 dark:divide-slate-700/50">
                                             {monthlyData.qaBreakdown.map((qa, index) => (
-                                                <tr key={index} className="border-b border-slate-100 hover:bg-slate-50/50 transition-colors">
-                                                    <td className="px-6 py-4 font-medium text-slate-800 border-r border-slate-50">
+                                                <tr key={index} className="hover:bg-slate-50/50 dark:hover:bg-slate-700/30 transition-colors">
+                                                    <td className="px-6 py-4 font-medium text-slate-800 dark:text-slate-200 border-r border-slate-50 dark:border-slate-700/50">
                                                         {qa.qaName}
                                                     </td>
-                                                    <td className="px-6 py-4 text-slate-600 border-r border-slate-50">
+                                                    <td className="px-6 py-4 text-slate-600 dark:text-slate-400 border-r border-slate-50 dark:border-slate-700/50">
                                                         {formatTime(qa.totalTime)}
                                                     </td>
-                                                    <td className="px-6 py-4 border-r border-slate-50">
-                                                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${getActivityColor(qa.avgActivity)}`}>
+                                                    <td className="px-6 py-4 border-r border-slate-50 dark:border-slate-700/50">
+                                                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${getActivityColor(qa.avgActivity).replace('bg-emerald-50 text-emerald-700 border-emerald-200', 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/50').replace('bg-blue-50 text-blue-700 border-blue-200', 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-800/50').replace('bg-amber-50 text-amber-700 border-amber-200', 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800/50').replace('bg-red-50 text-red-700 border-red-200', 'bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400 border-red-200 dark:border-red-800/50')}`}>
                                                             {qa.avgActivity}%
                                                         </span>
                                                     </td>
-                                                    <td className="px-6 py-4 text-slate-600 border-r border-slate-50">
+                                                    <td className="px-6 py-4 text-slate-600 dark:text-slate-400 border-r border-slate-50 dark:border-slate-700/50">
                                                         {qa.daysActive}
                                                     </td>
-                                                    <td className="px-6 py-4 text-slate-600">
+                                                    <td className="px-6 py-4 text-slate-600 dark:text-slate-400">
                                                         {qa.projects.slice(0, 2).map(p => p.projectName).join(', ')}
                                                         {qa.projects.length > 2 && ` +${qa.projects.length - 2} more`}
                                                     </td>
@@ -634,18 +629,18 @@ export default function Attendance() {
 
                     {/* Loading State */}
                     {loading && (
-                        <div className="bg-white rounded-xl p-12 text-center border border-slate-100">
+                        <div className="bg-white dark:bg-slate-800 rounded-xl p-12 text-center border border-slate-100 dark:border-slate-700 transition-colors">
                             <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-sky-500 mx-auto mb-4"></div>
-                            <p className="text-slate-600">Fetching monthly data... This may take a moment.</p>
+                            <p className="text-slate-600 dark:text-slate-400">Fetching monthly data... This may take a moment.</p>
                         </div>
                     )}
 
                     {/* Empty State */}
                     {!monthlyData && !loading && !error && (
-                        <div className="bg-white rounded-xl p-12 text-center border border-slate-100">
-                            <Calendar className="mx-auto text-slate-300 mb-4" size={64} />
-                            <h3 className="text-xl font-semibold text-slate-700 mb-2">No Monthly Data</h3>
-                            <p className="text-slate-500">Select a month and year, then click "Fetch Monthly Data"</p>
+                        <div className="bg-white dark:bg-slate-800 rounded-xl p-12 text-center border border-slate-100 dark:border-slate-700 transition-colors">
+                            <Calendar className="mx-auto text-slate-300 dark:text-slate-600 mb-4" size={64} />
+                            <h3 className="text-xl font-semibold text-slate-700 dark:text-slate-200 mb-2">No Monthly Data</h3>
+                            <p className="text-slate-500 dark:text-slate-400">Select a month and year, then click "Fetch Monthly Data"</p>
                         </div>
                     )}
                 </>
@@ -655,10 +650,10 @@ export default function Attendance() {
             {viewMode === 'hr-daily' && (
                 <>
                     {/* Date Selector */}
-                    <div className="bg-white rounded-xl p-6 border border-slate-100 shadow-sm">
+                    <div className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-100 dark:border-slate-700 shadow-sm transition-colors">
                         <div className="flex flex-col md:flex-row gap-4 items-end">
                             <div className="flex-1">
-                                <label className="block text-sm font-medium text-slate-700 mb-2">
+                                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                                     Select Date
                                 </label>
                                 <input
@@ -666,7 +661,7 @@ export default function Attendance() {
                                     value={hrSelectedDate}
                                     onChange={(e) => setHrSelectedDate(e.target.value)}
                                     max={new Date().toISOString().split('T')[0]}
-                                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500"
+                                    className="w-full px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 dark:focus:ring-sky-400 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200"
                                 />
                             </div>
                             <button
@@ -681,19 +676,19 @@ export default function Attendance() {
 
                     {/* Error Message */}
                     {error && (
-                        <div className="bg-red-50 border border-red-200 rounded-xl p-6">
-                            <h3 className="font-semibold text-red-900 mb-2">Error</h3>
-                            <p className="text-sm text-red-700">{error}</p>
+                        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-6">
+                            <h3 className="font-semibold text-red-900 dark:text-red-400 mb-2">Error</h3>
+                            <p className="text-sm text-red-700 dark:text-red-300">{error}</p>
                         </div>
                     )}
 
                     {/* HR Daily Data Table */}
                     {hrDailyData && (
-                        <div className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
-                            <div className="p-6 border-b border-slate-100 flex justify-between items-center">
+                        <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm overflow-hidden transition-colors">
+                            <div className="p-6 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center">
                                 <div>
-                                    <h2 className="text-xl font-bold text-slate-800">HR Daily Report</h2>
-                                    <p className="text-sm text-slate-500 mt-1">
+                                    <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">HR Daily Report</h2>
+                                    <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
                                         {new Date(hrSelectedDate).toLocaleDateString('en-US', {
                                             weekday: 'long',
                                             year: 'numeric',
@@ -704,7 +699,7 @@ export default function Attendance() {
                                 </div>
                                 <button
                                     onClick={exportHRDailyReport}
-                                    className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors shadow-sm"
+                                    className="flex items-center gap-2 px-4 py-2 bg-emerald-600 dark:bg-emerald-500 text-white rounded-lg hover:bg-emerald-700 dark:hover:bg-emerald-600 transition-colors shadow-sm"
                                 >
                                     <FileSpreadsheet size={18} />
                                     Export CSV
@@ -712,7 +707,7 @@ export default function Attendance() {
                             </div>
                             <div className="overflow-x-auto">
                                 <table className="w-full border-collapse">
-                                    <thead className="bg-gradient-to-r from-emerald-600 to-teal-600">
+                                    <thead className="bg-gradient-to-r from-emerald-600 to-teal-600 dark:from-emerald-800 dark:to-teal-800">
                                         <tr>
                                             <th className="px-4 py-3 text-left font-semibold text-white border-r border-white/20 text-sm">Department</th>
                                             <th className="px-4 py-3 text-left font-semibold text-white border-r border-white/20 text-sm">Name</th>
@@ -722,7 +717,7 @@ export default function Attendance() {
                                             <th className="px-4 py-3 text-left font-semibold text-white text-sm">Projects</th>
                                         </tr>
                                     </thead>
-                                    <tbody>
+                                    <tbody className="divide-y divide-slate-100 dark:divide-slate-700/50">
                                         {hrDailyData.departments && hrDailyData.departments.map((dept: string, deptIndex: number) => {
                                             const members = hrDailyData.departmentData[dept] || [];
                                             if (members.length === 0) return null;
@@ -730,40 +725,40 @@ export default function Attendance() {
                                             return members.map((member: any, memberIndex: number) => (
                                                 <tr
                                                     key={`${dept}-${memberIndex}`}
-                                                    className={`border-b border-slate-100 hover:bg-slate-50/50 transition-colors ${deptIndex % 2 === 0 ? 'bg-white' : 'bg-slate-50/30'
+                                                    className={`hover:bg-slate-50/50 dark:hover:bg-slate-700/30 transition-colors ${deptIndex % 2 === 0 ? 'bg-white dark:bg-slate-900' : 'bg-slate-50/30 dark:bg-slate-800/30'
                                                         }`}
                                                 >
                                                     {/* Department name only on first row of each department */}
                                                     {memberIndex === 0 ? (
                                                         <td
                                                             rowSpan={members.length}
-                                                            className="px-4 py-3 font-bold text-slate-800 border-r border-slate-200 bg-slate-100/50 align-top"
+                                                            className="px-4 py-3 font-bold text-slate-800 dark:text-slate-100 border-r border-slate-200 dark:border-slate-700/50 bg-slate-100/50 dark:bg-slate-800/50 align-top"
                                                         >
                                                             {dept}
                                                         </td>
                                                     ) : null}
-                                                    <td className="px-4 py-3 font-medium text-slate-800 border-r border-slate-100">
+                                                    <td className="px-4 py-3 font-medium text-slate-800 dark:text-slate-200 border-r border-slate-100 dark:border-slate-700/50">
                                                         {member.name}
                                                     </td>
-                                                    <td className="px-4 py-3 text-slate-400 border-r border-slate-100 italic text-sm">
+                                                    <td className="px-4 py-3 text-slate-400 dark:text-slate-500 border-r border-slate-100 dark:border-slate-700/50 italic text-sm">
                                                         {/* Blank for HR to fill manually */}
                                                         -
                                                     </td>
-                                                    <td className="px-4 py-3 border-r border-slate-100">
-                                                        <span className="font-medium text-slate-800">
+                                                    <td className="px-4 py-3 border-r border-slate-100 dark:border-slate-700/50">
+                                                        <span className="font-medium text-slate-800 dark:text-slate-200">
                                                             {member.timeWorked > 0 ? formatTime(member.timeWorked) : '0m'}
                                                         </span>
                                                     </td>
-                                                    <td className="px-4 py-3 border-r border-slate-100">
-                                                        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border ${member.activityPercentage >= 70 ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
-                                                            member.activityPercentage >= 50 ? 'bg-blue-50 text-blue-700 border-blue-200' :
-                                                                member.activityPercentage > 0 ? 'bg-amber-50 text-amber-700 border-amber-200' :
-                                                                    'bg-red-50 text-red-700 border-red-200'
+                                                    <td className="px-4 py-3 border-r border-slate-100 dark:border-slate-700/50">
+                                                        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border ${member.activityPercentage >= 70 ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/50' :
+                                                            member.activityPercentage >= 50 ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-800/50' :
+                                                                member.activityPercentage > 0 ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800/50' :
+                                                                    'bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400 border-red-200 dark:border-red-800/50'
                                                             }`}>
                                                             {member.activityPercentage}%
                                                         </span>
                                                     </td>
-                                                    <td className="px-4 py-3 text-slate-600 text-sm">
+                                                    <td className="px-4 py-3 text-slate-600 dark:text-slate-400 text-sm">
                                                         {member.projects.length > 0 ? member.projects.join(', ') : 'N/A'}
                                                     </td>
                                                 </tr>
@@ -774,9 +769,9 @@ export default function Attendance() {
                             </div>
 
                             {/* Summary Row */}
-                            <div className="bg-slate-50 px-6 py-4 border-t-2 border-slate-200">
+                            <div className="bg-slate-50 dark:bg-slate-800/80 px-6 py-4 border-t-2 border-slate-200 dark:border-slate-700 transition-colors">
                                 <div className="flex justify-between items-center">
-                                    <div className="text-sm font-semibold text-slate-700">
+                                    <div className="text-sm font-semibold text-slate-700 dark:text-slate-300">
                                         Total Team Members: {
                                             hrDailyData.departments ?
                                                 hrDailyData.departments.reduce((sum: number, dept: string) =>
@@ -784,7 +779,7 @@ export default function Attendance() {
                                                 ) : 0
                                         }
                                     </div>
-                                    <div className="text-sm text-slate-600">
+                                    <div className="text-sm text-slate-600 dark:text-slate-400">
                                         <span className="font-semibold">Note:</span> Floor Time column is blank for manual entry
                                     </div>
                                 </div>
@@ -794,10 +789,10 @@ export default function Attendance() {
 
                     {/* Empty State */}
                     {!hrDailyData && !loading && !error && (
-                        <div className="bg-white rounded-xl p-12 text-center border border-slate-100">
-                            <FileSpreadsheet className="mx-auto text-slate-300 mb-4" size={64} />
-                            <h3 className="text-xl font-semibold text-slate-700 mb-2">No HR Data</h3>
-                            <p className="text-slate-500">Select a date and click "Fetch Data" to view HR daily report</p>
+                        <div className="bg-white dark:bg-slate-800 rounded-xl p-12 text-center border border-slate-100 dark:border-slate-700 transition-colors">
+                            <FileSpreadsheet className="mx-auto text-slate-300 dark:text-slate-600 mb-4" size={64} />
+                            <h3 className="text-xl font-semibold text-slate-700 dark:text-slate-200 mb-2">No HR Data</h3>
+                            <p className="text-slate-500 dark:text-slate-400">Select a date and click "Fetch Data" to view HR daily report</p>
                         </div>
                     )}
                 </>
@@ -807,10 +802,10 @@ export default function Attendance() {
             {viewMode === 'custom-range' && (
                 <>
                     {/* Range Selectors */}
-                    <div className="bg-white rounded-xl p-6 border border-slate-100 shadow-sm">
+                    <div className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-100 dark:border-slate-700 shadow-sm transition-colors">
                         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 items-end">
                             <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-2">
+                                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                                     Team Member
                                 </label>
                                 <Combobox
@@ -823,7 +818,7 @@ export default function Attendance() {
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-2">
+                                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                                     Project
                                 </label>
                                 <Combobox
@@ -836,7 +831,7 @@ export default function Attendance() {
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-2">
+                                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                                     Team
                                 </label>
                                 <Combobox
@@ -849,7 +844,7 @@ export default function Attendance() {
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-2">
+                                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                                     From Date
                                 </label>
                                 <input
@@ -857,11 +852,11 @@ export default function Attendance() {
                                     value={customStartDate}
                                     onChange={(e) => setCustomStartDate(e.target.value)}
                                     max={new Date().toISOString().split('T')[0]}
-                                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500"
+                                    className="w-full px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 dark:focus:ring-sky-400 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200"
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-2">
+                                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                                     To Date
                                 </label>
                                 <input
@@ -869,7 +864,7 @@ export default function Attendance() {
                                     value={customEndDate}
                                     onChange={(e) => setCustomEndDate(e.target.value)}
                                     max={new Date().toISOString().split('T')[0]}
-                                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500"
+                                    className="w-full px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 dark:focus:ring-sky-400 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200"
                                 />
                             </div>
                         </div>
@@ -886,9 +881,9 @@ export default function Attendance() {
 
                     {/* Error Message */}
                     {error && (
-                        <div className="bg-red-50 border border-red-200 rounded-xl p-6">
-                            <h3 className="font-semibold text-red-900 mb-2">Error</h3>
-                            <p className="text-sm text-red-700">{error}</p>
+                        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-6">
+                            <h3 className="font-semibold text-red-900 dark:text-red-400 mb-2">Error</h3>
+                            <p className="text-sm text-red-700 dark:text-red-300">{error}</p>
                         </div>
                     )}
 
@@ -897,50 +892,48 @@ export default function Attendance() {
                         <>
                             {/* Summary Cards */}
                             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-                                <div className="bg-white rounded-xl p-6 border border-slate-100 shadow-sm">
+                                <div className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-100 dark:border-slate-700 shadow-sm transition-colors">
                                     <div className="flex items-center justify-between mb-4">
-                                        <div className="text-slate-500">Total Time</div>
+                                        <div className="text-slate-500 dark:text-slate-400">Total Time</div>
                                         <Clock className="text-sky-500" size={24} />
                                     </div>
-                                    <div className="text-3xl font-bold text-slate-800">
+                                    <div className="text-3xl font-bold text-slate-800 dark:text-slate-100">
                                         {formatDuration(customRangeData.totalTime)}
                                     </div>
                                 </div>
 
-                                <div className="bg-white rounded-xl p-6 border border-slate-100 shadow-sm">
+                                <div className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-100 dark:border-slate-700 shadow-sm transition-colors">
                                     <div className="flex items-center justify-between mb-4">
-                                        <div className="text-slate-500">Team Members</div>
+                                        <div className="text-slate-500 dark:text-slate-400">Team Members</div>
                                         <Users className="text-purple-500" size={24} />
                                     </div>
-                                    <div className="text-3xl font-bold text-slate-800">
+                                    <div className="text-3xl font-bold text-slate-800 dark:text-slate-100">
                                         {new Set(customRangeData.activities.map(a => a.userId)).size}
                                     </div>
                                 </div>
 
-                                <div className="bg-white rounded-xl p-6 border border-slate-100 shadow-sm">
+                                <div className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-100 dark:border-slate-700 shadow-sm transition-colors">
                                     <div className="flex items-center justify-between mb-4">
-                                        <div className="text-slate-500">Avg Activity</div>
+                                        <div className="text-slate-500 dark:text-slate-400">Avg Activity</div>
                                         <TrendingUp className="text-emerald-500" size={24} />
                                     </div>
-                                    <div className="text-3xl font-bold text-slate-800">
+                                    <div className="text-3xl font-bold text-slate-800 dark:text-slate-100">
                                         {(() => {
                                             const weightedActivity = customRangeData.activities.reduce((sum, a) => sum + (a.activityPercentage * a.timeWorked), 0);
                                             const activeTime = customRangeData.activities.reduce((sum, a) => sum + (a.activityPercentage > 0 ? a.timeWorked : 0), 0);
-
                                             if (activeTime === 0) return '0';
-
                                             return Math.round(weightedActivity / activeTime);
                                         })()}
                                         %
                                     </div>
                                 </div>
 
-                                <div className="bg-white rounded-xl p-6 border border-slate-100 shadow-sm">
+                                <div className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-100 dark:border-slate-700 shadow-sm transition-colors">
                                     <div className="flex items-center justify-between mb-4">
-                                        <div className="text-slate-500">Range</div>
+                                        <div className="text-slate-500 dark:text-slate-400">Range</div>
                                         <Calendar className="text-blue-500" size={24} />
                                     </div>
-                                    <div className="text-sm font-bold text-slate-800">
+                                    <div className="text-sm font-bold text-slate-800 dark:text-slate-100">
                                         {new Date(customStartDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - {new Date(customEndDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                                     </div>
                                 </div>
@@ -953,10 +946,10 @@ export default function Attendance() {
 
                     {/* Empty State */}
                     {!customRangeData && !loading && !error && (
-                        <div className="bg-white rounded-xl p-12 text-center border border-slate-100">
-                            <Calendar className="mx-auto text-slate-300 mb-4" size={64} />
-                            <h3 className="text-xl font-semibold text-slate-700 mb-2">No Range Data</h3>
-                            <p className="text-slate-500">Select dates and click "Fetch Range" to view activity data</p>
+                        <div className="bg-white dark:bg-slate-800 rounded-xl p-12 text-center border border-slate-100 dark:border-slate-700 transition-colors">
+                            <Calendar className="mx-auto text-slate-300 dark:text-slate-600 mb-4" size={64} />
+                            <h3 className="text-xl font-semibold text-slate-700 dark:text-slate-200 mb-2">No Range Data</h3>
+                            <p className="text-slate-500 dark:text-slate-400">Select dates and click "Fetch Range" to view activity data</p>
                         </div>
                     )}
                 </>
