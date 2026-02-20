@@ -67,8 +67,6 @@ export function DatePicker({ date, setDate, className, placeholder = "Pick a dat
                         day: cn(
                             "h-9 w-9 p-0 font-normal aria-selected:opacity-100 hover:bg-slate-100 dark:hover:bg-slate-800 dark:text-slate-200 rounded-md transition-colors"
                         ),
-                        curr_month: "dark:text-slate-200",
-                        nav_button: "dark:text-slate-200 dark:hover:bg-slate-800"
                     }}
                 />
             </PopoverContent>
