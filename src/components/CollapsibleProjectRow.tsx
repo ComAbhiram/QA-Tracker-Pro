@@ -238,7 +238,7 @@ export default function CollapsibleProjectRow({
     return (
         <>
             {/* Primary Project Row */}
-            <tr className={`border-b dark:border-slate-800 ${headerColorClass} group transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50`}>
+            <tr className={`border-b dark:border-slate-800 bg-white dark:bg-slate-900 group transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/10`}>
                 <td className="px-2 py-3">
                     <div className="flex items-center gap-2">
                         <button
@@ -248,7 +248,7 @@ export default function CollapsibleProjectRow({
                         >
                             {isOpen ? <ArrowUp size={16} /> : <ArrowDown size={16} />}
                         </button>
-                        <div className="w-6 h-6 rounded-full bg-white/60 dark:bg-black/20 backdrop-blur-sm border border-black/5 flex items-center justify-center font-bold text-xs shadow-sm dark:text-slate-200 shrink-0">
+                        <div className={`w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs shadow-sm shrink-0 ${headerColorClass} text-opacity-90`}>
                             {projectName.charAt(0)}
                         </div>
                         <span className="font-bold text-sm leading-tight opacity-90 truncate">{projectName}</span>
@@ -311,7 +311,7 @@ export default function CollapsibleProjectRow({
                                                         className={`group hover:bg-slate-50 dark:hover:bg-slate-800/80 transition-colors ${isReadOnly ? 'cursor-default' : 'cursor-pointer'}`}
                                                     >
                                                         <td className="px-2 py-1.5 border-r border-slate-200 dark:border-slate-800 font-medium text-slate-700 dark:text-slate-300">
-                                                            <div className={cellClass} title={task.projectName}>{task.projectName}</div>
+                                                            <div className={cellClass} title={task.subPhase || 'Unnamed Task'}>{task.subPhase || 'Unnamed Task'}</div>
                                                             {task.currentUpdates && (
                                                                 <SimpleTooltip
                                                                     content={task.currentUpdates}
