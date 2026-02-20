@@ -302,19 +302,19 @@ export default function ProjectsPage() {
                 <div className="flex gap-2">
                     <button
                         onClick={() => setActiveTab('import')}
-                        className={`btn flex items-center gap-2 text-sm px-4 py-2 rounded-lg transition-all ${activeTab === 'import' ? 'bg-indigo-600 text-white shadow-md shadow-indigo-200 dark:shadow-indigo-900/50' : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700'}`}
+                        className={`btn btn-primary flex items-center gap-2 text-sm px-4 py-2 rounded-lg transition-all ${activeTab === 'import' ? 'shadow-lg shadow-yellow-500/30' : 'opacity-80 hover:opacity-100'}`}
                     >
                         <Globe size={16} /> <span className="hidden sm:inline">Import from Hubstaff</span>
                     </button>
                     <button
                         onClick={() => setActiveTab('create')}
-                        className={`btn flex items-center gap-2 text-sm px-4 py-2 rounded-lg transition-all ${activeTab === 'create' ? 'bg-indigo-600 text-white shadow-md shadow-indigo-200 dark:shadow-indigo-900/50' : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700'}`}
+                        className={`btn btn-secondary flex items-center gap-2 text-sm px-4 py-2 rounded-lg transition-all ${activeTab === 'create' ? 'shadow-lg border-indigo-500' : 'opacity-80 hover:opacity-100'}`}
                     >
                         <Plus size={16} /> <span className="hidden sm:inline">Create Manual</span>
                     </button>
                     <button
                         onClick={() => setActiveTab('list')}
-                        className={`btn flex items-center gap-2 text-sm px-4 py-2 rounded-lg transition-all ${activeTab === 'list' ? 'bg-indigo-600 text-white shadow-md shadow-indigo-200 dark:shadow-indigo-900/50' : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700'}`}
+                        className={`btn btn-info flex items-center gap-2 text-sm px-4 py-2 rounded-lg transition-all ${activeTab === 'list' ? 'shadow-lg shadow-blue-500/30' : 'opacity-80 hover:opacity-100'}`}
                     >
                         <Database size={16} /> View All
                     </button>

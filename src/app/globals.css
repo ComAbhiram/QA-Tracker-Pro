@@ -131,6 +131,8 @@
     --uib-shadow-2: rgba(255, 255, 255, 0.2);
     /* Neutral highlight */
 
+    @apply dark:[--uib-shadow-2:rgba(0, 0, 0, 0.3)] dark:[--uib-shadow-1:rgba(0, 0, 0, 0.5)];
+
     @apply border-transparent;
   }
 
@@ -163,6 +165,9 @@
     --uib-border: #22c55e;
     --uib-shadow-1: rgba(0, 0, 0, 0.1);
     --uib-shadow-2: rgba(255, 255, 255, 0.2);
+
+    @apply dark:[--uib-shadow-2:rgba(0, 0, 0, 0.3)] dark:[--uib-shadow-1:rgba(0, 0, 0, 0.5)];
+
     @apply border-transparent;
   }
 
@@ -177,6 +182,9 @@
     --uib-border: #ef4444;
     --uib-shadow-1: rgba(0, 0, 0, 0.1);
     --uib-shadow-2: rgba(255, 255, 255, 0.2);
+
+    @apply dark:[--uib-shadow-2:rgba(0, 0, 0, 0.3)] dark:[--uib-shadow-1:rgba(0, 0, 0, 0.5)];
+
     @apply border-transparent;
   }
 
@@ -191,6 +199,9 @@
     --uib-border: #3b82f6;
     --uib-shadow-1: rgba(0, 0, 0, 0.1);
     --uib-shadow-2: rgba(255, 255, 255, 0.2);
+
+    @apply dark:[--uib-shadow-2:rgba(0, 0, 0, 0.3)] dark:[--uib-shadow-1:rgba(0, 0, 0, 0.5)];
+
     @apply border-transparent;
   }
 
@@ -631,6 +642,8 @@
   --uib-border: #e8e8e8;
   --uib-shadow-1: #c5c5c5;
   --uib-shadow-2: #ffffff;
+
+  @apply dark:[--uib-bg:theme(colors.slate.800)] dark:[--uib-color:theme(colors.slate.200)] dark:[--uib-border:theme(colors.slate.700)] dark:[--uib-shadow-1:theme(colors.slate.900)] dark:[--uib-shadow-2:theme(colors.slate.800)];
 
   position: relative;
   overflow: hidden;
