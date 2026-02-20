@@ -29,26 +29,26 @@ export function DatePicker({ date, setDate, className, placeholder = "Pick a dat
                 <Button
                     variant={"outline"}
                     className={cn(
-                        "w-full text-left font-normal bg-slate-50 border-slate-200 hover:bg-slate-100 min-h-[46px] rounded-xl px-5 text-slate-700 block",
+                        "w-full text-left font-normal bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800/80 min-h-[46px] rounded-xl px-5 text-slate-700 dark:text-slate-200 block",
                         !date && "text-muted-foreground",
                         className
                     )}
                 >
                     <span className="flex items-center justify-between w-full h-full overflow-hidden">
-                        {date && !isNaN(date.getTime()) ? <span className="truncate">{format(date, "MMM d, yyyy")}</span> : <span className="text-slate-400 truncate">{placeholder}</span>}
+                        {date && !isNaN(date.getTime()) ? <span className="truncate">{format(date, "MMM d, yyyy")}</span> : <span className="text-slate-400 dark:text-slate-500 truncate">{placeholder}</span>}
                         <ChevronDownIcon className="ml-2 h-4 w-4 opacity-50 shrink-0" />
                     </span>
                 </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-auto p-0 z-[300]" align={align}>
-                <div className="p-2 border-b border-slate-100 flex justify-between items-center">
-                    <span className="text-xs font-medium text-slate-500">Pick a date</span>
+            <PopoverContent className="w-auto p-0 z-[300] dark:bg-slate-900 dark:border-slate-800" align={align}>
+                <div className="p-2 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
+                    <span className="text-xs font-medium text-slate-500 dark:text-slate-400">Pick a date</span>
                     <button
                         onClick={() => {
                             setDate(undefined);
                             setOpen(false);
                         }}
-                        className="text-xs text-indigo-600 hover:text-indigo-700 font-medium hover:bg-indigo-50 px-2 py-1 rounded"
+                        className="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-medium hover:bg-indigo-50 dark:hover:bg-indigo-900/30 px-2 py-1 rounded transition-colors"
                     >
                         Clear date
                     </button>
@@ -63,7 +63,12 @@ export function DatePicker({ date, setDate, className, placeholder = "Pick a dat
                     }}
                     initialFocus
                     classNames={{
-                        day_selected: "bg-indigo-600 text-white hover:bg-indigo-700 focus:bg-indigo-700"
+                        day_selected: "bg-indigo-600 text-white hover:bg-indigo-700 focus:bg-indigo-700",
+                        day: cn(
+                            "h-9 w-9 p-0 font-normal aria-selected:opacity-100 hover:bg-slate-100 dark:hover:bg-slate-800 dark:text-slate-200 rounded-md transition-colors"
+                        ),
+                        curr_month: "dark:text-slate-200",
+                        nav_button: "dark:text-slate-200 dark:hover:bg-slate-800"
                     }}
                 />
             </PopoverContent>
