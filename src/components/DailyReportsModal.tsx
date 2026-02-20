@@ -1189,14 +1189,14 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                             <div className="border-t border-slate-200 bg-slate-50 p-4 space-y-3">
                                 {/* Date Selector */}
                                 <div>
-                                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                                         Select Schedule Date
                                     </label>
                                     <input
                                         type="date"
                                         value={scheduleDate}
                                         onChange={(e) => setScheduleDate(e.target.value)}
-                                        className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 text-sm"
+                                        className="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 text-sm dark:[color-scheme:dark]"
                                     />
                                 </div>
 
@@ -1277,7 +1277,7 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
 
                                 {/* Date Selector */}
                                 <div>
-                                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                                         Select Date
                                     </label>
                                     <input
@@ -1285,7 +1285,7 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                                         value={selectedQADate}
                                         onChange={(e) => setSelectedQADate(e.target.value)}
                                         max={new Date().toISOString().split('T')[0]}
-                                        className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 text-sm"
+                                        className="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 text-sm dark:[color-scheme:dark]"
                                     />
                                 </div>
 
