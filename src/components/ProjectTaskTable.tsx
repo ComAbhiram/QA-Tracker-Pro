@@ -20,6 +20,7 @@ import {
     Cloud,
     XCircle,
     Edit2,
+    Activity,
     GripVertical
 } from 'lucide-react';
 import Loader from '@/components/ui/Loader';
@@ -234,6 +235,25 @@ export default function ProjectTaskTable({
     };
     const headerColorClass = getHeaderColor(projectName);
 
+    const sumDaysAllotted = tasks.reduce((sum, t) => sum + (Number(t.daysAllotted) || 0), 0).toFixed(2);
+
+    const sumTimeTakenString = () => {
+        let totalSeconds = 0;
+        tasks.forEach(t => {
+            if (!t.timeTaken) return;
+            const parts = t.timeTaken.split(':').map(Number);
+            if (parts.length === 3) {
+                totalSeconds += parts[0] * 3600 + parts[1] * 60 + parts[2];
+            }
+        });
+        const h = Math.floor(totalSeconds / 3600);
+        const m = Math.floor((totalSeconds % 3600) / 60);
+        const s = totalSeconds % 60;
+        return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    };
+
+    const sumActivityPercentage = tasks.reduce((sum, t) => sum + (Number(t.activityPercentage) || 0), 0);
+
     // Dynamic Class for Cells
     const cellClass = isRowExpanded ? "whitespace-normal break-words" : "truncate";
 
@@ -256,6 +276,11 @@ export default function ProjectTaskTable({
                             <h3 className="font-bold text-xs leading-tight opacity-90">{projectName}</h3>
                         </div>
                     </div>
+                    <div className="flex items-center gap-4 ml-6 hidden sm:flex text-[11px] font-semibold opacity-90">
+                        <span className="flex items-center gap-1" title="Days Allotted"><Clock size={12} /> {sumDaysAllotted}</span>
+                        <span className="flex items-center gap-1" title="Time Taken"><CalendarClock size={12} /> {sumTimeTakenString()}</span>
+                        <span className="flex items-center gap-1" title="Activity %"><Activity size={12} /> {sumActivityPercentage}%</span>
+                    </div>
                 </div>
             </div>
 
@@ -272,19 +297,32 @@ export default function ProjectTaskTable({
                     <col style={{ width: columnWidths.startDate }} />
                     <col style={{ width: columnWidths.endDate }} />
                     <col style={{ width: columnWidths.actualCompletionDate }} />
+                    <col style={{ width: columnWidths.daysAllotted }} />
+                    <col style={{ width: columnWidths.timeTaken }} />
+                    <col style={{ width: columnWidths.activityPercentage }} />
                     <col style={{ width: columnWidths.comments }} />
                     <col style={{ width: columnWidths.deviation }} />
                     <col style={{ width: columnWidths.sprint }} />
 
                     {!hideHeader && (
-                        <thead>
-                            <tr className="border-b border-slate-200 bg-slate-50 text-left font-semibold text-slate-600">
-                                {/* Only render THs if hideHeader is false. But normally we hide this if sticky header exists. */}
-                                {/* If we hide header, we rely on the sticky header above all tables. */}
-                                {/* If we DO show header (e.g. standalone), we would render Resizable headers here. */}
-                                {/* For now, assuming layout is controlled by parent, we might render empty here or just nothing. */}
-                                {/* The design implies we want ONE sticky header for ALL tables. */}
-                                {/* So if hideHeader is true, we render NOTHING here. */}
+                        <thead className="bg-slate-50 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 text-left text-[11px] font-semibold text-slate-600 dark:text-slate-300">
+                            <tr>
+                                <th className="px-2 py-2 truncate">Project</th>
+                                <th className="px-2 py-2">Phase</th>
+                                <th className="px-2 py-2">Priority</th>
+                                <th className="px-2 py-2 truncate">Sub Phase</th>
+                                <th className="px-2 py-2">Assignees</th>
+                                <th className="px-2 py-2">PC</th>
+                                <th className="px-2 py-2">Status</th>
+                                <th className="px-2 py-2 truncate">Start Date</th>
+                                <th className="px-2 py-2 truncate">End Date</th>
+                                <th className="px-2 py-2">Achvmnt</th>
+                                <th className="px-2 py-2 text-center whitespace-normal leading-tight">Days Allotted</th>
+                                <th className="px-2 py-2 text-center whitespace-normal leading-tight">Time Taken</th>
+                                <th className="px-2 py-2 text-center whitespace-normal leading-tight">Activity %</th>
+                                <th className="px-2 py-2">Comments</th>
+                                <th className="px-2 py-2 text-center">Dev.</th>
+                                <th className="px-2 py-2 text-center">Sprint</th>
                             </tr>
                         </thead>
                     )}
@@ -376,6 +414,42 @@ export default function ProjectTaskTable({
 
                                 <td className="px-2 py-1 truncate border-r border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400">
                                     {task.actualCompletionDate ? format(new Date(task.actualCompletionDate), 'MMM d') : '-'}
+                                </td>
+
+                                <td className={`px-2 py-1 border-r border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 ${cellClass}`} onClick={e => e.stopPropagation()}>
+                                    {isReadOnly
+                                        ? <span className="text-xs text-center block">{task.daysAllotted || '-'}</span>
+                                        : <EditableCell
+                                            value={task.daysAllotted}
+                                            onSave={(val) => onFieldUpdate(task.id, 'days_allotted', val)}
+                                            className="w-full text-center"
+                                            isExpanded={isRowExpanded}
+                                        />
+                                    }
+                                </td>
+
+                                <td className={`px-2 py-1 border-r border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 ${cellClass}`} onClick={e => e.stopPropagation()}>
+                                    {isReadOnly
+                                        ? <span className="text-xs text-center block">{task.timeTaken || '-'}</span>
+                                        : <EditableCell
+                                            value={task.timeTaken}
+                                            onSave={(val) => onFieldUpdate(task.id, 'time_taken', val)}
+                                            className="w-full text-center"
+                                            isExpanded={isRowExpanded}
+                                        />
+                                    }
+                                </td>
+
+                                <td className={`px-2 py-1 border-r border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 ${cellClass}`} onClick={e => e.stopPropagation()}>
+                                    {isReadOnly
+                                        ? <span className="text-xs text-center block">{task.activityPercentage || '-'}</span>
+                                        : <EditableCell
+                                            value={task.activityPercentage}
+                                            onSave={(val) => onFieldUpdate(task.id, 'activity_percentage', val)}
+                                            className="w-full text-center"
+                                            isExpanded={isRowExpanded}
+                                        />
+                                    }
                                 </td>
 
                                 {/* Comments - Editable (read-only in PC Mode) */}

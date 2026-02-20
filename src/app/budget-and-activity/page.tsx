@@ -42,6 +42,9 @@ export default function BudgetAndActivityPage() {
         startDate: 90,
         endDate: 90,
         actualCompletionDate: 80,
+        daysAllotted: 60,
+        timeTaken: 80,
+        activityPercentage: 60,
         comments: 120,
         deviation: 60,
         sprint: 50
