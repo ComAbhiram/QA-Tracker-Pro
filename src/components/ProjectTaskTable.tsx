@@ -47,7 +47,7 @@ interface ProjectTaskTableProps {
     dragHandleProps?: any; // For @dnd-kit
 }
 
-type SortKey = 'projectName' | 'projectType' | 'priority' | 'subPhase' | 'pc' | 'status' | 'startDate' | 'endDate' | 'actualCompletionDate' | 'deviation';
+type SortKey = 'projectName' | 'assignees' | 'daysAllotted' | 'timeTaken' | 'activityPercentage' | 'deviation';
 
 // Simple editable cell for inline text edits
 const EditableCell = ({ value, onSave, className, type = 'text', options = [], isExpanded = false }: { value: string | number | null, onSave: (val: string) => void, className?: string, type?: 'text' | 'select' | 'textarea', options?: string[], isExpanded?: boolean }) => {
@@ -288,204 +288,100 @@ export default function ProjectTaskTable({
             <div className="overflow-x-auto no-scrollbar pb-0">
                 <table className="w-full text-xs text-slate-800 dark:text-slate-200 border-collapse table-fixed border border-slate-200 dark:border-slate-800">
                     <col style={{ width: columnWidths.projectName }} />
-                    <col style={{ width: columnWidths.projectType }} />
-                    <col style={{ width: columnWidths.priority }} />
-                    <col style={{ width: columnWidths.subPhase }} />
-                    <col style={{ width: 120 }} /> {/* Assignees column */}
-                    <col style={{ width: columnWidths.pc }} />
-                    <col style={{ width: columnWidths.status }} />
-                    <col style={{ width: columnWidths.startDate }} />
-                    <col style={{ width: columnWidths.endDate }} />
-                    <col style={{ width: columnWidths.actualCompletionDate }} />
+                    <col style={{ width: columnWidths.assignees }} />
                     <col style={{ width: columnWidths.daysAllotted }} />
                     <col style={{ width: columnWidths.timeTaken }} />
                     <col style={{ width: columnWidths.activityPercentage }} />
-                    <col style={{ width: columnWidths.comments }} />
                     <col style={{ width: columnWidths.deviation }} />
-                    <col style={{ width: columnWidths.sprint }} />
-
-                    {!hideHeader && (
-                        <thead className="bg-slate-50 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 text-left text-[11px] font-semibold text-slate-600 dark:text-slate-300">
-                            <tr>
-                                <th className="px-2 py-2 truncate">Project</th>
-                                <th className="px-2 py-2">Phase</th>
-                                <th className="px-2 py-2">Priority</th>
-                                <th className="px-2 py-2 truncate">Sub Phase</th>
-                                <th className="px-2 py-2">Assignees</th>
-                                <th className="px-2 py-2">PC</th>
-                                <th className="px-2 py-2">Status</th>
-                                <th className="px-2 py-2 truncate">Start Date</th>
-                                <th className="px-2 py-2 truncate">End Date</th>
-                                <th className="px-2 py-2">Achvmnt</th>
-                                <th className="px-2 py-2 text-center whitespace-normal leading-tight">Days Allotted</th>
-                                <th className="px-2 py-2 text-center whitespace-normal leading-tight">Time Taken</th>
-                                <th className="px-2 py-2 text-center whitespace-normal leading-tight">Activity %</th>
-                                <th className="px-2 py-2">Comments</th>
-                                <th className="px-2 py-2 text-center">Dev.</th>
-                                <th className="px-2 py-2 text-center">Sprint</th>
-                            </tr>
-                        </thead>
-                    )}
+                    {/* Removed inner thead because we now use a single sticky header over all projects */}
 
                     <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                        {paginatedTasks.map(task => (
-                            <tr
-                                key={task.id}
-                                onClick={() => !isReadOnly && onEditTask(task)}
-                                className={`group hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors ${isReadOnly ? 'cursor-default' : 'cursor-pointer'}`}
-                            >
-                                <td className="px-2 py-1 border-r border-slate-200 dark:border-slate-800 font-medium text-slate-700 dark:text-slate-200">
-                                    <div className={cellClass} title={task.projectName}>{task.projectName}</div>
-                                    {task.currentUpdates && (
-                                        <SimpleTooltip
-                                            content={task.currentUpdates}
-                                            className="mt-0.5 cursor-help"
-                                        >
-                                            <span className="text-[10px] text-indigo-600 dark:text-indigo-400 font-medium hover:text-indigo-800 dark:hover:text-indigo-300 transition-colors">
-                                                Updates
-                                            </span>
-                                        </SimpleTooltip>
-                                    )}
+                        {paginatedTasks.map(task => {
+                            // Calculate Deviation dynamically based on Time Taken vs Days Allotted
+                            let calculatedDeviation = 0;
+                            if (task.timeTaken && task.daysAllotted) {
+                                const parts = task.timeTaken.split(':').map(Number);
+                                if (parts.length === 3) {
+                                    const fractionalDays = (parts[0] * 3600 + parts[1] * 60 + parts[2]) / 86400; // 24 hours in seconds
+                                    calculatedDeviation = fractionalDays - Number(task.daysAllotted);
+                                }
+                            }
 
-                                </td>
-
-                                <td className={`px-2 py-1 border-r border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 ${cellClass}`}>{task.projectType || '-'}</td>
-
-                                <td className="px-2 py-1 truncate border-r border-slate-200 dark:border-slate-800">
-                                    <div className="transform scale-90 origin-left">
-                                        <PriorityBadge priority={task.priority} />
-                                    </div>
-                                </td>
-
-                                <td className={`px-2 py-1 border-r border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 ${cellClass}`} title={task.subPhase || ''}>{task.subPhase || '-'}</td>
-                                <td className={`px-2 py-1 border-r border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 ${cellClass}`}>
-                                    <div className="flex flex-col gap-0.5">
-                                        {task.assignedTo && <span className="text-[10px] font-medium text-slate-700 dark:text-slate-300">{task.assignedTo}</span>}
-                                        {task.assignedTo2 && <span className="text-[10px] text-slate-500 dark:text-slate-400">{task.assignedTo2}</span>}
-                                        {task.additionalAssignees && task.additionalAssignees.map(a => (
-                                            <span key={a} className="text-[10px] text-slate-500 dark:text-slate-400">{a}</span>
-                                        ))}
-                                    </div>
-                                </td>
-                                <td className={`px-2 py-1 border-r border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 ${cellClass}`}>{task.pc || '-'}</td>
-
-                                {/* Status - Editable Select (read-only in PC Mode) */}
-                                <td className="px-2 py-1 border-r border-slate-200 dark:border-slate-800" onClick={e => e.stopPropagation()}>
-                                    <div className="flex items-center gap-1.5 w-full min-w-0">
-                                        <div className="flex-1 min-w-0">
-                                            {isReadOnly
-                                                ? <StatusBadge status={task.status} />
-                                                : <StatusSelectCell status={task.status} onSave={(val) => onFieldUpdate(task.id, 'status', val)} />
-                                            }
-                                        </div>
-                                        {isTaskOverdue(task) && (
-                                            <span className="flex-shrink-0 flex items-center gap-0.5 text-red-600 dark:text-red-400 font-bold text-[10px]" title={`${getOverdueDays(task)} days overdue`}>
-                                                <AlertCircle size={10} /> {getOverdueDays(task)}d
-                                            </span>
+                            return (
+                                <tr
+                                    key={task.id}
+                                    onClick={() => !isReadOnly && onEditTask(task)}
+                                    className={`group hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors ${isReadOnly ? 'cursor-default' : 'cursor-pointer'}`}
+                                >
+                                    <td className="px-2 py-1 border-r border-slate-200 dark:border-slate-800 font-medium text-slate-700 dark:text-slate-200">
+                                        <div className={cellClass} title={task.projectName}>{task.projectName}</div>
+                                        {task.currentUpdates && (
+                                            <SimpleTooltip
+                                                content={task.currentUpdates}
+                                                className="mt-0.5 cursor-help"
+                                            >
+                                                <span className="text-[10px] text-indigo-600 dark:text-indigo-400 font-medium hover:text-indigo-800 dark:hover:text-indigo-300 transition-colors">
+                                                    Updates
+                                                </span>
+                                            </SimpleTooltip>
                                         )}
-                                    </div>
-                                </td>
+                                    </td>
 
-                                {/* Start Date - Inline Edit (read-only in PC Mode) */}
-                                <td className="px-1 py-0.5 truncate border-r border-slate-200 dark:border-slate-800" onClick={(e) => e.stopPropagation()}>
-                                    {isReadOnly
-                                        ? <span className="px-1 text-[11px] text-slate-600 dark:text-slate-300">{task.startDate ? format(new Date(task.startDate), 'MMM d, yyyy') : '-'}</span>
-                                        : <DatePicker
-                                            date={task.startDate ? new Date(task.startDate) : undefined}
-                                            setDate={(d) => handleDateChange(d, task.id, 'start_date')}
-                                            className="w-full h-full border-none shadow-none bg-transparent hover:bg-slate-100 dark:hover:bg-slate-800 rounded px-1 text-[11px] font-normal min-h-[24px] py-0 dark:text-slate-200"
-                                            placeholder="-"
-                                        />
-                                    }
-                                </td>
+                                    <td className={`px-2 py-1 border-r border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 ${cellClass}`}>
+                                        <div className="flex flex-col gap-0.5">
+                                            {task.assignedTo && <span className="text-[10px] font-medium text-slate-700 dark:text-slate-300">{task.assignedTo}</span>}
+                                            {task.assignedTo2 && <span className="text-[10px] text-slate-500 dark:text-slate-400">{task.assignedTo2}</span>}
+                                            {task.additionalAssignees && task.additionalAssignees.map(a => (
+                                                <span key={a} className="text-[10px] text-slate-500 dark:text-slate-400">{a}</span>
+                                            ))}
+                                        </div>
+                                    </td>
 
-                                {/* End Date - Inline Edit (read-only in PC Mode) */}
-                                <td className={`px-1 py-0.5 truncate border-r border-slate-200 dark:border-slate-800 transition-colors ${isTaskOverdue(task) ? 'bg-red-50 dark:bg-red-900/20' : ''}`} onClick={(e) => e.stopPropagation()}>
-                                    {isReadOnly
-                                        ? <span className={`px-1 text-[11px] ${isTaskOverdue(task) ? 'text-red-700 dark:text-red-400 font-semibold' : 'text-slate-600 dark:text-slate-300'}`}>{task.endDate ? format(new Date(task.endDate), 'MMM d, yyyy') : '-'}</span>
-                                        : <DatePicker
-                                            date={task.endDate ? new Date(task.endDate) : undefined}
-                                            setDate={(d) => handleDateChange(d, task.id, 'end_date')}
-                                            className={`w-full h-full border-none shadow-none bg-transparent rounded px-1 text-[11px] font-normal min-h-[24px] py-0 ${isTaskOverdue(task) ? 'text-red-700 dark:text-red-400 font-semibold' : 'hover:bg-slate-100 dark:hover:bg-slate-800 dark:text-slate-200'}`}
-                                            placeholder="-"
-                                        />
-                                    }
-                                </td>
+                                    <td className={`px-2 py-1 border-r border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 ${cellClass}`} onClick={e => e.stopPropagation()}>
+                                        {isReadOnly
+                                            ? <span className="text-xs text-center block">{task.daysAllotted || '-'}</span>
+                                            : <EditableCell
+                                                value={task.daysAllotted}
+                                                onSave={(val) => onFieldUpdate(task.id, 'days_allotted', val)}
+                                                className="w-full text-center"
+                                                isExpanded={isRowExpanded}
+                                            />
+                                        }
+                                    </td>
 
-                                <td className="px-2 py-1 truncate border-r border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400">
-                                    {task.actualCompletionDate ? format(new Date(task.actualCompletionDate), 'MMM d') : '-'}
-                                </td>
+                                    <td className={`px-2 py-1 border-r border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 ${cellClass}`} onClick={e => e.stopPropagation()}>
+                                        {isReadOnly
+                                            ? <span className="text-xs text-center block">{task.timeTaken || '-'}</span>
+                                            : <EditableCell
+                                                value={task.timeTaken}
+                                                onSave={(val) => onFieldUpdate(task.id, 'time_taken', val)}
+                                                className="w-full text-center"
+                                                isExpanded={isRowExpanded}
+                                            />
+                                        }
+                                    </td>
 
-                                <td className={`px-2 py-1 border-r border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 ${cellClass}`} onClick={e => e.stopPropagation()}>
-                                    {isReadOnly
-                                        ? <span className="text-xs text-center block">{task.daysAllotted || '-'}</span>
-                                        : <EditableCell
-                                            value={task.daysAllotted}
-                                            onSave={(val) => onFieldUpdate(task.id, 'days_allotted', val)}
-                                            className="w-full text-center"
-                                            isExpanded={isRowExpanded}
-                                        />
-                                    }
-                                </td>
+                                    <td className={`px-2 py-1 border-r border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 ${cellClass}`} onClick={e => e.stopPropagation()}>
+                                        {isReadOnly
+                                            ? <span className="text-xs text-center block">{task.activityPercentage || '-'}</span>
+                                            : <EditableCell
+                                                value={task.activityPercentage}
+                                                onSave={(val) => onFieldUpdate(task.id, 'activity_percentage', val)}
+                                                className="w-full text-center"
+                                                isExpanded={isRowExpanded}
+                                            />
+                                        }
+                                    </td>
 
-                                <td className={`px-2 py-1 border-r border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 ${cellClass}`} onClick={e => e.stopPropagation()}>
-                                    {isReadOnly
-                                        ? <span className="text-xs text-center block">{task.timeTaken || '-'}</span>
-                                        : <EditableCell
-                                            value={task.timeTaken}
-                                            onSave={(val) => onFieldUpdate(task.id, 'time_taken', val)}
-                                            className="w-full text-center"
-                                            isExpanded={isRowExpanded}
-                                        />
-                                    }
-                                </td>
-
-                                <td className={`px-2 py-1 border-r border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 ${cellClass}`} onClick={e => e.stopPropagation()}>
-                                    {isReadOnly
-                                        ? <span className="text-xs text-center block">{task.activityPercentage || '-'}</span>
-                                        : <EditableCell
-                                            value={task.activityPercentage}
-                                            onSave={(val) => onFieldUpdate(task.id, 'activity_percentage', val)}
-                                            className="w-full text-center"
-                                            isExpanded={isRowExpanded}
-                                        />
-                                    }
-                                </td>
-
-                                {/* Comments - Editable (read-only in PC Mode) */}
-                                <td className={`px-2 py-1 border-r border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 ${cellClass}`} title={task.comments || ''} onClick={e => e.stopPropagation()}>
-                                    {isReadOnly
-                                        ? <span className="text-xs">{task.comments || '-'}</span>
-                                        : <EditableCell
-                                            value={task.comments}
-                                            onSave={(val) => onFieldUpdate(task.id, 'comments', val)}
-                                            className="w-full"
-                                            isExpanded={isRowExpanded}
-                                        />
-                                    }
-                                </td>
-
-                                {/* Deviation - Editable (read-only in PC Mode) */}
-                                <td className={`px-2 py-1 border-r border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 ${cellClass}`} onClick={e => e.stopPropagation()}>
-                                    {isReadOnly
-                                        ? <span className="text-xs text-center block">{task.deviation || '-'}</span>
-                                        : <EditableCell
-                                            value={task.deviation}
-                                            onSave={(val) => onFieldUpdate(task.id, 'deviation', val)}
-                                            className="w-full text-center"
-                                            isExpanded={isRowExpanded}
-                                        />
-                                    }
-                                </td>
-
-
-                                <td className="px-2 py-1 truncate text-center text-slate-600 dark:text-slate-400">
-                                    {task.sprintLink ? (
-                                        <a href={task.sprintLink} target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline" onClick={e => e.stopPropagation()}>Link</a>
-                                    ) : '-'}
-                                </td>
-                            </tr>
-                        ))}
+                                    {/* Calculated Deviation (Read-Only) */}
+                                    <td className={`px-2 py-1 border-r border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 ${cellClass}`} onClick={e => e.stopPropagation()}>
+                                        <span className={`text-xs text-center block ${calculatedDeviation > 0 ? 'text-red-500' : 'text-green-500'}`}>
+                                            {calculatedDeviation !== 0 ? calculatedDeviation.toFixed(2) : '-'}
+                                        </span>
+                                    </td>
+                                </tr>
+                            );
+                        })}
                     </tbody>
                 </table>
             </div>

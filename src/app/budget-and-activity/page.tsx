@@ -33,21 +33,12 @@ export default function BudgetAndActivityPage() {
 
     // Column Resizing
     const { columnWidths, startResizing } = useColumnResizing({
-        projectName: 200,
-        projectType: 60,
-        priority: 65,
-        subPhase: 100,
-        pc: 50,
-        status: 110,
-        startDate: 90,
-        endDate: 90,
-        actualCompletionDate: 80,
-        daysAllotted: 60,
-        timeTaken: 80,
-        activityPercentage: 60,
-        comments: 120,
-        deviation: 60,
-        sprint: 50
+        projectName: 250,
+        assignees: 150,
+        daysAllotted: 100,
+        timeTaken: 100,
+        activityPercentage: 100,
+        deviation: 100
     });
 
     useEffect(() => {
@@ -421,13 +412,38 @@ export default function BudgetAndActivityPage() {
                 ) : (
                     <div className="relative">
                         <div className="space-y-4 pt-4">
+                            {/* Sticky Header */}
+                            <div className="sticky top-0 z-40 bg-white dark:bg-slate-900 shadow-md border-b border-slate-200 dark:border-slate-700 mb-2 rounded-t-lg overflow-x-auto no-scrollbar transition-colors">
+                                <table className="w-full text-xs text-slate-800 dark:text-slate-200 border-collapse table-fixed">
+                                    <colgroup>
+                                        <col style={{ width: columnWidths.projectName }} />
+                                        <col style={{ width: columnWidths.assignees }} />
+                                        <col style={{ width: columnWidths.daysAllotted }} />
+                                        <col style={{ width: columnWidths.timeTaken }} />
+                                        <col style={{ width: columnWidths.activityPercentage }} />
+                                        <col style={{ width: columnWidths.deviation }} />
+                                    </colgroup>
+                                    <thead className="bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-bold uppercase tracking-wider backdrop-blur-md">
+                                        <tr>
+                                            <ResizableHeader label="Project" widthKey="projectName" width={columnWidths.projectName} onResizeStart={startResizing} isSortable={false} />
+                                            <ResizableHeader label="Assignees" widthKey="assignees" width={columnWidths.assignees} onResizeStart={startResizing} isSortable={false} />
+                                            <ResizableHeader label="Days Allotted" widthKey="daysAllotted" width={columnWidths.daysAllotted} onResizeStart={startResizing} isSortable={false} />
+                                            <ResizableHeader label="Time Taken" widthKey="timeTaken" width={columnWidths.timeTaken} onResizeStart={startResizing} isSortable={false} />
+                                            <ResizableHeader label="Activity %" widthKey="activityPercentage" width={columnWidths.activityPercentage} onResizeStart={startResizing} isSortable={false} />
+                                            <ResizableHeader label="Deviation" widthKey="deviation" width={columnWidths.deviation} onResizeStart={startResizing} isSortable={false} />
+                                        </tr>
+                                    </thead>
+                                </table>
+                            </div>
+
+                            {/* Tables */}
                             {sortedProjects.map(project => (
                                 <ProjectTaskTable
                                     key={project}
                                     projectName={project}
                                     tasks={groupedTasks[project]}
                                     columnWidths={columnWidths}
-                                    hideHeader={false}
+                                    hideHeader={true}
                                     isRowExpanded={isRowExpanded}
                                     onEditTask={handleEditTask}
                                     onFieldUpdate={handleFieldUpdate}
