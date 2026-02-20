@@ -372,7 +372,7 @@ export default function AssigneeTaskTable({
             </div>
 
             {/* Table */}
-            <div className="overflow-x-visible pb-0"> {/* Allow dropdowns to overflow if needed, but table-layout fixed handles most */}
+            <div className="overflow-x-auto no-scrollbar pb-0">
                 <table className="w-full text-xs text-slate-800 dark:text-slate-200 border-collapse table-fixed border border-slate-200 dark:border-slate-800">
                     <col style={{ width: columnWidths.projectName }} />
                     <col style={{ width: columnWidths.projectType }} />

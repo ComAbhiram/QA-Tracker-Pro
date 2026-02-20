@@ -299,7 +299,7 @@ export default function ProjectsPage() {
                     <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100">Project Management</h1>
                     <p className="text-sm text-slate-500 dark:text-slate-400">Manage your project list from Hubstaff or manual entry</p>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
                     <button
                         onClick={() => setActiveTab('import')}
                         className={`btn btn-primary flex items-center gap-2 text-sm px-4 py-2 rounded-lg transition-all ${activeTab === 'import' ? 'shadow-lg shadow-yellow-500/30' : 'opacity-80 hover:opacity-100'}`}

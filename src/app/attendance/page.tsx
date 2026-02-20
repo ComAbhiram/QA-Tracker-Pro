@@ -314,7 +314,7 @@ export default function Attendance() {
                 <>
                     {/* Date and Team Member Selectors */}
                     <div className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-100 dark:border-slate-700 shadow-sm transition-colors">
-                        <div className="flex flex-col md:flex-row gap-4 items-end">
+                        <div className="flex flex-col md:flex-row gap-4 items-end flex-wrap">
                             <div className="flex-1">
                                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                                     Team Member
@@ -420,11 +420,11 @@ export default function Attendance() {
 
                             {/* Team Activity Table */}
                             <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm overflow-hidden transition-colors">
-                                <div className="p-6 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center">
+                                <div className="p-6 border-b border-slate-100 dark:border-slate-700 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                                     <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">Team Activity Breakdown</h2>
                                     <button
                                         onClick={exportReport}
-                                        className="flex items-center gap-2 px-4 py-2 bg-slate-600 dark:bg-slate-500 text-white rounded-lg hover:bg-slate-700 dark:hover:bg-slate-600 transition-colors shadow-sm"
+                                        className="flex items-center justify-center gap-2 px-4 py-2 bg-slate-600 dark:bg-slate-500 text-white rounded-lg hover:bg-slate-700 dark:hover:bg-slate-600 transition-colors shadow-sm w-full sm:w-auto"
                                     >
                                         <Download size={18} />
                                         Export Report
@@ -484,7 +484,7 @@ export default function Attendance() {
                 <>
                     {/* Month/Year Selectors */}
                     <div className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-100 dark:border-slate-700 shadow-sm transition-colors">
-                        <div className="flex flex-col md:flex-row gap-4 items-end">
+                        <div className="flex flex-col md:flex-row gap-4 items-end flex-wrap">
                             <div className="flex-1">
                                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                                     Month
@@ -651,7 +651,7 @@ export default function Attendance() {
                 <>
                     {/* Date Selector */}
                     <div className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-100 dark:border-slate-700 shadow-sm transition-colors">
-                        <div className="flex flex-col md:flex-row gap-4 items-end">
+                        <div className="flex flex-col md:flex-row gap-4 items-end flex-wrap">
                             <div className="flex-1">
                                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                                     Select Date
@@ -685,7 +685,7 @@ export default function Attendance() {
                     {/* HR Daily Data Table */}
                     {hrDailyData && (
                         <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm overflow-hidden transition-colors">
-                            <div className="p-6 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center">
+                            <div className="p-6 border-b border-slate-100 dark:border-slate-700 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                                 <div>
                                     <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">HR Daily Report</h2>
                                     <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
@@ -699,7 +699,7 @@ export default function Attendance() {
                                 </div>
                                 <button
                                     onClick={exportHRDailyReport}
-                                    className="flex items-center gap-2 px-4 py-2 bg-emerald-600 dark:bg-emerald-500 text-white rounded-lg hover:bg-emerald-700 dark:hover:bg-emerald-600 transition-colors shadow-sm"
+                                    className="flex items-center justify-center gap-2 px-4 py-2 bg-emerald-600 dark:bg-emerald-500 text-white rounded-lg hover:bg-emerald-700 dark:hover:bg-emerald-600 transition-colors shadow-sm w-full sm:w-auto"
                                 >
                                     <FileSpreadsheet size={18} />
                                     Export CSV

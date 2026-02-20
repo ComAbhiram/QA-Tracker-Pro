@@ -463,7 +463,7 @@ export default function Schedule() {
                 <div className="flex flex-col xl:flex-row items-center justify-between gap-4 pt-4 border-t border-slate-100 dark:border-slate-800">
 
                     {/* Left: View Toggles */}
-                    <div className="flex items-center gap-4 w-full xl:w-auto">
+                    <div className="flex flex-wrap items-center gap-4 w-full xl:w-auto">
                         <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-lg">
                             <button
                                 onClick={() => { setViewMode('calendar'); setShowTableView(false); }}
@@ -498,7 +498,7 @@ export default function Schedule() {
                     </div>
 
                     {/* Right: Navigation & Action */}
-                    <div className="flex items-center gap-4 w-full xl:w-auto justify-between xl:justify-end">
+                    <div className="flex flex-wrap items-center gap-4 w-full xl:w-auto justify-between xl:justify-end">
                         <div className="flex items-center gap-2">
                             <button onClick={prevPeriod} className="p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-indigo-300 dark:hover:border-indigo-500 transition-all">
                                 <ChevronLeft size={20} />

@@ -395,14 +395,14 @@ export default function Reports() {
     return (
         <div className="max-w-7xl mx-auto space-y-6">
             {/* Header */}
-            <div className="flex justify-between items-center">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                     <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-100">Reports & Analytics</h1>
                     <p className="text-slate-500 dark:text-slate-400 mt-1">Comprehensive overview of project metrics</p>
                 </div>
                 <button
                     onClick={exportReport}
-                    className="btn btn-info flex items-center gap-2"
+                    className="btn btn-info flex items-center justify-center gap-2 w-full md:w-auto"
                 >
                     <Download size={18} />
                     Export Report
@@ -414,14 +414,14 @@ export default function Reports() {
                 <div className="flex flex-col md:flex-row gap-4 items-end">
                     <div className="flex-1 w-full">
                         <label className="text-sm font-medium text-slate-600 dark:text-slate-300 mb-1 block">Date Range</label>
-                        <div className="flex gap-2">
+                        <div className="flex flex-col sm:flex-row gap-2">
                             <input
                                 type="date"
                                 value={dateRange.start}
                                 onChange={e => setDateRange(prev => ({ ...prev, start: e.target.value }))}
                                 className="w-full px-3 py-2 border dark:border-slate-700 bg-white dark:bg-slate-900 rounded-lg text-sm text-slate-900 dark:text-slate-200 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 outline-none transition-colors"
                             />
-                            <span className="self-center text-slate-400 dark:text-slate-500">-</span>
+                            <span className="hidden sm:inline self-center text-slate-400 dark:text-slate-500">-</span>
                             <input
                                 type="date"
                                 value={dateRange.end}
@@ -452,19 +452,21 @@ export default function Reports() {
                             emptyMessage="No projects found."
                         />
                     </div>
-                    <button
-                        onClick={() => { setDateRange({ start: '', end: '' }); setSelectedQA(''); setSelectedProject(''); }}
-                        className="btn btn-secondary text-sm"
-                    >
-                        Reset
-                    </button>
-                    <button
-                        onClick={exportReport}
-                        className="btn btn-info flex items-center gap-2 whitespace-nowrap"
-                    >
-                        <Download size={18} />
-                        Export CSV
-                    </button>
+                    <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
+                        <button
+                            onClick={() => { setDateRange({ start: '', end: '' }); setSelectedQA(''); setSelectedProject(''); }}
+                            className="btn btn-secondary text-sm flex-1 sm:flex-none justify-center"
+                        >
+                            Reset
+                        </button>
+                        <button
+                            onClick={exportReport}
+                            className="btn btn-info flex items-center justify-center gap-2 whitespace-nowrap flex-1 sm:flex-none"
+                        >
+                            <Download size={18} />
+                            Export CSV
+                        </button>
+                    </div>
                 </div>
             </div>
 

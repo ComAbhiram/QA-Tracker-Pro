@@ -404,10 +404,10 @@ export default function ProjectStatusPage({ pageTitle, statusFilter, showAvailab
                         </div>
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-3">
+                    <div className="flex flex-wrap items-center gap-3 mt-4 md:mt-0">
                         <button
                             onClick={exportCSV}
-                            className="flex items-center gap-2 px-4 py-2 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-lg hover:bg-emerald-100 transition-colors font-medium text-sm"
+                            className="flex items-center gap-2 px-4 py-2 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-lg hover:bg-emerald-100 transition-colors font-medium text-sm w-full md:w-auto justify-center"
                         >
                             <FileSpreadsheet size={16} /> Export CSV
                         </button>
@@ -420,7 +420,7 @@ export default function ProjectStatusPage({ pageTitle, statusFilter, showAvailab
             <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4 md:space-y-0 md:flex md:items-center md:gap-4">
 
                 {/* Search */}
-                <div className="relative flex-1">
+                <div className="relative flex-1 w-full md:w-auto">
                     <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                     <input
                         type="text"
@@ -435,11 +435,11 @@ export default function ProjectStatusPage({ pageTitle, statusFilter, showAvailab
                 <div className="flex flex-wrap items-center gap-3">
 
                     {/* PC Filter */}
-                    <div className="relative">
+                    <div className="relative w-full sm:w-auto">
                         <select
                             value={pcFilter}
                             onChange={(e) => setPcFilter(e.target.value)}
-                            className="appearance-none pl-9 pr-8 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer min-w-[140px]"
+                            className="appearance-none pl-9 pr-8 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer w-full sm:w-auto min-w-[140px]"
                         >
                             <option value="All">All PCs</option>
                             {pcNames.map(pc => <option key={pc} value={pc}>{pc}</option>)}
@@ -448,23 +448,23 @@ export default function ProjectStatusPage({ pageTitle, statusFilter, showAvailab
                     </div>
 
                     {/* Date Range */}
-                    <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-1">
-                        <div className="flex items-center gap-2 px-2 border-r border-slate-200 dark:border-slate-700">
-                            <span className="text-xs font-semibold text-slate-500 uppercase">From</span>
+                    <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-1 w-full sm:w-auto justify-between sm:justify-start">
+                        <div className="flex items-center gap-2 px-2 border-r border-slate-200 dark:border-slate-700 flex-1 sm:flex-none justify-center">
+                            <span className="text-xs font-semibold text-slate-500 uppercase hidden sm:inline">From</span>
                             <DatePicker
                                 date={dateRange.start}
                                 setDate={(d) => setDateRange(prev => ({ ...prev, start: d }))}
                                 placeholder="Start Date"
-                                className="border-none bg-transparent shadow-none text-sm p-0 w-24"
+                                className="border-none bg-transparent shadow-none text-sm p-0 w-24 flex justify-center"
                             />
                         </div>
-                        <div className="flex items-center gap-2 px-2">
-                            <span className="text-xs font-semibold text-slate-500 uppercase">To</span>
+                        <div className="flex items-center gap-2 px-2 flex-1 sm:flex-none justify-center">
+                            <span className="text-xs font-semibold text-slate-500 uppercase hidden sm:inline">To</span>
                             <DatePicker
                                 date={dateRange.end}
                                 setDate={(d) => setDateRange(prev => ({ ...prev, end: d }))}
                                 placeholder="End Date"
-                                className="border-none bg-transparent shadow-none text-sm p-0 w-24"
+                                className="border-none bg-transparent shadow-none text-sm p-0 w-24 flex justify-center"
                             />
                         </div>
                         {(dateRange.start || dateRange.end) && (
@@ -491,8 +491,8 @@ export default function ProjectStatusPage({ pageTitle, statusFilter, showAvailab
             ) : (
                 <div className="space-y-6">
                     {/* STICKY HEADER for All Tables */}
-                    <div className="sticky top-0 z-40 bg-white dark:bg-slate-900 shadow-md border-b border-slate-200 dark:border-slate-700 mb-2 rounded-t-lg overflow-hidden transition-colors">
-                        <table className="w-full text-xs text-slate-800 dark:text-slate-200 border-collapse table-fixed">
+                    <div className="sticky top-0 z-40 bg-white dark:bg-slate-900 shadow-md border-b border-slate-200 dark:border-slate-700 mb-2 rounded-t-lg overflow-x-auto no-scrollbar transition-colors">
+                        <table className="w-full text-xs text-slate-800 dark:text-slate-200 border-collapse table-fixed min-w-[800px]">
                             <colgroup>
                                 <col style={{ width: columnWidths.projectName }} />
                                 <col style={{ width: columnWidths.projectType }} />

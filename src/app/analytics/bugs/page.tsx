@@ -163,13 +163,13 @@ export default function BugsReport() {
                     <div className="h-full w-px bg-slate-200 dark:bg-slate-700 hidden sm:block mx-1"></div>
 
                     {/* Date Filters */}
-                    <div className="flex items-center gap-2">
-                        <div className="relative">
-                            <DatePicker date={startDate} setDate={setStartDate} placeholder="Start Date" className="w-[130px] h-[38px] text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-200 rounded-md shadow-sm" />
+                    <div className="flex flex-wrap items-center gap-2 mt-2 sm:mt-0">
+                        <div className="relative w-full sm:w-auto">
+                            <DatePicker date={startDate} setDate={setStartDate} placeholder="Start Date" className="w-full sm:w-[130px] h-[38px] text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-200 rounded-md shadow-sm" />
                         </div>
-                        <span className="text-slate-400 dark:text-slate-500 text-xs">to</span>
-                        <div className="relative">
-                            <DatePicker date={endDate} setDate={setEndDate} placeholder="End Date" className="w-[130px] h-[38px] text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-200 rounded-md shadow-sm" />
+                        <span className="text-slate-400 dark:text-slate-500 text-xs hidden sm:inline">to</span>
+                        <div className="relative w-full sm:w-auto mt-2 sm:mt-0">
+                            <DatePicker date={endDate} setDate={setEndDate} placeholder="End Date" className="w-full sm:w-[130px] h-[38px] text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-200 rounded-md shadow-sm" />
                         </div>
                         {(startDate || endDate) && (
                             <button onClick={() => { setStartDate(undefined); setEndDate(undefined); }} className="p-2 text-slate-400 dark:text-slate-500 hover:text-rose-500 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg transition-colors">

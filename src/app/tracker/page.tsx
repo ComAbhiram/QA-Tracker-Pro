@@ -12,6 +12,7 @@ import { calculateAvailability } from '@/lib/availability';
 import { useToast } from '@/contexts/ToastContext';
 import { toast } from 'sonner';
 import { DatePicker } from '@/components/DatePicker';
+import Combobox from '@/components/ui/Combobox';
 import useColumnResizing from '@/hooks/useColumnResizing';
 import ResizableHeader from '@/components/ui/ResizableHeader';
 import CloseButton from '@/components/ui/CloseButton';
@@ -887,7 +888,7 @@ export default function Tracker() {
                             />
                         </div>
 
-                        <div className="w-full sm:w-auto flex justify-between sm:justify-start items-center gap-2">
+                        <div className="w-full sm:w-auto flex flex-wrap justify-between sm:justify-start items-center gap-2">
                             <DatePicker
                                 date={dateFilter}
                                 setDate={setDateFilter}
@@ -896,25 +897,17 @@ export default function Tracker() {
                             />
 
                             {/* PC Filter Dropdown */}
-                            <div className="relative">
-                                <select
+                            <div className="relative w-full sm:w-[220px] z-50">
+                                <Combobox
+                                    options={[
+                                        { id: 'All', label: 'All PCs' },
+                                        ...pcNames.map(name => ({ id: name, label: name }))
+                                    ]}
                                     value={pcFilter}
-                                    onChange={(e) => setPcFilter(e.target.value)}
-                                    className={`appearance-none pl-8 pr-8 py-2 border rounded-md text-xs font-medium shadow-sm focus:outline-none focus:ring-1 focus:ring-indigo-400 cursor-pointer transition-all
-                                        ${pcFilter !== 'All'
-                                            ? 'bg-indigo-50 dark:bg-indigo-900/30 border-indigo-300 dark:border-indigo-700 text-indigo-700 dark:text-indigo-300'
-                                            : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700'
-                                        }`}
-                                >
-                                    <option value="All">All PCs</option>
-                                    {pcNames.map(name => (
-                                        <option key={name} value={name}>{name}</option>
-                                    ))}
-                                </select>
-                                {/* Person icon */}
-                                <svg className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="4" /><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" /></svg>
-                                {/* Chevron */}
-                                <svg className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-slate-400" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                                    onChange={(val) => setPcFilter(val as string)}
+                                    placeholder="All PCs"
+                                    searchPlaceholder="Search PC..."
+                                />
                             </div>
 
                             <div className="bg-slate-100 dark:bg-slate-800 p-0.5 rounded-lg flex items-center border border-slate-200 dark:border-slate-700">
@@ -1033,7 +1026,7 @@ export default function Tracker() {
 
 
             {/* STICKY HEADER for All Tables */}
-            <div className="sticky top-0 z-40 bg-white dark:bg-slate-900 shadow-md border-b border-slate-200 dark:border-slate-700 mb-2 rounded-t-lg overflow-hidden transition-colors">
+            <div className="sticky top-0 z-40 bg-white dark:bg-slate-900 shadow-md border-b border-slate-200 dark:border-slate-700 mb-2 rounded-t-lg overflow-x-auto no-scrollbar transition-colors">
                 <table className="w-full text-xs text-slate-800 dark:text-slate-200 border-collapse table-fixed">
                     <colgroup>
                         <col style={{ width: columnWidths.projectName }} />

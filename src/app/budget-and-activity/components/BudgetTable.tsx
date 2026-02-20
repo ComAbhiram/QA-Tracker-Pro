@@ -342,7 +342,7 @@ export default function BudgetTable({ projects, tasks, onEdit, onDelete, onUpdat
                                     {isExpanded && hasTasks && (
                                         <tr className="bg-slate-50 dark:bg-slate-800/30 border-b border-slate-300 dark:border-slate-700/50">
                                             <td colSpan={10} className="px-4 py-3 shadow-inner dark:shadow-slate-900/50">
-                                                <div className="bg-white dark:bg-slate-900 rounded border border-slate-200 dark:border-slate-700 overflow-hidden">
+                                                <div className="bg-white dark:bg-slate-900 rounded border border-slate-200 dark:border-slate-700 overflow-x-auto custom-scrollbar">
                                                     <table className="w-full text-xs text-left">
                                                         <thead className="bg-slate-100/50 dark:bg-slate-800/80 text-slate-500 dark:text-slate-400 font-semibold border-b border-slate-200 dark:border-slate-700">
                                                             <tr>

@@ -492,8 +492,8 @@ export default function Home() {
               All Tasks
             </h3>
 
-            <div className="flex items-center gap-3">
-              <div className="relative">
+            <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
+              <div className="relative w-full sm:w-auto">
                 <input
                   type="text"
                   placeholder="Search tasks..."
@@ -505,7 +505,7 @@ export default function Home() {
               </div>
 
               {/* PC Filter Dropdown */}
-              <div className="relative">
+              <div className="relative w-full sm:w-auto">
                 <select
                   value={pcFilter}
                   onChange={(e) => setPcFilter(e.target.value)}

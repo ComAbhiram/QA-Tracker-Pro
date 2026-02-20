@@ -328,7 +328,7 @@ export default function BudgetAndActivityPage() {
                                 Track project budgets, activity, and team performance
                             </p>
                         </div>
-                        <div className="flex items-center gap-3">
+                        <div className="flex flex-wrap items-center gap-3">
                             <button
                                 onClick={handleExport}
                                 className="flex items-center gap-2 px-4 py-2 bg-emerald-600 dark:bg-emerald-500 text-white rounded-lg hover:bg-emerald-700 dark:hover:bg-emerald-600 transition-colors shadow-sm"
@@ -404,13 +404,13 @@ export default function BudgetAndActivityPage() {
                         {(filterStartDate || filterEndDate || filterQA || filterAssignedOnly) && (
                             <button
                                 onClick={() => { setFilterStartDate(''); setFilterEndDate(''); setFilterQA(''); setFilterAssignedOnly(false); }}
-                                className="text-sm text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 font-medium ml-auto"
+                                className="text-sm text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 font-medium sm:ml-auto w-full sm:w-auto text-left sm:text-right mt-2 sm:mt-0"
                             >
                                 Clear Filters
                             </button>
                         )}
                         {/* Search */}
-                        <div className="ml-auto w-full max-w-sm">
+                        <div className="sm:ml-auto w-full sm:max-w-sm mt-2 sm:mt-0">
                             <input
                                 type="text"
                                 placeholder="Search projects..."

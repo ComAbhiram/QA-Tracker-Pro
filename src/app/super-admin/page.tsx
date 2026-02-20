@@ -314,7 +314,7 @@ export default function SuperAdminPage() {
                                 Combined view of all projects across locations
                             </p>
                         </div>
-                        <div className="flex items-center gap-3">
+                        <div className="flex flex-wrap items-center gap-3 mt-4 sm:mt-0">
                             {hsFetchProgress.total > 0 && hsFetchProgress.loaded < hsFetchProgress.total && (
                                 <div className="flex items-center gap-2 px-3 py-1.5 bg-indigo-50 text-indigo-700 rounded-lg border border-indigo-100 animate-pulse">
                                     <RefreshCw size={14} className="animate-spin" />
