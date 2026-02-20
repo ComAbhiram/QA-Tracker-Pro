@@ -72,6 +72,7 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
     const [userTeamId, setUserTeamId] = useState<string | null>(null);
     const { error: toastError } = useToast();
     const [showEndDateWarning, setShowEndDateWarning] = useState(false);
+    const [showCloseWarning, setShowCloseWarning] = useState(false);
     const [formData, setFormData] = useState<Partial<Task>>(initialState);
 
     // Default structure for a new assignee
@@ -470,6 +471,14 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
         }
     };
 
+    const handleCloseAttempt = () => {
+        if (formData.projectName || formData.comments || assignees[0].name || task) {
+            setShowCloseWarning(true);
+        } else {
+            onClose();
+        }
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         const hasMissingEndDate = assignees.some(a => a.startDate && !a.endDate);
@@ -495,6 +504,20 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
                 type="warning"
                 isLoading={loading}
             />
+            <ConfirmationModal
+                isOpen={showCloseWarning}
+                onClose={() => setShowCloseWarning(false)}
+                onConfirm={() => {
+                    setShowCloseWarning(false);
+                    onClose();
+                }}
+                title="Discard Unsaved Changes?"
+                message="Are you sure you want to close without saving? Any unsaved progress will be lost."
+                confirmText="Yes, Discard"
+                cancelText="Keep Editing"
+                type="danger"
+            />
+
 
             <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl w-full max-w-2xl max-h-[85dvh] overflow-y-auto custom-scrollbar border border-slate-100 dark:border-slate-800 transition-colors duration-300">
                 {/* Header */}
@@ -508,7 +531,7 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
                             <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">{task ? 'Update task details' : 'Kickoff a new project'}</p>
                         </div>
                     </div>
-                    <CloseButton onClick={onClose} />
+                    <CloseButton onClick={handleCloseAttempt} />
                 </div>
 
                 <form onSubmit={handleSubmit} className="p-4 pb-10 md:p-6 space-y-8">
@@ -724,7 +747,7 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
 
                     {/* Footer */}
                     <div className="pt-6 flex items-center justify-end gap-3 border-t border-slate-100 dark:border-slate-800 mt-8">
-                        <button type="button" onClick={onClose} className="btn btn-secondary px-6 py-3 rounded-xl text-sm h-auto">Cancel</button>
+                        <button type="button" onClick={handleCloseAttempt} className="btn btn-secondary px-6 py-3 rounded-xl text-sm h-auto">Cancel</button>
                         {task && onDelete && (
                             <Button type="button" variant="destructive" onClick={async () => { if (confirm('Delete?')) { setLoading(true); await onDelete(task.id); setLoading(false); } }} className="btn btn-danger px-6 py-3 rounded-xl shadow-none h-auto">Delete</Button>
                         )}
