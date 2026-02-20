@@ -131,9 +131,12 @@
     --uib-shadow-2: rgba(255, 255, 255, 0.2);
     /* Neutral highlight */
 
-    @apply dark:[--uib-shadow-2:rgba(0, 0, 0, 0.3)] dark:[--uib-shadow-1:rgba(0, 0, 0, 0.5)];
-
     @apply border-transparent;
+  }
+
+  .dark .btn-primary {
+    --uib-shadow-2: rgba(0, 0, 0, 0.3);
+    --uib-shadow-1: rgba(0, 0, 0, 0.5);
   }
 
   .btn-secondary {
@@ -151,7 +154,12 @@
     /* Slate-300 */
     --uib-shadow-2: #ffffff;
 
-    @apply dark:[--uib-bg:theme(colors.slate.800)] dark:[--uib-color:theme(colors.slate.200)] dark:[--uib-border:theme(colors.slate.700)] dark:[--uib-shadow-1:theme(colors.slate.950)] dark:[--uib-shadow-2:theme(colors.slate.800)];
+    @apply dark:[--uib-bg:theme(colors.slate.800)] dark:[--uib-color:theme(colors.slate.200)] dark:[--uib-border:theme(colors.slate.700)];
+  }
+
+  .dark .btn-secondary {
+    --uib-shadow-1: theme(colors.slate.950);
+    --uib-shadow-2: theme(colors.slate.800);
   }
 
   .btn-success {
@@ -166,9 +174,12 @@
     --uib-shadow-1: rgba(0, 0, 0, 0.1);
     --uib-shadow-2: rgba(255, 255, 255, 0.2);
 
-    @apply dark:[--uib-shadow-2:rgba(0, 0, 0, 0.3)] dark:[--uib-shadow-1:rgba(0, 0, 0, 0.5)];
-
     @apply border-transparent;
+  }
+
+  .dark .btn-success {
+    --uib-shadow-2: rgba(0, 0, 0, 0.3);
+    --uib-shadow-1: rgba(0, 0, 0, 0.5);
   }
 
   .btn-danger {
@@ -183,9 +194,12 @@
     --uib-shadow-1: rgba(0, 0, 0, 0.1);
     --uib-shadow-2: rgba(255, 255, 255, 0.2);
 
-    @apply dark:[--uib-shadow-2:rgba(0, 0, 0, 0.3)] dark:[--uib-shadow-1:rgba(0, 0, 0, 0.5)];
-
     @apply border-transparent;
+  }
+
+  .dark .btn-danger {
+    --uib-shadow-2: rgba(0, 0, 0, 0.3);
+    --uib-shadow-1: rgba(0, 0, 0, 0.5);
   }
 
   .btn-info {
@@ -200,9 +214,12 @@
     --uib-shadow-1: rgba(0, 0, 0, 0.1);
     --uib-shadow-2: rgba(255, 255, 255, 0.2);
 
-    @apply dark:[--uib-shadow-2:rgba(0, 0, 0, 0.3)] dark:[--uib-shadow-1:rgba(0, 0, 0, 0.5)];
-
     @apply border-transparent;
+  }
+
+  .dark .btn-info {
+    --uib-shadow-2: rgba(0, 0, 0, 0.3);
+    --uib-shadow-1: rgba(0, 0, 0, 0.5);
   }
 
   /* Tables */
@@ -643,7 +660,15 @@
   --uib-shadow-1: #c5c5c5;
   --uib-shadow-2: #ffffff;
 
-  @apply dark:[--uib-bg:theme(colors.slate.800)] dark:[--uib-color:theme(colors.slate.200)] dark:[--uib-border:theme(colors.slate.700)] dark:[--uib-shadow-1:theme(colors.slate.900)] dark:[--uib-shadow-2:theme(colors.slate.800)];
+  @apply dark:[--uib-bg:theme(colors.slate.800)] dark:[--uib-color:theme(colors.slate.200)] dark:[--uib-border:theme(colors.slate.700)];
+}
+
+.dark .btn-uiverse {
+  --uib-shadow-1: theme(colors.slate.900);
+  --uib-shadow-2: theme(colors.slate.800);
+}
+
+.btn-uiverse {
 
   position: relative;
   overflow: hidden;
