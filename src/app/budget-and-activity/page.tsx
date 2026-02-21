@@ -28,8 +28,7 @@ export default function BudgetAndActivityPage() {
     const [pcFilter, setPcFilter] = useState('All');
     const [pcNames, setPcNames] = useState<string[]>([]);
     const [statusFilter, setStatusFilter] = useState('All');
-    const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 10;
+    const [refreshTrigger, setRefreshTrigger] = useState(0);
     const [realtimeTick, setRealtimeTick] = useState(0);
 
     const [userProfile, setUserProfile] = useState<{ team_id: string | null } | null>(null);
@@ -116,7 +115,7 @@ export default function BudgetAndActivityPage() {
             setLoading(false);
         }
         fetchData();
-    }, [searchTerm, pcFilter, statusFilter, isGuest, selectedTeamId, isGuestLoading, userProfile?.team_id, realtimeTick]);
+    }, [searchTerm, pcFilter, statusFilter, isGuest, selectedTeamId, isGuestLoading, userProfile?.team_id, realtimeTick, refreshTrigger]);
 
     // Real-time subscriptions
     const realtimeChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
@@ -259,27 +258,8 @@ export default function BudgetAndActivityPage() {
         }
     };
 
-    const refreshTasks = async () => {
-        let taskQuery = supabase
-            .from('tasks')
-            .select('*')
-            .not('status', 'in', '("Completed","Rejected")')
-            .order('start_date', { ascending: false });
-
-        if (isGuest) {
-            if (selectedTeamId) {
-                taskQuery = taskQuery.eq('team_id', selectedTeamId);
-            } else {
-                taskQuery = taskQuery.eq('id', '00000000-0000-0000-0000-000000000000');
-            }
-        }
-
-        const { data } = await taskQuery;
-
-        if (data) {
-            const filtered = data.filter((t: any) => t.status !== 'Rejected' && t.status !== 'Completed');
-            setTasks(filtered.map(mapTaskFromDB));
-        }
+    const refreshTasks = () => {
+        setRefreshTrigger(prev => prev + 1);
     };
 
     const handleFieldUpdate = async (taskId: number, field: string, value: any) => {
@@ -356,7 +336,7 @@ export default function BudgetAndActivityPage() {
                             <div className="flex items-center gap-2 sm:w-auto w-full">
                                 <select
                                     value={pcFilter}
-                                    onChange={(e) => { setPcFilter(e.target.value); setCurrentPage(1); }}
+                                    onChange={(e) => { setPcFilter(e.target.value); }}
                                     className="px-3 py-2 bg-slate-50 dark:bg-slate-800 border-none rounded-lg text-sm text-slate-700 dark:text-slate-300 focus:ring-2 focus:ring-indigo-500/20 cursor-pointer flex-1 sm:flex-none"
                                 >
                                     <option value="All">All PCs</option>
@@ -369,7 +349,7 @@ export default function BudgetAndActivityPage() {
                                 </select>
                                 <select
                                     value={statusFilter}
-                                    onChange={(e) => { setStatusFilter(e.target.value); setCurrentPage(1); }}
+                                    onChange={(e) => { setStatusFilter(e.target.value); }}
                                     className="px-3 py-2 bg-slate-50 dark:bg-slate-800 border-none rounded-lg text-sm text-slate-700 dark:text-slate-300 focus:ring-2 focus:ring-indigo-500/20 cursor-pointer flex-1 sm:flex-none"
                                 >
                                     <option value="All">All Statuses</option>
@@ -454,7 +434,7 @@ export default function BudgetAndActivityPage() {
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                                        {sortedProjects.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map(project => (
+                                        {sortedProjects.map(project => (
                                             <CollapsibleProjectRow
                                                 key={project}
                                                 projectName={project}
@@ -468,37 +448,7 @@ export default function BudgetAndActivityPage() {
                                         ))}
                                     </tbody>
                                 </table>
-                            </div>
-
-                            {/* Pagination Controls */}
-                            {sortedProjects.length > itemsPerPage && (
-                                <div className="mt-4 flex items-center justify-between border-t border-slate-200 dark:border-slate-800 pt-4 px-2">
-                                    <div className="text-sm text-slate-500 dark:text-slate-400">
-                                        Showing <span className="font-medium">{(currentPage - 1) * itemsPerPage + 1}</span> to <span className="font-medium">{Math.min(currentPage * itemsPerPage, sortedProjects.length)}</span> of <span className="font-medium">{sortedProjects.length}</span> projects
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <button
-                                            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                                            disabled={currentPage === 1}
-                                            className="px-3 py-1.5 text-sm font-medium rounded-md bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                                        >
-                                            Previous
-                                        </button>
-                                        <div className="text-sm font-medium text-slate-700 dark:text-slate-300 px-2">
-                                            Page {currentPage} of {Math.ceil(sortedProjects.length / itemsPerPage)}
-                                        </div>
-                                        <button
-                                            onClick={() => setCurrentPage(p => Math.min(Math.ceil(sortedProjects.length / itemsPerPage), p + 1))}
-                                            disabled={currentPage === Math.ceil(sortedProjects.length / itemsPerPage)}
-                                            className="px-3 py-1.5 text-sm font-medium rounded-md bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                                        >
-                                            Next
-                                        </button>
-                                    </div>
-                                </div>
-                            )}
-
-                            {sortedProjects.length === 0 && (
+                            </div>                            {sortedProjects.length === 0 && (
                                 <div className="p-12 text-center bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800">
                                     <div className="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
                                         <Search className="text-slate-400" size={24} />
