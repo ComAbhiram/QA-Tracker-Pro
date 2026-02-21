@@ -62,6 +62,12 @@ export default function BudgetAndActivityPage() {
     }, []);
 
     useEffect(() => {
+        if (isPCMode && selectedPCName) {
+            setPcFilter(selectedPCName);
+        }
+    }, [isPCMode, selectedPCName]);
+
+    useEffect(() => {
         if (isGuestLoading) return;
 
         async function fetchUserProfile() {

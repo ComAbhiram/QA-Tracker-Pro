@@ -128,6 +128,12 @@ export default function Tracker() {
     }, []);
 
     useEffect(() => {
+        if (isPCMode && selectedPCName) {
+            setPcFilter(selectedPCName);
+        }
+    }, [isPCMode, selectedPCName]);
+
+    useEffect(() => {
         if (isGuestLoading) return; // Wait for guest session to initialize
 
         async function fetchUserProfile() {
