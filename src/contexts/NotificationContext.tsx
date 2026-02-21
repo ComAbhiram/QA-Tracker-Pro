@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, useRef, ReactNode } from 'react';
 import { useGuestMode } from '@/contexts/GuestContext';
 import { supabase } from '@/lib/supabase';
 
@@ -27,11 +27,14 @@ interface NotificationContextType {
 
 const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
 
+const POLL_INTERVAL_MS = 15000; // Poll every 15 seconds as fallback
+
 export function NotificationProvider({ children }: { children: ReactNode }) {
     const { isPCMode, selectedPCName } = useGuestMode();
     const [notifications, setNotifications] = useState<PCNotification[]>([]);
     const [unreadCount, setUnreadCount] = useState(0);
     const [isLoading, setIsLoading] = useState(false);
+    const latestCreatedAt = useRef<string | null>(null);
 
     const fetchNotifications = useCallback(async () => {
         if (!isPCMode || !selectedPCName) return;
@@ -40,8 +43,12 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
             const res = await fetch(`/api/notifications?pc_name=${encodeURIComponent(selectedPCName)}&page=1&page_size=50`);
             if (res.ok) {
                 const data = await res.json();
-                setNotifications(data.notifications || []);
+                const notifs: PCNotification[] = data.notifications || [];
+                setNotifications(notifs);
                 setUnreadCount(data.unreadCount || 0);
+                if (notifs.length > 0) {
+                    latestCreatedAt.current = notifs[0].created_at;
+                }
             }
         } catch (err) {
             console.error('[NotificationContext] fetch error:', err);
@@ -55,12 +62,19 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
         fetchNotifications();
     }, [fetchNotifications]);
 
-    // Real-time subscription
+    // Polling fallback (runs every 15s) — ensures new notifications appear even if Realtime isn't enabled
+    useEffect(() => {
+        if (!isPCMode || !selectedPCName) return;
+        const interval = setInterval(fetchNotifications, POLL_INTERVAL_MS);
+        return () => clearInterval(interval);
+    }, [isPCMode, selectedPCName, fetchNotifications]);
+
+    // Supabase Real-time subscription (supplementary — instant updates when Realtime is enabled)
     useEffect(() => {
         if (!isPCMode || !selectedPCName) return;
 
         const channel = supabase
-            .channel(`pc_notifications_${selectedPCName}`)
+            .channel(`pc_notifications_${selectedPCName}_${Date.now()}`)
             .on(
                 'postgres_changes',
                 {
@@ -70,12 +84,19 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
                     filter: `pc_name=eq.${selectedPCName}`,
                 },
                 (payload) => {
+                    console.log('[NotificationContext] Real-time notification received:', payload.new);
                     const newNotif = payload.new as PCNotification;
-                    setNotifications(prev => [newNotif, ...prev]);
+                    setNotifications(prev => {
+                        // Avoid duplicates
+                        if (prev.some(n => n.id === newNotif.id)) return prev;
+                        return [newNotif, ...prev];
+                    });
                     setUnreadCount(prev => prev + 1);
                 }
             )
-            .subscribe();
+            .subscribe((status) => {
+                console.log('[NotificationContext] Realtime subscription status:', status);
+            });
 
         return () => {
             supabase.removeChannel(channel);

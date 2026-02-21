@@ -26,9 +26,13 @@ const actionColors: Record<string, string> = {
 };
 
 function NotificationItem({ notif, onRead }: { notif: PCNotification; onRead: (id: string) => void }) {
+    const router = useRouter();
     return (
         <div
-            onClick={() => onRead(notif.id)}
+            onClick={() => {
+                onRead(notif.id);
+                router.push('/notifications');
+            }}
             className={`flex gap-3 px-4 py-3 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors ${!notif.is_read ? 'border-l-2 border-indigo-500' : 'border-l-2 border-transparent'}`}
         >
             <div className="pt-0.5">

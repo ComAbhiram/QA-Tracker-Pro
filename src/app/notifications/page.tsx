@@ -166,6 +166,19 @@ export default function NotificationsPage() {
         setAllNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
     };
 
+    // Refetch when page becomes visible (e.g. tab focus)
+    useEffect(() => {
+        const onVisible = () => { if (document.visibilityState === 'visible') fetchFiltered(); };
+        document.addEventListener('visibilitychange', onVisible);
+        return () => document.removeEventListener('visibilitychange', onVisible);
+    }, [fetchFiltered]);
+
+    // Also refetch when context (real-time or polling) updates the global list
+    useEffect(() => {
+        fetchFiltered();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [unreadCount]);
+
     const hasActiveFilters = search || actionFilter !== 'all' || readFilter !== 'all' || fromDate || toDate;
     const totalPages = Math.ceil(total / PAGE_SIZE);
     const unreadLocal = allNotifications.filter(n => !n.is_read).length;
@@ -182,7 +195,7 @@ export default function NotificationsPage() {
     }
 
     return (
-        <div className="max-w-3xl mx-auto px-4 py-8 space-y-5 animate-in fade-in duration-300">
+        <div className="w-full px-4 lg:px-8 py-8 space-y-5 animate-in fade-in duration-300">
 
             {/* ── Page Header ── */}
             <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-600 via-indigo-500 to-violet-600 text-white p-6 shadow-lg shadow-indigo-200 dark:shadow-indigo-950">
