@@ -388,6 +388,28 @@ export default function Tracker() {
         };
     }, [isGuestLoading, fetchLeaves]);
 
+    // Polling fallback: auto-refresh every 30s (works even when Supabase Realtime replication is off)
+    useEffect(() => {
+        if (isGuestLoading) return;
+        const interval = setInterval(() => {
+            setRealtimeTick(t => t + 1);
+        }, 30000);
+        return () => clearInterval(interval);
+    }, [isGuestLoading]);
+
+    // Tab-focus refresh: immediately re-fetch when user switches back to this tab
+    useEffect(() => {
+        const onVisible = () => {
+            if (document.visibilityState === 'visible') {
+                setRealtimeTick(t => t + 1);
+                fetchLeaves();
+            }
+        };
+        document.addEventListener('visibilitychange', onVisible);
+        return () => document.removeEventListener('visibilitychange', onVisible);
+    }, [fetchLeaves]);
+
+
     const handleAddTask = () => {
         setEditingTask(null);
         setIsTaskModalOpen(true);
