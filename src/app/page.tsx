@@ -43,7 +43,7 @@ export default function Home() {
   const [isAvailabilityModalOpen, setIsAvailabilityModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
 
-  const { isGuest, selectedTeamId, isLoading: isGuestLoading } = useGuestMode();
+  const { isGuest, selectedTeamId, isLoading: isGuestLoading, isPCMode, selectedPCName } = useGuestMode();
 
   // Column Resizing
   const { columnWidths, startResizing: handleResizeStart } = useColumnResizing({
@@ -71,6 +71,13 @@ export default function Home() {
     }
     fetchPCNames();
   }, []);
+
+  // Sync pcFilter to selected PC name when in PC Mode
+  useEffect(() => {
+    if (isPCMode && selectedPCName) {
+      setPcFilter(selectedPCName);
+    }
+  }, [isPCMode, selectedPCName]);
 
   // 1. Fetch Stats Data (Global logic for Charts & Stats Cards)
   // Fetches lightweight data for ALL tasks to populate charts/stats consistently
@@ -306,8 +313,8 @@ export default function Home() {
   };
 
   const handleEditTask = (task: Task) => {
-    if (isGuest) {
-      alert('You are in guest mode. Editing is not allowed.');
+    if (isGuest || isPCMode) {
+      // PC Mode and manager guest mode cannot edit tasks
       return;
     }
     setEditingTask(task);
@@ -509,6 +516,7 @@ export default function Home() {
                 <select
                   value={pcFilter}
                   onChange={(e) => setPcFilter(e.target.value)}
+                  disabled={isPCMode && !!selectedPCName}
                   className={`appearance-none pl-8 pr-8 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 cursor-pointer transition-all font-medium
                     ${pcFilter !== 'All'
                       ? 'bg-indigo-50 dark:bg-indigo-900/30 border-indigo-300 dark:border-indigo-700 text-indigo-700 dark:text-indigo-300'
