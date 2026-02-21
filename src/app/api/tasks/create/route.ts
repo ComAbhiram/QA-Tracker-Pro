@@ -86,29 +86,30 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: error.message }, { status: 500 });
         }
 
-        // Trigger PC Notification if PC is assigned (for each created task)
-        // We do this asynchronously to not block the response
-        (async () => {
-            if (!data) return;
-
+        // Trigger PC Notification if PC is assigned
+        // MUST be awaited before return — Vercel serverless kills background tasks on function exit
+        if (data) {
             for (const task of data) {
                 if (task.pc) {
                     try {
-                        if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
-                            console.error('[API Tasks Create] CRITICAL: SUPABASE_SERVICE_ROLE_KEY is missing in environment!');
-                            continue;
-                        }
+                        // 1. Always create in-app notification (unconditional, doesn't depend on email)
+                        await createInAppNotification({
+                            pcName: task.pc,
+                            taskId: task.id,
+                            projectName: task.project_name,
+                            taskName: task.sub_phase || 'General Task',
+                            action: 'created',
+                        });
+                        console.log(`[API Tasks Create] ✅ In-app notification for PC: ${task.pc}`);
 
-                        // Fetch PC email (Case-insensitive)
-                        // console.log(`[API Tasks Create] Looking up email for PC: "${task.pc}"`);
-                        const { data: pcData, error: pcFetchError } = await supabaseAdmin
+                        // 2. Send email notification (best-effort)
+                        const { data: pcData } = await supabaseAdmin
                             .from('global_pcs')
                             .select('email')
                             .ilike('name', task.pc)
                             .single();
 
                         if (pcData?.email) {
-                            // console.log(`[API Tasks Create] Sending PC notification to ${task.pc} (${pcData.email})`);
                             await sendPCNotification({
                                 type: 'created',
                                 pcEmail: pcData.email,
@@ -121,23 +122,17 @@ export async function POST(request: NextRequest) {
                                 startDate: task.start_date,
                                 endDate: task.end_date
                             });
+                            console.log(`[API Tasks Create] ✅ Email sent to ${pcData.email}`);
                         }
-                        // Always create in-app notification (regardless of email)
-                        await createInAppNotification({
-                            pcName: task.pc,
-                            taskId: task.id,
-                            projectName: task.project_name,
-                            taskName: task.sub_phase || 'General Task',
-                            action: 'created',
-                        });
                     } catch (err) {
                         console.error('[API Tasks Create] Error preparing notification:', err);
                     }
                 }
             }
-        })();
+        }
 
         return NextResponse.json({ tasks: data }, { status: 201 });
+
 
     } catch (error: any) {
         console.error('[API Tasks Create] Error:', error);
