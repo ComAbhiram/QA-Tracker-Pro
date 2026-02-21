@@ -71,7 +71,8 @@ export default function NotificationBell() {
         return () => document.removeEventListener('mousedown', handler);
     }, []);
 
-    const recent = notifications.slice(0, 10);
+    const unreadNotifs = notifications.filter(n => !n.is_read).slice(0, 10);
+
 
     return (
         <div className="relative" ref={panelRef}>
@@ -116,13 +117,14 @@ export default function NotificationBell() {
 
                     {/* List */}
                     <div className="max-h-[360px] overflow-y-auto divide-y divide-slate-50 dark:divide-slate-800/60">
-                        {recent.length === 0 ? (
+                        {unreadNotifs.length === 0 ? (
                             <div className="flex flex-col items-center py-10 text-slate-400 dark:text-slate-500">
-                                <Info size={32} className="mb-2 opacity-40" />
-                                <p className="text-sm font-medium">No notifications yet</p>
+                                <CheckCheck size={32} className="mb-2 opacity-40 text-emerald-500" />
+                                <p className="text-sm font-semibold text-slate-600 dark:text-slate-300">All caught up!</p>
+                                <p className="text-xs text-slate-400 mt-1">No unread notifications</p>
                             </div>
                         ) : (
-                            recent.map(n => (
+                            unreadNotifs.map(n => (
                                 <NotificationItem
                                     key={n.id}
                                     notif={n}
