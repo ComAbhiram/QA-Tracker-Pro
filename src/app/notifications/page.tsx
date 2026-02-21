@@ -239,7 +239,7 @@ export default function NotificationsPage() {
     const [total, setTotal] = useState(0);
     const [isLoading, setIsLoading] = useState(false);
     const [selectedNotif, setSelectedNotif] = useState<PCNotification | null>(null);
-    const PAGE_SIZE = 20;
+    const PAGE_SIZE = 10;
 
     const fetchFiltered = useCallback(async () => {
         if (!selectedPCName) return;
@@ -408,12 +408,56 @@ export default function NotificationsPage() {
                             </div>
                         </>
                     )}
-                    {totalPages > 1 && (
-                        <div className="border-t border-slate-100 dark:border-slate-800 px-5 py-3 flex items-center justify-between bg-slate-50/40 dark:bg-slate-800/40">
-                            <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Page <span className="font-bold text-slate-700 dark:text-slate-200">{currentPage}</span> of {totalPages}</span>
-                            <div className="flex items-center gap-2">
-                                <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} className="px-4 py-1.5 text-xs font-semibold rounded-lg bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 disabled:opacity-40 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">← Prev</button>
-                                <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} className="px-4 py-1.5 text-xs font-semibold rounded-lg bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 disabled:opacity-40 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">Next →</button>
+                    {/* ── Pagination (always visible) ── */}
+                    {total > 0 && (
+                        <div className="border-t border-slate-100 dark:border-slate-800 px-5 py-4 flex flex-col sm:flex-row items-center justify-between gap-3 bg-slate-50/40 dark:bg-slate-800/40">
+                            <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+                                Showing{' '}
+                                <span className="font-bold text-slate-700 dark:text-slate-200">{(currentPage - 1) * PAGE_SIZE + 1}</span>
+                                {' '}–{' '}
+                                <span className="font-bold text-slate-700 dark:text-slate-200">{Math.min(currentPage * PAGE_SIZE, total)}</span>
+                                {' '}of{' '}
+                                <span className="font-bold text-slate-700 dark:text-slate-200">{total}</span>
+                                {' '}notifications
+                            </span>
+                            <div className="flex items-center gap-1.5">
+                                {/* Prev */}
+                                <button
+                                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                                    disabled={currentPage === 1}
+                                    className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 disabled:opacity-40 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 hover:text-indigo-600 dark:hover:text-indigo-400 hover:border-indigo-200 dark:hover:border-indigo-800 transition-all"
+                                >← Prev</button>
+
+                                {/* Page Numbers */}
+                                {Array.from({ length: totalPages }, (_, i) => i + 1)
+                                    .filter(p => p === 1 || p === totalPages || Math.abs(p - currentPage) <= 1)
+                                    .reduce<(number | '...')[]>((acc, p, idx, arr) => {
+                                        if (idx > 0 && (p as number) - (arr[idx - 1] as number) > 1) acc.push('...');
+                                        acc.push(p);
+                                        return acc;
+                                    }, [])
+                                    .map((p, idx) =>
+                                        p === '...' ? (
+                                            <span key={`ellipsis-${idx}`} className="px-1 text-xs text-slate-400">…</span>
+                                        ) : (
+                                            <button
+                                                key={p}
+                                                onClick={() => setCurrentPage(p as number)}
+                                                className={`w-8 h-8 text-xs font-bold rounded-lg transition-all border ${currentPage === p
+                                                        ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm shadow-indigo-200 dark:shadow-indigo-950'
+                                                        : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 hover:text-indigo-600 hover:border-indigo-200 dark:hover:text-indigo-400'
+                                                    }`}
+                                            >{p}</button>
+                                        )
+                                    )
+                                }
+
+                                {/* Next */}
+                                <button
+                                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                                    disabled={currentPage === totalPages || totalPages === 0}
+                                    className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 disabled:opacity-40 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 hover:text-indigo-600 dark:hover:text-indigo-400 hover:border-indigo-200 dark:hover:border-indigo-800 transition-all"
+                                >Next →</button>
                             </div>
                         </div>
                     )}
