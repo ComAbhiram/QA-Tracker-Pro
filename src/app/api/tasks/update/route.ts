@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabaseServer } from '@/lib/supabase-server';
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { cookies } from 'next/headers';
-import { sendPCNotification } from '@/lib/notifications';
+import { sendPCNotification, createInAppNotification } from '@/lib/notifications';
 
 export const dynamic = 'force-dynamic';
 
@@ -210,7 +210,6 @@ export async function PUT(request: NextRequest) {
 
                     const normalize = (val: any) => {
                         if (val === null || val === undefined || val === '') return null;
-                        // Normalize dates to just YYYY-MM-DD
                         if (typeof val === 'string' && val.includes('T')) return val.split('T')[0];
                         return String(val).trim();
                     };
@@ -220,10 +219,7 @@ export async function PUT(request: NextRequest) {
                             const oldVal = normalize(task[field]);
                             const newVal = normalize(updates[field]);
                             if (oldVal !== newVal) {
-                                changes[field] = {
-                                    old: task[field],
-                                    new: updates[field]
-                                };
+                                changes[field] = { old: task[field], new: updates[field] };
                             }
                         }
                     });
@@ -243,8 +239,26 @@ export async function PUT(request: NextRequest) {
                         endDate: updates.end_date || task.end_date,
                         changes: changes
                     });
+
+                    // In-app notification with changes
+                    await createInAppNotification({
+                        pcName: targetPC,
+                        taskId: id,
+                        projectName: task.project_name,
+                        taskName: updates.sub_phase || task.sub_phase || 'General Task',
+                        action: 'updated',
+                        changes: Object.keys(changes).length > 0 ? changes : undefined,
+                    });
                 } else {
-                    console.warn(`[API Update] No email found for PC: ${targetPC}. Notification skip.`);
+                    console.warn(`[API Update] No email found for PC: ${targetPC}. Saving in-app notification only.`);
+                    // Still save in-app notification even without email
+                    await createInAppNotification({
+                        pcName: targetPC,
+                        taskId: id,
+                        projectName: task.project_name,
+                        taskName: updates.sub_phase || task.sub_phase || 'General Task',
+                        action: 'updated',
+                    });
                 }
             } catch (err) {
                 console.error('[API Update] Error preparing PC notification:', err);

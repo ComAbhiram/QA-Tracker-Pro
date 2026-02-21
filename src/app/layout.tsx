@@ -11,6 +11,7 @@ import AIChatAssistant from "@/components/AIChatAssistant";
 import { Toaster } from "@/components/ui/sonner";
 import BackToTop from "@/components/ui/BackToTop";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { NotificationProvider } from "@/contexts/NotificationContext";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -40,18 +41,20 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <GuestProvider>
-            <ToastProvider>
-              <SidebarProvider>
-                <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-200 dark:from-slate-900 dark:to-slate-950 transition-colors duration-500">
-                  <MainLayout>
-                    {children}
-                  </MainLayout>
-                  <AIChatAssistant />
-                  <BackToTop />
-                  <Toaster />
-                </div>
-              </SidebarProvider>
-            </ToastProvider>
+            <NotificationProvider>
+              <ToastProvider>
+                <SidebarProvider>
+                  <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-200 dark:from-slate-900 dark:to-slate-950 transition-colors duration-500">
+                    <MainLayout>
+                      {children}
+                    </MainLayout>
+                    <AIChatAssistant />
+                    <BackToTop />
+                    <Toaster />
+                  </div>
+                </SidebarProvider>
+              </ToastProvider>
+            </NotificationProvider>
           </GuestProvider>
         </ThemeProvider>
       </body>

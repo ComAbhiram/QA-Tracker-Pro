@@ -31,7 +31,8 @@ import {
     PauseCircle,
     Bug,
     Plane,
-    ChevronLeft
+    ChevronLeft,
+    Bell
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useGuestMode } from '@/contexts/GuestContext';
@@ -40,6 +41,8 @@ import ManageTeamModal from './ManageTeamModal';
 import { TeamSelector } from './TeamSelector';
 import CloseButton from './ui/CloseButton';
 import { ModeToggle } from './ModeToggle';
+import NotificationBell from './NotificationBell';
+import { useNotifications } from '@/contexts/NotificationContext';
 
 interface NavItem {
     label: string;
@@ -172,6 +175,7 @@ export function Sidebar() {
             title: 'REQUESTS',
             items: [
                 { label: 'Leaves and WFH', icon: <Plane size={20} />, href: '/requests/new' },
+                ...(isPCMode ? [{ label: 'Notifications', icon: <Bell size={20} />, href: '/notifications' }] : []),
             ]
         }
     };
@@ -368,6 +372,14 @@ export function Sidebar() {
                             <Users size={20} className="transition-colors" />
                             {showExpanded && <span className="font-medium text-sm">Manage Team</span>}
                         </button>
+                    )}
+
+                    {/* Notification Bell - PC Mode only */}
+                    {isPCMode && showExpanded && (
+                        <div className="flex items-center gap-3 px-2 py-1">
+                            <NotificationBell />
+                            <span className="text-sm font-medium text-slate-600 dark:text-slate-400">Notifications</span>
+                        </div>
                     )}
 
                     <button

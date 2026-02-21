@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase-admin';
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { cookies } from 'next/headers';
-import { sendPCNotification } from '@/lib/notifications';
+import { sendPCNotification, createInAppNotification } from '@/lib/notifications';
 
 export const dynamic = 'force-dynamic';
 
@@ -121,6 +121,14 @@ export async function POST(request: NextRequest) {
                                 endDate: task.end_date
                             });
                         }
+                        // Always create in-app notification (regardless of email)
+                        await createInAppNotification({
+                            pcName: task.pc,
+                            taskId: task.id,
+                            projectName: task.project_name,
+                            taskName: task.sub_phase || 'General Task',
+                            action: 'created',
+                        });
                     } catch (err) {
                         console.error('[API Tasks Create] Error preparing notification:', err);
                     }
