@@ -60,34 +60,34 @@ async function getEnhancedSystemPrompt(supabase: SupabaseClient) {
             dataContext += `\n[Teams]: ${teams.map(t => t.name).join(', ')}\n`;
         }
 
-        // 2. Fetch Projects
+        // 2. Fetch ALL Projects (Compact Formatting)
         const { data: projects, error: projectsError } = await supabase
             .from('projects')
             .select('name, status, team_id, pc')
             .order('name');
 
         if (!projectsError && projects) {
-            dataContext += `\n[Projects Mapping]: \n`;
+            dataContext += `\n[Project Mapping (Name|Team|PC|Status)]: \n`;
             projects.forEach(p => {
                 const teamName = p.team_id ? teamMap.get(p.team_id) : 'Global';
-                dataContext += `- **${p.name}** (Status: ${p.status || 'Active'}, Team: ${teamName || 'N/A'}, PC: ${p.pc || 'N/A'})\n`;
+                dataContext += `${p.name}|${teamName || 'N/A'}|${p.pc || 'N/A'}|${p.status}\n`;
             });
         }
 
-        // 3. Fetch Active Tasks
+        // 3. Fetch Active Tasks (Top 150)
         const { data: activeTasks, error: activeError } = await supabase
             .from('tasks')
             .select('project_name, status, start_date, end_date, assigned_to, assigned_to2, sub_phase, team_id')
             .not('status', 'in', '("Completed","Rejected")')
             .order('end_date', { ascending: true })
-            .limit(100);
+            .limit(150);
 
         if (activeError) throw activeError;
 
-        dataContext += `\n[Active Tasks](Top 100 by due date): \n`;
+        dataContext += `\n[Recent Active Tasks (Detailed)]: \n`;
         if (activeTasks && activeTasks.length > 0) {
             const now = new Date();
-            now.setHours(0, 0, 0, 0); // Start of today
+            now.setHours(0, 0, 0, 0);
 
             activeTasks.forEach((t: any) => {
                 const assignees = [t.assigned_to, t.assigned_to2].filter(Boolean).join(', ');
@@ -96,23 +96,16 @@ async function getEnhancedSystemPrompt(supabase: SupabaseClient) {
                 let timeStatus = '';
                 if (t.end_date) {
                     const endDate = new Date(t.end_date);
-                    // Set deadline to 6:30 PM on the end date
                     const deadline = new Date(endDate);
                     deadline.setHours(18, 30, 0, 0);
-
-                    // Check if now is strictly after the deadline
-                    if (now > deadline) {
-                        timeStatus = ' [OVERDUE]';
-                    }
+                    if (now > deadline) timeStatus = ' [OVERDUE]';
                 }
 
-                dataContext += `- ** ${t.project_name}**: Status = ${t.status}${timeStatus}, Team = ${teamName || 'N/A'}, Assigned = [${assignees}], Due = ${t.end_date || 'N/A'} \n`;
+                dataContext += `- ${t.project_name}: ${t.status}${timeStatus} (${teamName}), Assigned: [${assignees}], Due: ${t.end_date || 'N/A'}\n`;
             });
-        } else {
-            dataContext += "No active tasks found (Access might be restricted or list is empty).\n";
         }
 
-        // 4. Fetch Recently Completed (Last 50) for Performance Context
+        // 4. Fetch Recently Completed (Last 50)
         const { data: completedTasks, error: completedError } = await supabase
             .from('tasks')
             .select('project_name, assigned_to, actual_completion_date, team_id')
@@ -122,11 +115,11 @@ async function getEnhancedSystemPrompt(supabase: SupabaseClient) {
 
         if (completedError) throw completedError;
 
-        dataContext += `\n[Recently Completed Tasks](Last 50): \n`;
+        dataContext += `\n[Recently Completed]: \n`;
         if (completedTasks && completedTasks.length > 0) {
             completedTasks.forEach((t: any) => {
                 const teamName = t.team_id ? teamMap.get(t.team_id) : 'Global';
-                dataContext += `- ** ${t.project_name}**: Completed by ${t.assigned_to} in Team ${teamName || 'N/A'} on ${t.actual_completion_date} \n`;
+                dataContext += `- ${t.project_name}: Done by ${t.assigned_to} (${teamName}) on ${t.actual_completion_date}\n`;
             });
         }
 
