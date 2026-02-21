@@ -1,6 +1,7 @@
 
 import { NextResponse } from 'next/server';
 import { createClient } from '@/utils/supabase/server';
+import { supabaseAdmin } from '@/lib/supabase-admin';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
 export const dynamic = 'force-dynamic';
@@ -153,8 +154,8 @@ export async function POST(req: Request) {
         // Initialize authenticated Supabase client
         const supabase = createClient();
 
-        // Generate System Prompt with Live Data using authenticated client
-        const systemPromptWithData = await getEnhancedSystemPrompt(supabase);
+        // Generate System Prompt with Live Data using ADMIN client for global visibility
+        const systemPromptWithData = await getEnhancedSystemPrompt(supabaseAdmin);
 
         // Prepend system prompt
         const completionMessages = [
