@@ -43,7 +43,7 @@ interface TeamMember {
 }
 
 export default function Tracker() {
-    const { isGuest, selectedTeamId, selectedTeamName, setGuestSession, isLoading: isGuestLoading, isPCMode } = useGuestMode();
+    const { isGuest, selectedTeamId, selectedTeamName, setGuestSession, isLoading: isGuestLoading, isPCMode, selectedPCName } = useGuestMode();
     const [tasks, setTasks] = useState<Task[]>([]);
     const [leaves, setLeaves] = useState<Leave[]>([]);
     const [loading, setLoading] = useState(true);
@@ -62,7 +62,7 @@ export default function Tracker() {
     const [viewMode, setViewMode] = useState<'active' | 'forecast'>('active');
     const [isRowExpanded, setIsRowExpanded] = useState(false);
     const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false);
-    const [pcFilter, setPcFilter] = useState('All');
+    const [pcFilter, setPcFilter] = useState(isPCMode && selectedPCName ? selectedPCName : 'All');
     const [pcNames, setPcNames] = useState<string[]>([]);
     const [realtimeTick, setRealtimeTick] = useState(0); // incremented by real-time subscription
 
@@ -909,6 +909,7 @@ export default function Tracker() {
                                     onChange={(val) => setPcFilter(val as string)}
                                     placeholder="All PCs"
                                     searchPlaceholder="Search PC..."
+                                    disabled={isPCMode && !!selectedPCName}
                                 />
                             </div>
 

@@ -15,7 +15,7 @@ import { getCurrentUserTeam } from '@/utils/userUtils';
 import { DraggableTableWrapper } from '@/components/DraggableTableWrapper';
 
 export default function BudgetAndActivityPage() {
-    const { isGuest, selectedTeamId, selectedTeamName, isLoading: isGuestLoading, isPCMode } = useGuestMode();
+    const { isGuest, selectedTeamId, selectedTeamName, isLoading: isGuestLoading, isPCMode, selectedPCName } = useGuestMode();
     const [tasks, setTasks] = useState<Task[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
@@ -25,7 +25,7 @@ export default function BudgetAndActivityPage() {
     const { success, error: toastError } = useToast();
     const [viewMode, setViewMode] = useState<'active' | 'forecast'>('active');
     const [isRowExpanded, setIsRowExpanded] = useState(false);
-    const [pcFilter, setPcFilter] = useState('All');
+    const [pcFilter, setPcFilter] = useState(isPCMode && selectedPCName ? selectedPCName : 'All');
     const [pcNames, setPcNames] = useState<string[]>([]);
     const [statusFilter, setStatusFilter] = useState('All');
     const [currentPage, setCurrentPage] = useState(1);
@@ -332,6 +332,7 @@ export default function BudgetAndActivityPage() {
                                     value={pcFilter}
                                     onChange={(e) => { setPcFilter(e.target.value); setCurrentPage(1); }}
                                     className="px-3 py-2 bg-slate-50 dark:bg-slate-800 border-none rounded-lg text-sm text-slate-700 dark:text-slate-300 focus:ring-2 focus:ring-indigo-500/20 cursor-pointer flex-1 sm:flex-none"
+                                    disabled={isPCMode && !!selectedPCName}
                                 >
                                     <option value="All">All PCs</option>
                                     <option value="-">None (-)</option>

@@ -6,6 +6,7 @@ interface GuestSession {
     isGuest: boolean;
     selectedTeamId: string | null;
     selectedTeamName: string | null;
+    selectedPCName: string | null;
 }
 
 interface GuestContextType extends GuestSession {
@@ -14,6 +15,7 @@ interface GuestContextType extends GuestSession {
     isPCMode: boolean;
     setGuestSession: (teamId: string, teamName: string) => void;
     setPCModeSession: (teamId: string, teamName: string) => void;
+    setPCSelection: (pcName: string) => void;
     clearGuestSession: () => void;
 }
 
@@ -23,7 +25,7 @@ const GUEST_SESSION_KEY = 'qa_tracker_guest_session';
 const GUEST_COOKIE_NAME = 'guest_mode';
 
 // Helper function to set cookie
-function setCookie(name: string, value: string, days: number = 7) {
+function setCookie(name: string, value: string, days: number = 30) {
     if (typeof window === 'undefined') return;
     const expires = new Date();
     expires.setTime(expires.getTime() + days * 24 * 60 * 60 * 1000);
@@ -43,6 +45,7 @@ export function GuestProvider({ children }: { children: ReactNode }) {
         isGuest: false,
         selectedTeamId: null,
         selectedTeamName: null,
+        selectedPCName: null,
     });
 
     // Load guest session from localStorage on mount (client-side only)
@@ -79,6 +82,7 @@ export function GuestProvider({ children }: { children: ReactNode }) {
             isGuest: true,
             selectedTeamId: teamId,
             selectedTeamName: teamName,
+            selectedPCName: null, // Managers don't select a PC context
         };
         setGuestSessionState(session);
         setIsPCMode(false);
@@ -96,6 +100,7 @@ export function GuestProvider({ children }: { children: ReactNode }) {
             isGuest: true,
             selectedTeamId: teamId,
             selectedTeamName: teamName,
+            selectedPCName: null, // PC Users start without a selected PC
         };
         setGuestSessionState(session);
         setIsPCMode(true);
@@ -107,11 +112,22 @@ export function GuestProvider({ children }: { children: ReactNode }) {
         setCookie('pc_mode_token', 'pc_read_only_2026', 30);
     };
 
+    const setPCSelection = (pcName: string) => {
+        setGuestSessionState(prev => {
+            const newSession = { ...prev, selectedPCName: pcName };
+            if (typeof window !== 'undefined') {
+                localStorage.setItem(GUEST_SESSION_KEY, JSON.stringify({ ...newSession, isPCMode: true }));
+            }
+            return newSession;
+        });
+    };
+
     const clearGuestSession = () => {
         const session: GuestSession = {
             isGuest: false,
             selectedTeamId: null,
             selectedTeamName: null,
+            selectedPCName: null,
         };
         setGuestSessionState(session);
         setIsPCMode(false);
@@ -130,6 +146,7 @@ export function GuestProvider({ children }: { children: ReactNode }) {
         isPCMode,
         setGuestSession,
         setPCModeSession,
+        setPCSelection,
         clearGuestSession,
     };
 
