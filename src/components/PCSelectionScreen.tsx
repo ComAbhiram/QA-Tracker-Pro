@@ -55,7 +55,7 @@ export default function PCSelectionScreen() {
                         <Monitor className="w-12 h-12 text-emerald-600 dark:text-emerald-400" />
                     </div>
                     <h1 className="text-4xl md:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-4">
-                        Select Your PC Role
+                        Select The PC
                     </h1>
                     <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
                         Welcome to PC Mode. Please select your designated PC account below to view your personalized dashboard securely.
