@@ -174,58 +174,55 @@ export async function PUT(request: NextRequest) {
             }
         }
 
-        // Trigger PC Notification whenever a task is saved and a PC is assigned
+        // Always fire in-app notification when task has a PC assigned
         const targetPC = updates.pc || task.pc;
         if (targetPC) {
-            console.log(`[API Update] Task saved with PC: ${targetPC}. Sending notification...`);
-            try {
-                if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
-                    console.error('[API Update] CRITICAL: SUPABASE_SERVICE_ROLE_KEY is missing in environment!');
+            // Build change log
+            const changes: Record<string, { old: any; new: any }> = {};
+            const fieldsToTrack = [
+                'status', 'assigned_to', 'assigned_to2', 'pc',
+                'start_date', 'end_date', 'priority', 'sub_phase',
+                'project_name', 'bug_count', 'comments', 'current_updates'
+            ];
+            const normalize = (val: any) => {
+                if (val === null || val === undefined || val === '') return null;
+                if (typeof val === 'string' && val.includes('T')) return val.split('T')[0];
+                return String(val).trim();
+            };
+            fieldsToTrack.forEach(field => {
+                if (updates[field] !== undefined) {
+                    const oldVal = normalize(task[field]);
+                    const newVal = normalize(updates[field]);
+                    if (oldVal !== newVal) {
+                        changes[field] = { old: task[field], new: updates[field] };
+                    }
                 }
+            });
 
-                // Fetch PC email (Case-insensitive)
-                console.log(`[API Update] Looking up email for PC: "${targetPC}"`);
-                const { data: pcData, error: pcFetchError } = await supabaseServer
+            // 1. Always create in-app notification (unconditional)
+            try {
+                await createInAppNotification({
+                    pcName: targetPC,
+                    taskId: id,
+                    projectName: task.project_name,
+                    taskName: updates.sub_phase || task.sub_phase || 'General Task',
+                    action: 'updated',
+                    changes: Object.keys(changes).length > 0 ? changes : undefined,
+                });
+                console.log(`[API Update] ✅ In-app notification created for PC: ${targetPC}`);
+            } catch (err) {
+                console.error('[API Update] Failed to create in-app notification:', err);
+            }
+
+            // 2. Try to send email notification (best-effort)
+            try {
+                const { data: pcData } = await supabaseServer
                     .from('global_pcs')
                     .select('email')
                     .ilike('name', targetPC)
                     .single();
 
-                if (pcFetchError) {
-                    console.warn(`[API Update] PC email lookup error for "${targetPC}":`, pcFetchError.message);
-                } else {
-                    console.log(`[API Update] Lookup result for "${targetPC}":`, pcData);
-                }
-
                 if (pcData?.email) {
-                    console.log(`[API Update] Triggering PC notification (SMTP) for ${targetPC} (${pcData.email})`);
-
-                    // Calculate changes for the email
-                    const changes: Record<string, { old: any, new: any }> = {};
-                    const fieldsToTrack = [
-                        'status', 'assigned_to', 'assigned_to2', 'pc',
-                        'start_date', 'end_date', 'priority', 'sub_phase',
-                        'project_name', 'bug_count', 'comments', 'current_updates'
-                    ];
-
-                    const normalize = (val: any) => {
-                        if (val === null || val === undefined || val === '') return null;
-                        if (typeof val === 'string' && val.includes('T')) return val.split('T')[0];
-                        return String(val).trim();
-                    };
-
-                    fieldsToTrack.forEach(field => {
-                        if (updates[field] !== undefined) {
-                            const oldVal = normalize(task[field]);
-                            const newVal = normalize(updates[field]);
-                            if (oldVal !== newVal) {
-                                changes[field] = { old: task[field], new: updates[field] };
-                            }
-                        }
-                    });
-
-                    console.log(`[API Update] Detected changes:`, JSON.stringify(changes));
-
                     await sendPCNotification({
                         type: 'updated',
                         pcEmail: pcData.email,
@@ -239,29 +236,10 @@ export async function PUT(request: NextRequest) {
                         endDate: updates.end_date || task.end_date,
                         changes: changes
                     });
-
-                    // In-app notification with changes
-                    await createInAppNotification({
-                        pcName: targetPC,
-                        taskId: id,
-                        projectName: task.project_name,
-                        taskName: updates.sub_phase || task.sub_phase || 'General Task',
-                        action: 'updated',
-                        changes: Object.keys(changes).length > 0 ? changes : undefined,
-                    });
-                } else {
-                    console.warn(`[API Update] No email found for PC: ${targetPC}. Saving in-app notification only.`);
-                    // Still save in-app notification even without email
-                    await createInAppNotification({
-                        pcName: targetPC,
-                        taskId: id,
-                        projectName: task.project_name,
-                        taskName: updates.sub_phase || task.sub_phase || 'General Task',
-                        action: 'updated',
-                    });
+                    console.log(`[API Update] ✅ Email notification sent to ${pcData.email}`);
                 }
             } catch (err) {
-                console.error('[API Update] Error preparing PC notification:', err);
+                console.error('[API Update] Email notification error (non-blocking):', err);
             }
         }
 
