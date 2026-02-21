@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase-admin';
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { cookies } from 'next/headers';
-import { sendPCNotification, createInAppNotification } from '@/lib/notifications';
+import { sendPCNotification } from '@/lib/notifications';
+import { createInAppNotification } from '@/lib/in-app-notifications';
 
 export const dynamic = 'force-dynamic';
 

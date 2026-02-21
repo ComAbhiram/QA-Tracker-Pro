@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createInAppNotification } from '@/lib/notifications';
+import { createInAppNotification } from '@/lib/in-app-notifications';
 
 export const dynamic = 'force-dynamic';
 

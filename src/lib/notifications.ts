@@ -1,5 +1,4 @@
 import nodemailer from 'nodemailer';
-import { supabaseAdmin } from '@/lib/supabase-admin';
 
 const SMTP_USER = process.env.SMTP_USER;
 const SMTP_PASS = process.env.SMTP_PASS;
@@ -23,32 +22,6 @@ interface PCNotificationParams {
     startDate?: string | null;
     endDate?: string | null;
     changes?: Record<string, { old: any, new: any }>;
-}
-
-export interface InAppNotificationParams {
-    pcName: string;
-    taskId?: number | null;
-    projectName: string;
-    taskName?: string;
-    action: 'created' | 'updated' | 'assigned';
-    changes?: Record<string, { old: any; new: any }>;
-}
-
-export async function createInAppNotification(params: InAppNotificationParams): Promise<void> {
-    try {
-        const { pcName, taskId, projectName, taskName, action, changes } = params;
-        await supabaseAdmin.from('pc_notifications').insert({
-            pc_name: pcName,
-            task_id: taskId || null,
-            project_name: projectName,
-            task_name: taskName || null,
-            action,
-            changes: changes || null,
-            is_read: false,
-        });
-    } catch (err) {
-        console.error('[InApp Notification] Failed to create in-app notification:', err);
-    }
 }
 
 export async function sendPCNotification(params: PCNotificationParams) {
