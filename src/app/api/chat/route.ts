@@ -63,14 +63,14 @@ async function getEnhancedSystemPrompt(supabase: SupabaseClient) {
         // 2. Fetch ALL Projects (Compact Formatting)
         const { data: projects, error: projectsError } = await supabase
             .from('projects')
-            .select('name, status, team_id, pc')
+            .select('name, status, team_id')
             .order('name');
 
         if (!projectsError && projects) {
-            dataContext += `\n[Project Mapping (Name|Team|PC|Status)]: \n`;
+            dataContext += `\n[Project Mapping (Name|Team|Status)]: \n`;
             projects.forEach(p => {
                 const teamName = p.team_id ? teamMap.get(p.team_id) : 'Global';
-                dataContext += `${p.name}|${teamName || 'N/A'}|${p.pc || 'N/A'}|${p.status}\n`;
+                dataContext += `${p.name}|${teamName || 'N/A'}|${p.status}\n`;
             });
         }
 
