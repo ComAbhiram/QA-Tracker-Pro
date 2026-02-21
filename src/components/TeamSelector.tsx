@@ -17,13 +17,15 @@ interface TeamSelectorProps {
     teams: Team[];
     selectedTeamName: string | null;
     onSelect: (teamName: string) => void;
+    onOpenChange?: (open: boolean) => void;
 }
 
-export function TeamSelector({ teams, selectedTeamName, onSelect }: TeamSelectorProps) {
+export function TeamSelector({ teams, selectedTeamName, onSelect, onOpenChange }: TeamSelectorProps) {
     return (
         <Select
             value={selectedTeamName || ""}
             onValueChange={onSelect}
+            onOpenChange={onOpenChange}
         >
             <SelectTrigger className="w-full justify-between bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-3 py-2 rounded-md text-sm transition-colors outline-none focus:ring-2 focus:ring-indigo-500 border-0 h-auto">
                 <SelectValue placeholder="Select Team" />

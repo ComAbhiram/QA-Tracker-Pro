@@ -178,11 +178,12 @@ export function Sidebar() {
 
     const [isHovered, setIsHovered] = useState(false);
     const [ignoreHover, setIgnoreHover] = useState(false);
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
     // Derived state for visual expansion
     // On desktop: Expand if not collapsed (pinned) OR if collapsed but hovered (unless ignored)
     // On mobile: Ignore hover, rely on collapsed state (which is handled by overlay/toggle)
-    const showExpanded = !isCollapsed || (isHovered && !ignoreHover);
+    const showExpanded = !isCollapsed || ((isHovered || isDropdownOpen) && !ignoreHover);
 
     // Reset ignoreHover when mouse interactions occur
     const handleMouseEnter = () => {
@@ -263,6 +264,7 @@ export function Sidebar() {
                                                     }, 100);
                                                 }
                                             }}
+                                            onOpenChange={setIsDropdownOpen}
                                         />
                                     </div>
                                 ) : <span className="text-xl font-bold text-slate-800 dark:text-slate-100 truncate">{sidebarTitle}</span>}
