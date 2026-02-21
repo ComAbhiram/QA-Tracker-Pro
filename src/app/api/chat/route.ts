@@ -50,30 +50,33 @@ async function getEnhancedSystemPrompt(supabase: SupabaseClient) {
         // 1. Fetch Teams
         const { data: teams, error: teamsError } = await supabase
             .from('teams')
-            .select('name')
+            .select('id, name')
             .order('name');
 
+        const teamMap = new Map<string, string>();
         if (!teamsError && teams) {
+            teams.forEach(t => teamMap.set(t.id, t.name));
             dataContext += `\n[Teams]: ${teams.map(t => t.name).join(', ')}\n`;
         }
 
         // 2. Fetch Projects
         const { data: projects, error: projectsError } = await supabase
             .from('projects')
-            .select('name, status')
+            .select('name, status, team_id, pc')
             .order('name');
 
         if (!projectsError && projects) {
-            dataContext += `\n[Projects]: \n`;
+            dataContext += `\n[Projects Mapping]: \n`;
             projects.forEach(p => {
-                dataContext += `- ${p.name} (Status: ${p.status || 'Active'})\n`;
+                const teamName = p.team_id ? teamMap.get(p.team_id) : 'Global';
+                dataContext += `- **${p.name}** (Status: ${p.status || 'Active'}, Team: ${teamName || 'N/A'}, PC: ${p.pc || 'N/A'})\n`;
             });
         }
 
         // 3. Fetch Active Tasks
         const { data: activeTasks, error: activeError } = await supabase
             .from('tasks')
-            .select('project_name, status, start_date, end_date, assigned_to, assigned_to2, sub_phase')
+            .select('project_name, status, start_date, end_date, assigned_to, assigned_to2, sub_phase, team_id')
             .not('status', 'in', '("Completed","Rejected")')
             .order('end_date', { ascending: true })
             .limit(100);
@@ -87,6 +90,7 @@ async function getEnhancedSystemPrompt(supabase: SupabaseClient) {
 
             activeTasks.forEach((t: any) => {
                 const assignees = [t.assigned_to, t.assigned_to2].filter(Boolean).join(', ');
+                const teamName = t.team_id ? teamMap.get(t.team_id) : 'Global';
 
                 let timeStatus = '';
                 if (t.end_date) {
@@ -101,7 +105,7 @@ async function getEnhancedSystemPrompt(supabase: SupabaseClient) {
                     }
                 }
 
-                dataContext += `- ** ${t.project_name}**: Status = ${t.status}${timeStatus}, Phase = ${t.sub_phase || 'N/A'}, Assigned = [${assignees}], Due = ${t.end_date || 'N/A'} \n`;
+                dataContext += `- ** ${t.project_name}**: Status = ${t.status}${timeStatus}, Team = ${teamName || 'N/A'}, Assigned = [${assignees}], Due = ${t.end_date || 'N/A'} \n`;
             });
         } else {
             dataContext += "No active tasks found (Access might be restricted or list is empty).\n";
@@ -110,7 +114,7 @@ async function getEnhancedSystemPrompt(supabase: SupabaseClient) {
         // 4. Fetch Recently Completed (Last 50) for Performance Context
         const { data: completedTasks, error: completedError } = await supabase
             .from('tasks')
-            .select('project_name, assigned_to, actual_completion_date')
+            .select('project_name, assigned_to, actual_completion_date, team_id')
             .eq('status', 'Completed')
             .order('actual_completion_date', { ascending: false })
             .limit(50);
@@ -120,7 +124,8 @@ async function getEnhancedSystemPrompt(supabase: SupabaseClient) {
         dataContext += `\n[Recently Completed Tasks](Last 50): \n`;
         if (completedTasks && completedTasks.length > 0) {
             completedTasks.forEach((t: any) => {
-                dataContext += `- ** ${t.project_name}**: Completed by ${t.assigned_to} on ${t.actual_completion_date} \n`;
+                const teamName = t.team_id ? teamMap.get(t.team_id) : 'Global';
+                dataContext += `- ** ${t.project_name}**: Completed by ${t.assigned_to} in Team ${teamName || 'N/A'} on ${t.actual_completion_date} \n`;
             });
         }
 
