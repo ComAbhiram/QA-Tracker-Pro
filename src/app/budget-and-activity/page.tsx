@@ -87,15 +87,7 @@ export default function BudgetAndActivityPage() {
                 taskQuery = taskQuery.or(`project_name.ilike.%${searchTerm}%,assigned_to.ilike.%${searchTerm}%,sub_phase.ilike.%${searchTerm}%,status.ilike.%${searchTerm}%,priority.ilike.%${searchTerm}%,comments.ilike.%${searchTerm}%`);
             }
 
-            // Manager/Guest Mode Filtering
-            if (isGuest) {
-                if (selectedTeamId) {
-                    taskQuery = taskQuery.eq('team_id', selectedTeamId);
-                } else if (!selectedTeamId) {
-                    console.warn('Manager Mode: selectedTeamId is missing, blocking data fetch.');
-                    taskQuery = taskQuery.eq('id', '00000000-0000-0000-0000-000000000000');
-                }
-            }
+            // Fetch all tasks (RLS handles normal user team restriction; Manager mode bypassing this fetches all teams)
 
             const { data: taskData, error: taskError } = await taskQuery;
 
