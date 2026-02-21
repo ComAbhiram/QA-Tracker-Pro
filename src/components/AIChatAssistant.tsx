@@ -103,7 +103,7 @@ export default function AIChatAssistant() {
                                     {msg.role === 'user' ? (
                                         <p>{msg.content}</p>
                                     ) : (
-                                        <div className="prose prose-sm max-w-none prose-p:my-1 prose-ul:my-1 prose-li:my-0.5 prose-headings:text-slate-800 prose-headings:font-bold prose-headings:text-sm prose-headings:mt-2 prose-headings:mb-1 prose-strong:text-slate-800 prose-strong:font-semibold prose-a:text-yellow-600 prose-a:no-underline hover:prose-a:underline prose-code:text-yellow-600 prose-code:bg-yellow-50 prose-code:px-1 prose-code:rounded prose-code:before:content-none prose-code:after:content-none">
+                                        <div className="prose prose-sm max-w-none dark:prose-invert prose-p:my-1 prose-ul:my-1 prose-li:my-0.5 prose-headings:text-slate-800 dark:prose-headings:text-slate-100 prose-headings:font-bold prose-headings:text-sm prose-headings:mt-2 prose-headings:mb-1 prose-strong:text-slate-800 dark:prose-strong:text-slate-100 prose-strong:font-semibold prose-a:text-yellow-600 prose-a:no-underline hover:prose-a:underline prose-code:text-yellow-600 dark:prose-code:text-yellow-400 prose-code:bg-yellow-50 dark:prose-code:bg-yellow-900/30 prose-code:px-1 prose-code:rounded prose-code:before:content-none prose-code:after:content-none">
                                             <ReactMarkdown remarkPlugins={[remarkGfm]}>
                                                 {msg.content}
                                             </ReactMarkdown>

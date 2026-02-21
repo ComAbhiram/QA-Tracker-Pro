@@ -47,7 +47,30 @@ async function getEnhancedSystemPrompt(supabase: SupabaseClient) {
     let dataContext = `\n\n === LIVE DATA CONTEXT(Current Date: ${today}) ===\n`;
 
     try {
-        // 1. Fetch Active Tasks
+        // 1. Fetch Teams
+        const { data: teams, error: teamsError } = await supabase
+            .from('teams')
+            .select('name')
+            .order('name');
+
+        if (!teamsError && teams) {
+            dataContext += `\n[Teams]: ${teams.map(t => t.name).join(', ')}\n`;
+        }
+
+        // 2. Fetch Projects
+        const { data: projects, error: projectsError } = await supabase
+            .from('projects')
+            .select('name, status')
+            .order('name');
+
+        if (!projectsError && projects) {
+            dataContext += `\n[Projects]: \n`;
+            projects.forEach(p => {
+                dataContext += `- ${p.name} (Status: ${p.status || 'Active'})\n`;
+            });
+        }
+
+        // 3. Fetch Active Tasks
         const { data: activeTasks, error: activeError } = await supabase
             .from('tasks')
             .select('project_name, status, start_date, end_date, assigned_to, assigned_to2, sub_phase')
@@ -84,7 +107,7 @@ async function getEnhancedSystemPrompt(supabase: SupabaseClient) {
             dataContext += "No active tasks found (Access might be restricted or list is empty).\n";
         }
 
-        // 2. Fetch Recently Completed (Last 50) for Performance Context
+        // 4. Fetch Recently Completed (Last 50) for Performance Context
         const { data: completedTasks, error: completedError } = await supabase
             .from('tasks')
             .select('project_name, assigned_to, actual_completion_date')
