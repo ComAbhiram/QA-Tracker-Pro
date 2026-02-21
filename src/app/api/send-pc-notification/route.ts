@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { createInAppNotification } from '@/lib/notifications';
 
 export const dynamic = 'force-dynamic';
 
@@ -116,6 +117,19 @@ export async function POST(request: NextRequest) {
             const error = await response.json();
             console.error('[Brevo API] Error:', error);
             return NextResponse.json({ error: 'Failed to send email via Brevo' }, { status: response.status });
+        }
+
+        // Mirror email to in-app notification system
+        try {
+            await createInAppNotification({
+                pcName,
+                projectName,
+                taskName,
+                action: type === 'created' ? 'created' : 'updated',
+                changes: changes && Object.keys(changes).length > 0 ? changes : undefined,
+            });
+        } catch (err) {
+            console.error('[Brevo API] Failed to create in-app notification:', err);
         }
 
         return NextResponse.json({ success: true });
