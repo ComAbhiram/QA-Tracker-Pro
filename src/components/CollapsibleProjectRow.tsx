@@ -212,7 +212,7 @@ export default function CollapsibleProjectRow({
 
     const sumDaysAllotted = tasks.reduce((sum, t) => sum + (Number(t.daysAllotted) || 0), 0).toFixed(2);
 
-    const sumTimeTakenString = () => {
+    const sumTimeTakenDays = (() => {
         let totalSeconds = 0;
         tasks.forEach(t => {
             if (!t.timeTaken) return;
@@ -221,19 +221,23 @@ export default function CollapsibleProjectRow({
                 totalSeconds += parts[0] * 3600 + parts[1] * 60 + parts[2];
             }
         });
-        const h = Math.floor(totalSeconds / 3600);
-        const m = Math.floor((totalSeconds % 3600) / 60);
-        const s = totalSeconds % 60;
-        return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-    };
+        // 1 Day = 8 Hours = 28800 Seconds
+        return (totalSeconds / 28800).toFixed(2);
+    })();
 
     const sumActivityPercentage = tasks.reduce((sum, t) => sum + (Number(t.activityPercentage) || 0), 0);
 
     // Dynamic Class for Cells
     const cellClass = isRowExpanded ? "whitespace-normal break-words" : "truncate";
 
-    const totalDeviation = (parseFloat(sumTimeTakenString().replace(':', '.')) - parseFloat(sumDaysAllotted)).toFixed(2);
+    const totalDeviation = (parseFloat(sumTimeTakenDays) - parseFloat(sumDaysAllotted)).toFixed(2);
     const calculatedDeviation = parseFloat(totalDeviation);
+
+    const uniqueAssignees = Array.from(new Set(
+        tasks.flatMap(t => [t.assignedTo, t.assignedTo2, ...(t.additionalAssignees || [])])
+            .filter(Boolean)
+            .map(a => a!.trim())
+    )).join(', ');
 
     return (
         <>
@@ -254,19 +258,19 @@ export default function CollapsibleProjectRow({
                         <span className="font-bold text-sm leading-tight opacity-90 truncate">{projectName}</span>
                     </div>
                 </td>
-                <td className="px-2 py-3 text-center text-slate-500 text-xs">
-                    {tasks.length} Task{tasks.length !== 1 ? 's' : ''}
+                <td className="px-2 py-3 text-slate-500 text-xs">
+                    {uniqueAssignees || 'Unassigned'}
                 </td>
-                <td className="px-2 py-3 text-center font-medium text-xs">
+                <td className="px-2 py-3 font-medium text-xs">
                     {sumDaysAllotted}
                 </td>
-                <td className="px-2 py-3 text-center font-medium text-xs">
-                    {sumTimeTakenString()}
+                <td className="px-2 py-3 font-medium text-xs">
+                    {sumTimeTakenDays}
                 </td>
-                <td className="px-2 py-3 text-center font-medium text-xs">
+                <td className="px-2 py-3 font-medium text-xs">
                     {sumActivityPercentage}%
                 </td>
-                <td className={`px-2 py-3 text-center font-bold text-xs ${calculatedDeviation > 0 ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
+                <td className={`px-2 py-3 font-bold text-xs ${calculatedDeviation > 0 ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
                     {calculatedDeviation > 0 ? '+' : ''}{totalDeviation}
                 </td>
             </tr>
@@ -336,11 +340,11 @@ export default function CollapsibleProjectRow({
 
                                                         <td className={`px-2 py-1.5 border-r border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 ${cellClass}`} onClick={e => e.stopPropagation()}>
                                                             {isReadOnly
-                                                                ? <span className="text-xs text-center block">{task.daysAllotted || '-'}</span>
+                                                                ? <span className="text-xs block">{task.daysAllotted || '-'}</span>
                                                                 : <EditableCell
                                                                     value={task.daysAllotted}
                                                                     onSave={(val) => onFieldUpdate(task.id, 'days_allotted', val)}
-                                                                    className="w-full text-center"
+                                                                    className="w-full bg-transparent px-1 focus:outline-none focus:ring-1 focus:ring-indigo-500 rounded"
                                                                     isExpanded={isRowExpanded}
                                                                 />
                                                             }
@@ -348,11 +352,11 @@ export default function CollapsibleProjectRow({
 
                                                         <td className={`px-2 py-1.5 border-r border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 ${cellClass}`} onClick={e => e.stopPropagation()}>
                                                             {isReadOnly
-                                                                ? <span className="text-xs text-center block">{task.timeTaken || '-'}</span>
+                                                                ? <span className="text-xs block">{task.timeTaken || '-'}</span>
                                                                 : <EditableCell
                                                                     value={task.timeTaken}
                                                                     onSave={(val) => onFieldUpdate(task.id, 'time_taken', val)}
-                                                                    className="w-full text-center"
+                                                                    className="w-full bg-transparent px-1 focus:outline-none focus:ring-1 focus:ring-indigo-500 rounded"
                                                                     isExpanded={isRowExpanded}
                                                                 />
                                                             }
@@ -360,11 +364,11 @@ export default function CollapsibleProjectRow({
 
                                                         <td className={`px-2 py-1.5 border-r border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 ${cellClass}`} onClick={e => e.stopPropagation()}>
                                                             {isReadOnly
-                                                                ? <span className="text-xs text-center block">{task.activityPercentage || '-'}</span>
+                                                                ? <span className="text-xs block">{task.activityPercentage || '0'}%</span>
                                                                 : <EditableCell
                                                                     value={task.activityPercentage}
                                                                     onSave={(val) => onFieldUpdate(task.id, 'activity_percentage', val)}
-                                                                    className="w-full text-center"
+                                                                    className="w-full bg-transparent px-1 focus:outline-none focus:ring-1 focus:ring-indigo-500 rounded"
                                                                     isExpanded={isRowExpanded}
                                                                 />
                                                             }

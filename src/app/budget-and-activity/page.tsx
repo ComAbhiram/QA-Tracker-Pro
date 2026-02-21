@@ -433,7 +433,7 @@ export default function BudgetAndActivityPage() {
                     <div className="relative">
                         <div className="space-y-4 pt-4">
                             {/* Master Table */}
-                            <div className="bg-white dark:bg-slate-900 shadow-md border border-slate-200 dark:border-slate-700 rounded-lg overflow-x-auto no-scrollbar transition-colors">
+                            <div className="bg-white dark:bg-slate-900 shadow-md border border-slate-200 dark:border-slate-700 rounded-lg overflow-x-auto overflow-y-auto max-h-[calc(100vh-280px)] no-scrollbar transition-colors">
                                 <table className="w-full text-xs text-slate-800 dark:text-slate-200 border-collapse table-fixed">
                                     <colgroup>
                                         <col style={{ width: columnWidths.projectName }} />
@@ -448,7 +448,7 @@ export default function BudgetAndActivityPage() {
                                             <ResizableHeader label="Project" widthKey="projectName" width={columnWidths.projectName} onResizeStart={startResizing} isSortable={false} />
                                             <ResizableHeader label="Assignees" widthKey="assignees" width={columnWidths.assignees} onResizeStart={startResizing} isSortable={false} />
                                             <ResizableHeader label="Days Allotted" widthKey="daysAllotted" width={columnWidths.daysAllotted} onResizeStart={startResizing} isSortable={false} />
-                                            <ResizableHeader label="Time Taken" widthKey="timeTaken" width={columnWidths.timeTaken} onResizeStart={startResizing} isSortable={false} />
+                                            <ResizableHeader label="Time Taken(Days)" widthKey="timeTaken" width={columnWidths.timeTaken} onResizeStart={startResizing} isSortable={false} />
                                             <ResizableHeader label="Activity %" widthKey="activityPercentage" width={columnWidths.activityPercentage} onResizeStart={startResizing} isSortable={false} />
                                             <ResizableHeader label="Deviation" widthKey="deviation" width={columnWidths.deviation} onResizeStart={startResizing} isSortable={false} />
                                         </tr>
