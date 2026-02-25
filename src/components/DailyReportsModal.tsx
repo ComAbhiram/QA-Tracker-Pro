@@ -62,7 +62,7 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
             .select('*')
             .order('created_at', { ascending: false });
 
-        if (currentUser && currentUser.team_id && currentUser.role !== 'super_admin') {
+        if (currentUser && currentUser.team_id) {
             query = query.eq('team_id', currentUser.team_id);
         }
 
