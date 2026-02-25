@@ -45,11 +45,23 @@ export default function BugsReport() {
                     .from('tasks')
                     .select('project_name, bug_count, html_bugs, functional_bugs, team_id, start_date, created_at');
 
-                // Global QA Team ID - If selected, show ALL bugs (Super Admin behavior)
-                const isQATeamGlobal = selectedTeamId === 'ba60298b-8635-4cca-bcd5-7e470fad60e6';
-
-                if (isGuest && selectedTeamId && !isQATeamGlobal) {
-                    query = query.eq('team_id', selectedTeamId);
+                // Team Filtering
+                if (isGuest) {
+                    // Guest / Manager mode - filter by selected team
+                    if (selectedTeamId) {
+                        query = query.eq('team_id', selectedTeamId);
+                    }
+                } else {
+                    // Logged-in user (e.g. QA Team / super_admin) - restrict to their own team
+                    try {
+                        const { getCurrentUserTeam } = await import('@/utils/userUtils');
+                        const userTeam = await getCurrentUserTeam();
+                        if (userTeam?.team_id) {
+                            query = query.eq('team_id', userTeam.team_id);
+                        }
+                    } catch (e) {
+                        console.error('Error fetching user team for bugs:', e);
+                    }
                 }
 
                 const { data, error } = await query;

@@ -159,16 +159,25 @@ export default function Reports() {
             .select('*')
             .order('created_at', { ascending: false });
 
-        // Manager/Guest Mode Filtering
+        // Team Filtering
         if (isGuest) {
-            // Global QA Team ID - If selected, show ALL tasks (Super Admin behavior)
-            const isQATeamGlobal = selectedTeamId === 'ba60298b-8635-4cca-bcd5-7e470fad60e6';
-
-            if (selectedTeamId && !isQATeamGlobal) {
+            // Guest / Manager mode - filter by selected team
+            if (selectedTeamId) {
                 query = query.eq('team_id', selectedTeamId);
-            } else if (!selectedTeamId) {
+            } else {
                 console.warn('Manager Mode: selectedTeamId is missing, blocking data fetch.');
                 query = query.eq('id', 0);
+            }
+        } else {
+            // Logged-in user (e.g. QA Team / super_admin) - restrict to their own team
+            try {
+                const { getCurrentUserTeam } = await import('@/utils/userUtils');
+                const userTeam = await getCurrentUserTeam();
+                if (userTeam?.team_id) {
+                    query = query.eq('team_id', userTeam.team_id);
+                }
+            } catch (e) {
+                console.error('Error fetching user team for reports:', e);
             }
         }
 

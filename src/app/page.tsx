@@ -15,6 +15,7 @@ import TaskMigration from '@/components/TaskMigration';
 import ResizableHeader from '@/components/ui/ResizableHeader';
 import useColumnResizing from '@/hooks/useColumnResizing';
 import Loader from '@/components/ui/Loader';
+import { getCurrentUserTeam } from '@/utils/userUtils';
 
 export default function Home() {
   // Table Data State
@@ -42,6 +43,9 @@ export default function Home() {
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [isAvailabilityModalOpen, setIsAvailabilityModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
+
+  // Logged-in user's team (for non-guest authenticated users like QA Team / super_admin)
+  const [userTeamId, setUserTeamId] = useState<string | null>(null);
 
   const { isGuest, selectedTeamId, isLoading: isGuestLoading, isPCMode, selectedPCName } = useGuestMode();
 
@@ -72,6 +76,17 @@ export default function Home() {
     fetchPCNames();
   }, []);
 
+  // Fetch the logged-in user's team_id (used for authenticated non-guest users like QA Team)
+  useEffect(() => {
+    if (!isGuestLoading && !isGuest) {
+      getCurrentUserTeam().then(profile => {
+        if (profile?.team_id) {
+          setUserTeamId(profile.team_id);
+        }
+      });
+    }
+  }, [isGuest, isGuestLoading]);
+
   // Sync pcFilter to selected PC name when in PC Mode
   useEffect(() => {
     if (isPCMode && selectedPCName) {
@@ -83,17 +98,20 @@ export default function Home() {
   // Fetches lightweight data for ALL tasks to populate charts/stats consistently
   const fetchStatsData = useCallback(async () => {
     setLoadingStats(true);
-    console.log('fetchStatsData: isGuest=', isGuest, 'selectedTeamId=', selectedTeamId);
+    console.log('fetchStatsData: isGuest=', isGuest, 'selectedTeamId=', selectedTeamId, 'userTeamId=', userTeamId);
     let query = supabase
       .from('tasks')
       .select('id, status, end_date, assigned_to, project_name, sub_phase, created_at', { count: 'exact' });
 
-    // Apply Team Filter if Guest
+    // Apply Team Filter
     if (isGuest) {
-      const isQATeamGlobal = selectedTeamId === 'ba60298b-8635-4cca-bcd5-7e470fad60e6';
-      if (selectedTeamId && !isQATeamGlobal) {
+      // Guest / Manager mode - filter by selected team
+      if (selectedTeamId) {
         query = query.eq('team_id', selectedTeamId);
       }
+    } else if (userTeamId) {
+      // Logged-in user (e.g. QA Team / super_admin) - restrict to their own team
+      query = query.eq('team_id', userTeamId);
     }
 
     const { data, error } = await query;
@@ -143,13 +161,13 @@ export default function Home() {
       setAllStatsTasks(mappedStatsTasks);
     }
     setLoadingStats(false);
-  }, [isGuest, selectedTeamId, isGuestLoading]);
+  }, [isGuest, selectedTeamId, isGuestLoading, userTeamId]);
 
 
   // 2. Fetch Table Data (Paginated & Filtered)
   const fetchTableData = useCallback(async (page: number, currentFilter: string, search: string) => {
     setLoadingTasks(true);
-    console.log('fetchTableData: isGuest=', isGuest, 'selectedTeamId=', selectedTeamId);
+    console.log('fetchTableData: isGuest=', isGuest, 'selectedTeamId=', selectedTeamId, 'userTeamId=', userTeamId);
 
     let query = supabase
       .from('tasks')
@@ -157,15 +175,17 @@ export default function Home() {
 
     // Apply Team Filter
     if (isGuest) {
-      const isQATeamGlobal = selectedTeamId === 'ba60298b-8635-4cca-bcd5-7e470fad60e6';
-
-      if (selectedTeamId && !isQATeamGlobal) {
+      // Guest / Manager mode - filter by selected team
+      if (selectedTeamId) {
         query = query.eq('team_id', selectedTeamId);
-      } else if (!selectedTeamId) {
+      } else {
         // Critical Fix: If in Guest/Manager mode but no Team ID is present, DO NOT return all data.
         console.warn('Manager Mode: selectedTeamId is missing, blocking data fetch.');
         query = query.eq('id', 0);
       }
+    } else if (userTeamId) {
+      // Logged-in user (e.g. QA Team / super_admin) - restrict to their own team
+      query = query.eq('team_id', userTeamId);
     }
 
     // Apply Status Filter
@@ -272,7 +292,7 @@ export default function Home() {
       }
     }
     setLoadingTasks(false);
-  }, [isGuest, selectedTeamId, itemsPerPage, isGuestLoading, showTodayOnly, pcFilter]);
+  }, [isGuest, selectedTeamId, itemsPerPage, isGuestLoading, showTodayOnly, pcFilter, userTeamId]);
 
 
   // Effects
