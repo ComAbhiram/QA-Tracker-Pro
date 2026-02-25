@@ -34,7 +34,7 @@ export default function LoginPage() {
             if (error) throw error;
 
             if (data.session) {
-                window.location.href = '/';
+                router.push('/');
                 // Keep loading true while redirecting
             } else {
                 setLoading(false);
