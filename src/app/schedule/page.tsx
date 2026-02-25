@@ -15,6 +15,7 @@ import TaskModal from '@/components/TaskModal';
 import Loader from '@/components/ui/Loader';
 
 import { useGuestMode } from '@/contexts/GuestContext';
+import { getCurrentUserTeam } from '@/utils/userUtils';
 import { StatusBadge } from "@/components/ui/standard/StatusBadge";
 import { PriorityBadge } from "@/components/ui/standard/PriorityBadge";
 import { StandardTableStyles } from "@/components/ui/standard/TableStyles";
@@ -93,6 +94,12 @@ export default function Schedule() {
                 // Prevent data leak if team ID is missing
                 console.warn('Manager Mode: selectedTeamId is missing, blocking data fetch.');
                 query = query.eq('id', 0);
+            }
+        } else {
+            // Logged-in user (e.g. QA Team / super_admin) - restrict to their own team
+            const profile = await getCurrentUserTeam();
+            if (profile?.team_id) {
+                query = query.eq('team_id', profile.team_id);
             }
         }
 

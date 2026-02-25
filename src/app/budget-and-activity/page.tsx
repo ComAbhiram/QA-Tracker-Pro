@@ -70,16 +70,6 @@ export default function BudgetAndActivityPage() {
     useEffect(() => {
         if (isGuestLoading) return;
 
-        async function fetchUserProfile() {
-            if (!isGuest) {
-                const profile = await getCurrentUserTeam();
-                if (profile) {
-                    setUserProfile({ team_id: profile.team_id });
-                }
-            }
-        }
-        fetchUserProfile();
-
         async function fetchData() {
             setLoading(true);
 
@@ -93,7 +83,23 @@ export default function BudgetAndActivityPage() {
                 taskQuery = taskQuery.or(`project_name.ilike.%${searchTerm}%,assigned_to.ilike.%${searchTerm}%,sub_phase.ilike.%${searchTerm}%,status.ilike.%${searchTerm}%,priority.ilike.%${searchTerm}%,comments.ilike.%${searchTerm}%`);
             }
 
-            // Fetch all tasks (RLS handles normal user team restriction; Manager mode bypassing this fetches all teams)
+            // Team Filtering
+            if (isGuest) {
+                // Guest / Manager mode - filter by selected team
+                if (selectedTeamId) {
+                    taskQuery = taskQuery.eq('team_id', selectedTeamId);
+                } else {
+                    console.warn('Manager Mode: selectedTeamId is missing, blocking data fetch.');
+                    taskQuery = taskQuery.eq('id', 0);
+                }
+            } else {
+                // Logged-in user (e.g. QA Team / super_admin) - restrict to their own team
+                const profile = await getCurrentUserTeam();
+                if (profile?.team_id) {
+                    taskQuery = taskQuery.eq('team_id', profile.team_id);
+                    setUserProfile({ team_id: profile.team_id });
+                }
+            }
 
             const { data: taskData, error: taskError } = await taskQuery;
 

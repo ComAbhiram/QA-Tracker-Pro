@@ -10,6 +10,7 @@ import TaskModal from '@/components/TaskModal'; // Import TaskModal
 import { supabase } from '@/lib/supabase';
 import { mapTaskFromDB, Task } from '@/lib/types'; // Import types and mapper
 import { useGuestMode } from '@/contexts/GuestContext';
+import { getCurrentUserTeam } from '@/utils/userUtils';
 import TaskMigration from '@/components/TaskMigration';
 import Checkbox from '@/components/ui/Checkbox';
 
@@ -272,10 +273,18 @@ export default function ProjectOverviewPage() {
         try {
             let url = '/api/project-overview';
 
-            // If in Manager Mode (Guest), filter by team UNLESS it's QA Team (Global)
-            // QA Team ID: ba60298b-8635-4cca-bcd5-7e470fad60e6
-            if (isGuest && selectedTeamId && selectedTeamId !== 'ba60298b-8635-4cca-bcd5-7e470fad60e6') {
-                url += `?teamId=${selectedTeamId}`;
+            // Team Filtering
+            if (isGuest) {
+                // Guest / Manager mode - filter by selected team
+                if (selectedTeamId) {
+                    url += `?teamId=${selectedTeamId}`;
+                }
+            } else {
+                // Logged-in user (e.g. QA Team / super_admin) - restrict to their own team
+                const profile = await getCurrentUserTeam();
+                if (profile?.team_id) {
+                    url += `?teamId=${profile.team_id}`;
+                }
             }
 
             const response = await fetch(url);

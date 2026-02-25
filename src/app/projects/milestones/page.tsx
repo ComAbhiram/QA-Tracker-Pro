@@ -8,6 +8,7 @@ import { Target, Search, CheckCircle2, Calendar, User, Layout, ChevronRight, Has
 import { format } from 'date-fns';
 
 import { useGuestMode } from '@/contexts/GuestContext';
+import { getCurrentUserTeam } from '@/utils/userUtils';
 
 export default function Milestones() {
     const { isGuest, selectedTeamId, isLoading: isGuestLoading } = useGuestMode();
@@ -38,13 +39,19 @@ export default function Milestones() {
             .select('project_name')
             .not('project_name', 'is', null);
 
-        // Manager/Guest Mode Filtering
+        // Team Filtering
         if (isGuest) {
             if (selectedTeamId) {
                 query = query.eq('team_id', selectedTeamId);
             } else {
                 console.warn('Manager Mode: selectedTeamId is missing, blocking data fetch.');
                 query = query.eq('id', 0);
+            }
+        } else {
+            // Logged-in user (e.g. QA Team / super_admin) - restrict to their own team
+            const profile = await getCurrentUserTeam();
+            if (profile?.team_id) {
+                query = query.eq('team_id', profile.team_id);
             }
         }
 
@@ -66,13 +73,19 @@ export default function Milestones() {
                 .eq('project_name', projectName)
                 .order('end_date', { ascending: true }); // Timeline order
 
-            // Manager/Guest Mode Filtering
+            // Team Filtering
             if (isGuest) {
                 if (selectedTeamId) {
                     query = query.eq('team_id', selectedTeamId);
                 } else {
                     console.warn('Manager Mode: selectedTeamId is missing, blocking data fetch.');
                     query = query.eq('id', 0);
+                }
+            } else {
+                // Logged-in user (e.g. QA Team / super_admin) - restrict to their own team
+                const profile = await getCurrentUserTeam();
+                if (profile?.team_id) {
+                    query = query.eq('team_id', profile.team_id);
                 }
             }
 
