@@ -163,16 +163,16 @@ export default function Tracker() {
 
             // Manager/Guest Mode Filtering
             if (isGuest) {
-                const isQATeamGlobal = selectedTeamId === 'ba60298b-8635-4cca-bcd5-7e470fad60e6';
-
                 if (selectedTeamId) {
-                    // Even for QA Team, we want to filter by their team_id to avoid mixed data
-                    // unless some specific "Everything" view is requested
+                    // Guest/Manager mode: filter by selected team
                     taskQuery = taskQuery.eq('team_id', selectedTeamId);
-                } else if (!selectedTeamId) {
+                } else {
                     console.warn('Manager Mode: selectedTeamId is missing, blocking data fetch.');
                     taskQuery = taskQuery.eq('id', 0);
                 }
+            } else if (userProfile?.team_id) {
+                // Authenticated user: filter to their own team only
+                taskQuery = taskQuery.eq('team_id', userProfile.team_id);
             }
 
             const { data: taskData, error: taskError } = await taskQuery;
@@ -607,7 +607,7 @@ export default function Tracker() {
             .not('status', 'in', '("Completed","Rejected")')
             .order('start_date', { ascending: false });
 
-        // Apply Manager Mode filtering
+        // Apply team filtering
         if (isGuest) {
             if (selectedTeamId) {
                 taskQuery = taskQuery.eq('team_id', selectedTeamId);
@@ -615,6 +615,9 @@ export default function Tracker() {
                 console.warn('Manager Mode: selectedTeamId is missing during refresh.');
                 taskQuery = taskQuery.eq('id', 0);
             }
+        } else if (userProfile?.team_id) {
+            // Authenticated user: filter to their own team only
+            taskQuery = taskQuery.eq('team_id', userProfile.team_id);
         }
 
         const { data } = await taskQuery;

@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import { mapTaskFromDB, Task } from '@/lib/types';
+import { getCurrentUserTeam } from '@/utils/userUtils';
 import DashboardStats from '@/components/DashboardStats';
 import DashboardCharts from '@/components/DashboardCharts';
 import DailyReportsModal from '@/components/DailyReportsModal';
@@ -44,6 +45,7 @@ export default function Home() {
   const [editingTask, setEditingTask] = useState<Task | null>(null);
 
   const { isGuest, selectedTeamId, isLoading: isGuestLoading, isPCMode, selectedPCName } = useGuestMode();
+  const [authTeamId, setAuthTeamId] = useState<string | null>(null);
 
   // Column Resizing
   const { columnWidths, startResizing: handleResizeStart } = useColumnResizing({
@@ -53,6 +55,16 @@ export default function Home() {
     assignees: 100,
     timeline: 160
   });
+
+  // Fetch the authenticated user's team_id (non-guest users only)
+  useEffect(() => {
+    if (isGuestLoading || isGuest) return;
+    getCurrentUserTeam().then(profile => {
+      if (profile?.team_id) setAuthTeamId(profile.team_id);
+    });
+  }, [isGuest, isGuestLoading]);
+
+
 
   // Fetch PC names via API (bypasses RLS for guest/manager/PC mode)
   useEffect(() => {
@@ -88,12 +100,14 @@ export default function Home() {
       .from('tasks')
       .select('id, status, end_date, assigned_to, project_name, sub_phase, created_at', { count: 'exact' });
 
-    // Apply Team Filter if Guest
+    // Apply Team Filter
     if (isGuest) {
-      const isQATeamGlobal = selectedTeamId === 'ba60298b-8635-4cca-bcd5-7e470fad60e6';
-      if (selectedTeamId && !isQATeamGlobal) {
+      if (selectedTeamId) {
         query = query.eq('team_id', selectedTeamId);
       }
+    } else if (authTeamId) {
+      // Authenticated user — filter to their own team only
+      query = query.eq('team_id', authTeamId);
     }
 
     const { data, error } = await query;
@@ -143,7 +157,7 @@ export default function Home() {
       setAllStatsTasks(mappedStatsTasks);
     }
     setLoadingStats(false);
-  }, [isGuest, selectedTeamId, isGuestLoading]);
+  }, [isGuest, selectedTeamId, isGuestLoading, authTeamId]);
 
 
   // 2. Fetch Table Data (Paginated & Filtered)
@@ -157,15 +171,16 @@ export default function Home() {
 
     // Apply Team Filter
     if (isGuest) {
-      const isQATeamGlobal = selectedTeamId === 'ba60298b-8635-4cca-bcd5-7e470fad60e6';
-
-      if (selectedTeamId && !isQATeamGlobal) {
+      if (selectedTeamId) {
         query = query.eq('team_id', selectedTeamId);
-      } else if (!selectedTeamId) {
+      } else {
         // Critical Fix: If in Guest/Manager mode but no Team ID is present, DO NOT return all data.
         console.warn('Manager Mode: selectedTeamId is missing, blocking data fetch.');
         query = query.eq('id', 0);
       }
+    } else if (authTeamId) {
+      // Authenticated user — filter to their own team only
+      query = query.eq('team_id', authTeamId);
     }
 
     // Apply Status Filter
@@ -272,7 +287,7 @@ export default function Home() {
       }
     }
     setLoadingTasks(false);
-  }, [isGuest, selectedTeamId, itemsPerPage, isGuestLoading, showTodayOnly, pcFilter]);
+  }, [isGuest, selectedTeamId, itemsPerPage, isGuestLoading, showTodayOnly, pcFilter, authTeamId]);
 
 
   // Effects
