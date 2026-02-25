@@ -171,7 +171,7 @@ export default function Tracker() {
                     taskQuery = taskQuery.eq('team_id', selectedTeamId);
                 } else if (!selectedTeamId) {
                     console.warn('Manager Mode: selectedTeamId is missing, blocking data fetch.');
-                    taskQuery = taskQuery.eq('id', '00000000-0000-0000-0000-000000000000');
+                    taskQuery = taskQuery.eq('id', 0);
                 }
             }
 
@@ -613,7 +613,7 @@ export default function Tracker() {
                 taskQuery = taskQuery.eq('team_id', selectedTeamId);
             } else {
                 console.warn('Manager Mode: selectedTeamId is missing during refresh.');
-                taskQuery = taskQuery.eq('id', '00000000-0000-0000-0000-000000000000');
+                taskQuery = taskQuery.eq('id', 0);
             }
         }
 

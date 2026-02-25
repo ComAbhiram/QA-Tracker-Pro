@@ -164,7 +164,7 @@ export default function Home() {
       } else if (!selectedTeamId) {
         // Critical Fix: If in Guest/Manager mode but no Team ID is present, DO NOT return all data.
         console.warn('Manager Mode: selectedTeamId is missing, blocking data fetch.');
-        query = query.eq('id', '00000000-0000-0000-0000-000000000000');
+        query = query.eq('id', 0);
       }
     }
 

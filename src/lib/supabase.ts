@@ -1,7 +1,8 @@
 import { createBrowserClient } from '@supabase/ssr';
 
-// Use environment variables
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+const isBrowser = typeof window !== 'undefined';
+// Use the Next.js rewrite proxy for browser requests to bypass network restrictions
+const supabaseUrl = isBrowser ? `${window.location.origin}/supabase-proxy` : (process.env.NEXT_PUBLIC_SUPABASE_URL || '');
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 
 if (!supabaseUrl || !supabaseAnonKey) {

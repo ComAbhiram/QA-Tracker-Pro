@@ -131,7 +131,7 @@ export default function ProjectStatusPage({ pageTitle, statusFilter, showAvailab
                     taskQuery = taskQuery.eq('team_id', selectedTeamId);
                 } else {
                     // Manager mode safety
-                    taskQuery = taskQuery.eq('id', '00000000-0000-0000-0000-000000000000');
+                    taskQuery = taskQuery.eq('id', 0);
                 }
             } else if (effectiveTeamId) {
                 // Optional: relying on RLS is standard, but explicit filter mimics Tracker logic
