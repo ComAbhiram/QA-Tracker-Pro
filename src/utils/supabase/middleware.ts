@@ -58,7 +58,8 @@ export async function updateSession(request: NextRequest) {
         // Allow public assets
         if (request.nextUrl.pathname.startsWith('/_next') ||
             request.nextUrl.pathname.includes('favicon.ico') ||
-            request.nextUrl.pathname.startsWith('/api')
+            request.nextUrl.pathname.startsWith('/api') ||
+            request.nextUrl.pathname.startsWith('/supabase-proxy')
         ) {
             return response
         }
