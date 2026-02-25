@@ -134,8 +134,8 @@ export default function ProjectStatusPage({ pageTitle, statusFilter, showAvailab
                     taskQuery = taskQuery.eq('id', 0);
                 }
             } else if (effectiveTeamId) {
-                // Optional: relying on RLS is standard, but explicit filter mimics Tracker logic
-                // taskQuery = taskQuery.eq('team_id', effectiveTeamId); 
+                // Explicitly filter by team for logged-in users (e.g. QA Team / super_admin)
+                taskQuery = taskQuery.eq('team_id', effectiveTeamId);
             }
 
             const { data: taskData, error: taskError } = await taskQuery;
