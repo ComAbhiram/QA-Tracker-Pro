@@ -1,5 +1,5 @@
 -- ==========================================
--- QATrack Project - Full Database Schema
+-- Team Tracker Project - Full Database Schema
 -- ==========================================
 
 -- 1. EXTENSIONS

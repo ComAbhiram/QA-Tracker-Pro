@@ -14,7 +14,7 @@ interface Message {
 export default function AIChatAssistant() {
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState<Message[]>([
-        { role: 'assistant', content: 'Hi there! 👋 I am your QATracker AI assistant. How can I help you today?' }
+        { role: 'assistant', content: 'Hi there! 👋 I am your Team Tracker AI assistant. How can I help you today?' }
     ]);
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);

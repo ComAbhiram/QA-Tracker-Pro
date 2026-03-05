@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Team Tracker - Advanced Project Management System Documentation</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h1,
+        h2,
+        h3 {
+            color: #2c3e50;
+        }
+
+        h1 {
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+
+        h2 {
+            margin-top: 30px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+        }
+
+        code {
+            background-color: #f4f4f4;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-family: Consolas, monospace;
+        }
+
+        pre {
+            background-color: #f4f4f4;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .note {
+            background-color: #e7f3fe;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Team Tracker - Advanced QA & Project Management System</h1>
+    <p>Thank you for purchasing Team Tracker! This documentation will guide you through setting up and customizing the
+        application.</p>
+
+    <h2>1. System Requirements</h2>
+    <ul>
+        <li><strong>Node.js:</strong> Version 18.x or higher</li>
+        <li><strong>NPM/Yarn/PNPM:</strong> Recommended `npm`</li>
+        <li><strong>Database:</strong> Supabase (PostgreSQL)</li>
+    </ul>
+
+    <h2>2. Installation & Setup</h2>
+    <h3>Step 2.1: Extract the Files</h3>
+    <p>Extract the downloaded ZIP file and navigate into the source code folder.</p>
+
+    <h3>Step 2.2: Install Dependencies</h3>
+    <p>Open your terminal in the root folder and run:</p>
+    <pre><code>npm install</code></pre>
+
+    <h3>Step 2.3: Environment Variables</h3>
+    <p>Rename <code>.env.example</code> to <code>.env.local</code>. Open it and fill in your details:</p>
+    <pre><code>SMTP_USER=your_smtp_email
+SMTP_PASS=your_smtp_password
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key</code></pre>
+
+    <h2>3. Database Configuration</h2>
+    <p>You need a Supabase project to run this application. Follow these steps:</p>
+    <ol>
+        <li>Create a new project at <a href="https://supabase.com">Supabase.com</a>.</li>
+        <li>Go to the SQL Editor in your Supabase dashboard.</li>
+        <li>Copy the contents of <code>database/schema.sql</code> provided in this package.</li>
+        <li>Paste it into the SQL Editor and click <strong>Run</strong>. This will set up all required tables, triggers,
+            and Row Level Security (RLS) policies.</li>
+    </ol>
+    <div class="note">
+        <strong>Important:</strong> After running the SQL script, make sure you configure your Supabase Authentication
+        settings to enable Email/Password login.
+    </div>
+
+    <h2>4. Running the Application</h2>
+    <h3>Development Mode</h3>
+    <p>To run the app locally for development, use:</p>
+    <pre><code>npm run dev</code></pre>
+    <p>The app will be available at <code>http://localhost:3000</code>.</p>
+
+    <h3>Production Build</h3>
+    <p>To build for production (e.g., when deploying to Vercel, VPS, or cPanel Node):</p>
+    <pre><code>npm run build
+npm run start</code></pre>
+
+    <h2>5. Deployment</h2>
+    <p>The easiest way to deploy this Next.js application is through <strong>Vercel</strong>.</p>
+    <ol>
+        <li>Push your code to a GitHub/GitLab repository.</li>
+        <li>Connect Vercel to your repository.</li>
+        <li>Ensure you add the Environment Variables in the Vercel project settings before clicking Deploy.</li>
+    </ol>
+
+    <h2>6. Support</h2>
+    <p>If you encounter any issues or have questions, please reach out via the CodeCanyon Support tab on the item page.
+    </p>
+</body>
+
+</html>
