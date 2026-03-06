@@ -11,10 +11,12 @@ const nextConfig = {
         ],
     },
     async rewrites() {
+        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+        if (!supabaseUrl) return [];
         return [
             {
                 source: '/supabase-proxy/:path*',
-                destination: `${process.env.NEXT_PUBLIC_SUPABASE_URL}/:path*`,
+                destination: `${supabaseUrl}/:path*`,
             },
         ];
     },
