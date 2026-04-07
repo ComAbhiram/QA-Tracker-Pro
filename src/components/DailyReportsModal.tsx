@@ -258,7 +258,7 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                         if (effectiveStatus === 'Overdue' && task.endDate) {
                             const end = new Date(task.endDate);
                             const now = new Date();
-                            end.setHours(0, 0, 0, 0);
+                            end.setHours(23, 59, 59, 999);
                             now.setHours(0, 0, 0, 0);
                             const diffTime = now.getTime() - end.getTime();
                             const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
@@ -626,8 +626,10 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                             </thead>
                             <tbody>
                                 ${groupedTasks[assignee].map((task, index) => {
-                            const isLateCompletion = task.status === 'Completed' && task.endDate && task.actualCompletionDate && new Date(task.actualCompletionDate) > new Date(task.endDate);
-                            let lateLabel = 'Completed (Overdue)';
+                            const isLateCompletion = task.status === 'Completed' && task.endDate && task.actualCompletionDate && 
+                                new Date(new Date(task.actualCompletionDate).setHours(0,0,0,0)).getTime() > new Date(new Date(task.endDate).setHours(0,0,0,0)).getTime();
+                            
+                            let lateLabel = 'Completed';
                             if (isLateCompletion && task.endDate && task.actualCompletionDate) {
                                 const end = new Date(task.endDate);
                                 const actual = new Date(task.actualCompletionDate);
@@ -635,7 +637,9 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                                 const a = new Date(actual); a.setHours(0, 0, 0, 0);
                                 const diffTime = a.getTime() - e.getTime();
                                 const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                                lateLabel = `Completed (Overdue ${diffDays}d)`;
+                                if (diffDays > 0) {
+                                    lateLabel = `Completed (Overdue ${diffDays}d)`;
+                                }
                             }
 
                             const effectiveStatus = getEffectiveStatus(task);
@@ -643,7 +647,7 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                             if (effectiveStatus === 'Overdue' && task.endDate) {
                                 const end = new Date(task.endDate);
                                 const now = new Date();
-                                end.setHours(0, 0, 0, 0);
+                                end.setHours(23, 59, 59, 999);
                                 now.setHours(0, 0, 0, 0);
                                 const diffTime = now.getTime() - end.getTime();
                                 const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
