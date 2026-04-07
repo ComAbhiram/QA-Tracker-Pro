@@ -624,6 +624,15 @@ export default function Tracker() {
     const handleFieldUpdate = async (taskId: number, field: string, value: any) => {
         console.log('[Field Update] Starting update:', { taskId, field, value });
 
+        const updatePayload: any = {
+            id: taskId,
+            [field]: value
+        };
+
+        if (field === 'status' && value === 'Completed') {
+            updatePayload.actual_completion_date = new Date().toISOString();
+        }
+
         // Optimistic UI Update (optional but good for UX)
         // For now, we wait for server response to be safe, but we could update local state immediately.
 
@@ -634,10 +643,7 @@ export default function Tracker() {
                 'X-Manager-Mode': localStorage.getItem('qa_tracker_guest_session') ? 'true' : 'false',
             },
             credentials: 'include',
-            body: JSON.stringify({
-                id: taskId,
-                [field]: value
-            })
+            body: JSON.stringify(updatePayload)
         });
 
         if (!response.ok) {

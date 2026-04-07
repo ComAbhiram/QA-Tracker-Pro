@@ -95,18 +95,20 @@ export function GuestProvider({ children }: { children: ReactNode }) {
         setCookie('guest_token', 'manager_access_token_2026', 30); // 30 days
     };
 
-    const setPCModeSession = (teamId: string, teamName: string) => {
-        const session: GuestSession = {
-            isGuest: true,
-            selectedTeamId: teamId,
-            selectedTeamName: teamName,
-            selectedPCName: null, // PC Users start without a selected PC
-        };
-        setGuestSessionState(session);
+    const setPCModeSession = (teamId: string, teamName: string, preservePCName: boolean = true) => {
+        setGuestSessionState(prev => {
+            const session: GuestSession = {
+                isGuest: true,
+                selectedTeamId: teamId,
+                selectedTeamName: teamName,
+                selectedPCName: preservePCName ? prev.selectedPCName : null,
+            };
+            if (typeof window !== 'undefined') {
+                localStorage.setItem(GUEST_SESSION_KEY, JSON.stringify({ ...session, isPCMode: true }));
+            }
+            return session;
+        });
         setIsPCMode(true);
-        if (typeof window !== 'undefined') {
-            localStorage.setItem(GUEST_SESSION_KEY, JSON.stringify({ ...session, isPCMode: true }));
-        }
         setCookie(GUEST_COOKIE_NAME, 'true');
         setCookie('guest_token', 'manager_access_token_2026', 30);
         setCookie('pc_mode_token', 'pc_read_only_2026', 30);

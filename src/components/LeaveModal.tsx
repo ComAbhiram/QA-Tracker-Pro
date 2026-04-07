@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { X, Calendar, User, FileText, Tag } from 'lucide-react';
 import Combobox from './ui/Combobox';
 import CloseButton from './ui/CloseButton';
+import { supabase } from '@/lib/supabase';
 
 interface LeaveModalProps {
     isOpen: boolean;
@@ -54,10 +55,9 @@ export default function LeaveModal({ isOpen, onClose, onSave }: LeaveModalProps)
     const fetchMembers = async () => {
         setFetchingMembers(true);
         try {
-            const response = await fetch('/api/hubstaff/members');
-            const data = await response.json();
-            if (data.members) {
-                setMembers(data.members);
+            const { data, error } = await supabase.from('team_members').select('id, name').order('name');
+            if (data) {
+                setMembers(data);
             }
         } catch (error) {
             console.error('Error fetching members:', error);

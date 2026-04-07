@@ -1,9 +1,11 @@
 'use client';
 
-import { X, Calendar, User, Briefcase, Activity, Layers, Pencil, Link as LinkIcon, AlertCircle, Clock, Bug, Zap, FileText, ExternalLink } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { X, Calendar, User, Briefcase, Activity, Layers, Pencil, Link as LinkIcon, AlertCircle, Clock, Bug, Zap, FileText, ExternalLink, CheckCircle2 } from 'lucide-react';
 import CloseButton from './ui/CloseButton';
 import { Task } from '@/lib/types';
 import { format } from 'date-fns';
+import { supabase } from '@/lib/supabase';
 
 interface TaskDetailsModalProps {
     isOpen: boolean;
@@ -13,6 +15,58 @@ interface TaskDetailsModalProps {
 }
 
 export default function TaskDetailsModal({ isOpen, onClose, task, onEdit }: TaskDetailsModalProps) {
+    const [projectChecklists, setProjectChecklists] = useState<{ id: string; title: string }[]>([]);
+    const [checklistStatus, setChecklistStatus] = useState<Record<string, boolean>>({});
+    const [savingChecklist, setSavingChecklist] = useState<string | null>(null);
+    const [currentUserName, setCurrentUserName] = useState<string | null>(null);
+
+    // Fetch User Profile
+    useEffect(() => {
+        const checkRole = async () => {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+                const { data: profile } = await supabase.from('user_profiles').select('full_name').eq('id', user.id).single();
+                setCurrentUserName(profile?.full_name || user.email || null);
+            }
+        };
+        if (isOpen) checkRole();
+    }, [isOpen]);
+
+    // Fetch checklists for a project whenever task changes
+    useEffect(() => {
+        const fetchProjectChecklists = async () => {
+            const name = task?.projectName;
+            if (!name || !isOpen) {
+                setProjectChecklists([]);
+                setChecklistStatus({});
+                return;
+            }
+            try {
+                const [assignRes, statusRes] = await Promise.all([
+                    fetch(`/api/project-checklists?project_name=${encodeURIComponent(name)}`),
+                    fetch(`/api/checklist-status?project_name=${encodeURIComponent(name)}`),
+                ]);
+                const assignData = await assignRes.json();
+                const statusData = await statusRes.json();
+
+                const items = (assignData.assignments || []).map((a: any) => ({
+                    id: a.checklist_id,
+                    title: a.checklist?.title || '',
+                }));
+                setProjectChecklists(items);
+
+                const statusMap: Record<string, boolean> = {};
+                for (const s of (statusData.statuses || [])) {
+                    statusMap[s.checklist_id] = s.is_checked;
+                }
+                setChecklistStatus(statusMap);
+            } catch (err) {
+                console.error('[TaskDetailsModal] Error fetching project checklists:', err);
+            }
+        };
+        fetchProjectChecklists();
+    }, [task?.projectName, isOpen]);
+
     if (!isOpen || !task) return null;
 
     // Helper for Status Color - Matching the rest of the app
@@ -87,6 +141,77 @@ export default function TaskDetailsModal({ isOpen, onClose, task, onEdit }: Task
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+
+                        {/* Project Checklists spanning full width if present */}
+                        {projectChecklists.length > 0 && (
+                            <div className="md:col-span-3 bg-slate-50 rounded-xl p-5 border border-slate-100">
+                                <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                                    <CheckCircle2 size={12} className="text-emerald-500" />
+                                    Project Checklists
+                                    <span className="ml-auto text-xs font-bold text-slate-500 bg-white border border-slate-200 px-2.5 py-0.5 rounded-full">
+                                        {projectChecklists.filter(c => checklistStatus[c.id]).length}/{projectChecklists.length} passed
+                                    </span>
+                                </label>
+                                <div className="bg-white rounded-xl border border-slate-200 divide-y divide-slate-100 mt-2">
+                                    {projectChecklists.map(item => {
+                                        const isChecked = !!checklistStatus[item.id];
+                                        const isSaving = savingChecklist === item.id;
+                                        return (
+                                            <label
+                                                key={item.id}
+                                                className={`flex items-center gap-3 px-4 py-3 cursor-pointer transition-colors hover:bg-slate-50 ${isChecked ? 'opacity-70' : ''
+                                                    }`}
+                                            >
+                                                <button
+                                                    type="button"
+                                                    disabled={isSaving}
+                                                    onClick={async () => {
+                                                        const newVal = !isChecked;
+                                                        setSavingChecklist(item.id);
+                                                        try {
+                                                            await fetch('/api/checklist-status', {
+                                                                method: 'POST',
+                                                                headers: { 'Content-Type': 'application/json' },
+                                                                body: JSON.stringify({
+                                                                    project_name: task.projectName,
+                                                                    checklist_id: item.id,
+                                                                    is_checked: newVal,
+                                                                    checked_by: currentUserName,
+                                                                }),
+                                                            });
+                                                            setChecklistStatus(prev => ({ ...prev, [item.id]: newVal }));
+                                                        } finally {
+                                                            setSavingChecklist(null);
+                                                        }
+                                                    }}
+                                                    className={`w-5 h-5 rounded-md border-2 flex-shrink-0 flex items-center justify-center transition-all ${isChecked
+                                                            ? 'bg-emerald-500 border-emerald-500'
+                                                            : 'border-slate-300 bg-white'
+                                                        } ${isSaving ? 'opacity-50' : 'hover:border-emerald-400'}`}
+                                                >
+                                                    {isChecked && (
+                                                        <svg width="10" height="10" viewBox="0 0 12 12" fill="none">
+                                                            <path d="M2 6l3 3 5-5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                                        </svg>
+                                                    )}
+                                                </button>
+                                                <span className={`text-sm flex-1 ${isChecked
+                                                        ? 'line-through text-slate-400'
+                                                        : 'text-slate-700 font-medium'
+                                                    }`}>
+                                                    {item.title}
+                                                </span>
+                                                {isSaving && (
+                                                    <svg className="animate-spin text-emerald-500" width="14" height="14" viewBox="0 0 24 24" fill="none">
+                                                        <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" strokeDasharray="60" strokeDashoffset="30" />
+                                                    </svg>
+                                                )}
+                                            </label>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        )}
 
                         {/* Assignees */}
                         <div className="bg-slate-50 rounded-xl p-5 border border-slate-100">

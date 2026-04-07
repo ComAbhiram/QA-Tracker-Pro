@@ -8,6 +8,35 @@ export async function updateSession(request: NextRequest) {
         },
     })
 
+    // Check guest/manager/PC mode FIRST before any Supabase calls
+    // These are set server-side by the login API routes
+    const isGuestMode = request.cookies.get('guest_mode')?.value === 'true'
+    const hasManagerSession = request.cookies.get('manager_session')?.value === 'active'
+    const isGuestPath = request.nextUrl.pathname.startsWith('/guest')
+    const isLoginPath = request.nextUrl.pathname.startsWith('/login')
+    const isAuthPath = request.nextUrl.pathname.startsWith('/auth')
+
+    // Allow public assets without any auth check
+    if (
+        request.nextUrl.pathname.startsWith('/_next') ||
+        request.nextUrl.pathname.includes('favicon.ico') ||
+        request.nextUrl.pathname.startsWith('/api') ||
+        request.nextUrl.pathname.startsWith('/supabase-proxy')
+    ) {
+        return response
+    }
+
+    // Guest/Manager/PC mode: allow access to all pages (except redirect away from login)
+    if (isGuestMode || hasManagerSession) {
+        if (isLoginPath) {
+            const url = request.nextUrl.clone()
+            url.pathname = '/'
+            return NextResponse.redirect(url)
+        }
+        return response
+    }
+
+    // For regular Supabase auth users, validate the session
     const supabase = createServerClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -42,28 +71,18 @@ export async function updateSession(request: NextRequest) {
         }
     )
 
-    const {
-        data: { user },
-    } = await supabase.auth.getUser()
-
-    // Check if user is in guest mode via cookie
-    const isGuestMode = request.cookies.get('guest_mode')?.value === 'true'
-    const isGuestPath = request.nextUrl.pathname.startsWith('/guest')
-    const isLoginPath = request.nextUrl.pathname.startsWith('/login')
-    const isAuthPath = request.nextUrl.pathname.startsWith('/auth')
+    let user = null
+    try {
+        const { data } = await supabase.auth.getUser()
+        user = data?.user
+    } catch (err) {
+        // Swallow network/DNS errors to prevent accidental logouts
+        console.error('Middleware: getUser() failed (possible network issue):', err)
+    }
 
     // Protect routes
     // 1. If not logged in and not in guest mode and not on login/guest page, redirect to login
     if (!user && !isGuestMode && !isLoginPath && !isGuestPath && !isAuthPath) {
-        // Allow public assets
-        if (request.nextUrl.pathname.startsWith('/_next') ||
-            request.nextUrl.pathname.includes('favicon.ico') ||
-            request.nextUrl.pathname.startsWith('/api') ||
-            request.nextUrl.pathname.startsWith('/supabase-proxy')
-        ) {
-            return response
-        }
-
         const url = request.nextUrl.clone()
         url.pathname = '/login'
         return NextResponse.redirect(url)
@@ -71,13 +90,6 @@ export async function updateSession(request: NextRequest) {
 
     // 2. If logged in (not guest) and on login page, redirect to home
     if (user && !isGuestMode && isLoginPath) {
-        const url = request.nextUrl.clone()
-        url.pathname = '/'
-        return NextResponse.redirect(url)
-    }
-
-    // 3. If in guest mode and on login page, redirect to home
-    if (isGuestMode && isLoginPath) {
         const url = request.nextUrl.clone()
         url.pathname = '/'
         return NextResponse.redirect(url)

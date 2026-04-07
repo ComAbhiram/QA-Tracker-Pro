@@ -24,11 +24,7 @@ export default function ManageTeamModal({ isOpen, onClose }: ManageTeamModalProp
     const [adding, setAdding] = useState(false);
 
     // Add Member State
-    const [hubstaffUsers, setHubstaffUsers] = useState<{ id: string; label: string }[]>([]);
-    const [hubstaffError, setHubstaffError] = useState<string | null>(null);
-    const [selectedHubstaffUser, setSelectedHubstaffUser] = useState<string | number | null>(null);
     const [customName, setCustomName] = useState('');
-    const [activeTab, setActiveTab] = useState<'hubstaff' | 'manual'>('hubstaff');
     const [teamId, setTeamId] = useState<string | null>(null);
 
     useEffect(() => {
@@ -58,42 +54,14 @@ export default function ManageTeamModal({ isOpen, onClose }: ManageTeamModalProp
         }
     };
 
-    const fetchHubstaffUsers = async () => {
-        try {
-            setHubstaffError(null);
-            const response = await fetch('/api/hubstaff/users');
-            if (response.ok) {
-                const data = await response.json();
-                if (data.members) {
-                    const formattedUsers = data.members.map((u: any) => ({
-                        id: u.name,
-                        label: u.name
-                    }));
-                    setHubstaffUsers(formattedUsers);
-                }
-            } else {
-                if (response.status === 429) {
-                    setHubstaffError("Rate limit reached (Hubstaff). Try again later.");
-                } else {
-                    setHubstaffError("Failed to fetch Hubstaff users.");
-                }
-                console.error("Hubstaff fetch error:", response.status);
-            }
-        } catch (error) {
-            console.error('Error fetching Hubstaff users:', error);
-            setHubstaffError("Network error fetching Hubstaff users.");
-        }
-    };
-
     useEffect(() => {
         if (isOpen) {
             fetchMembers();
-            fetchHubstaffUsers();
         }
     }, [isOpen]);
 
     const handleAddMember = async () => {
-        const nameToAdd = activeTab === 'hubstaff' ? String(selectedHubstaffUser) : customName;
+        const nameToAdd = customName;
 
         if (!nameToAdd || !nameToAdd.trim() || nameToAdd === 'null') {
             alert('Please select or enter a name.');
@@ -120,7 +88,6 @@ export default function ManageTeamModal({ isOpen, onClose }: ManageTeamModalProp
             await fetchMembers();
 
             // Reset inputs
-            setSelectedHubstaffUser(null);
             setCustomName('');
 
         } catch (error: any) {
@@ -167,43 +134,15 @@ export default function ManageTeamModal({ isOpen, onClose }: ManageTeamModalProp
 
                     {/* Add Section */}
                     <div className="bg-slate-50 rounded-xl p-4 border border-slate-100 space-y-4">
-                        <div className="flex bg-white rounded-lg p-1 border border-slate-200">
-                            <button
-                                onClick={() => setActiveTab('hubstaff')}
-                                className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-all ${activeTab === 'hubstaff' ? 'bg-indigo-50 text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'
-                                    }`}
-                            >
-                                From Hubstaff
-                            </button>
-                            <button
-                                onClick={() => setActiveTab('manual')}
-                                className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-all ${activeTab === 'manual' ? 'bg-indigo-50 text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'
-                                    }`}
-                            >
-                                Manual Entry
-                            </button>
-                        </div>
-
                         <div className="flex gap-2">
                             <div className="flex-1">
-                                {activeTab === 'hubstaff' ? (
-                                    <Combobox
-                                        options={hubstaffUsers}
-                                        value={selectedHubstaffUser || ''}
-                                        onChange={setSelectedHubstaffUser}
-                                        placeholder="Select Hubstaff User..."
-                                        searchPlaceholder="Search Hubstaff..."
-                                        emptyMessage={hubstaffError || "No option found."}
-                                    />
-                                ) : (
-                                    <input
-                                        type="text"
-                                        value={customName}
-                                        onChange={(e) => setCustomName(e.target.value)}
-                                        placeholder="Enter Name (e.g. John Doe)"
-                                        className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none text-sm"
-                                    />
-                                )}
+                                <input
+                                    type="text"
+                                    value={customName}
+                                    onChange={(e) => setCustomName(e.target.value)}
+                                    placeholder="Enter Name (e.g. John Doe)"
+                                    className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none text-sm"
+                                />
                             </div>
                             <button
                                 onClick={handleAddMember}

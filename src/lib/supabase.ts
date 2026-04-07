@@ -13,10 +13,19 @@ if (!supabaseUrl || !supabaseAnonKey) {
 // to ensure cookie names match what the server expects.
 export const supabase = createBrowserClient(supabaseUrl, supabaseAnonKey, {
   global: {
-    fetch: (url, options) => {
+    fetch: async (url, options) => {
       if (typeof window !== 'undefined' && url.toString().includes(supabaseUrl)) {
         const proxyUrl = url.toString().replace(supabaseUrl, `${window.location.origin}/supabase-proxy`);
-        return fetch(proxyUrl, options);
+        try {
+          const response = await fetch(proxyUrl, options);
+          if (!response.ok && response.status >= 500) {
+            console.error(`Supabase Proxy Error: ${response.status} ${response.statusText}`);
+          }
+          return response;
+        } catch (error) {
+          console.error('Supabase Proxy Connection Error:', error);
+          throw error;
+        }
       }
       return fetch(url, options);
     },

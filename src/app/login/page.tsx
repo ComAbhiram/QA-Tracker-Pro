@@ -41,7 +41,16 @@ export default function LoginPage() {
             }
         } catch (err: any) {
             console.error('Login error:', err);
-            setError(err.message || 'Failed to login');
+            
+            let message = err.message || 'Failed to login';
+            
+            // Handle the specific "Unexpected token 'I'" parsing error which occurs 
+            // when the proxy returns an "Internal Server Error" string.
+            if (message.includes('Unexpected token') || message.includes('JSON')) {
+                message = 'Server configuration error. Please check your Supabase URL and keys in .env.local and restart the server.';
+            }
+            
+            setError(message);
             setLoading(false);
         }
     };
@@ -52,22 +61,45 @@ export default function LoginPage() {
         if (managerPassword === 'inter223') {
             try {
                 // Call server-side API to set manager session
-                const response = await fetch('/api/auth/manager-login', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ passkey: managerPassword }),
-                });
+                let response;
+                try {
+                    response = await fetch('/api/auth/manager-login', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ passkey: managerPassword }),
+                    });
+                } catch (fetchErr) {
+                    setError('Connection error. Please check if the server is running.');
+                    return;
+                }
 
                 if (!response.ok) {
-                    setError('Failed to authenticate manager');
+                    const contentType = response.headers.get('content-type');
+                    if (contentType && contentType.includes('application/json')) {
+                        const errData = await response.json();
+                        setError(errData.message || 'Failed to authenticate manager');
+                    } else {
+                        setError(`Server error (${response.status}). Please check your connection or environment variables.`);
+                    }
                     return;
                 }
 
                 // Auto-select "QA Team" logic
                 try {
                     const teamsResponse = await fetch('/api/teams');
+                    if (!teamsResponse.ok) {
+                        throw new Error(`Teams API failed with status ${teamsResponse.status}`);
+                    }
+                    
+                    const contentType = teamsResponse.headers.get('content-type');
+                    if (!contentType || !contentType.includes('application/json')) {
+                        const rawText = await teamsResponse.text();
+                        console.error('Invalid JSON from /api/teams:', rawText.substring(0, 100));
+                        throw new Error('Server returned invalid data format instead of JSON');
+                    }
+
                     const teamsData = await teamsResponse.json();
 
                     if (teamsData.teams && Array.isArray(teamsData.teams)) {
@@ -95,7 +127,7 @@ export default function LoginPage() {
                             return;
                         }
                     }
-                } catch (teamErr) {
+                } catch (teamErr: any) {
                     console.error('Failed to auto-fetch teams for manager:', teamErr);
                     // Fallback to guest selection page if auto-select fails
                 }
@@ -103,9 +135,9 @@ export default function LoginPage() {
                 setShowManagerModal(false);
                 setManagerPassword('');
                 router.push('/guest');
-            } catch (err) {
+            } catch (err: any) {
                 console.error('Manager login error:', err);
-                setError('Failed to authenticate manager');
+                setError(err.message || 'Failed to authenticate manager');
             }
         } else {
             setError('Invalid manager passkey');
@@ -115,20 +147,41 @@ export default function LoginPage() {
     const handlePCLogin = async () => {
         if (pcPassword === 'inter224') {
             try {
-                const response = await fetch('/api/auth/pc-login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ passkey: pcPassword }),
-                });
+                let response;
+                try {
+                    response = await fetch('/api/auth/pc-login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ passkey: pcPassword }),
+                    });
+                } catch (fetchErr) {
+                    setError('Connection error. Please check if the server is running.');
+                    return;
+                }
 
                 if (!response.ok) {
-                    setError('Failed to authenticate PC mode');
+                    const contentType = response.headers.get('content-type');
+                    if (contentType && contentType.includes('application/json')) {
+                        const errData = await response.json();
+                        setError(errData.message || 'Failed to authenticate PC mode');
+                    } else {
+                        setError(`Server error (${response.status}). Please check your connection or environment variables.`);
+                    }
                     return;
                 }
 
                 // Auto-select "QA Team" same as manager mode
                 try {
                     const teamsResponse = await fetch('/api/teams');
+                    if (!teamsResponse.ok) {
+                        throw new Error(`Teams API failed with status ${teamsResponse.status}`);
+                    }
+
+                    const contentType = teamsResponse.headers.get('content-type');
+                    if (!contentType || !contentType.includes('application/json')) {
+                        throw new Error('Server returned invalid data format instead of JSON');
+                    }
+
                     const teamsData = await teamsResponse.json();
 
                     if (teamsData.teams && Array.isArray(teamsData.teams)) {
@@ -153,16 +206,16 @@ export default function LoginPage() {
                             return;
                         }
                     }
-                } catch (teamErr) {
+                } catch (teamErr: any) {
                     console.error('Failed to auto-fetch teams for PC mode:', teamErr);
                 }
 
                 setShowPCModal(false);
                 setPCPassword('');
                 router.push('/guest');
-            } catch (err) {
+            } catch (err: any) {
                 console.error('PC login error:', err);
-                setError('Failed to authenticate PC mode');
+                setError(err.message || 'Failed to authenticate PC mode');
             }
         } else {
             setError('Invalid PC mode passkey');

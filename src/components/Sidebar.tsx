@@ -58,7 +58,7 @@ interface NavSection {
 
 export function Sidebar() {
     const pathname = usePathname();
-    const { isGuest, selectedTeamName, setGuestSession, clearGuestSession, isPCMode } = useGuestMode();
+    const { isGuest, selectedTeamName, setGuestSession, clearGuestSession, isPCMode, setPCModeSession } = useGuestMode();
     const { isCollapsed, setCollapsed, toggleSidebar } = useSidebar();
 
     // Hide sidebar on login and guest selection pages
@@ -143,6 +143,8 @@ export function Sidebar() {
                 { label: 'Task Tracker', icon: <ClipboardList size={20} />, href: '/tracker' },
                 { label: 'Schedule', icon: <CalendarDays size={20} />, href: '/schedule' },
                 ...(!isPCMode && (userRole === 'super_admin' || isGuest) ? [{ label: 'Super Admin', icon: <Shield size={20} />, href: '/super-admin' }] : []),
+                // Checklists — admin only (Supabase super_admin login, not guest mode)
+                ...(!isGuest && !isPCMode && userRole === 'super_admin' ? [{ label: 'Checklists', icon: <CheckSquare size={20} />, href: '/checklists' }] : []),
             ]
         },
         projects: {
@@ -163,12 +165,13 @@ export function Sidebar() {
             items: [
                 { label: 'Reports', icon: <BarChart3 size={20} />, href: '/reports' },
                 { label: 'Analytics', icon: <Search size={20} />, href: '/analytics' },
-                { label: 'Hubstaff', icon: <Calendar size={20} />, href: '/attendance' },
                 // Enable Bugs Report for Super Admin AND Managers (isGuest) regardless of team
                 ...((isGuest) || (sidebarTitle === 'QA Team') || userRole === 'super_admin'
                     ? [{ label: 'Bugs Report', icon: <Bug size={20} />, href: '/analytics/bugs' }]
                     : []
                 ),
+                // Checklist Status — visible to all authenticated and guest users
+                { label: 'Checklist Status', icon: <ClipboardList size={20} />, href: '/checklist-status' },
             ]
         },
         requests: {
@@ -261,7 +264,11 @@ export function Sidebar() {
                                                         }
                                                     }
 
-                                                    setGuestSession(targetTeamId, newTeamName);
+                                                    if (isPCMode) {
+                                                        setPCModeSession(targetTeamId, newTeamName);
+                                                    } else {
+                                                        setGuestSession(targetTeamId, newTeamName);
+                                                    }
                                                     // Force reload to ensure all components and data fetchers update with new context
                                                     setTimeout(() => {
                                                         window.location.reload();
@@ -384,6 +391,12 @@ export function Sidebar() {
 
                     <button
                         onClick={async () => {
+                            try {
+                                await fetch('/api/auth/logout', { method: 'POST' });
+                            } catch (e) {
+                                console.error('Failed to clear server cookies:', e);
+                            }
+
                             if (isGuest) {
                                 clearGuestSession();
                                 window.location.href = '/login';

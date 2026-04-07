@@ -22,6 +22,15 @@ export async function POST(request: NextRequest) {
             maxAge: 60 * 60 * 24 * 30, // 30 days
         });
 
+        // Set guest_mode cookie so middleware immediately allows access on navigation
+        cookieStore.set('guest_mode', 'true', {
+            httpOnly: false,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            path: '/',
+            maxAge: 60 * 60 * 24 * 30, // 30 days
+        });
+
         // Also set the guest token for client-side detection
         cookieStore.set('guest_token', 'manager_access_token_2026', {
             httpOnly: false,

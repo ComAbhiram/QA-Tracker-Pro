@@ -222,15 +222,6 @@ export default function ProjectDetailsModal({ isOpen, onClose, project, onSave }
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                            <label className="block text-sm font-semibold text-slate-700 mb-2">HS Budget</label>
-                            <input
-                                type="text"
-                                value={formData.hubstaff_budget}
-                                onChange={(e) => setFormData({ ...formData, hubstaff_budget: e.target.value })}
-                                className="w-full px-4 py-3 border border-slate-400 rounded-xl focus:ring-2 focus:ring-indigo-500"
-                            />
-                        </div>
-                        <div>
                             <label className="block text-sm font-semibold text-slate-700 mb-2">Budget</label>
                             <input
                                 type="text"
