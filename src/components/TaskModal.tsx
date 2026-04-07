@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { X, Save, Calendar, User, Briefcase, Activity, Layers, Plus, CheckCircle2 } from 'lucide-react';
+import { X, Save, Calendar, User, Briefcase, Activity, Layers, Plus, CheckCircle2, AlertCircle, Clock } from 'lucide-react';
 import { Task, isValidProjectDate } from '@/lib/types';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
@@ -98,6 +98,8 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
     const [showCorrections, setShowCorrections] = useState(false);
     const [correctorName, setCorrectorName] = useState('');
     const [newCorrections, setNewCorrections] = useState<string[]>(['']);
+    const [existingCorrections, setExistingCorrections] = useState<any[]>([]);
+    const [isFetchingCorrections, setIsFetchingCorrections] = useState(false);
 
     // Fetch Team ID
     useEffect(() => {
@@ -277,6 +279,30 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
             }
         };
         fetchProjectChecklists();
+    }, [formData.projectName, isOpen]);
+
+    // Fetch existing corrections for the project
+    useEffect(() => {
+        const fetchExistingCorrections = async () => {
+            const name = formData.projectName;
+            if (!name || !isOpen) {
+                setExistingCorrections([]);
+                return;
+            }
+            setIsFetchingCorrections(true);
+            try {
+                const res = await fetch(`/api/project-corrections?project_name=${encodeURIComponent(name)}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    setExistingCorrections(data.corrections || []);
+                }
+            } catch (err) {
+                console.error('[TaskModal] Error fetching existing corrections:', err);
+            } finally {
+                setIsFetchingCorrections(false);
+            }
+        };
+        fetchExistingCorrections();
     }, [formData.projectName, isOpen]);
 
     // Initialize Form Data
@@ -888,55 +914,120 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
                     )}
 
                     {/* Correction Section */}
-                    <div className="pt-6 border-t border-slate-100 dark:border-slate-800">
-                        <div className="flex items-center gap-3 mb-4">
-                            <Checkbox 
-                                checked={showCorrections} 
-                                onChange={setShowCorrections} 
-                                label={<span className="font-semibold text-slate-700 dark:text-slate-300">Add Corrections</span>} 
-                            />
+                    <div className="pt-8 border-t border-slate-100 dark:border-slate-800">
+                        <div className="flex items-center justify-between mb-4">
+                            <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                                <AlertCircle size={18} className="text-amber-500" /> 
+                                <span>Project Corrections</span>
+                                {existingCorrections.length > 0 && (
+                                    <span className="text-[10px] bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 px-2 py-0.5 rounded-full font-bold">
+                                        {existingCorrections.filter(c => !c.is_completed).length} Pending
+                                    </span>
+                                )}
+                            </label>
+                            <label className="flex items-center gap-2 cursor-pointer group">
+                                <input 
+                                    type="checkbox" 
+                                    className="sr-only" 
+                                    checked={showCorrections} 
+                                    onChange={(e) => setShowCorrections(e.target.checked)} 
+                                />
+                                <div className={`w-10 h-5 rounded-full transition-colors relative ${showCorrections ? 'bg-amber-500' : 'bg-slate-200 dark:bg-slate-700'}`}>
+                                    <div className={`absolute top-1 left-1 w-3 h-3 bg-white rounded-full transition-transform ${showCorrections ? 'translate-x-5' : 'translate-x-0'}`} />
+                                </div>
+                                <span className="text-sm font-medium text-slate-600 dark:text-slate-400 group-hover:text-amber-500 transition-colors">Add New</span>
+                            </label>
                         </div>
 
+                        {/* Existing Corrections List */}
+                        {existingCorrections.length > 0 && (
+                            <div className="mb-6 space-y-2">
+                                {existingCorrections.map(c => (
+                                    <div key={c.id} className={`flex items-start gap-3 p-3 rounded-xl border ${c.is_completed ? 'bg-slate-50/50 dark:bg-slate-800/30 border-slate-100 dark:border-slate-800' : 'bg-amber-50/20 dark:bg-amber-900/5 border-amber-100/50 dark:border-amber-900/10'}`}>
+                                        <div className={`mt-0.5 ${c.is_completed ? 'text-emerald-500' : 'text-amber-500'}`}>
+                                            {c.is_completed ? <CheckCircle2 size={16} /> : <Clock size={16} />}
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <p className={`text-sm ${c.is_completed ? 'text-slate-400 line-through' : 'text-slate-700 dark:text-slate-300 font-medium'}`}>{c.correction_text}</p>
+                                            <div className="flex items-center gap-2 mt-1">
+                                                <span className="text-[10px] text-slate-400 flex items-center gap-1">
+                                                    <User size={10} /> {c.submitter_name}
+                                                </span>
+                                                <span className="text-[10px] text-slate-400 flex items-center gap-1">
+                                                    <Calendar size={10} /> {format(new Date(c.created_at), 'MMM d')}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        {!c.is_completed && (
+                                            <button 
+                                                type="button"
+                                                onClick={async () => {
+                                                    await fetch('/api/project-corrections', {
+                                                        method: 'PATCH',
+                                                        headers: { 'Content-Type': 'application/json' },
+                                                        body: JSON.stringify({ id: c.id, is_completed: true }),
+                                                    });
+                                                    setExistingCorrections(prev => prev.map(item => item.id === c.id ? { ...item, is_completed: true, completed_at: new Date().toISOString() } : item));
+                                                }}
+                                                className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 hover:underline"
+                                            >
+                                                Resolve
+                                            </button>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
                         {showCorrections && (
-                            <div className="space-y-4 bg-amber-50/50 dark:bg-amber-900/10 p-5 rounded-2xl border border-amber-100 dark:border-amber-900/30 animate-in slide-in-from-top-2 duration-200">
-                                <div className="space-y-2">
-                                    <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Your Name</label>
-                                    <input 
-                                        type="text" 
-                                        value={correctorName} 
-                                        onChange={(e) => setCorrectorName(e.target.value)}
-                                        className="w-full px-5 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 dark:text-slate-200 rounded-xl outline-none"
-                                        placeholder="Enter your name..."
-                                    />
-                                </div>
-                                <div className="space-y-3">
-                                    <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Corrections</label>
-                                    {newCorrections.map((text, idx) => (
-                                        <div key={idx} className="flex gap-2">
+                            <div className="space-y-6 bg-slate-50 dark:bg-slate-800/40 p-6 rounded-2xl border border-slate-100 dark:border-slate-800 animate-in slide-in-from-top-2 duration-200">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Your Name</label>
+                                        <div className="relative">
+                                            <User className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
                                             <input 
                                                 type="text" 
-                                                value={text} 
-                                                onChange={(e) => {
-                                                    const updated = [...newCorrections];
-                                                    updated[idx] = e.target.value;
-                                                    setNewCorrections(updated);
-                                                }}
-                                                className="flex-1 px-5 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 dark:text-slate-200 rounded-xl outline-none"
-                                                placeholder={`Correction #${idx + 1}`}
+                                                value={correctorName} 
+                                                onChange={(e) => setCorrectorName(e.target.value)}
+                                                className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 dark:text-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all text-sm"
+                                                placeholder="Enter your name..."
                                             />
-                                            {idx === newCorrections.length - 1 ? (
-                                                <button 
-                                                    type="button" 
-                                                    onClick={() => setNewCorrections([...newCorrections, ''])}
-                                                    className="p-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-colors shadow-sm"
-                                                >
-                                                    <Plus size={20} />
-                                                </button>
-                                            ) : (
+                                        </div>
+                                    </div>
+                                    <div className="text-right">
+                                        <button 
+                                            type="button" 
+                                            onClick={() => setNewCorrections([...newCorrections, ''])}
+                                            className="inline-flex items-center gap-2 text-xs font-bold text-indigo-600 hover:text-indigo-700 transition-colors"
+                                        >
+                                            <Plus size={14} /> Add Another Correction
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-3">
+                                    {newCorrections.map((text, idx) => (
+                                        <div key={idx} className="flex gap-2 group animate-in slide-in-from-left-2 duration-200" style={{ animationDelay: `${idx * 50}ms` }}>
+                                            <div className="flex-1 relative">
+                                                <input 
+                                                    type="text" 
+                                                    value={text} 
+                                                    onChange={(e) => {
+                                                        const updated = [...newCorrections];
+                                                        updated[idx] = e.target.value;
+                                                        setNewCorrections(updated);
+                                                    }}
+                                                    className="w-full px-5 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 dark:text-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all text-sm"
+                                                    placeholder={`Enter correction details #${idx + 1}...`}
+                                                />
+                                            </div>
+                                            {newCorrections.length > 1 && (
                                                 <button 
                                                     type="button" 
                                                     onClick={() => setNewCorrections(newCorrections.filter((_, i) => i !== idx))}
-                                                    className="p-3 bg-slate-100 dark:bg-slate-700 text-slate-500 rounded-xl hover:bg-red-50 hover:text-red-500 transition-colors"
+                                                    className="p-3 text-slate-300 hover:text-red-500 transition-colors"
+                                                    title="Remove"
                                                 >
                                                     <X size={20} />
                                                 </button>

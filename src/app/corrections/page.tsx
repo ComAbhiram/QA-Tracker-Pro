@@ -236,22 +236,27 @@ export default function CorrectionsPage() {
                                                 <span className="text-slate-400 italic text-xs">None completed yet</span>
                                             ) : (
                                                 group.completed.map(c => (
-                                                    <div key={c.id} className="flex items-start gap-3 p-3 bg-emerald-50/30 dark:bg-emerald-900/10 rounded-xl border border-emerald-100/50 dark:border-emerald-900/20 group">
+                                                    <div key={c.id} className="flex items-start gap-3 p-3 bg-emerald-50/30 dark:bg-emerald-900/10 rounded-xl border border-emerald-100/50 dark:border-emerald-900/20 group animate-in fade-in duration-300">
                                                         <CheckCircle2 className="mt-0.5 text-emerald-500 flex-shrink-0" size={16} />
                                                         <div className="flex-1 min-w-0">
-                                                            <p className="text-slate-500 dark:text-slate-400 line-through decoration-emerald-500/50 break-words">{c.correction_text}</p>
+                                                            <p className="text-slate-500 dark:text-slate-400 line-through decoration-emerald-500/50 break-words font-medium">{c.correction_text}</p>
+                                                            <div className="flex items-center gap-2 mt-2">
+                                                                <span className="text-[9px] bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded text-slate-500 flex items-center gap-1 font-bold">
+                                                                    <User size={8} /> {c.submitter_name}
+                                                                </span>
+                                                            </div>
                                                             <div className="grid grid-cols-2 gap-2 mt-2 pt-2 border-t border-emerald-100/30 dark:border-emerald-900/20">
                                                                 <div>
-                                                                    <span className="text-[9px] uppercase font-bold text-slate-400 block">Added</span>
+                                                                    <span className="text-[9px] uppercase font-bold text-slate-400 block tracking-tight">Added</span>
                                                                     <span className="text-[10px] text-slate-500 dark:text-slate-400">{format(new Date(c.created_at), 'MMM d, yyyy')}</span>
                                                                 </div>
                                                                 <div>
-                                                                    <span className="text-[9px] uppercase font-bold text-emerald-500 block">Completed</span>
+                                                                    <span className="text-[9px] uppercase font-bold text-emerald-500 block tracking-tight">Completed</span>
                                                                     <span className="text-[10px] text-emerald-600 dark:text-emerald-400">{c.completed_at ? format(new Date(c.completed_at), 'MMM d, yyyy') : 'Recently'}</span>
                                                                 </div>
                                                             </div>
                                                         </div>
-                                                        <button onClick={() => deleteCorrection(c.id)} className="opacity-0 group-hover:opacity-100 transition-opacity text-slate-300 hover:text-red-500">
+                                                        <button onClick={() => deleteCorrection(c.id)} className="opacity-0 group-hover:opacity-100 transition-opacity text-slate-300 hover:text-red-500" title="Delete">
                                                             <Trash2 size={12} />
                                                         </button>
                                                     </div>
