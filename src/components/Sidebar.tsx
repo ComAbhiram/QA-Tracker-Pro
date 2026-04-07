@@ -32,7 +32,8 @@ import {
     Bug,
     Plane,
     ChevronLeft,
-    Bell
+    Bell,
+    AlertCircle
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useGuestMode } from '@/contexts/GuestContext';
