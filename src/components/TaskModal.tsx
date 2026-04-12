@@ -237,14 +237,18 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
         const checkRole = async () => {
             const { data: { user } } = await supabase.auth.getUser();
             if (user) {
-                const { data: profile } = await supabase.from('user_profiles').select('role, full_name').eq('id', user.id).single();
-                setIsQATeam(profile?.role === 'super_admin');
+                const { data: profile } = await supabase.from('user_profiles').select('role, full_name, team_id').eq('id', user.id).single();
+                // QA Team ID: ba60298b-8635-4cca-bcd5-7e470fad60e6
+                const isUserInQATeam = profile?.team_id === 'ba60298b-8635-4cca-bcd5-7e470fad60e6';
+                const isGuestInQA = isGuest && selectedTeamId === 'ba60298b-8635-4cca-bcd5-7e470fad60e6';
+                
+                setIsQATeam(profile?.role === 'super_admin' || isUserInQATeam || isGuestInQA);
                 setCurrentUserName(profile?.full_name || user.email || null);
                 if (!correctorName) setCorrectorName(profile?.full_name || '');
             }
         };
         if (isOpen) checkRole();
-    }, [isOpen]);
+    }, [isOpen, isGuest, selectedTeamId]);
 
     // Fetch checklists for a project whenever projectName changes
     useEffect(() => {

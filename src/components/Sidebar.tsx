@@ -102,8 +102,8 @@ export function Sidebar() {
 
                     if (profile.team_id) {
                         const { data: team } = await supabase.from('teams').select('name').eq('id', profile.team_id).single();
-                        if (team && team.name !== 'QA Team') {
-                            setSidebarTitle(team.name); // Use team name if not QA Team
+                        if (team) {
+                            setSidebarTitle(team.name); // Set the sidebar title to the team name
                         }
                     }
                 }
@@ -166,8 +166,9 @@ export function Sidebar() {
             items: [
                 { label: 'Reports', icon: <BarChart3 size={20} />, href: '/reports' },
                 { label: 'Analytics', icon: <Search size={20} />, href: '/analytics' },
-                // Enable Bugs Report for Super Admin AND Managers (isGuest) regardless of team
-                ...((isGuest) || (sidebarTitle === 'QA Team') || userRole === 'super_admin'
+                { label: 'Hubstaff', icon: <Calendar size={20} />, href: '/attendance' },
+                // Enable Bugs Report for Super Admin AND Managers (isGuest) AND QA Team members
+                ...((isGuest) || (sidebarTitle === 'QA Team') || (sidebarTitle === 'Team Tracker') || userRole === 'super_admin'
                     ? [{ label: 'Bugs Report', icon: <Bug size={20} />, href: '/analytics/bugs' }]
                     : []
                 ),
