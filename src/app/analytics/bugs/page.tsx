@@ -202,8 +202,8 @@ export default function BugsReport() {
                 {/* Filters Bar */}
                 <div className="flex flex-col sm:flex-row gap-3 bg-white dark:bg-slate-800 p-3 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm transition-colors">
                     {/* Search */}
-                    <div className="relative flex-1 sm:flex-none">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" size={16} />
+                    <div className="relative flex-1 sm:flex-none flex items-center">
+                        <Search className="absolute left-3 text-slate-400 dark:text-slate-500 pointer-events-none" size={16} />
                         <input
                             type="text"
                             placeholder="Search projects..."
@@ -299,20 +299,20 @@ export default function BugsReport() {
             )}
 
             {/* Detailed Table */}
-            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 overflow-hidden transition-colors">
-                <div className="p-6 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden transition-colors">
+                <div className="p-6 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center bg-slate-50/50 dark:bg-slate-800/50">
                     <h3 className="font-bold text-lg text-slate-800 dark:text-slate-100">Project Bug Breakdown</h3>
-                    <span className="text-xs text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-900 px-2 py-1 rounded-md">{processedData.length} projects found</span>
+                    <span className="text-xs text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-900 px-3 py-1.5 rounded-full border border-slate-100 dark:border-slate-800 shadow-sm">{processedData.length} projects found</span>
                 </div>
                 <div className="overflow-x-auto">
-                    <table className="w-full text-left text-sm text-slate-600 dark:text-slate-300">
-                        <thead className="bg-slate-50 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-700">
+                    <table className="w-full text-left text-sm text-slate-600 dark:text-slate-300 border-collapse border border-slate-300 dark:border-slate-600">
+                        <thead className="bg-slate-100/80 dark:bg-slate-900/80 border-b border-slate-300 dark:border-slate-600">
                             <tr>
                                 <SortHeader label="Project Name" sortKey="projectName" currentSort={sortConfig} onSort={handleSort} />
                                 <SortHeader label="HTML Bugs" sortKey="htmlBugs" currentSort={sortConfig} onSort={handleSort} align="center" />
                                 <SortHeader label="Functional Bugs" sortKey="functionalBugs" currentSort={sortConfig} onSort={handleSort} align="center" />
                                 <SortHeader label="Total Bugs" sortKey="totalBugs" currentSort={sortConfig} onSort={handleSort} align="center" />
-                                <th className="px-6 py-4 font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider text-xs">Share of Total</th>
+                                <th className="px-6 py-4 font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider text-xs border-r border-slate-300 dark:border-slate-600 last:border-r-0">Share of Total</th>
                             </tr>
                         </thead>
                         {processedData.length === 0 ? (
@@ -329,10 +329,10 @@ export default function BugsReport() {
                                     return (
                                         <tbody key={project.projectName} className="divide-y divide-slate-100 dark:divide-slate-700/50">
                                             <tr 
-                                                className={`hover:bg-slate-50/50 dark:hover:bg-slate-700/50 transition-colors cursor-pointer ${isExpanded ? 'bg-indigo-50/20 dark:bg-indigo-900/10' : ''}`}
+                                                className={`hover:bg-slate-50/50 dark:hover:bg-slate-700/50 transition-colors cursor-pointer border-b border-slate-300 dark:border-slate-600 ${isExpanded ? 'bg-indigo-50/20 dark:bg-indigo-900/10' : ''}`}
                                                 onClick={() => toggleProject(project.projectName)}
                                             >
-                                                <td className="px-6 py-4 font-medium text-slate-800 dark:text-slate-200">
+                                                <td className="px-6 py-4 font-medium text-slate-800 dark:text-slate-200 border-r border-slate-300 dark:border-slate-600">
                                                     <div className="flex items-center gap-3">
                                                         <div className="text-slate-400 dark:text-slate-500">
                                                             {isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
@@ -340,10 +340,10 @@ export default function BugsReport() {
                                                         {project.projectName}
                                                     </div>
                                                 </td>
-                                                <td className="px-6 py-4 text-center text-pink-600 dark:text-pink-400 font-medium bg-pink-50/30 dark:bg-pink-900/10">{project.htmlBugs}</td>
-                                                <td className="px-6 py-4 text-center text-yellow-600 dark:text-yellow-400 font-medium bg-yellow-50/30 dark:bg-yellow-900/10">{project.functionalBugs}</td>
-                                                <td className="px-6 py-4 text-center font-bold text-slate-800 dark:text-slate-200 bg-slate-50/50 dark:bg-slate-800">{project.totalBugs}</td>
-                                                <td className="px-6 py-4">
+                                                <td className="px-6 py-4 text-center text-pink-600 dark:text-pink-400 font-medium bg-pink-50/10 dark:bg-pink-900/10 border-r border-slate-300 dark:border-slate-600">{project.htmlBugs}</td>
+                                                <td className="px-6 py-4 text-center text-yellow-600 dark:text-yellow-400 font-medium bg-yellow-50/10 dark:bg-yellow-900/10 border-r border-slate-300 dark:border-slate-600">{project.functionalBugs}</td>
+                                                <td className="px-6 py-4 text-center font-bold text-slate-800 dark:text-slate-200 bg-slate-50/50 dark:bg-slate-800 border-r border-slate-300 dark:border-slate-600">{project.totalBugs}</td>
+                                                <td className="px-6 py-4 border-r-0">
                                                     <div className="flex items-center gap-3">
                                                         <div className="flex-1 h-2 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
                                                             <div className="h-full bg-indigo-500 dark:bg-indigo-400 rounded-full" style={{ width: `${percentage}%` }}></div>
@@ -448,7 +448,7 @@ function SortHeader({ label, sortKey, currentSort, onSort, align = 'left' }: { l
     const isActive = currentSort.key === sortKey;
     return (
         <th
-            className={`px-6 py-4 font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider text-xs cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors group ${align === 'center' ? 'text-center' : align === 'right' ? 'text-right' : 'text-left'}`}
+            className={`px-6 py-4 font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider text-xs cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors group border-r border-slate-300 dark:border-slate-600 last:border-r-0 ${align === 'center' ? 'text-center' : align === 'right' ? 'text-right' : 'text-left'}`}
             onClick={() => onSort(sortKey)}
         >
             <div className={`flex items-center gap-2 ${align === 'center' ? 'justify-center' : align === 'right' ? 'justify-end' : 'justify-start'}`}>
