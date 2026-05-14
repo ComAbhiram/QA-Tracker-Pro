@@ -519,7 +519,9 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                 }
                 const index = Math.abs(hash) % colors.length;
                 return colors[index];
-                    // Create a temporary container for the report
+            };
+
+            // Create a temporary container for the report
             const container = document.createElement('div');
             container.style.cssText = 'position: absolute; left: -9999px; top: -9999px; background: #f8fafc; padding: 64px; width: 2200px;';
 
