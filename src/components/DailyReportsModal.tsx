@@ -546,16 +546,15 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
             const iconPriority = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.6;"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path><line x1="4" y1="22" x2="4" y2="15"></line></svg>`;
             const iconTask = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.6;"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>`;
 
-            // Create a temporary container for the report
             const container = document.createElement('div');
-            container.style.cssText = 'position: absolute; left: -9999px; top: -9999px; background: linear-gradient(135deg, #F8FBFF, #EEF4FF); padding: 80px; width: 1800px;';
+            container.style.cssText = 'position: absolute; left: -9999px; top: -9999px; background: #f9fafb; padding: 60px; width: 1800px;';
 
-            const statusStyles: { [key: string]: string } = {
-                'Completed': 'linear-gradient(135deg, #34d399, #10b981)',
-                'In Progress': 'linear-gradient(135deg, #60a5fa, #3b82f6)',
-                'Yet to Start': 'linear-gradient(135deg, #fbbf24, #f59e0b)',
-                'On Hold': 'linear-gradient(135deg, #a78bfa, #8b5cf6)',
-                'Overdue': 'linear-gradient(135deg, #f87171, #ef4444)'
+            const statusStyles: { [key: string]: { gradient: string, color: string, icon: string } } = {
+                'Completed': { gradient: 'linear-gradient(135deg, #10b981, #059669)', color: '#10b981', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>' },
+                'In Progress': { gradient: 'linear-gradient(135deg, #3b82f6, #2563eb)', color: '#3b82f6', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>' },
+                'Yet to Start': { gradient: 'linear-gradient(135deg, #f59e0b, #d97706)', color: '#f59e0b', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>' },
+                'On Hold': { gradient: 'linear-gradient(135deg, #8b5cf6, #7c3aed)', color: '#8b5cf6', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>' },
+                'Overdue': { gradient: 'linear-gradient(135deg, #ef4444, #dc2626)', color: '#ef4444', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>' }
             };
 
             const getMemberTheme = (name: string) => {
@@ -571,156 +570,149 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                 <style>
                     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap');
                     * { font-family: 'Poppins', sans-serif; box-sizing: border-box; }
+                    .pill-badge { display: flex; align-items: center; gap: 8px; padding: 6px 14px; border-radius: 12px; font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; }
                 </style>
-                <div style="padding: 40px;">
+                <div style="padding: 20px;">
                     <!-- Header Section -->
-                    <div style="margin-bottom: 60px; display: flex; justify-content: space-between; align-items: center;">
+                    <div style="margin-bottom: 50px; display: flex; justify-content: space-between; align-items: center;">
                         <div>
-                            <div style="display: flex; align-items: center; gap: 20px;">
-                                <div style="width: 8px; height: 56px; background: #4f46e5; border-radius: 4px; box-shadow: 0 0 20px rgba(79, 70, 229, 0.4);"></div>
+                            <div style="display: flex; align-items: center; gap: 16px;">
+                                <div style="width: 8px; height: 48px; background: #3b82f6; border-radius: 4px;"></div>
                                 <h1 style="color: #0f172a; font-size: 64px; margin: 0; font-weight: 900; letter-spacing: -0.04em;">Work Status Report</h1>
                             </div>
-                            <p style="color: #64748b; font-size: 24px; margin: 12px 0 0 28px; font-weight: 600;">
-                                QA Team • ${new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
-                            </p>
+                            <p style="color: #64748b; font-size: 22px; margin: 12px 0 0 24px; font-weight: 600;">QA Team • ${new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}</p>
                         </div>
                         
-                        <!-- Premium KPI Widget -->
-                        <div style="background: linear-gradient(135deg, #4f46e5, #9333ea); width: 380px; height: 140px; border-radius: 32px; color: white; display: flex; align-items: center; padding: 0 32px; gap: 24px; box-shadow: 0 20px 40px -10px rgba(79, 70, 229, 0.5);">
-                            <div style="background: rgba(255,255,255,0.2); width: 72px; height: 72px; border-radius: 20px; display: flex; align-items: center; justify-content: center;">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                        <!-- Top Right KPI Widget -->
+                        <div style="background: linear-gradient(135deg, #4f46e5, #3b82f6); width: 340px; height: 130px; border-radius: 24px; color: white; display: flex; align-items: center; padding: 24px; gap: 20px; box-shadow: 0 20px 40px rgba(79, 70, 229, 0.2);">
+                            <div style="background: rgba(255,255,255,0.15); width: 64px; height: 64px; border-radius: 16px; display: flex; align-items: center; justify-content: center;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
                             </div>
                             <div>
-                                <p style="margin: 0; font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.8;">RESOURCE UTILIZATION</p>
-                                <p style="margin: 4px 0 0 0; font-size: 48px; font-weight: 900; line-height: 1;">${todayTasks.length} <span style="font-size: 18px; font-weight: 600; opacity: 0.7;">Active Tasks</span></p>
+                                <p style="margin: 0; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.8;">RESOURCE UTILIZATION</p>
+                                <div style="display: flex; align-items: baseline; gap: 8px; margin-top: 4px;">
+                                    <span style="font-size: 48px; font-weight: 900; line-height: 1;">${todayTasks.length}</span>
+                                    <span style="font-size: 16px; font-weight: 700; opacity: 0.8;">Active Tasks</span>
+                                </div>
                             </div>
                         </div>
                     </div>
                     
                     ${hubstaffData ? `
-                    <!-- Premium Activity Summary Section -->
-                    <div style="background: white; border: 1px solid #e2e8f0; padding: 40px; margin-bottom: 60px; border-radius: 40px; box-shadow: 0 10px 30px rgba(0,0,0,0.04);">
-                        <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 32px;">
-                            <div style="background: linear-gradient(135deg, #a855f7, #7c3aed); padding: 10px; border-radius: 12px; color: white;">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                    <!-- Activity Summary Card -->
+                    <div style="background: white; border: 1px solid #f1f5f9; padding: 40px; margin-bottom: 50px; border-radius: 32px; box-shadow: 0 4px 20px rgba(0,0,0,0.02); display: flex; align-items: center; gap: 60px;">
+                        <div style="text-align: center; border-right: 1px solid #f1f5f9; padding-right: 40px;">
+                            <div style="background: linear-gradient(135deg, #a855f7, #8b5cf6); width: 84px; height: 84px; border-radius: 20px; display: flex; align-items: center; justify-content: center; color: white; margin-bottom: 12px; box-shadow: 0 10px 20px rgba(139, 92, 246, 0.2);">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
                             </div>
-                            <h3 style="color: #0f172a; font-size: 32px; margin: 0; font-weight: 800; letter-spacing: -0.02em;">Activity Summary</h3>
+                            <p style="color: #0f172a; font-size: 12px; font-weight: 800; text-transform: uppercase; margin: 0; letter-spacing: 0.05em;">Activity Summary</p>
                         </div>
-                        <div style="display: flex; flex-direction: column; gap: 24px;">
+
                         ${(() => {
-                        const relevantActivities = hubstaffData.activities.filter((a: any) => {
-                            if (a.timeWorked <= 0) return false;
-                            const activeAssignees = new Set<string>();
-                            todayTasks.forEach(t => {
-                                if (t.assignedTo) activeAssignees.add(t.assignedTo.toLowerCase());
-                                if (t.assignedTo2) activeAssignees.add(t.assignedTo2.toLowerCase());
-                            });
-                            const hubName = a.userName.toLowerCase();
-                            for (const assignee of activeAssignees) {
-                                if (hubName.includes(assignee) || assignee.includes(hubName)) return true;
-                            }
-                            return false;
-                        });
-
-                        if (relevantActivities.length === 0) return `<p style="color: #94a3b8; font-size: 20px; font-style: italic; text-align: center; padding: 40px;">No synchronization data available.</p>`;
-
-                        const aggregated = relevantActivities.reduce((acc: any, curr: any) => {
-                            if (!acc[curr.userName]) acc[curr.userName] = { userName: curr.userName, timeWorked: 0, activeTimeWorked: 0, weightedActivitySum: 0, projects: new Set() };
-                            acc[curr.userName].timeWorked += curr.timeWorked;
-                            if (curr.activityPercentage > 0) {
-                                acc[curr.userName].weightedActivitySum += (curr.activityPercentage * curr.timeWorked);
-                                acc[curr.userName].activeTimeWorked += curr.timeWorked;
-                            }
-                            if (curr.projectName) acc[curr.userName].projects.add(curr.projectName);
-                            return acc;
-                        }, {});
-
-                        return Object.values(aggregated).map((user: any) => {
-                            const avgActivity = user.activeTimeWorked > 0 ? Math.round(user.weightedActivitySum / user.activeTimeWorked) : 0;
-                            const projectList = Array.from(user.projects).join(' / ') || 'General Tasks';
+                            const activities = hubstaffData.activities.filter((a: any) => a.timeWorked > 0);
+                            if (activities.length === 0) return '<p style="flex: 1; color: #94a3b8; font-style: italic; font-size: 20px;">No sync data available.</p>';
+                            
+                            const user = activities[0];
                             const memberTheme = getMemberTheme(user.userName);
+                            const avgActivity = user.activityPercentage || 0;
                             
                             return `
-                                <div style="display: flex; align-items: center; gap: 40px; padding: 32px; border-radius: 32px; background: #f8fafc; border: 1px solid #f1f5f9; height: 180px;">
-                                    <div style="width: 84px; height: 84px; background: ${memberTheme.bg}; border-radius: 24px; display: flex; align-items: center; justify-content: center; color: ${memberTheme.color}; border: 2px solid ${memberTheme.color}20;">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                                <div style="display: flex; align-items: center; gap: 32px; flex: 1;">
+                                    <div style="width: 100px; height: 100px; background: ${memberTheme.bg}; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 4px solid white; box-shadow: 0 10px 25px rgba(0,0,0,0.05);">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 24 24" fill="${memberTheme.color}" style="opacity: 0.3;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
                                     </div>
                                     <div style="flex: 1;">
-                                        <p style="color: #0f172a; font-size: 28px; font-weight: 800; margin: 0; letter-spacing: -0.02em;">${user.userName}</p>
-                                        <p style="color: #64748b; font-size: 16px; margin: 6px 0 0 0; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 500px;">${projectList}</p>
+                                        <h3 style="color: #0f172a; font-size: 28px; font-weight: 900; margin: 0; letter-spacing: -0.02em;">${user.userName}</h3>
+                                        <p style="color: #64748b; font-size: 15px; margin: 6px 0 0 0; font-weight: 600; line-height: 1.4;">${user.projectName || 'Active Projects Support'}</p>
                                     </div>
-                                    <div style="text-align: right; min-width: 180px; border-right: 2px solid #e2e8f0; padding-right: 40px;">
-                                        <div style="display: flex; align-items: center; gap: 8px; justify-content: flex-end; margin-bottom: 4px;">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                                            <p style="color: #94a3b8; font-size: 14px; font-weight: 800; text-transform: uppercase; margin: 0;">Time Spent</p>
+                                    
+                                    <div style="display: flex; gap: 60px; padding-left: 60px; border-left: 1px solid #f1f5f9;">
+                                        <div style="text-align: center;">
+                                            <div style="display: flex; align-items: center; gap: 8px; justify-content: center; margin-bottom: 4px;">
+                                                <div style="color: #6366f1;">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                                </div>
+                                                <p style="color: #94a3b8; font-size: 11px; font-weight: 800; text-transform: uppercase;">TIME SPENT</p>
+                                            </div>
+                                            <p style="color: #0f172a; font-size: 36px; font-weight: 900; margin: 0;">${formatTime(user.timeWorked)}</p>
+                                            <p style="color: #94a3b8; font-size: 14px; font-weight: 700; margin: 0;">Hours</p>
                                         </div>
-                                        <p style="color: #0f172a; font-size: 36px; font-weight: 900; margin: 0; letter-spacing: -0.02em;">${formatTime(user.timeWorked)}</p>
-                                    </div>
-                                    <div style="min-width: 320px; padding-left: 40px;">
-                                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                                            <p style="color: #94a3b8; font-size: 14px; font-weight: 800; text-transform: uppercase; margin: 0;">Activity Load</p>
-                                            <p style="color: #10b981; font-size: 28px; font-weight: 900; margin: 0;">${avgActivity}%</p>
+
+                                        <div style="text-align: center;">
+                                            <div style="display: flex; align-items: center; gap: 8px; justify-content: center; margin-bottom: 4px;">
+                                                <div style="color: #10b981;">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                                                </div>
+                                                <p style="color: #94a3b8; font-size: 11px; font-weight: 800; text-transform: uppercase;">ACTIVE</p>
+                                            </div>
+                                            <p style="color: #10b981; font-size: 36px; font-weight: 900; margin: 0;">${avgActivity}%</p>
+                                            <p style="color: #94a3b8; font-size: 14px; font-weight: 700; margin: 0;">Productivity</p>
                                         </div>
-                                        <div style="height: 14px; background: #e2e8f0; border-radius: 7px; overflow: hidden;">
-                                            <div style="height: 100%; width: ${avgActivity}%; background: linear-gradient(90deg, #34d399, #10b981); border-radius: 7px;"></div>
+
+                                        <div style="width: 240px; padding-top: 10px;">
+                                            <div style="height: 12px; background: #f1f5f9; border-radius: 6px; overflow: hidden; margin-bottom: 12px;">
+                                                <div style="height: 100%; width: ${avgActivity}%; background: #10b981; border-radius: 6px;"></div>
+                                            </div>
+                                            <p style="color: #64748b; font-size: 13px; font-weight: 600; text-align: center; margin: 0;">You're doing great!<br>Keep up the momentum 🚀</p>
                                         </div>
                                     </div>
                                 </div>
                             `;
-                        }).join('');
-                    })()}
-                        </div>
+                        })()}
                     </div>
                     ` : ''}
                     
-                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 50px;">
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 40px;">
                     ${sortedAssignees.map(assignee => {
                         const memberTheme = getMemberTheme(assignee);
                         return `
                         <div>
-                            <!-- Member Header -->
-                            <div style="display: flex; align-items: center; gap: 20px; margin-bottom: 32px; background: ${memberTheme.bg}; padding: 16px 24px; border-radius: 24px; border: 1px solid ${memberTheme.color}20;">
-                                <div style="width: 56px; height: 56px; background: ${memberTheme.color}; border-radius: 16px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 900; font-size: 24px; box-shadow: 0 10px 20px ${memberTheme.color}30;">
-                                    ${assignee.charAt(0)}
+                            <!-- Member Header Bar -->
+                            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; background: white; padding: 24px 32px; border-radius: 24px; border: 1px solid #f1f5f9; box-shadow: 0 4px 10px rgba(0,0,0,0.01);">
+                                <div style="display: flex; align-items: center; gap: 20px;">
+                                    <div style="width: 56px; height: 56px; background: ${memberTheme.color}; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 900; font-size: 26px;">
+                                        ${assignee.charAt(0)}
+                                    </div>
+                                    <div>
+                                        <h3 style="color: #0f172a; font-size: 26px; font-weight: 900; margin: 0; letter-spacing: -0.02em;">${assignee}</h3>
+                                        <p style="color: #94a3b8; font-size: 15px; font-weight: 700; margin: 0;">${groupedTasks[assignee].length} Projects Assigned</p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <h3 style="color: #0f172a; font-size: 28px; font-weight: 900; margin: 0; letter-spacing: -0.02em;">${assignee}</h3>
-                                    <p style="color: ${memberTheme.color}; font-size: 15px; font-weight: 700; margin: 0;">${groupedTasks[assignee].length} Projects Under Control</p>
+                                <div style="display: flex; align-items: center; gap: 8px; color: #f97316; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; background: #fff7ed; padding: 8px 16px; border-radius: 10px;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+                                    Medium Priority
                                 </div>
                             </div>
 
-                            <div style="display: flex; flex-direction: column; gap: 32px;">
+                            <div style="display: flex; flex-direction: column; gap: 24px;">
                                 ${groupedTasks[assignee].map((task) => {
                                     const effectiveStatus = getEffectiveStatus(task);
-                                    let displayStatus = effectiveStatus;
-                                    const sGradient = statusStyles[effectiveStatus] || statusStyles['On Hold'];
-                                    const pGradient = task.priority === 'High' ? statusStyles['Overdue'] : 'linear-gradient(135deg, #f97316, #ea580c)';
+                                    const sStyle = statusStyles[effectiveStatus] || statusStyles['On Hold'];
 
                                     return `
-                                        <div style="background: white; border-radius: 32px; padding: 32px; display: flex; flex-direction: column; gap: 24px; border-left: 10px solid transparent; border-image: ${sGradient} 1; border-image-slice: 0 0 0 1; box-shadow: 0 15px 35px rgba(0,0,0,0.06); position: relative; overflow: hidden; border-left-width: 8px; border-left-style: solid; border-left-color: ${effectiveStatus === 'Completed' ? '#10b981' : (effectiveStatus === 'In Progress' ? '#3b82f6' : '#f59e0b')};">
+                                        <div style="background: white; border-radius: 28px; padding: 32px; display: flex; flex-direction: column; gap: 20px; border-left: 12px solid ${sStyle.color}; box-shadow: 0 10px 30px rgba(0,0,0,0.03);">
                                             
-                                            <div style="display: flex; justify-content: space-between; align-items: center;">
-                                                <div style="background: ${sGradient}; color: white; padding: 8px 18px; border-radius: 14px; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; box-shadow: 0 5px 15px -5px rgba(0,0,0,0.2);">${displayStatus}</div>
-                                                ${task.priority ? `<div style="background: ${pGradient}; color: white; padding: 8px 18px; border-radius: 14px; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; box-shadow: 0 5px 15px -5px rgba(0,0,0,0.2);">${task.priority} Priority</div>` : ''}
+                                            <div class="pill-badge" style="background: ${effectiveStatus === 'Completed' ? '#ecfdf5' : '#eff6ff'}; color: ${sStyle.color}; width: fit-content;">
+                                                ${sStyle.icon}
+                                                ${effectiveStatus.toUpperCase()}
                                             </div>
                                             
-                                            <h4 style="color: #0f172a; font-weight: 900; font-size: 26px; line-height: 1.3; margin: 0; letter-spacing: -0.02em;">${task.projectName}</h4>
+                                            <h4 style="color: #0f172a; font-weight: 900; font-size: 28px; line-height: 1.3; margin: 0; letter-spacing: -0.02em;">${task.projectName}</h4>
                                             
                                             <div style="display: flex; gap: 12px;">
-                                                <div style="background: #f1f5f9; color: #475569; padding: 6px 16px; border-radius: 12px; font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 8px;">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
-                                                    Project
-                                                </div>
-                                                <div style="background: #f1f5f9; color: #475569; padding: 6px 16px; border-radius: 12px; font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 8px;">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                                                    ${task.subPhase || 'Milestone'}
-                                                </div>
+                                                <div style="background: #ecfeff; color: #06b6d4; padding: 6px 16px; border-radius: 10px; font-size: 14px; font-weight: 800;">Project</div>
+                                                <div style="background: #f0fdf4; color: #10b981; padding: 6px 16px; border-radius: 10px; font-size: 14px; font-weight: 800;">${task.subPhase || 'Task'}</div>
                                             </div>
                                             
-                                            <div style="display: flex; align-items: center; gap: 16px; margin-top: 8px; padding-top: 24px; border-top: 2px dashed #f1f5f9;">
-                                                <div style="display: flex; align-items: center; gap: 10px; color: #64748b; font-size: 15px; font-weight: 700;">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="color: #3b82f6;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                                                    ${task.startDate ? formatDate(task.startDate) : '-'} <span style="color: #cbd5e1;">→</span> ${task.endDate ? formatDate(task.endDate) : '-'}
+                                            <div style="display: flex; align-items: center; gap: 16px; margin-top: 10px; padding-top: 24px; border-top: 2px dashed #f1f5f9;">
+                                                <div style="display: flex; align-items: center; gap: 12px; color: #0f172a; font-size: 16px; font-weight: 700;">
+                                                    <div style="background: #ecfdf5; color: #10b981; padding: 8px; border-radius: 10px;">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                                                    </div>
+                                                    <div style="display: flex; flex-direction: column;">
+                                                        <span style="color: #94a3b8; font-size: 11px; font-weight: 800; text-transform: uppercase;">Period</span>
+                                                        <span>${task.startDate ? formatDate(task.startDate) : '-'} <span style="color: #cbd5e1;">—</span> ${task.endDate ? formatDate(task.endDate) : '-'}</span>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -732,26 +724,45 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                     }).join('')}
                     </div>
 
-                    <!-- Premium Dark Footer -->
-                    <div style="margin-top: 80px; background: linear-gradient(135deg, #0f172a, #1e1b4b); border-radius: 40px; padding: 48px 64px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 30px 60px -10px rgba(15, 23, 42, 0.4); border: 1px solid rgba(255,255,255,0.1);">
+                    <!-- Consolidated Summary Footer Bar -->
+                    <div style="margin-top: 60px; background: #0f172a; border-radius: 32px; padding: 40px 64px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 30px 60px rgba(15, 23, 42, 0.4);">
                         <div style="display: flex; align-items: center; gap: 24px;">
-                            <div style="background: linear-gradient(135deg, #6366f1, #4f46e5); width: 72px; height: 72px; border-radius: 20px; display: flex; align-items: center; justify-content: center; color: white; box-shadow: 0 0 30px rgba(99, 102, 241, 0.4);">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>
+                            <div style="background: linear-gradient(135deg, #a855f7, #7c3aed); width: 84px; height: 84px; border-radius: 20px; display: flex; align-items: center; justify-content: center; color: white; box-shadow: 0 10px 20px rgba(139, 92, 246, 0.3);">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>
                             </div>
-                            <h2 style="color: white; font-size: 34px; margin: 0; font-weight: 800; letter-spacing: -0.02em;">Consolidated Summary</h2>
+                            <div>
+                                <h2 style="color: white; font-size: 36px; margin: 0; font-weight: 900; letter-spacing: -0.02em;">Consolidated Summary</h2>
+                                <p style="color: rgba(255,255,255,0.6); font-size: 16px; font-weight: 600; margin: 4px 0 0 0;">Overview of all your assigned tasks</p>
+                            </div>
                         </div>
-                        <div style="display: flex; gap: 100px;">
+                        
+                        <div style="display: flex; gap: 100px; padding-left: 80px; border-left: 2px solid rgba(255,255,255,0.1);">
                             <div style="text-align: center;">
-                                <p style="color: rgba(255,255,255,0.5); font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.2em; margin: 0 0 8px 0;">Total Tasks</p>
-                                <p style="color: white; font-size: 48px; font-weight: 900; margin: 0; letter-spacing: -0.02em; text-shadow: 0 0 20px rgba(255,255,255,0.2);">${todayTasks.length}</p>
+                                <p style="color: rgba(255,255,255,0.5); font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; margin: 0 0 12px 0;">TOTAL TASKS</p>
+                                <div style="display: flex; align-items: center; gap: 16px; justify-content: center;">
+                                    <span style="color: white; font-size: 64px; font-weight: 900; line-height: 1;">${todayTasks.length}</span>
+                                    <div style="background: #a855f7; padding: 10px; border-radius: 12px; color: white;">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                                    </div>
+                                </div>
                             </div>
                             <div style="text-align: center;">
-                                <p style="color: rgba(255,255,255,0.5); font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.2em; margin: 0 0 8px 0;">Completed</p>
-                                <p style="color: #34d399; font-size: 48px; font-weight: 900; margin: 0; letter-spacing: -0.02em; text-shadow: 0 0 20px rgba(52, 211, 153, 0.3);">${todayTasks.filter(t => getEffectiveStatus(t) === 'Completed').length}</p>
+                                <p style="color: rgba(255,255,255,0.5); font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; margin: 0 0 12px 0;">COMPLETED</p>
+                                <div style="display: flex; align-items: center; gap: 16px; justify-content: center;">
+                                    <span style="color: #10b981; font-size: 64px; font-weight: 900; line-height: 1;">${todayTasks.filter(t => getEffectiveStatus(t) === 'Completed').length}</span>
+                                    <div style="background: #10b981; padding: 10px; border-radius: 50%; color: white;">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                    </div>
+                                </div>
                             </div>
                             <div style="text-align: center;">
-                                <p style="color: rgba(255,255,255,0.5); font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.2em; margin: 0 0 8px 0;">Ongoing</p>
-                                <p style="color: #60a5fa; font-size: 48px; font-weight: 900; margin: 0; letter-spacing: -0.02em; text-shadow: 0 0 20px rgba(96, 165, 250, 0.3);">${todayTasks.filter(t => getEffectiveStatus(t) === 'In Progress').length}</p>
+                                <p style="color: rgba(255,255,255,0.5); font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; margin: 0 0 12px 0;">ONGOING</p>
+                                <div style="display: flex; align-items: center; gap: 16px; justify-content: center;">
+                                    <span style="color: #3b82f6; font-size: 64px; font-weight: 900; line-height: 1;">${todayTasks.filter(t => getEffectiveStatus(t) === 'In Progress').length}</span>
+                                    <div style="background: #3b82f6; padding: 10px; border-radius: 50%; color: white;">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -864,14 +875,14 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
             const iconUser = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.6;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>`;
 
             const container = document.createElement('div');
-            container.style.cssText = 'position: absolute; left: -9999px; top: -9999px; background: linear-gradient(135deg, #F8FBFF, #EEF4FF); padding: 80px; width: 1800px;';
+            container.style.cssText = 'position: absolute; left: -9999px; top: -9999px; background: #f9fafb; padding: 60px; width: 1800px;';
 
-            const statusStyles: { [key: string]: string } = {
-                'Completed': 'linear-gradient(135deg, #34d399, #10b981)',
-                'In Progress': 'linear-gradient(135deg, #60a5fa, #3b82f6)',
-                'Yet to Start': 'linear-gradient(135deg, #fbbf24, #f59e0b)',
-                'On Hold': 'linear-gradient(135deg, #a78bfa, #8b5cf6)',
-                'Overdue': 'linear-gradient(135deg, #f87171, #ef4444)'
+            const statusStyles: { [key: string]: { gradient: string, color: string, bg: string } } = {
+                'Completed': { gradient: 'linear-gradient(135deg, #10b981, #059669)', color: '#10b981', bg: '#ecfdf5' },
+                'In Progress': { gradient: 'linear-gradient(135deg, #3b82f6, #2563eb)', color: '#3b82f6', bg: '#eff6ff' },
+                'Yet to Start': { gradient: 'linear-gradient(135deg, #f59e0b, #d97706)', color: '#f59e0b', bg: '#fffbeb' },
+                'On Hold': { gradient: 'linear-gradient(135deg, #8b5cf6, #7c3aed)', color: '#8b5cf6', bg: '#f5f3ff' },
+                'Overdue': { gradient: 'linear-gradient(135deg, #ef4444, #dc2626)', color: '#ef4444', bg: '#fef2f2' }
             };
 
             container.innerHTML = `
@@ -879,76 +890,77 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap');
                     * { font-family: 'Poppins', sans-serif; box-sizing: border-box; }
                 </style>
-                <div style="padding: 40px;">
+                <div style="padding: 20px;">
                     <!-- Header -->
-                    <div style="margin-bottom: 60px; display: flex; justify-content: space-between; align-items: center;">
+                    <div style="margin-bottom: 50px; display: flex; justify-content: space-between; align-items: center;">
                         <div>
-                            <div style="display: flex; align-items: center; gap: 20px;">
-                                <div style="width: 8px; height: 56px; background: #4f46e5; border-radius: 4px; box-shadow: 0 0 20px rgba(79, 70, 229, 0.4);"></div>
-                                <h1 style="color: #0f172a; font-size: 64px; margin: 0; font-weight: 900; letter-spacing: -0.04em;">Upcoming Schedule</h1>
+                            <div style="display: flex; align-items: center; gap: 16px;">
+                                <div style="width: 8px; height: 48px; background: #3b82f6; border-radius: 4px;"></div>
+                                <h1 style="color: #0f172a; font-size: 64px; margin: 0; font-weight: 900; letter-spacing: -0.04em;">Upcoming Work Schedule</h1>
                             </div>
-                            <p style="color: #64748b; font-size: 24px; margin: 12px 0 0 28px; font-weight: 600;">${dateStr}</p>
+                            <p style="color: #64748b; font-size: 22px; margin: 12px 0 0 24px; font-weight: 600;">${dateStr}</p>
                         </div>
                         
-                        <div style="background: linear-gradient(135deg, #4f46e5, #9333ea); width: 380px; height: 140px; border-radius: 32px; color: white; display: flex; align-items: center; padding: 0 32px; gap: 24px; box-shadow: 0 20px 40px -10px rgba(79, 70, 229, 0.5);">
-                            <div style="background: rgba(255,255,255,0.2); width: 72px; height: 72px; border-radius: 20px; display: flex; align-items: center; justify-content: center;">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>
+                        <div style="background: linear-gradient(135deg, #a855f7, #8b5cf6); width: 340px; height: 130px; border-radius: 24px; color: white; display: flex; align-items: center; padding: 24px; gap: 20px; box-shadow: 0 20px 40px rgba(139, 92, 246, 0.2);">
+                            <div style="background: rgba(255,255,255,0.15); width: 64px; height: 64px; border-radius: 16px; display: flex; align-items: center; justify-content: center;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                             </div>
                             <div>
-                                <p style="margin: 0; font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.8;">TOTAL ACTIVE LOAD</p>
-                                <p style="margin: 4px 0 0 0; font-size: 48px; font-weight: 900; line-height: 1;">${scheduleTasks.length} <span style="font-size: 18px; font-weight: 600; opacity: 0.7;">Tasks</span></p>
+                                <p style="margin: 0; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.8;">TOTAL ACTIVE LOAD</p>
+                                <div style="display: flex; align-items: baseline; gap: 8px; margin-top: 4px;">
+                                    <span style="font-size: 48px; font-weight: 900; line-height: 1;">${scheduleTasks.length}</span>
+                                    <span style="font-size: 16px; font-weight: 700; opacity: 0.8;">Tasks</span>
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 50px;">
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 40px;">
                         ${scheduleTasks.length === 0 ?
-                            '<div style="grid-column: span 2; padding: 120px; text-align: center; color: #94a3b8; font-size: 24px; font-weight: 700; background: white; border-radius: 40px; border: 3px dashed #e2e8f0; box-shadow: 0 10px 30px rgba(0,0,0,0.02);">No synchronization data available.</div>' :
+                            '<div style="grid-column: span 2; padding: 120px; text-align: center; color: #94a3b8; font-size: 24px; font-weight: 700; background: white; border-radius: 40px; border: 3px dashed #e2e8f0;">No active tasks scheduled.</div>' :
                             scheduleTasks.map((task) => {
                                 const effectiveStatus = getEffectiveStatus(task);
-                                let displayStatus = effectiveStatus;
-                                const sGradient = statusStyles[effectiveStatus] || statusStyles['On Hold'];
-                                const pGradient = task.priority === 'High' ? statusStyles['Overdue'] : 'linear-gradient(135deg, #f97316, #ea580c)';
+                                const sStyle = statusStyles[effectiveStatus] || statusStyles['On Hold'];
 
                                 return `
-                                    <div style="background: white; border-radius: 32px; padding: 32px; display: flex; flex-direction: column; gap: 24px; border-left: 8px solid transparent; border-image: ${sGradient} 1; border-image-slice: 0 0 0 1; box-shadow: 0 15px 35px rgba(0,0,0,0.06); position: relative; overflow: hidden; border-left-width: 8px; border-left-style: solid; border-left-color: ${effectiveStatus === 'Completed' ? '#10b981' : (effectiveStatus === 'In Progress' ? '#3b82f6' : '#f59e0b')};">
+                                    <div style="background: white; border-radius: 28px; padding: 32px; display: flex; flex-direction: column; gap: 20px; border-left: 12px solid ${sStyle.color}; box-shadow: 0 10px 30px rgba(0,0,0,0.03);">
                                         <div style="display: flex; justify-content: space-between; align-items: center;">
-                                            <div style="background: ${sGradient}; color: white; padding: 8px 18px; border-radius: 14px; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; box-shadow: 0 5px 15px -5px rgba(0,0,0,0.2);">${displayStatus}</div>
-                                            ${task.priority ? `<div style="background: ${pGradient}; color: white; padding: 8px 18px; border-radius: 14px; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; box-shadow: 0 5px 15px -5px rgba(0,0,0,0.2);">${task.priority} Priority</div>` : ''}
+                                            <div style="background: ${sStyle.bg}; color: ${sStyle.color}; padding: 6px 14px; border-radius: 10px; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;">
+                                                ${effectiveStatus.toUpperCase()}
+                                            </div>
+                                            <div style="display: flex; align-items: center; gap: 6px; color: #f97316; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em;">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+                                                Medium Priority
+                                            </div>
                                         </div>
                                         
-                                        <h4 style="color: #0f172a; font-weight: 900; font-size: 26px; line-height: 1.3; margin: 0; letter-spacing: -0.02em;">${task.projectName}</h4>
+                                        <h4 style="color: #0f172a; font-weight: 900; font-size: 28px; line-height: 1.3; margin: 0; letter-spacing: -0.02em;">${task.projectName}</h4>
                                         
                                         <div style="display: flex; gap: 12px;">
-                                            <div style="background: #f1f5f9; color: #475569; padding: 6px 16px; border-radius: 12px; font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 8px;">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
-                                                Project
-                                            </div>
-                                            <div style="background: #f1f5f9; color: #475569; padding: 6px 16px; border-radius: 12px; font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 8px;">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                                                ${task.subPhase || 'Milestone'}
-                                            </div>
+                                            <div style="background: #fffbeb; color: #f59e0b; padding: 6px 16px; border-radius: 10px; font-size: 14px; font-weight: 800;">Project</div>
+                                            <div style="background: #fffbeb; color: #f59e0b; padding: 6px 16px; border-radius: 10px; font-size: 14px; font-weight: 800;">${task.subPhase || 'Task'}</div>
                                         </div>
                                         
-                                        <div style="margin-top: 8px; padding-top: 24px; border-top: 2px dashed #f1f5f9; display: flex; flex-direction: column; gap: 16px;">
-                                            <div style="display: flex; align-items: center; gap: 12px;">
-                                                <div style="color: #6366f1;">
+                                        <div style="margin-top: 10px; padding-top: 24px; border-top: 2px dashed #f1f5f9; display: flex; align-items: center; gap: 0;">
+                                            <div style="display: flex; align-items: center; gap: 12px; flex: 1;">
+                                                <div style="color: #f97316; background: #fff7ed; padding: 8px; border-radius: 10px;">
                                                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
                                                 </div>
                                                 <div>
-                                                    <p style="color: #94a3b8; font-size: 12px; font-weight: 800; text-transform: uppercase; margin: 0; letter-spacing: 0.1em;">Assignees</p>
-                                                    <p style="color: #475569; font-size: 16px; font-weight: 700; margin: 0;">${[task.assignedTo, task.assignedTo2, ...(task.additionalAssignees || [])].filter(Boolean).join(', ') || 'Unassigned'}</p>
+                                                    <p style="color: #94a3b8; font-size: 10px; font-weight: 800; text-transform: uppercase; margin: 0;">Assignee</p>
+                                                    <p style="color: #0f172a; font-size: 16px; font-weight: 700; margin: 0;">${[task.assignedTo, task.assignedTo2, ...(task.additionalAssignees || [])].filter(Boolean).join(', ') || 'Unassigned'}</p>
                                                 </div>
                                             </div>
-                                            <div style="display: flex; align-items: center; gap: 12px;">
-                                                <div style="color: #3b82f6;">
+                                            
+                                            <div style="width: 2px; height: 40px; background: #f1f5f9; margin: 0 32px;"></div>
+
+                                            <div style="display: flex; align-items: center; gap: 12px; flex: 1.2;">
+                                                <div style="color: #3b82f6; background: #eff6ff; padding: 8px; border-radius: 10px;">
                                                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                                                 </div>
                                                 <div>
-                                                    <p style="color: #94a3b8; font-size: 12px; font-weight: 800; text-transform: uppercase; margin: 0; letter-spacing: 0.1em;">Timeline Period</p>
-                                                    <p style="color: #475569; font-size: 16px; font-weight: 700; margin: 0;">
-                                                        ${task.startDate ? formatDate(task.startDate) : '-'} <span style="color: #cbd5e1;">→</span> ${task.endDate ? formatDate(task.endDate) : '-'}
-                                                    </p>
+                                                    <p style="color: #94a3b8; font-size: 10px; font-weight: 800; text-transform: uppercase; margin: 0;">Period</p>
+                                                    <p style="color: #0f172a; font-size: 16px; font-weight: 700; margin: 0;">${task.startDate ? formatDate(task.startDate) : '-'} <span style="color: #cbd5e1;">—</span> ${task.endDate ? formatDate(task.endDate) : '-'}</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -958,33 +970,9 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                         }
                     </div>
 
-                    <!-- Premium Dark Footer -->
-                    <div style="margin-top: 80px; background: linear-gradient(135deg, #0f172a, #1e1b4b); border-radius: 40px; padding: 48px 64px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 30px 60px -10px rgba(15, 23, 42, 0.4); border: 1px solid rgba(255,255,255,0.1);">
-                        <div style="display: flex; align-items: center; gap: 24px;">
-                            <div style="background: linear-gradient(135deg, #6366f1, #4f46e5); width: 72px; height: 72px; border-radius: 20px; display: flex; align-items: center; justify-content: center; color: white; box-shadow: 0 0 30px rgba(99, 102, 241, 0.4);">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>
-                            </div>
-                            <h2 style="color: white; font-size: 34px; margin: 0; font-weight: 800; letter-spacing: -0.02em;">Consolidated Summary</h2>
-                        </div>
-                        <div style="display: flex; gap: 100px;">
-                            <div style="text-align: center;">
-                                <p style="color: rgba(255,255,255,0.5); font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.2em; margin: 0 0 8px 0;">Total Tasks</p>
-                                <p style="color: white; font-size: 48px; font-weight: 900; margin: 0; letter-spacing: -0.02em; text-shadow: 0 0 20px rgba(255,255,255,0.2);">${scheduleTasks.length}</p>
-                            </div>
-                            <div style="text-align: center;">
-                                <p style="color: rgba(255,255,255,0.5); font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.2em; margin: 0 0 8px 0;">Completed</p>
-                                <p style="color: #34d399; font-size: 48px; font-weight: 900; margin: 0; letter-spacing: -0.02em; text-shadow: 0 0 20px rgba(52, 211, 153, 0.3);">0</p>
-                            </div>
-                            <div style="text-align: center;">
-                                <p style="color: rgba(255,255,255,0.5); font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.2em; margin: 0 0 8px 0;">Ongoing</p>
-                                <p style="color: #60a5fa; font-size: 48px; font-weight: 900; margin: 0; letter-spacing: -0.02em; text-shadow: 0 0 20px rgba(96, 165, 250, 0.3);">${scheduleTasks.length}</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div style="margin-top: 48px; text-align: center;">
-                        <p style="color: #94a3b8; font-size: 14px; font-weight: 800; letter-spacing: 0.4em; text-transform: uppercase; opacity: 0.6;">
-                            POWERED BY <span style="color: #475569; font-weight: 900;">QA TRACKER PRO</span>
+                    <div style="margin-top: 60px; text-align: center;">
+                        <p style="color: #cbd5e1; font-size: 12px; font-weight: 800; letter-spacing: 0.4em; text-transform: uppercase;">
+                            POWERED BY <span style="color: #94a3b8; font-weight: 900;">QA TRACKER PRO</span>
                         </p>
                     </div>
                 </div>
