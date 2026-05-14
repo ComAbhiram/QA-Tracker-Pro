@@ -796,7 +796,9 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                 const month = d.toLocaleString('en-US', { month: 'short' });
                 const year = d.getFullYear();
                 return `<span>${day}</span><span style="margin: 0 4px;">${month}</span><span>${year}</span>`;
-                      const container = document.createElement('div');
+            };
+
+            const container = document.createElement('div');
             container.style.cssText = 'position: absolute; left: -9999px; top: -9999px; background: #fdfdfd; padding: 60px; width: 2000px;';
 
             container.innerHTML = `
