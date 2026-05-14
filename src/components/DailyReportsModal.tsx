@@ -219,49 +219,51 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
 
             // Create a temporary container
             const container = document.createElement('div');
-            container.style.cssText = 'position: absolute; left: -9999px; top: -9999px; background: #fdfdfd; padding: 60px; width: 1800px;';
+            container.style.cssText = 'position: absolute; left: -9999px; top: -9999px; background: #f8fafc; padding: 64px; width: 1600px;';
 
             container.innerHTML = `
-                <div style="font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
-                    <div style="margin-bottom: 50px; display: flex; justify-content: space-between; align-items: center; background: white; padding: 40px; border-radius: 30px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.04); border: 1px solid #f1f5f9;">
+                <style>
+                    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+                    * { font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; box-sizing: border-box; }
+                </style>
+                <div style="background: #f8fafc;">
+                    <!-- Header -->
+                    <div style="margin-bottom: 48px; display: flex; justify-content: space-between; align-items: flex-start;">
                         <div>
-                            <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 10px;">
-                                <div style="width: 12px; height: 40px; background: #0ea5e9; border-radius: 6px;"></div>
-                                <h1 style="color: #0f172a; font-size: 56px; margin: 0; font-weight: 900; letter-spacing: -2px;">Work Status</h1>
-                            </div>
-                            <p style="color: #64748b; font-size: 24px; margin: 0; font-weight: 600; padding-left: 27px;">${selectedQA} • ${new Date(selectedQADate).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                            <h1 style="color: #0f172a; font-size: 40px; margin: 0 0 8px 0; font-weight: 700; letter-spacing: -0.02em;">Daily QA Report</h1>
+                            <p style="color: #64748b; font-size: 18px; margin: 0; font-weight: 500;">${selectedQA} • ${new Date(selectedQADate).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}</p>
                         </div>
-                        <div style="text-align: right; background: #f8fafc; padding: 20px 40px; border-radius: 20px; border: 1px solid #e2e8f0;">
-                             <p style="color: #94a3b8; font-size: 16px; margin: 0 0 5px 0; font-weight: 700; text-transform: uppercase; letter-spacing: 2px;">Daily Output</p>
-                             <p style="color: #0f172a; font-size: 48px; font-weight: 900; margin: 0;">${qaData.tasks.length} <span style="font-size: 20px; color: #64748b; font-weight: 700;">Tasks</span></p>
+                        <div style="display: flex; gap: 16px;">
+                            <div style="background: white; border: 1px solid #e2e8f0; border-radius: 16px; padding: 16px 24px; box-shadow: 0 1px 2px rgba(0,0,0,0.04); text-align: center; min-width: 140px;">
+                                <p style="color: #64748b; font-size: 12px; margin: 0 0 4px 0; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Total Tasks</p>
+                                <p style="color: #0f172a; font-size: 28px; font-weight: 700; margin: 0;">${qaData.tasks.length}</p>
+                            </div>
+                            <div style="background: white; border: 1px solid #e2e8f0; border-radius: 16px; padding: 16px 24px; box-shadow: 0 1px 2px rgba(0,0,0,0.04); text-align: center; min-width: 140px;">
+                                <p style="color: #64748b; font-size: 12px; margin: 0 0 4px 0; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Time Worked</p>
+                                <p style="color: #0f172a; font-size: 28px; font-weight: 700; margin: 0;">${formatTime(qaData.hubstaffActivity.timeWorked)}</p>
+                            </div>
                         </div>
                     </div>
                     
-                    <div style="background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); padding: 40px; margin-bottom: 50px; border-radius: 30px; box-shadow: 0 20px 25px -5px rgba(14, 165, 233, 0.15); display: flex; justify-content: space-between; align-items: center; color: white;">
-                        <div style="display: flex; align-items: center; gap: 25px;">
-                            <div style="width: 100px; height: 100px; background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); border: 2px solid rgba(255,255,255,0.4); border-radius: 25px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 48px;">
+                    <!-- Activity Strip -->
+                    <div style="background: white; border: 1px solid #e2e8f0; padding: 24px; margin-bottom: 48px; border-radius: 16px; box-shadow: 0 1px 2px rgba(0,0,0,0.04); display: flex; align-items: center; justify-content: space-between;">
+                        <div style="display: flex; align-items: center; gap: 16px;">
+                            <div style="width: 48px; height: 48px; background: #f1f5f9; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #475569; font-weight: 700; font-size: 20px;">
                                 ${selectedQA.charAt(0)}
                             </div>
                             <div>
-                                <h3 style="font-size: 36px; margin: 0 0 5px 0; font-weight: 800; letter-spacing: -1px;">Hubstaff Overview</h3>
-                                <p style="color: rgba(255,255,255,0.8); font-size: 20px; margin: 0; font-weight: 500;">${qaData.hubstaffActivity.projects.join(' / ') || 'General Tasks'}</p>
+                                <p style="color: #0f172a; font-size: 18px; margin: 0; font-weight: 600;">Hubstaff Activity</p>
+                                <p style="color: #64748b; font-size: 14px; margin: 0; font-weight: 400;">${qaData.hubstaffActivity.projects.join(' / ') || 'General Tasks'}</p>
                             </div>
                         </div>
-                        <div style="display: flex; gap: 60px; text-align: right;">
-                            <div>
-                                <p style="color: rgba(255,255,255,0.6); font-size: 16px; margin: 0 0 8px 0; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Duration</p>
-                                <p style="font-size: 42px; font-weight: 900; margin: 0;">${formatTime(qaData.hubstaffActivity.timeWorked)}</p>
-                            </div>
-                            <div>
-                                <p style="color: rgba(255,255,255,0.6); font-size: 16px; margin: 0 0 8px 0; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Engagement</p>
-                                <p style="font-size: 42px; font-weight: 900; margin: 0;">${qaData.hubstaffActivity.activityPercentage}%</p>
-                            </div>
+                        <div style="background: #ecfdf5; color: #059669; padding: 8px 16px; border-radius: 999px; font-size: 14px; font-weight: 600;">
+                            ${qaData.hubstaffActivity.activityPercentage}% Engagement
                         </div>
                     </div>
 
-                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px;">
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;">
                         ${qaData.tasks.length === 0 ? 
-                            '<div style="grid-column: span 3; padding: 100px; text-align: center; color: #94a3b8; font-size: 28px; font-weight: 600; background: white; border-radius: 30px; border: 2px dashed #e2e8f0;">No tasks recorded for this session</div>' : 
+                            '<div style="grid-column: span 3; padding: 64px; text-align: center; color: #94a3b8; font-size: 18px; font-weight: 500; background: white; border-radius: 16px; border: 1px dashed #e2e8f0;">No tasks recorded for this session</div>' : 
                             qaData.tasks.map((task: any) => {
                                 const effectiveStatus = getEffectiveStatus(task);
                                 let displayStatus = effectiveStatus;
@@ -288,40 +290,38 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                                 else if (task.priority === 'Low') pColor = '#22c55e';
 
                                 return `
-                                    <div style="background: white; border-radius: 24px; padding: 30px; display: flex; flex-direction: column; gap: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02); border: 1px solid #e2e8f0; border-left: 10px solid ${statusColor}; transition: transform 0.2s;">
-                                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 5px;">
-                                            <div style="background: ${statusBg}; color: ${statusColor}; padding: 6px 16px; border-radius: 12px; font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">${displayStatus}</div>
-                                            ${task.priority ? `<div style="font-size: 13px; font-weight: 900; color: ${pColor}; text-transform: uppercase; letter-spacing: 1px; background: ${pColor}15; padding: 4px 12px; border-radius: 8px;">${task.priority}</div>` : ''}
+                                    <div style="background: white; border-radius: 16px; padding: 24px; display: flex; flex-direction: column; gap: 16px; box-shadow: 0 1px 2px rgba(0,0,0,0.04); border: 1px solid #e2e8f0; border-left: 6px solid ${statusColor};">
+                                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                                            <div style="background: ${statusBg}; color: ${statusColor}; padding: 6px 12px; border-radius: 999px; font-size: 12px; font-weight: 600; text-transform: uppercase;">${displayStatus}</div>
+                                            ${task.priority ? `<div style="font-size: 12px; font-weight: 600; color: ${pColor}; text-transform: uppercase;">${task.priority}</div>` : ''}
                                         </div>
                                         
-                                        <div style="color: #0f172a; font-weight: 800; font-size: 24px; line-height: 1.2; min-height: 2.4em;">${task.projectName}</div>
+                                        <div style="color: #0f172a; font-weight: 600; font-size: 18px; line-height: 1.4;">${task.projectName}</div>
                                         
                                         <div style="display: flex; flex-direction: column; gap: 12px;">
-                                            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                                                <span style="font-size: 16px; color: #475569; background: #f1f5f9; padding: 6px 14px; border-radius: 10px; font-weight: 600;">${task.projectType || 'Project'}</span>
-                                                <span style="font-size: 16px; color: #475569; background: #f1f5f9; padding: 6px 14px; border-radius: 10px; font-weight: 600;">${task.subPhase || 'Task'}</span>
+                                            <div style="display: flex; gap: 8px;">
+                                                <span style="font-size: 12px; color: #64748b; background: #f8fafc; padding: 4px 10px; border-radius: 6px; font-weight: 500; border: 1px solid #f1f5f9;">${task.projectType || 'Project'}</span>
+                                                <span style="font-size: 12px; color: #64748b; background: #f8fafc; padding: 4px 10px; border-radius: 6px; font-weight: 500; border: 1px solid #f1f5f9;">${task.subPhase || 'Task'}</span>
                                             </div>
                                             
-                                            <div style="background: #f8fafc; padding: 15px; border-radius: 16px; border: 1px solid #f1f5f9;">
-                                                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                                                    <span style="color: #94a3b8; font-size: 14px; font-weight: 700; text-transform: uppercase;">Timeline</span>
-                                                </div>
-                                                <div style="color: #475569; font-size: 17px; font-weight: 600; display: flex; align-items: center; gap: 8px;">
-                                                    ${task.startDate ? formatDate(task.startDate) : '-'} <span style="color: #cbd5e1;">➔</span> ${task.endDate ? formatDate(task.endDate) : '-'}
-                                                </div>
+                                            <div style="margin-top: 8px;">
+                                                <p style="color: #94a3b8; font-size: 12px; font-weight: 400; margin: 0 0 4px 0;">Period</p>
+                                                <p style="color: #475569; font-size: 14px; font-weight: 500; margin: 0;">
+                                                    ${task.startDate ? formatDate(task.startDate) : '-'} <span style="color: #cbd5e1; margin: 0 4px;">→</span> ${task.endDate ? formatDate(task.endDate) : '-'}
+                                                </p>
                                             </div>
                                         </div>
                                         
-                                        ${task.comments ? `<div style="font-size: 18px; color: #64748b; line-height: 1.5; padding: 15px; background: #fff7ed; border-radius: 16px; border-left: 4px solid #f97316; font-style: italic;">"${task.comments}"</div>` : ''}
+                                        ${task.comments ? `<div style="font-size: 14px; color: #475569; line-height: 1.5; padding: 12px 16px; background: #f8fafc; border-radius: 12px; border: 1px solid #f1f5f9; font-style: italic;">"${task.comments}"</div>` : ''}
                                     </div>
                                 `;
                             }).join('')
                         }
                     </div>
 
-                    <div style="margin-top: 60px; padding: 40px; background: #0f172a; border-radius: 30px; text-align: center; color: rgba(255,255,255,0.5);">
-                        <p style="font-size: 20px; margin: 0; font-weight: 600; letter-spacing: 1px;">
-                            PRODUCED BY <span style="color: white; font-weight: 900;">QA TRACKER PRO</span> • ${new Date().getFullYear()}
+                    <div style="margin-top: 64px; text-align: center; border-top: 1px solid #e2e8f0; padding-top: 32px;">
+                        <p style="font-size: 14px; color: #94a3b8; font-weight: 500; letter-spacing: 0.05em;">
+                            GENERATED BY <span style="color: #475569; font-weight: 700;">QA TRACKER PRO</span>
                         </p>
                     </div>
                 </div>
@@ -519,35 +519,36 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                 }
                 const index = Math.abs(hash) % colors.length;
                 return colors[index];
-            };
-
-            // Create a temporary container for the report
+                    // Create a temporary container for the report
             const container = document.createElement('div');
-            container.style.cssText = 'position: absolute; left: -9999px; top: -9999px; background: #fdfdfd; padding: 60px; width: 2200px;';
+            container.style.cssText = 'position: absolute; left: -9999px; top: -9999px; background: #f8fafc; padding: 64px; width: 2200px;';
 
             container.innerHTML = `
-                <div style="font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
-                    <div style="margin-bottom: 50px; display: flex; justify-content: space-between; align-items: center; background: white; padding: 50px; border-radius: 40px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.04); border: 1px solid #f1f5f9;">
+                <style>
+                    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+                    * { font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; box-sizing: border-box; }
+                </style>
+                <div style="background: #f8fafc;">
+                    <!-- Header Section -->
+                    <div style="margin-bottom: 48px; display: flex; justify-content: space-between; align-items: flex-end;">
                         <div>
-                            <div style="display: flex; align-items: center; gap: 20px; margin-bottom: 10px;">
-                                <div style="width: 15px; height: 50px; background: #0f172a; border-radius: 8px;"></div>
-                                <h1 style="color: #0f172a; font-size: 64px; margin: 0; font-weight: 900; letter-spacing: -3px;">Work Status Report</h1>
-                            </div>
-                            <p style="color: #64748b; font-size: 28px; margin: 0; font-weight: 600; padding-left: 35px;">${teamName} • ${new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                            <h1 style="color: #0f172a; font-size: 48px; margin: 0 0 8px 0; font-weight: 700; letter-spacing: -0.02em;">Work Status Report</h1>
+                            <p style="color: #64748b; font-size: 18px; margin: 0; font-weight: 500;">${teamName} • ${new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}</p>
                         </div>
-                        <div style="text-align: right;">
-                             <p style="color: #94a3b8; font-size: 18px; margin: 0 0 8px 0; font-weight: 700; text-transform: uppercase; letter-spacing: 3px;">Resource Utilization</p>
-                             <p style="color: #0f172a; font-size: 56px; font-weight: 900; margin: 0;">${todayTasks.length} <span style="font-size: 24px; color: #64748b; font-weight: 700;">ACTIVE TASKS</span></p>
+                        <div style="background: white; border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px 32px; box-shadow: 0 1px 2px rgba(0,0,0,0.04); text-align: center;">
+                             <p style="color: #64748b; font-size: 12px; margin: 0 0 4px 0; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Resource Utilization</p>
+                             <p style="color: #0f172a; font-size: 36px; font-weight: 700; margin: 0;">${todayTasks.length} <span style="font-size: 16px; color: #94a3b8; font-weight: 600; text-transform: none;">Active Tasks</span></p>
                         </div>
                     </div>
                     
                     ${hubstaffData ? `
-                    <div style="background: white; border: 2px solid #e2e8f0; padding: 40px; margin-bottom: 50px; border-radius: 40px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);">
-                        <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 35px;">
-                            <div style="width: 12px; height: 12px; background: #0ea5e9; border-radius: 50%;"></div>
-                            <h3 style="color: #0f172a; font-size: 32px; margin: 0; font-weight: 800;">Activity Summary</h3>
+                    <!-- Hubstaff Summary Section -->
+                    <div style="background: white; border: 1px solid #e2e8f0; padding: 32px; margin-bottom: 48px; border-radius: 16px; box-shadow: 0 1px 2px rgba(0,0,0,0.04);">
+                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 24px;">
+                            <div style="width: 8px; height: 24px; background: #3b82f6; border-radius: 4px;"></div>
+                            <h3 style="color: #0f172a; font-size: 20px; margin: 0; font-weight: 700;">Activity Summary</h3>
                         </div>
-                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px;">
+                        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px;">
                         ${(() => {
                         const relevantActivities = hubstaffData.activities.filter((a: any) => {
                             if (a.timeWorked <= 0) return false;
@@ -563,7 +564,7 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                             return false;
                         });
 
-                        if (relevantActivities.length === 0) return `<p style="color: #64748b; grid-column: span 3; font-style: italic; font-size: 22px;">No active synchronization tracked.</p>`;
+                        if (relevantActivities.length === 0) return `<p style="color: #94a3b8; grid-column: span 4; font-size: 16px; font-style: italic;">No active synchronization tracked.</p>`;
 
                         const aggregated = relevantActivities.reduce((acc: any, curr: any) => {
                             if (!acc[curr.userName]) acc[curr.userName] = { userName: curr.userName, timeWorked: 0, activeTimeWorked: 0, weightedActivitySum: 0, projects: new Set() };
@@ -578,21 +579,21 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
 
                         return Object.values(aggregated).map((user: any) => {
                             const avgActivity = user.activeTimeWorked > 0 ? Math.round(user.weightedActivitySum / user.activeTimeWorked) : 0;
-                            const projectList = Array.from(user.projects).join(', ') || 'N/A';
+                            const projectList = Array.from(user.projects).join(', ') || 'General';
                             return `
-                                <div style="background: #f8fafc; padding: 30px; border-radius: 24px; border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between;">
-                                    <div style="flex: 1; padding-right: 20px;">
-                                        <p style="color: #0f172a; font-size: 24px; font-weight: 800; margin: 0 0 5px 0;">${user.userName}</p>
-                                        <p style="color: #64748b; font-size: 16px; margin: 0; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 250px;">${projectList}</p>
+                                <div style="background: #f8fafc; padding: 20px; border-radius: 12px; border: 1px solid #f1f5f9; display: flex; flex-direction: column; gap: 12px;">
+                                    <div>
+                                        <p style="color: #0f172a; font-size: 16px; font-weight: 600; margin: 0 0 2px 0;">${user.userName}</p>
+                                        <p style="color: #64748b; font-size: 12px; margin: 0; font-weight: 400; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${projectList}</p>
                                     </div>
-                                    <div style="display: flex; gap: 30px; text-align: right;">
+                                    <div style="display: flex; gap: 24px;">
                                         <div>
-                                            <p style="color: #94a3b8; font-size: 14px; margin: 0 0 4px 0; font-weight: 700; text-transform: uppercase;">Time</p>
-                                            <p style="color: #0ea5e9; font-size: 26px; font-weight: 900; margin: 0;">${formatTime(user.timeWorked)}</p>
+                                            <p style="color: #94a3b8; font-size: 10px; margin: 0 0 2px 0; font-weight: 600; text-transform: uppercase;">Time</p>
+                                            <p style="color: #475569; font-size: 16px; font-weight: 700; margin: 0;">${formatTime(user.timeWorked)}</p>
                                         </div>
                                         <div>
-                                            <p style="color: #94a3b8; font-size: 14px; margin: 0 0 4px 0; font-weight: 700; text-transform: uppercase;">Active</p>
-                                            <p style="color: #10b981; font-size: 26px; font-weight: 900; margin: 0;">${avgActivity}%</p>
+                                            <p style="color: #94a3b8; font-size: 10px; margin: 0 0 2px 0; font-weight: 600; text-transform: uppercase;">Active</p>
+                                            <p style="color: #10b981; font-size: 16px; font-weight: 700; margin: 0;">${avgActivity}%</p>
                                         </div>
                                     </div>
                                 </div>
@@ -603,29 +604,25 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                     </div>
                     ` : ''}
                     
-                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 50px;">
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 40px;">
                     ${sortedAssignees.map(assignee => {
                         const mColor = getMemberColor(assignee);
                         return `
-                        <div style="border-radius: 40px; overflow: hidden; background: white; border: 2px solid #f1f5f9; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.03);">
+                        <div style="background: white; border: 1px solid #e2e8f0; border-radius: 16px; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,0.04);">
                             <!-- Member Header -->
-                            <div style="background: ${mColor.bg}; padding: 35px 45px; border-bottom: 2px solid ${mColor.border}20; display: flex; justify-content: space-between; align-items: center;">
-                                <div style="display: flex; align-items: center; gap: 20px;">
-                                    <div style="width: 70px; height: 70px; background: ${mColor.border}; border-radius: 20px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 900; font-size: 32px; box-shadow: 0 10px 15px -3px ${mColor.border}40;">
+                            <div style="background: ${mColor.bg}40; padding: 24px 32px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center;">
+                                <div style="display: flex; align-items: center; gap: 16px;">
+                                    <div style="width: 40px; height: 40px; background: ${mColor.border}; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 18px;">
                                         ${assignee.charAt(0)}
                                     </div>
                                     <div>
-                                        <h3 style="color: #0f172a; font-size: 42px; font-weight: 900; margin: 0; letter-spacing: -1px;">${assignee}</h3>
-                                        <div style="color: ${mColor.text}; font-size: 18px; font-weight: 700; text-transform: uppercase; margin-top: 4px; letter-spacing: 1px;">TEAM CONTRIBUTOR</div>
+                                        <h3 style="color: #0f172a; font-size: 20px; font-weight: 700; margin: 0;">${assignee}</h3>
+                                        <p style="color: #64748b; font-size: 12px; font-weight: 500; margin: 0;">${groupedTasks[assignee].length} Projects Assigned</p>
                                     </div>
-                                </div>
-                                <div style="background: white; color: ${mColor.text}; padding: 10px 25px; border-radius: 99px; font-size: 20px; font-weight: 800; border: 2px solid ${mColor.border}30;">
-                                    ${groupedTasks[assignee].length} Tasks
                                 </div>
                             </div>
 
-                            <!-- Task Card List (Vertical within member box) -->
-                            <div style="padding: 40px; display: flex; flex-direction: column; gap: 25px; background: #fcfcfc;">
+                            <div style="padding: 32px; display: flex; flex-direction: column; gap: 24px;">
                                 ${groupedTasks[assignee].map((task) => {
                                     const effectiveStatus = getEffectiveStatus(task);
                                     let displayStatus = effectiveStatus;
@@ -652,27 +649,29 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                                     else if (task.priority === 'Low') pColor = '#22c55e';
 
                                     return `
-                                        <div style="background: white; border: 1px solid #e2e8f0; border-radius: 30px; padding: 35px; display: flex; flex-direction: column; gap: 20px; border-left: 12px solid ${statusColor}; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);">
-                                            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                                                <div style="background: ${statusBg}; color: ${statusColor}; padding: 8px 20px; border-radius: 15px; font-size: 16px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">${displayStatus}</div>
-                                                ${task.priority ? `<div style="font-size: 14px; font-weight: 900; color: ${pColor}; text-transform: uppercase; background: ${pColor}10; padding: 6px 16px; border-radius: 10px;">${task.priority} Priority</div>` : ''}
+                                        <div style="background: white; border: 1px solid #e2e8f0; border-radius: 16px; padding: 24px; display: flex; flex-direction: column; gap: 16px; border-left: 6px solid ${statusColor}; box-shadow: 0 1px 2px rgba(0,0,0,0.04);">
+                                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                                <div style="background: ${statusBg}; color: ${statusColor}; padding: 6px 12px; border-radius: 999px; font-size: 12px; font-weight: 600; text-transform: uppercase;">${displayStatus}</div>
+                                                ${task.priority ? `<div style="font-size: 12px; font-weight: 600; color: ${pColor}; text-transform: uppercase;">${task.priority} Priority</div>` : ''}
                                             </div>
                                             
-                                            <div style="color: #0f172a; font-weight: 900; font-size: 30px; line-height: 1.2;">${task.projectName}</div>
+                                            <div style="color: #0f172a; font-weight: 600; font-size: 18px; line-height: 1.4;">${task.projectName}</div>
                                             
-                                            <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-                                                <span style="font-size: 20px; color: #475569; background: #f1f5f9; padding: 8px 20px; border-radius: 12px; font-weight: 700;">${task.projectType || 'Project'}</span>
-                                                <span style="font-size: 20px; color: #475569; background: #f1f5f9; padding: 8px 20px; border-radius: 12px; font-weight: 700;">${task.subPhase || 'Task'}</span>
+                                            <div style="display: flex; gap: 8px;">
+                                                <span style="font-size: 12px; color: #64748b; background: #f8fafc; padding: 4px 10px; border-radius: 6px; font-weight: 500; border: 1px solid #f1f5f9;">${task.projectType || 'Project'}</span>
+                                                <span style="font-size: 12px; color: #64748b; background: #f8fafc; padding: 4px 10px; border-radius: 6px; font-weight: 500; border: 1px solid #f1f5f9;">${task.subPhase || 'Task'}</span>
                                             </div>
 
-                                            <div style="margin-top: 10px; padding-top: 25px; border-top: 2px dashed #f1f5f9; display: flex; justify-content: space-between; align-items: center;">
-                                                <div style="font-size: 22px; color: #475569; font-weight: 600;">
-                                                    <span style="color: #94a3b8; font-weight: 700; text-transform: uppercase; font-size: 14px; display: block; margin-bottom: 5px;">TIMELINE</span>
-                                                    ${task.startDate ? formatDate(task.startDate) : '-'} <span style="color: #cbd5e1; margin: 0 10px;">➔</span> ${task.endDate ? formatDate(task.endDate) : '-'}
+                                            <div style="margin-top: 8px; display: flex; justify-content: space-between; align-items: center;">
+                                                <div>
+                                                    <p style="color: #94a3b8; font-size: 12px; font-weight: 400; margin: 0 0 2px 0;">Period</p>
+                                                    <p style="color: #475569; font-size: 14px; font-weight: 500; margin: 0;">
+                                                        ${task.startDate ? formatDate(task.startDate) : '-'} <span style="color: #cbd5e1; margin: 0 4px;">→</span> ${task.endDate ? formatDate(task.endDate) : '-'}
+                                                    </p>
                                                 </div>
                                             </div>
                                             
-                                            ${task.comments ? `<div style="font-size: 20px; color: #64748b; line-height: 1.6; background: #fff7ed; padding: 25px; border-radius: 20px; border-left: 6px solid #f97316; font-style: italic;">"${task.comments}"</div>` : ''}
+                                            ${task.comments ? `<div style="font-size: 14px; color: #475569; line-height: 1.5; padding: 16px; background: #f8fafc; border-radius: 12px; border: 1px solid #f1f5f9; font-style: italic;">"${task.comments}"</div>` : ''}
                                         </div>
                                     `;
                                 }).join('')}
@@ -682,23 +681,24 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                     }).join('')}
                     </div>
 
-                    <div style="margin-top: 60px; padding: 50px; background: #0f172a; border-radius: 40px; display: flex; justify-content: space-between; align-items: center; color: white; box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.25);">
-                        <div style="display: flex; align-items: center; gap: 20px;">
-                            <div style="width: 10px; height: 60px; background: #3b82f6; border-radius: 5px;"></div>
-                            <h2 style="font-size: 36px; margin: 0; font-weight: 900; letter-spacing: -1px;">Consolidated Summary</h2>
+                    <!-- Summary Footer -->
+                    <div style="margin-top: 64px; background: #0f172a; border-radius: 16px; padding: 32px 48px; display: flex; justify-content: space-between; align-items: center; color: white;">
+                        <div style="display: flex; align-items: center; gap: 16px;">
+                            <div style="width: 4px; height: 32px; background: #3b82f6; border-radius: 2px;"></div>
+                            <h2 style="font-size: 24px; margin: 0; font-weight: 700; letter-spacing: -0.01em;">Consolidated Summary</h2>
                         </div>
-                        <div style="display: flex; gap: 80px;">
+                        <div style="display: flex; gap: 64px;">
                             <div style="text-align: center;">
-                                <p style="color: rgba(255,255,255,0.4); font-size: 18px; margin: 0 0 8px 0; font-weight: 700; text-transform: uppercase; letter-spacing: 2px;">Total Tasks</p>
-                                <p style="font-size: 56px; font-weight: 900; margin: 0; letter-spacing: -2px;">${todayTasks.length}</p>
+                                <p style="color: rgba(255,255,255,0.4); font-size: 12px; margin: 0 0 4px 0; font-weight: 600; text-transform: uppercase;">Total Tasks</p>
+                                <p style="font-size: 32px; font-weight: 700; margin: 0;">${todayTasks.length}</p>
                             </div>
                             <div style="text-align: center;">
-                                <p style="color: rgba(255,255,255,0.4); font-size: 18px; margin: 0 0 8px 0; font-weight: 700; text-transform: uppercase; letter-spacing: 2px;">Completed</p>
-                                <p style="font-size: 56px; font-weight: 900; margin: 0; color: #10b981; letter-spacing: -2px;">${todayTasks.filter(t => getEffectiveStatus(t) === 'Completed').length}</p>
+                                <p style="color: rgba(255,255,255,0.4); font-size: 12px; margin: 0 0 4px 0; font-weight: 600; text-transform: uppercase;">Completed</p>
+                                <p style="font-size: 32px; font-weight: 700; margin: 0; color: #10b981;">${todayTasks.filter(t => getEffectiveStatus(t) === 'Completed').length}</p>
                             </div>
                             <div style="text-align: center;">
-                                <p style="color: rgba(255,255,255,0.4); font-size: 18px; margin: 0 0 8px 0; font-weight: 700; text-transform: uppercase; letter-spacing: 2px;">Ongoing</p>
-                                <p style="font-size: 56px; font-weight: 900; margin: 0; color: #3b82f6; letter-spacing: -2px;">${todayTasks.filter(t => getEffectiveStatus(t) === 'In Progress').length}</p>
+                                <p style="color: rgba(255,255,255,0.4); font-size: 12px; margin: 0 0 4px 0; font-weight: 600; text-transform: uppercase;">Ongoing</p>
+                                <p style="font-size: 32px; font-weight: 700; margin: 0; color: #3b82f6;">${todayTasks.filter(t => getEffectiveStatus(t) === 'In Progress').length}</p>
                             </div>
                         </div>
                     </div>
@@ -799,27 +799,32 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
             };
 
             const container = document.createElement('div');
-            container.style.cssText = 'position: absolute; left: -9999px; top: -9999px; background: #fdfdfd; padding: 60px; width: 2000px;';
+            container.style.cssText = 'position: absolute; left: -9999px; top: -9999px; background: #f8fafc; padding: 64px; width: 2000px;';
 
             container.innerHTML = `
-                <div style="font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
-                    <div style="margin-bottom: 50px; display: flex; justify-content: space-between; align-items: center; background: white; padding: 40px; border-radius: 30px; border: 1px solid #f1f5f9;">
+                <style>
+                    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+                    * { font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; box-sizing: border-box; }
+                </style>
+                <div style="background: #f8fafc;">
+                    <!-- Header -->
+                    <div style="margin-bottom: 48px; display: flex; justify-content: space-between; align-items: flex-end;">
                         <div>
-                            <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 10px;">
-                                <div style="width: 10px; height: 40px; background: #3b82f6; border-radius: 5px;"></div>
-                                <h1 style="color: #0f172a; font-size: 56px; margin: 0; font-weight: 900; letter-spacing: -2px;">Upcoming Work Schedule</h1>
+                            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+                                <div style="width: 6px; height: 32px; background: #3b82f6; border-radius: 3px;"></div>
+                                <h1 style="color: #0f172a; font-size: 40px; margin: 0; font-weight: 700; letter-spacing: -0.02em;">Upcoming Work Schedule</h1>
                             </div>
-                            <p style="color: #64748b; font-size: 24px; margin: 0; font-weight: 600; padding-left: 25px;">${dateStr}</p>
+                            <p style="color: #64748b; font-size: 18px; margin: 0; font-weight: 500;">${dateStr}</p>
                         </div>
-                        <div style="text-align: right; background: #0f172a; padding: 20px 40px; border-radius: 20px; color: white;">
-                             <p style="color: rgba(255,255,255,0.5); font-size: 16px; margin: 0 0 5px 0; font-weight: 700; text-transform: uppercase; letter-spacing: 2px;">Total Active Load</p>
-                             <p style="font-size: 48px; font-weight: 900; margin: 0;">${scheduleTasks.length} <span style="font-size: 20px; color: rgba(255,255,255,0.7); font-weight: 700;">Tasks</span></p>
+                        <div style="background: white; border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px 32px; box-shadow: 0 1px 2px rgba(0,0,0,0.04); text-align: center;">
+                             <p style="color: #64748b; font-size: 12px; margin: 0 0 4px 0; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Total Active Load</p>
+                             <p style="color: #0f172a; font-size: 32px; font-weight: 700; margin: 0;">${scheduleTasks.length} <span style="font-size: 16px; color: #94a3b8; font-weight: 600; text-transform: none;">Tasks</span></p>
                         </div>
                     </div>
 
-                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px;">
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;">
                         ${scheduleTasks.length === 0 ?
-                            '<div style="grid-column: span 3; padding: 100px; text-align: center; color: #94a3b8; font-size: 24px; font-weight: 600; background: white; border-radius: 30px; border: 2px dashed #e2e8f0;">No active tasks found for the selected period</div>' :
+                            '<div style="grid-column: span 3; padding: 64px; text-align: center; color: #94a3b8; font-size: 18px; font-weight: 500; background: white; border-radius: 16px; border: 1px dashed #e2e8f0;">No active tasks found for the selected period</div>' :
                             scheduleTasks.map((task) => {
                                 const effectiveStatus = getEffectiveStatus(task);
                                 let displayStatus = effectiveStatus;
@@ -845,28 +850,31 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                                 else if (task.priority === 'Low') pColor = '#22c55e';
 
                                 return `
-                                    <div style="background: white; border-radius: 24px; padding: 30px; display: flex; flex-direction: column; gap: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02); border: 1px solid #e2e8f0; border-top: 10px solid ${statusColor};">
-                                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                                            <div style="background: ${statusBg}; color: ${statusColor}; padding: 6px 16px; border-radius: 12px; font-size: 14px; font-weight: 800; text-transform: uppercase;">${displayStatus}</div>
-                                            ${task.priority ? `<div style="font-size: 13px; font-weight: 900; color: ${pColor}; text-transform: uppercase;">${task.priority}</div>` : ''}
+                                    <div style="background: white; border-radius: 16px; padding: 24px; display: flex; flex-direction: column; gap: 16px; box-shadow: 0 1px 2px rgba(0,0,0,0.04); border: 1px solid #e2e8f0; border-left: 6px solid ${statusColor};">
+                                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                                            <div style="background: ${statusBg}; color: ${statusColor}; padding: 6px 12px; border-radius: 999px; font-size: 12px; font-weight: 600; text-transform: uppercase;">${displayStatus}</div>
+                                            ${task.priority ? `<div style="font-size: 12px; font-weight: 600; color: ${pColor}; text-transform: uppercase;">${task.priority}</div>` : ''}
                                         </div>
                                         
-                                        <div style="color: #0f172a; font-weight: 800; font-size: 24px; line-height: 1.3; min-height: 2.6em;">${task.projectName}</div>
+                                        <div style="color: #0f172a; font-weight: 600; font-size: 18px; line-height: 1.4;">${task.projectName}</div>
                                         
-                                        <div style="display: flex; flex-direction: column; gap: 15px;">
-                                            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                                                <span style="font-size: 16px; color: #475569; background: #f1f5f9; padding: 6px 14px; border-radius: 10px; font-weight: 600;">${task.projectType || 'Project'}</span>
-                                                <span style="font-size: 16px; color: #475569; background: #f1f5f9; padding: 6px 14px; border-radius: 10px; font-weight: 600;">${task.subPhase || 'Task'}</span>
+                                        <div style="display: flex; flex-direction: column; gap: 12px;">
+                                            <div style="display: flex; gap: 8px;">
+                                                <span style="font-size: 12px; color: #64748b; background: #f8fafc; padding: 4px 10px; border-radius: 6px; font-weight: 500; border: 1px solid #f1f5f9;">${task.projectType || 'Project'}</span>
+                                                <span style="font-size: 12px; color: #64748b; background: #f8fafc; padding: 4px 10px; border-radius: 6px; font-weight: 500; border: 1px solid #f1f5f9;">${task.subPhase || 'Task'}</span>
                                             </div>
-                                            <div style="font-size: 18px; color: #64748b; font-weight: 600; background: #f8fafc; padding: 12px; border-radius: 12px; border: 1px solid #f1f5f9;">
-                                                <span style="color: #94a3b8; font-size: 12px; text-transform: uppercase; font-weight: 700; display: block; margin-bottom: 5px;">Assignees</span>
-                                                ${[task.assignedTo, task.assignedTo2, ...(task.additionalAssignees || [])].filter(Boolean).join(', ') || 'Unassigned'}
+                                            
+                                            <div>
+                                                <p style="color: #94a3b8; font-size: 12px; font-weight: 400; margin: 0 0 2px 0;">Assignees</p>
+                                                <p style="color: #475569; font-size: 14px; font-weight: 500; margin: 0;">${[task.assignedTo, task.assignedTo2, ...(task.additionalAssignees || [])].filter(Boolean).join(', ') || 'Unassigned'}</p>
                                             </div>
                                         </div>
 
-                                        <div style="margin-top: auto; padding-top: 20px; border-top: 2px dashed #f1f5f9; font-size: 18px; color: #475569; font-weight: 700;">
-                                            <span style="color: #94a3b8; font-size: 12px; text-transform: uppercase; font-weight: 700; display: block; margin-bottom: 5px;">Period</span>
-                                            ${task.startDate ? formatDate(task.startDate) : 'TBD'} <span style="color: #cbd5e1;">➔</span> ${task.endDate ? formatDate(task.endDate) : 'TBD'}
+                                        <div style="margin-top: auto; padding-top: 16px; border-top: 1px dashed #e2e8f0;">
+                                            <p style="color: #94a3b8; font-size: 12px; font-weight: 400; margin: 0 0 2px 0;">Period</p>
+                                            <p style="color: #475569; font-size: 14px; font-weight: 600; margin: 0;">
+                                                ${task.startDate ? formatDate(task.startDate) : 'TBD'} <span style="color: #cbd5e1; margin: 0 4px;">→</span> ${task.endDate ? formatDate(task.endDate) : 'TBD'}
+                                            </p>
                                         </div>
                                     </div>
                                 `;
@@ -874,9 +882,9 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                         }
                     </div>
 
-                    <div style="margin-top: 60px; padding: 30px; background: white; border-radius: 24px; text-align: center; border: 1px solid #e2e8f0;">
-                        <p style="color: #94a3b8; font-size: 18px; margin: 0; font-weight: 600; letter-spacing: 1px;">
-                            GENERATED BY <span style="color: #0f172a; font-weight: 900;">QA TRACKER PRO</span>
+                    <div style="margin-top: 64px; text-align: center; border-top: 1px solid #e2e8f0; padding-top: 32px;">
+                        <p style="font-size: 14px; color: #94a3b8; font-weight: 500; letter-spacing: 0.05em;">
+                            GENERATED BY <span style="color: #475569; font-weight: 700;">QA TRACKER PRO</span>
                         </p>
                     </div>
                 </div>
