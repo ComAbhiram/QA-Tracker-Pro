@@ -1,0 +1,536 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import { supabase } from '@/lib/supabase';
+import { isValidProjectDate } from '@/lib/types';
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isToday, addMonths, subMonths, addDays, subDays } from 'date-fns';
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, List, PlusCircle, User, Tag, FileText, Trash2 } from 'lucide-react';
+import LeaveModal, { LeaveFormData } from '@/components/LeaveModal';
+import { useGuestMode } from '@/contexts/GuestContext';
+import TeamSelectorPill from '@/components/ui/TeamSelectorPill';
+import { useTeams } from '@/hooks/useTeams';
+import Loader from '@/components/ui/Loader';
+
+interface Leave {
+    id: number;
+    team_member_id: string;
+    team_member_name: string;
+    leave_date: string;
+    leave_type: string;
+    reason: string | null;
+    created_at: string;
+}
+
+export default function LeavePage() {
+    const [leaves, setLeaves] = useState<Leave[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [currentDate, setCurrentDate] = useState(new Date());
+    const [viewMode, setViewMode] = useState<'calendar' | 'day' | 'table'>('calendar');
+    const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false);
+    const [currentUser, setCurrentUser] = useState<any>(null);
+    const [userTeamId, setUserTeamId] = useState<string | null>(null);
+    const { isGuest, selectedTeamId, selectedTeamName, setGuestSession, isLoading: isGuestLoading } = useGuestMode();
+    const { teams } = useTeams(isGuest);
+
+    useEffect(() => {
+        if (!isGuestLoading) {
+            fetchCurrentUser();
+        }
+    }, [isGuestLoading]);
+
+    // Separate effect to fetch leaves when team context is ready
+    useEffect(() => {
+        if (!isGuestLoading && (userTeamId || (isGuest && selectedTeamId))) {
+            fetchLeaves();
+        }
+    }, [currentDate, viewMode, selectedTeamId, userTeamId, isGuestLoading]);
+
+    async function fetchCurrentUser() {
+        const { data: { user } } = await supabase.auth.getUser();
+        setCurrentUser(user);
+        console.log('[Leave] fetchCurrentUser - isGuest:', isGuest, 'user:', user?.id);
+
+        // Fetch user's team_id for filtering
+        if (user && !isGuest) {
+            const { data: profile } = await supabase
+                .from('user_profiles')
+                .select('team_id')
+                .eq('id', user.id)
+                .single();
+            console.log('[Leave] Fetched profile:', profile);
+            if (profile) {
+                setUserTeamId(profile.team_id);
+                console.log('[Leave] Set userTeamId:', profile.team_id);
+            }
+        }
+    }
+
+    async function fetchLeaves() {
+        setLoading(true);
+        let start, end;
+
+        if (viewMode === 'calendar') {
+            start = startOfMonth(currentDate);
+            end = endOfMonth(currentDate);
+        } else {
+            start = startOfMonth(currentDate);
+            end = endOfMonth(currentDate);
+        }
+
+        console.log('[Leave] fetchLeaves - isGuest:', isGuest, 'selectedTeamId:', selectedTeamId, 'userTeamId:', userTeamId);
+
+        try {
+            let url = `/api/leaves?start_date=${start.toISOString().split('T')[0]}&end_date=${end.toISOString().split('T')[0]}`;
+
+            // CRITICAL FIX: Always pass team_id to prevent cross-team data leakage
+            if (isGuest && selectedTeamId) {
+                url += `&team_id=${selectedTeamId}`;
+                console.log('[Leave] Using selectedTeamId:', selectedTeamId);
+            } else if (!isGuest && userTeamId) {
+                url += `&team_id=${userTeamId}`;
+                console.log('[Leave] Using userTeamId:', userTeamId);
+            } else {
+                console.error('[Leave] ⚠️ NO TEAM_ID! isGuest:', isGuest, 'selectedTeamId:', selectedTeamId, 'userTeamId:', userTeamId);
+            }
+            console.log('[Leave] Final URL:', url);
+
+            const response = await fetch(url);
+            const data = await response.json();
+
+            // Filter out leaves with invalid dates to prevent crashes
+            const validLeaves = (data.leaves || []).filter((l: any) => isValidProjectDate(l.leave_date));
+            setLeaves(validLeaves);
+        } catch (error) {
+            console.error('Error fetching leaves:', error);
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    const handleSaveLeave = async (leaveData: LeaveFormData) => {
+        try {
+            const response = await fetch('/api/leaves', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    ...leaveData,
+                    created_by: currentUser?.id,
+                    team_id: isGuest ? selectedTeamId : undefined
+                })
+            });
+
+            if (!response.ok) {
+                const errData = await response.json();
+                throw new Error(errData.error || 'Failed to save leave');
+            }
+
+            await fetchLeaves();
+        } catch (error: any) {
+            console.error('Error saving leave:', error);
+            alert(`Error: ${error.message}`);
+            throw error;
+        }
+    };
+
+    const handleDeleteLeave = async (leaveId: number) => {
+        if (!confirm('Are you sure you want to delete this leave request?')) {
+            return;
+        }
+
+        try {
+            const response = await fetch(`/api/leaves?id=${leaveId}`, {
+                method: 'DELETE'
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to delete leave');
+            }
+
+            await fetchLeaves();
+        } catch (error) {
+            console.error('Error deleting leave:', error);
+            alert('Failed to delete leave request');
+        }
+    };
+
+    const nextPeriod = () => {
+        if (viewMode === 'calendar') {
+            setCurrentDate(addMonths(currentDate, 1));
+        } else {
+            setCurrentDate(addDays(currentDate, 1));
+        }
+    };
+
+    const prevPeriod = () => {
+        if (viewMode === 'calendar') {
+            setCurrentDate(subMonths(currentDate, 1));
+        } else {
+            setCurrentDate(subDays(currentDate, 1));
+        }
+    };
+
+    const goToToday = () => {
+        setCurrentDate(new Date());
+    };
+
+    // Calendar Grid Generation
+    const days = eachDayOfInterval({
+        start: startOfMonth(currentDate),
+        end: endOfMonth(currentDate),
+    });
+    const startPadding = Array.from({ length: startOfMonth(currentDate).getDay() });
+
+    // Day View Leaves
+    const dayViewLeaves = leaves.filter(leave => {
+        const leaveDate = new Date(leave.leave_date);
+        const target = new Date(currentDate);
+        leaveDate.setHours(0, 0, 0, 0);
+        target.setHours(0, 0, 0, 0);
+        return leaveDate.getTime() === target.getTime();
+    });
+
+    const getLeaveTypeColor = (type: string) => {
+        const t = type.toLowerCase();
+        // Unplanned leave - urgent red
+        if (t.includes('unplanned')) return 'bg-rose-600 text-white border-rose-700';
+        // Full day sick leave - red
+        if (t.includes('full day sick')) return 'bg-red-600 text-white border-red-700';
+        // Full day casual leave - blue
+        if (t.includes('full day casual')) return 'bg-blue-600 text-white border-blue-700';
+        // Half day sick leave - lighter red
+        if (t.includes('half day') && t.includes('sick')) return 'bg-red-500 text-white border-red-600';
+        // Half day casual leave - lighter blue
+        if (t.includes('half day') && t.includes('casual')) return 'bg-blue-500 text-white border-blue-600';
+        // Fallback
+        return 'bg-slate-600 text-white border-slate-700';
+    };
+
+    const handleTeamSelect = (id: string, name: string) => {
+        setGuestSession(id, name);
+        // Force reload to ensure context updates propogate clean - same as tracker/page.tsx
+        setTimeout(() => {
+            window.location.reload();
+        }, 100);
+    };
+
+    if (isGuestLoading) {
+        return (
+            <div className="flex items-center justify-center min-h-[400px]">
+                <Loader size="lg" color="indigo" />
+            </div>
+        );
+    }
+
+    return (
+        <div className="max-w-[1600px] mx-auto space-y-6">
+
+            {/* Header Controls */}
+            <header className="flex flex-col gap-6 bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 transition-colors">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-100">Leave Management</h1>
+                        <p className="text-slate-500 dark:text-slate-400">Manage team member leave requests and view calendar</p>
+                    </div>
+
+                    {/* Manager Mode Team Selector */}
+                    {isGuest && teams.length > 0 && (
+                        <div className="flex-1 flex justify-start md:justify-end min-w-0 overflow-x-auto no-scrollbar md:ml-4">
+                            <TeamSelectorPill
+                                teams={teams}
+                                selectedTeamName={selectedTeamName}
+                                onSelect={handleTeamSelect}
+                            />
+                        </div>
+                    )}
+                </div>
+
+                <div className="flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-slate-50 dark:border-slate-800">
+                    <div className="flex flex-wrap items-center gap-4 w-full md:w-auto">
+                        {/* Add Leave Button */}
+                        <button
+                            onClick={() => setIsLeaveModalOpen(true)}
+                            className="btn btn-primary flex items-center justify-center gap-2 shadow-lg shadow-orange-200 transition-all hover:scale-[1.02] active:scale-[0.98] w-full sm:w-auto"
+                        >
+                            <PlusCircle size={18} />
+                            Add Leave
+                        </button>
+
+                        <div className="h-8 w-px bg-slate-200 dark:bg-slate-700 hidden md:block"></div>
+
+                        {/* View Toggle */}
+                        <div className="flex flex-wrap bg-slate-100 dark:bg-slate-800 p-1 rounded-xl transition-colors w-full sm:w-auto">
+                            <button
+                                onClick={() => setViewMode('calendar')}
+                                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${viewMode === 'calendar' ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
+                            >
+                                <CalendarIcon size={16} /> Calendar
+                            </button>
+                            <button
+                                onClick={() => setViewMode('table')}
+                                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${viewMode === 'table' ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
+                            >
+                                <List size={16} /> Table
+                            </button>
+                            <button
+                                onClick={() => setViewMode('day')}
+                                className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${viewMode === 'day' ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
+                            >
+                                <CalendarIcon size={16} /> Day View
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Navigation */}
+                    <div className="flex items-center justify-between sm:justify-end gap-4 w-full md:w-auto">
+                        <div className="flex items-center gap-2">
+                            <button onClick={prevPeriod} className="p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 hover:border-indigo-300 dark:hover:border-indigo-500 transition-all">
+                                <ChevronLeft size={20} />
+                            </button>
+                            <div className="min-w-[180px] text-center font-bold text-lg text-slate-800 dark:text-slate-100">
+                                {viewMode === 'calendar' ? format(currentDate, 'MMMM yyyy') : format(currentDate, 'EEEE, MMM d, yyyy')}
+                            </div>
+                            <button onClick={nextPeriod} className="p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 hover:border-indigo-300 dark:hover:border-indigo-500 transition-all">
+                                <ChevronRight size={20} />
+                            </button>
+                        </div>
+
+                        <button onClick={goToToday} className="text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 px-3 py-1.5 rounded-lg transition-colors">
+                            Today
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            {/* Content Area */}
+            <div className={`bg-white dark:bg-slate-900 rounded-2xl shadow-xl shadow-slate-200/50 dark:shadow-none border border-white/20 dark:border-slate-800 backdrop-blur-xl transition-colors ${viewMode === 'calendar' ? 'h-[calc(100vh-220px)] overflow-y-auto custom-scrollbar' : 'min-h-[600px]'}`}>
+
+                {viewMode === 'calendar' && (
+                    <div className="min-h-full flex flex-col">
+                        <div className="grid grid-cols-7 border-b border-slate-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-800/80 sticky top-0 z-10 shadow-sm transition-colors">
+                            {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+                                <div key={day} className="py-4 text-center text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider backdrop-blur-md bg-slate-50/90 dark:bg-slate-800/90 transition-colors">
+                                    {day}
+                                </div>
+                            ))}
+                        </div>
+                        <div className="grid grid-cols-7 auto-rows-[minmax(160px,1fr)] flex-1">
+                            {startPadding.map((_, i) => (
+                                <div key={`empty-${i}`} className="bg-slate-50/30 dark:bg-slate-800/30 border-r border-b border-slate-100 dark:border-slate-800 transition-colors"></div>
+                            ))}
+                            {days.map(day => {
+                                const dayLeaves = leaves.filter(leave => {
+                                    const leaveDate = new Date(leave.leave_date);
+                                    leaveDate.setHours(0, 0, 0, 0);
+                                    const targetDay = new Date(day);
+                                    targetDay.setHours(0, 0, 0, 0);
+                                    return leaveDate.getTime() === targetDay.getTime();
+                                });
+
+                                return (
+                                    <div
+                                        key={day.toString()}
+                                        onClick={() => { setCurrentDate(day); setViewMode('day'); }}
+                                        className={`border-r border-b border-slate-100 dark:border-slate-800 p-2 transition-all hover:bg-indigo-50/50 dark:hover:bg-indigo-900/30 cursor-pointer group relative flex flex-col
+                                            ${!isSameMonth(day, currentDate) ? 'bg-slate-50/50 dark:bg-slate-800/50 text-slate-400 dark:text-slate-600' : ''} 
+                                            ${isToday(day) ? 'bg-blue-50/30 dark:bg-blue-900/20' : ''}
+                                        `}
+                                    >
+                                        <div className="flex justify-between items-start mb-1">
+                                            <span className={`text-sm font-medium w-7 h-7 flex items-center justify-center rounded-full transition-colors ${isToday(day) ? 'bg-indigo-600 text-white shadow-md shadow-indigo-200 dark:shadow-none' : 'text-slate-700 dark:text-slate-300 group-hover:bg-white dark:group-hover:bg-slate-700 group-hover:shadow-sm'}`}>
+                                                {format(day, 'd')}
+                                            </span>
+                                        </div>
+                                        <div className="flex-1 overflow-y-auto space-y-1 custom-scrollbar min-h-0">
+                                            {dayLeaves.slice(0, 3).map(leave => (
+                                                <div key={leave.id} className={`group relative text-[11px] px-2 py-1.5 rounded-md border truncate font-semibold mb-1 transition-all hover:scale-[1.02] ${getLeaveTypeColor(leave.leave_type)} cursor-help`}>
+                                                    {leave.team_member_name}
+
+                                                    {/* Hover Popup */}
+                                                    <div className="hidden group-hover:block absolute left-0 bottom-full mb-2 z-50 w-48 bg-slate-800 text-white text-xs p-2 rounded-lg shadow-xl pointer-events-none">
+                                                        <div className="font-bold mb-1">{leave.team_member_name}</div>
+                                                        <div className="mb-1 opacity-90">{leave.leave_type}</div>
+                                                        {leave.reason && (
+                                                            <div className="text-[10px] opacity-75 italic border-t border-white/20 pt-1 mt-1">
+                                                                "{leave.reason}"
+                                                            </div>
+                                                        )}
+                                                        {/* Arrow */}
+                                                        <div className="absolute top-full left-4 -mt-1 border-4 border-transparent border-t-slate-800"></div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                            {dayLeaves.length > 3 && (
+                                                <div className="text-[10px] text-slate-400 font-medium pl-1">+{dayLeaves.length - 3} more</div>
+                                            )}
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                )}
+
+                {viewMode === 'day' && (
+                    <div className="p-8">
+                        <div className="flex justify-between items-end mb-6">
+                            <div>
+                                <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">Leaves for {format(currentDate, 'MMMM d')}</h2>
+                                <p className="text-slate-500 dark:text-slate-400">{dayViewLeaves.length} leave request(s)</p>
+                            </div>
+                        </div>
+
+                        {dayViewLeaves.length === 0 ? (
+                            <div className="flex flex-col items-center justify-center py-20 text-slate-400 dark:text-slate-500">
+                                <div className="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mb-4 text-3xl">📅</div>
+                                <p className="text-lg font-medium text-slate-600 dark:text-slate-400">No leaves scheduled for this day</p>
+                                <p className="text-sm">All team members are available</p>
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                {dayViewLeaves.map(leave => (
+                                    <div
+                                        key={leave.id}
+                                        className={`rounded-2xl p-6 shadow-sm hover:shadow-md transition-all relative border ${getLeaveTypeColor(leave.leave_type)}`}
+                                    >
+                                        <div className="flex justify-between items-start mb-4">
+                                            <span className="text-[11px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-lg bg-black/20 text-white">
+                                                {leave.leave_type}
+                                            </span>
+                                            <button
+                                                onClick={() => handleDeleteLeave(leave.id)}
+                                                className="p-1.5 hover:bg-white/20 rounded-lg transition-colors text-white"
+                                            >
+                                                <Trash2 size={16} />
+                                            </button>
+                                        </div>
+
+                                        <h3 className="font-bold text-xl text-white mb-1">{leave.team_member_name}</h3>
+                                        <p className="text-sm text-white/80 mb-4 font-medium">{format(new Date(leave.leave_date), 'EEEE, MMMM d, yyyy')}</p>
+
+                                        {leave.reason && (
+                                            <div className="pt-4 border-t border-white/20">
+                                                <p className="text-xs font-semibold text-white/70 mb-1">Reason:</p>
+                                                <p className="text-sm text-white/90">{leave.reason}</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {viewMode === 'table' && (
+                    <div className="space-y-8">
+                        {loading ? (
+                            <div className="flex justify-center py-20 bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800">
+                                <Loader size="lg" color="indigo" />
+                            </div>
+                        ) : leaves.length === 0 ? (
+                            <div className="flex flex-col items-center justify-center py-20 bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 text-slate-400 dark:text-slate-500">
+                                <div className="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mb-4 text-3xl">
+                                    📅
+                                </div>
+                                <p className="text-lg font-medium text-slate-600 dark:text-slate-400">No leaves found</p>
+                                <p className="text-sm">Add a leave request to get started</p>
+                            </div>
+                        ) : (
+                            // Group leaves by Month and Year
+                            (Object.entries(
+                                leaves
+                                    .sort((a: Leave, b: Leave) => new Date(b.leave_date).getTime() - new Date(a.leave_date).getTime())
+                                    .reduce((acc: Record<string, Leave[]>, leave: Leave) => {
+                                        const date = new Date(leave.leave_date);
+                                        const key = format(date, 'MMMM yyyy');
+                                        if (!acc[key]) acc[key] = [];
+                                        acc[key].push(leave);
+                                        return acc;
+                                    }, {} as Record<string, Leave[]>)
+                            ) as [string, Leave[]][]).map(([monthYear, monthLeaves]) => (
+                                <div key={monthYear} className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden">
+                                    <div className="px-6 py-4 bg-slate-50/50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                                        <h3 className="font-bold text-lg text-slate-800 dark:text-slate-200">{monthYear}</h3>
+                                        <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-800 px-2 py-1 rounded-md border border-slate-200 dark:border-slate-700">
+                                            {monthLeaves.length} {monthLeaves.length === 1 ? 'Leave' : 'Leaves'}
+                                        </span>
+                                    </div>
+                                    <div className="overflow-x-auto">
+                                        <table className="w-full">
+                                            <thead className="bg-slate-50 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-700">
+                                                <tr>
+                                                    <th className="px-6 py-3 text-left text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Date</th>
+                                                    <th className="px-6 py-3 text-left text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Team Member</th>
+                                                    <th className="px-6 py-3 text-left text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Leave Type</th>
+                                                    <th className="px-6 py-3 text-left text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Reason</th>
+                                                    <th className="px-6 py-3 text-center text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                                                {monthLeaves.map((leave) => (
+                                                    <tr key={leave.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors group">
+                                                        <td className="px-6 py-3 whitespace-nowrap">
+                                                            <div className="flex flex-col">
+                                                                <span className="text-sm font-bold text-slate-700 dark:text-slate-300">
+                                                                    {format(new Date(leave.leave_date), 'd')}
+                                                                </span>
+                                                                <span className="text-[10px] font-semibold text-slate-400 uppercase">
+                                                                    {format(new Date(leave.leave_date), 'EEE')}
+                                                                </span>
+                                                            </div>
+                                                        </td>
+                                                        <td className="px-6 py-3">
+                                                            <div className="flex items-center gap-3">
+                                                                <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-xs font-bold text-indigo-700 dark:text-indigo-400 border-2 border-white dark:border-slate-800 shadow-sm">
+                                                                    {leave.team_member_name.charAt(0)}
+                                                                </div>
+                                                                <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                                                                    {leave.team_member_name}
+                                                                </span>
+                                                            </div>
+                                                        </td>
+                                                        <td className="px-6 py-3">
+                                                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-bold border shadow-sm ${getLeaveTypeColor(leave.leave_type)}`}>
+                                                                {leave.leave_type}
+                                                            </span>
+                                                        </td>
+                                                        <td className="px-6 py-3">
+                                                            {leave.reason ? (
+                                                                <span className="text-sm text-slate-600 dark:text-slate-400 line-clamp-1 max-w-[200px]" title={leave.reason}>
+                                                                    {leave.reason}
+                                                                </span>
+                                                            ) : (
+                                                                <span className="text-xs text-slate-400 italic">No reason</span>
+                                                            )}
+                                                        </td>
+                                                        <td className="px-6 py-3">
+                                                            <div className="flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                                                <button
+                                                                    onClick={() => handleDeleteLeave(leave.id)}
+                                                                    className="p-1.5 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg text-slate-400 hover:text-red-600 dark:text-slate-500 dark:hover:text-red-400 transition-colors"
+                                                                    title="Delete leave"
+                                                                >
+                                                                    <Trash2 size={16} />
+                                                                </button>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            ))
+                        )}
+                    </div>
+                )}
+
+            </div>
+
+            <LeaveModal
+                isOpen={isLeaveModalOpen}
+                onClose={() => setIsLeaveModalOpen(false)}
+                onSave={handleSaveLeave}
+            />
+        </div>
+    );
+}

@@ -1,0 +1,194 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { X, UserPlus, Trash2, Users, Search, Plus } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
+import Combobox from './ui/Combobox';
+import CloseButton from './ui/CloseButton';
+import { mapHubstaffNameToQA } from '@/lib/hubstaff-name-mapping';
+
+interface ManageTeamModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+}
+
+interface TeamMember {
+    id: number;
+    team_id: string;
+    name: string;
+}
+
+export default function ManageTeamModal({ isOpen, onClose }: ManageTeamModalProps) {
+    const [members, setMembers] = useState<TeamMember[]>([]);
+    const [loading, setLoading] = useState(false);
+    const [adding, setAdding] = useState(false);
+
+    // Add Member State
+    const [customName, setCustomName] = useState('');
+    const [teamId, setTeamId] = useState<string | null>(null);
+
+    useEffect(() => {
+        const init = async () => {
+            const { getCurrentUserTeam } = await import('@/utils/userUtils');
+            const team = await getCurrentUserTeam();
+            if (team) setTeamId(team.team_id);
+        };
+        init();
+    }, []);
+
+    // Fetch team members
+    const fetchMembers = async () => {
+        setLoading(true);
+        try {
+            const { data, error } = await supabase
+                .from('team_members')
+                .select('*')
+                .order('display_order', { ascending: true });
+
+            if (error) throw error;
+            setMembers(data || []);
+        } catch (error) {
+            console.error('Error fetching members:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        if (isOpen) {
+            fetchMembers();
+        }
+    }, [isOpen]);
+
+    const handleAddMember = async () => {
+        const nameToAdd = customName;
+
+        if (!nameToAdd || !nameToAdd.trim() || nameToAdd === 'null') {
+            alert('Please select or enter a name.');
+            return;
+        }
+
+        if (!teamId) {
+            alert('Team ID not found. Please refresh.');
+            return;
+        }
+
+        setAdding(true);
+        try {
+            const { error } = await supabase
+                .from('team_members')
+                .insert({
+                    team_id: teamId,
+                    name: nameToAdd.trim()
+                });
+
+            if (error) throw error;
+
+            // Refresh list
+            await fetchMembers();
+
+            // Reset inputs
+            setCustomName('');
+
+        } catch (error: any) {
+            alert(error.message || 'Failed to add member');
+        } finally {
+            setAdding(false);
+        }
+    };
+
+    const handleDeleteMember = async (id: number) => {
+        if (!confirm('Are you sure you want to remove this member?')) return;
+
+        try {
+            const { error } = await supabase
+                .from('team_members')
+                .delete()
+                .eq('id', id);
+
+            if (error) throw error;
+
+            setMembers(prev => prev.filter(m => m.id !== id));
+        } catch (error) {
+            console.error(error);
+            alert('Failed to remove member');
+        }
+    };
+
+    if (!isOpen) return null;
+
+    return (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200 p-4">
+            <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
+
+                {/* Header */}
+                <div className="flex items-center justify-between p-4 border-b border-slate-100 bg-slate-50/50">
+                    <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+                        <Users size={20} className="text-indigo-600" /> Manage Team Members
+                    </h2>
+                    <CloseButton onClick={onClose} />
+                </div>
+
+                {/* Body */}
+                <div className="p-4 space-y-6">
+
+                    {/* Add Section */}
+                    <div className="bg-slate-50 rounded-xl p-4 border border-slate-100 space-y-4">
+                        <div className="flex gap-2">
+                            <div className="flex-1">
+                                <input
+                                    type="text"
+                                    value={customName}
+                                    onChange={(e) => setCustomName(e.target.value)}
+                                    placeholder="Enter Name (e.g. John Doe)"
+                                    className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none text-sm"
+                                />
+                            </div>
+                            <button
+                                onClick={handleAddMember}
+                                disabled={adding}
+                                className="px-4 py-2 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-colors disabled:opacity-50 flex items-center justify-center"
+                            >
+                                {adding ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Plus size={20} />}
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* List Section */}
+                    <div>
+                        <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Team Members ({members.length})</h3>
+                        <div className="space-y-2 max-h-[300px] overflow-y-auto custom-scrollbar pr-1">
+                            {loading ? (
+                                <div className="text-center py-4 text-slate-400 text-sm">Loading members...</div>
+                            ) : members.length === 0 ? (
+                                <div className="text-center py-8 bg-slate-50 rounded-xl border border-dashed border-slate-200">
+                                    <Users size={24} className="mx-auto text-slate-300 mb-2" />
+                                    <p className="text-sm text-slate-500">No members added yet.</p>
+                                </div>
+                            ) : (
+                                members.map(member => (
+                                    <div key={member.id} className="flex items-center justify-between p-3 bg-white border border-slate-100 rounded-xl hover:border-indigo-100 hover:shadow-sm transition-all group">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-8 h-8 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs font-bold">
+                                                {member.name.substring(0, 2).toUpperCase()}
+                                            </div>
+                                            <span className="text-sm font-medium text-slate-700">{member.name}</span>
+                                        </div>
+                                        <button
+                                            onClick={() => handleDeleteMember(member.id)}
+                                            className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
+                                            title="Remove Member"
+                                        >
+                                            <Trash2 size={16} />
+                                        </button>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div >
+    );
+}

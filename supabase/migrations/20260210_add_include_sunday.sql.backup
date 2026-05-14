@@ -1,0 +1,1 @@
+ALTER TABLE tasks ADD COLUMN include_sunday BOOLEAN DEFAULT FALSE;
