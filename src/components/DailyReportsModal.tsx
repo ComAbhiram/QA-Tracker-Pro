@@ -879,7 +879,6 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                     </div>
                 </div>
             `;
-     `;
 
             document.body.appendChild(container);
 
