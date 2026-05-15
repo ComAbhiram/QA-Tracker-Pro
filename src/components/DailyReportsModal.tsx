@@ -684,7 +684,7 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                                     const sStyle = statusStyles[effectiveStatus] || statusStyles['On Hold'];
 
                                     return `
-                                        <div style="display: flex; flex-direction: column; gap: 16px; border-left: 8px solid ${sStyle.color}; padding-left: 24px;">
+                                        <div style="background: white; border-radius: 24px; padding: 24px; display: flex; flex-direction: column; gap: 16px; border-left: 8px solid ${sStyle.color}; box-shadow: 0 4px 20px rgba(0,0,0,0.02);">
                                             <div style="display: flex; justify-content: space-between; align-items: center;">
                                                 <div class="pill-badge" style="background: ${effectiveStatus === 'Completed' ? '#dcfce7' : '#e0f2fe'}; color: ${sStyle.color}; width: fit-content; padding: 6px 16px; border-radius: 20px;">
                                                     ${effectiveStatus.toUpperCase()}
