@@ -438,10 +438,11 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                 // Always include if Overdue, even if outside date range
                 if (effectiveStatus === 'Overdue') return true;
 
-                // Include if completed TODAY (even if overdue completed)
-                if (effectiveStatus === 'Completed' && t.actualCompletionDate) {
+                // If completed, ONLY include if it was completed TODAY
+                if (effectiveStatus === 'Completed') {
+                    if (!t.actualCompletionDate) return false;
                     const completionDate = new Date(t.actualCompletionDate).toISOString().split('T')[0];
-                    if (completionDate === today) return true;
+                    return completionDate === today;
                 }
 
                 if (!t.startDate || !t.endDate) return false;
@@ -609,21 +610,29 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                         </div>
 
                         ${(() => {
-                            const activities = hubstaffData.activities.filter((a: any) => a.timeWorked > 0);
-                            if (activities.length === 0) return '<p style="flex: 1; color: #94a3b8; font-style: italic; font-size: 20px;">No sync data available.</p>';
+                            // Filter activities to only include users from our sortedAssignees (the team members working today)
+                            const teamActivities = hubstaffData.activities.filter((a: any) => 
+                                a.timeWorked > 0 && 
+                                sortedAssignees.some(assignee => 
+                                    a.userName.toLowerCase().includes(assignee.toLowerCase()) || 
+                                    assignee.toLowerCase().includes(a.userName.toLowerCase())
+                                )
+                            );
                             
-                            const user = activities[0];
-                            const memberTheme = getMemberTheme(user.userName);
-                            const avgActivity = user.activityPercentage || 0;
+                            if (teamActivities.length === 0) return '<p style="flex: 1; color: #94a3b8; font-style: italic; font-size: 20px;">No sync data available for team members.</p>';
+                            
+                            // Aggregate team data
+                            const totalTimeWorked = teamActivities.reduce((sum: number, a: any) => sum + a.timeWorked, 0);
+                            const avgActivity = Math.round(teamActivities.reduce((sum: number, a: any) => sum + (a.activityPercentage || 0), 0) / teamActivities.length);
                             
                             return `
                                 <div style="display: flex; align-items: center; gap: 32px; flex: 1;">
-                                    <div style="width: 100px; height: 100px; background: ${memberTheme.bg}; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 4px solid white; box-shadow: 0 10px 25px rgba(0,0,0,0.05);">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 24 24" fill="${memberTheme.color}" style="opacity: 0.3;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                                    <div style="width: 100px; height: 100px; background: #eef2ff; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 4px solid white; box-shadow: 0 10px 25px rgba(0,0,0,0.05);">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 24 24" fill="#6366f1" style="opacity: 0.3;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
                                     </div>
                                     <div style="flex: 1;">
-                                        <h3 style="color: #0f172a; font-size: 28px; font-weight: 900; margin: 0; letter-spacing: -0.02em;">${user.userName}</h3>
-                                        <p style="color: #64748b; font-size: 15px; margin: 6px 0 0 0; font-weight: 600; line-height: 1.4;">${user.projectName || 'Active Projects Support'}</p>
+                                        <h3 style="color: #0f172a; font-size: 28px; font-weight: 900; margin: 0; letter-spacing: -0.02em;">QA Team</h3>
+                                        <p style="color: #64748b; font-size: 15px; margin: 6px 0 0 0; font-weight: 600; line-height: 1.4;">${teamActivities.length} Members Active Today</p>
                                     </div>
                                     
                                     <div style="display: flex; gap: 60px; padding-left: 60px; border-left: 1px solid #f1f5f9;">
@@ -634,7 +643,7 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                                                 </div>
                                                 <p style="color: #94a3b8; font-size: 11px; font-weight: 800; text-transform: uppercase;">TIME SPENT</p>
                                             </div>
-                                            <p style="color: #0f172a; font-size: 36px; font-weight: 900; margin: 0;">${formatTime(user.timeWorked)}</p>
+                                            <p style="color: #0f172a; font-size: 36px; font-weight: 900; margin: 0;">${formatTime(totalTimeWorked)}</p>
                                             <p style="color: #94a3b8; font-size: 14px; font-weight: 700; margin: 0;">Hours</p>
                                         </div>
 
