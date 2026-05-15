@@ -222,61 +222,80 @@ export async function PATCH(request: NextRequest) {
             profile = anyUser;
         }
 
-        // 3. Update Admin User if profile exists
-        if (profile && (adminEmail || adminPassword)) {
+        // 2. Resolve the target email to update
+        const targetEmail = adminEmail?.trim().toLowerCase();
+
+        // 3. Handle User Update/Linking
+        if (targetEmail || adminPassword) {
             try {
-                const updateData: any = {};
-                if (adminEmail) updateData.email = adminEmail.trim().toLowerCase();
-                if (adminPassword) updateData.password = adminPassword;
-
-                // Attempt to update the user in Supabase Auth
-                const { error: authError } = await supabaseAdmin.auth.admin.updateUserById(profile.id, updateData);
+                // A. Check if a user with this email already exists in Auth
+                const { data: { users }, error: listError } = await supabaseAdmin.auth.admin.listUsers();
+                if (listError) throw listError;
                 
-                if (authError) {
-                    // Handle "Email already exists" - Link the existing user instead of updating the current one
-                    if (authError.message.toLowerCase().includes('already registered') || 
-                        authError.message.toLowerCase().includes('already exists')) {
-                        
-                        // 1. Find the existing user's ID
-                        const { data: usersData } = await supabaseAdmin.auth.admin.listUsers();
-                        const targetEmail = adminEmail.trim().toLowerCase();
-                        const existingUser = usersData?.users.find(u => u.email?.toLowerCase() === targetEmail);
+                const existingUser = targetEmail ? users.find(u => u.email?.toLowerCase() === targetEmail) : null;
 
-                        if (existingUser) {
-                            // 2. Link this existing user to the team and make them team_admin
-                            const { error: linkError } = await supabaseAdmin
-                                .from('user_profiles')
-                                .upsert({
-                                    id: existingUser.id,
-                                    email: targetEmail,
-                                    team_id: teamId,
-                                    role: 'team_admin'
-                                }, { onConflict: 'id' });
-                            
-                            if (linkError) throw linkError;
+                if (existingUser) {
+                    // Scenario 1: User already exists - Link them to the team
+                    console.log(`[PATCH Teams] Linking existing user ${targetEmail} to team ${teamId}`);
+                    
+                    const { error: profileError } = await supabaseAdmin
+                        .from('user_profiles')
+                        .upsert({
+                            id: existingUser.id,
+                            email: targetEmail,
+                            team_id: teamId,
+                            role: 'team_admin'
+                        }, { onConflict: 'id' });
+                    
+                    if (profileError) throw profileError;
 
-                            // 3. Optional: Update password for existing user if provided
-                            if (adminPassword) {
-                                await supabaseAdmin.auth.admin.updateUserById(existingUser.id, { password: adminPassword });
-                            }
-
-                            // 4. If the old profile was different, remove its team_id or keep it as a member?
-                            // For simplicity, we'll just leave it. The GET logic will prioritize the one we just made team_admin.
-                        } else {
-                            throw authError;
-                        }
-                    } else {
-                        throw authError;
+                    // Update password if provided
+                    if (adminPassword) {
+                        const { error: authError } = await supabaseAdmin.auth.admin.updateUserById(existingUser.id, { password: adminPassword });
+                        if (authError) throw authError;
                     }
-                } else {
-                    // Update user_profiles table if email changed successfully in Auth
-                    if (adminEmail) {
+                } else if (targetEmail) {
+                    // Scenario 2: Email doesn't exist - Try to update the CURRENT team user's email
+                    // First, find who is currently linked to the team
+                    const { data: currentProfile } = await supabaseAdmin
+                        .from('user_profiles')
+                        .select('id')
+                        .eq('team_id', teamId)
+                        .limit(1)
+                        .maybeSingle();
+
+                    if (currentProfile) {
+                        console.log(`[PATCH Teams] Renaming current user ${currentProfile.id} to ${targetEmail}`);
+                        
+                        const updateData: any = { email: targetEmail };
+                        if (adminPassword) updateData.password = adminPassword;
+
+                        const { error: authError } = await supabaseAdmin.auth.admin.updateUserById(currentProfile.id, updateData);
+                        if (authError) throw authError;
+
                         const { error: profileUpdateError } = await supabaseAdmin
                             .from('user_profiles')
-                            .update({ email: adminEmail.trim().toLowerCase() })
-                            .eq('id', profile.id);
+                            .update({ email: targetEmail })
+                            .eq('id', currentProfile.id);
                         
                         if (profileUpdateError) throw profileUpdateError;
+                    } else {
+                        // Scenario 3: No user linked to team yet - We can't really "update", user should use "Create Team" or we can create a user here?
+                        // For now, let's just return an error that a user profile wasn't found to update.
+                        throw new Error('No user profile found for this team. Please create a new team or manually link a user.');
+                    }
+                } else if (adminPassword) {
+                    // Scenario 4: Only password update requested for current user
+                    const { data: currentProfile } = await supabaseAdmin
+                        .from('user_profiles')
+                        .select('id')
+                        .eq('team_id', teamId)
+                        .limit(1)
+                        .maybeSingle();
+
+                    if (currentProfile) {
+                        const { error: authError } = await supabaseAdmin.auth.admin.updateUserById(currentProfile.id, { password: adminPassword });
+                        if (authError) throw authError;
                     }
                 }
             } catch (err: any) {
