@@ -666,7 +666,6 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                     ${sortedAssignees.map(assignee => {
                         const memberTheme = getMemberTheme(assignee);
                         return `
-                        return `
                         <div style="background: ${memberTheme.bg}; border-radius: 32px; padding: 40px; border: 1px solid white; box-shadow: 0 20px 40px rgba(0,0,0,0.02);">
                             <!-- Member Header -->
                             <div style="display: flex; align-items: center; gap: 24px; margin-bottom: 32px;">
