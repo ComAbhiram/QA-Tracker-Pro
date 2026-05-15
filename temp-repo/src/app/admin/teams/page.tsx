@@ -1,3 +1,5 @@
+'use client';
+
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Users, Plus, Trash2, AlertCircle, Layers, Edit2, Shield, Mail } from 'lucide-react';
