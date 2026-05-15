@@ -200,14 +200,27 @@ export async function PATCH(request: NextRequest) {
         }
 
         // 2. Resolve Admin User ID from user_profiles
-        const { data: profile, error: profileFetchError } = await supabaseAdmin
+        // 2. Resolve the user to update (Priority: team_admin > any team user)
+        let { data: profile, error: profileFetchError } = await supabaseAdmin
             .from('user_profiles')
-            .select('id, email')
+            .select('id, email, role')
             .eq('team_id', teamId)
             .eq('role', 'team_admin')
             .maybeSingle();
 
         if (profileFetchError) throw profileFetchError;
+
+        // If no team_admin, just pick the first user associated with this team
+        if (!profile) {
+            const { data: anyUser } = await supabaseAdmin
+                .from('user_profiles')
+                .select('id, email, role')
+                .eq('team_id', teamId)
+                .limit(1)
+                .maybeSingle();
+            
+            profile = anyUser;
+        }
 
         // 3. Update Admin User if profile exists
         if (profile && (adminEmail || adminPassword)) {
