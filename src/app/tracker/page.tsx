@@ -899,16 +899,16 @@ export default function Tracker() {
                     )}
                 </div>
 
-                <div className="flex flex-col 2xl:flex-row items-start 2xl:items-center justify-between gap-4"> {/* Changed xl:flex-row to 2xl:flex-row to give more space for filters */}
+                <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200 dark:border-slate-800 p-4 rounded-2xl shadow-sm flex flex-col 2xl:flex-row items-start 2xl:items-center justify-between gap-4 transition-all">
                     <div className="flex flex-col sm:flex-row flex-wrap items-start sm:items-center gap-3 w-full 2xl:w-auto">
                         <div className="relative group w-full sm:w-auto">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-slate-600 transition-colors" size={14} />
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors" size={16} />
                             <input
                                 type="text"
-                                placeholder="Filter tasks..."
+                                placeholder="Search tasks..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                className="w-full sm:w-[200px] bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 placeholder:text-slate-500 dark:placeholder:text-slate-500 pl-9 pr-3 py-2 border border-slate-200 dark:border-slate-700 rounded-md focus:outline-none focus:ring-1 focus:ring-slate-300 dark:focus:ring-slate-600 text-xs transition-all shadow-sm"
+                                className="w-full sm:w-[220px] bg-slate-50 dark:bg-slate-800/50 text-slate-700 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 pl-10 pr-4 py-2.5 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-sm transition-all shadow-inner"
                             />
                         </div>
 
@@ -918,7 +918,7 @@ export default function Tracker() {
                                     date={dateFilter}
                                     setDate={setDateFilter}
                                     placeholder="Filter by date"
-                                    className="w-full sm:w-[140px] bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 min-h-0 py-2 px-3 text-xs shadow-sm hover:bg-slate-50 dark:hover:bg-slate-700 rounded-md"
+                                    className="w-full sm:w-[150px] bg-slate-50 dark:bg-slate-800/50 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 min-h-0 py-2.5 px-4 text-sm shadow-inner hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl transition-colors"
                                 />
                             </div>
 
@@ -937,16 +937,16 @@ export default function Tracker() {
                                 />
                             </div>
 
-                            <div className="bg-slate-100 dark:bg-slate-800 p-0.5 rounded-lg flex items-center border border-slate-200 dark:border-slate-700 w-full sm:w-auto">
+                            <div className="bg-slate-100/80 dark:bg-slate-800/80 p-1 rounded-xl flex items-center border border-slate-200/50 dark:border-slate-700/50 w-full sm:w-auto shadow-inner">
                                 <button
                                     onClick={() => setViewMode('active')}
-                                    className={`flex-1 sm:flex-none px-3 py-1.5 text-xs font-bold rounded-md transition-all ${viewMode === 'active' ? 'bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
+                                    className={`flex-1 sm:flex-none px-4 py-2 text-sm font-bold rounded-lg transition-all duration-200 ${viewMode === 'active' ? 'bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
                                 >
                                     Active
                                 </button>
                                 <button
                                     onClick={() => setViewMode('forecast')}
-                                    className={`flex-1 sm:flex-none px-3 py-1.5 text-xs font-bold rounded-md transition-all ${viewMode === 'forecast' ? 'bg-white dark:bg-slate-700 text-purple-600 dark:text-purple-400 shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
+                                    className={`flex-1 sm:flex-none px-4 py-2 text-sm font-bold rounded-lg transition-all duration-200 ${viewMode === 'forecast' ? 'bg-white dark:bg-slate-700 text-purple-600 dark:text-purple-400 shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
                                 >
                                     Forecast
                                 </button>
@@ -954,34 +954,34 @@ export default function Tracker() {
                         </div>
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-2 w-full 2xl:w-auto mt-2 2xl:mt-0">
+                    <div className="flex flex-wrap items-center gap-3 w-full 2xl:w-auto mt-2 2xl:mt-0">
                         {!isPCMode && (
                             <button
                                 onClick={() => setIsLeaveModalOpen(true)}
-                                className="glint-effect flex-1 sm:flex-none flex items-center justify-center gap-2 bg-orange-50 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 hover:bg-orange-100 dark:hover:bg-orange-900/50 px-4 py-2 rounded-lg transition-all font-semibold border border-orange-100 dark:border-orange-800 text-sm"
+                                className="glint-effect flex-1 sm:flex-none flex items-center justify-center gap-2 bg-gradient-to-br from-orange-50 to-orange-100/50 dark:from-orange-900/30 dark:to-orange-800/30 text-orange-700 dark:text-orange-300 hover:shadow-md hover:shadow-orange-200/50 dark:hover:shadow-none px-5 py-2.5 rounded-xl transition-all font-semibold border border-orange-200/50 dark:border-orange-800 text-sm"
                             >
-                                <CalendarClock size={16} />
+                                <CalendarClock size={18} />
                                 Add Leave
                             </button>
                         )}
                         <button
                             onClick={() => setIsAvailabilityCheckOpen(true)}
-                            className="glint-effect flex-1 sm:flex-none flex items-center justify-center gap-2 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 px-4 py-2 rounded-lg transition-all font-semibold border border-indigo-100 dark:border-indigo-800 text-sm"
+                            className="glint-effect flex-1 sm:flex-none flex items-center justify-center gap-2 bg-gradient-to-br from-indigo-50 to-indigo-100/50 dark:from-indigo-900/30 dark:to-indigo-800/30 text-indigo-700 dark:text-indigo-300 hover:shadow-md hover:shadow-indigo-200/50 dark:hover:shadow-none px-5 py-2.5 rounded-xl transition-all font-semibold border border-indigo-200/50 dark:border-indigo-800 text-sm"
                         >
-                            <Users size={16} />
+                            <Users size={18} />
                             Check
                         </button>
                         <button
                             onClick={exportCSV}
-                            className="glint-effect flex-1 sm:flex-none flex items-center justify-center gap-2 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 px-4 py-2 rounded-lg transition-all font-semibold border border-emerald-100 dark:border-emerald-800 text-sm"
+                            className="glint-effect flex-1 sm:flex-none flex items-center justify-center gap-2 bg-gradient-to-br from-emerald-50 to-emerald-100/50 dark:from-emerald-900/30 dark:to-emerald-800/30 text-emerald-700 dark:text-emerald-300 hover:shadow-md hover:shadow-emerald-200/50 dark:hover:shadow-none px-5 py-2.5 rounded-xl transition-all font-semibold border border-emerald-200/50 dark:border-emerald-800 text-sm"
                         >
-                            <ArrowUpRight size={16} />
+                            <ArrowUpRight size={18} />
                             Export
                         </button>
                         {!isPCMode && (
                             <button
                                 onClick={handleAddTask}
-                                className="glint-effect col-span-2 sm:col-span-1 flex-1 sm:flex-none flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg shadow-lg shadow-indigo-200 dark:shadow-none hover:shadow-indigo-300 transition-all font-bold text-sm"
+                                className="glint-effect col-span-2 sm:col-span-1 flex-1 sm:flex-none flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-700 hover:to-indigo-600 text-white px-6 py-2.5 rounded-xl shadow-lg shadow-indigo-200 dark:shadow-none hover:shadow-indigo-300 transition-all font-bold text-sm"
                             >
                                 <Plus size={18} />
                                 New Task
@@ -1091,13 +1091,29 @@ export default function Tracker() {
             </div>
 
             {/* Grouped Tasks - No global pagination, but each assignee table is paginated */}
-            <div className="space-y-1"> {/* Reduced gap from space-y-2 to space-y-1 */}
+            <div className="space-y-1">
                 {loading ? (
-                    <div className="text-center py-12 text-slate-500">Loading tasks...</div>
+                    <div className="flex flex-col items-center justify-center py-20 bg-white/50 dark:bg-slate-900/50 rounded-2xl border border-slate-200 dark:border-slate-800 backdrop-blur-sm">
+                        <div className="w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+                        <p className="text-slate-500 font-medium">Loading tasks...</p>
+                    </div>
                 ) : Object.keys(groupedTasks).length === 0 ? (
-                    <div className="text-center py-12 bg-white dark:bg-slate-900/50 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800">
-                        <div className="text-slate-400 dark:text-slate-500 mb-2 font-medium">No tasks found</div>
-                        <p className="text-sm text-slate-500 dark:text-slate-400">Try adjusting your search or filters</p>
+                    <div className="flex flex-col items-center justify-center py-24 bg-white/50 dark:bg-slate-900/50 rounded-2xl border border-slate-200 border-dashed dark:border-slate-800 backdrop-blur-sm shadow-sm transition-all">
+                        <div className="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mb-4 shadow-inner">
+                            <Search className="w-8 h-8 text-slate-400 dark:text-slate-500" />
+                        </div>
+                        <h3 className="text-lg font-bold text-slate-700 dark:text-slate-300 mb-1">No tasks found</h3>
+                        <p className="text-slate-500 dark:text-slate-400 text-center max-w-sm">
+                            We couldn't find any tasks matching your current search or filter criteria.
+                        </p>
+                        {(searchTerm || dateFilter || pcFilter !== 'All') && (
+                            <button 
+                                onClick={() => { setSearchTerm(''); setDateFilter(undefined); setPcFilter('All'); }}
+                                className="mt-6 px-4 py-2 text-sm font-semibold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-900/30 dark:text-indigo-400 dark:hover:bg-indigo-900/50 rounded-lg transition-colors"
+                            >
+                                Clear All Filters
+                            </button>
+                        )}
                     </div>
                 ) : (
                     <DndContext

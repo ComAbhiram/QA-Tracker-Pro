@@ -640,22 +640,22 @@ export default function TaskModal({ isOpen, onClose, task, defaultAssigneeName, 
             />
 
 
-            <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl w-full max-w-4xl max-h-[90dvh] overflow-y-auto custom-scrollbar border border-slate-100 dark:border-slate-800 transition-colors duration-300">
+            <div className="bg-white dark:bg-slate-900 rounded-[24px] shadow-2xl w-full max-w-4xl max-h-[90dvh] overflow-y-auto custom-scrollbar border border-slate-200/50 dark:border-slate-800 transition-colors duration-300">
                 {/* Header */}
-                <div className="sticky top-0 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md z-10 flex items-center justify-between p-4 md:p-6 border-b border-slate-100 dark:border-slate-800 bg-gradient-to-r from-white to-slate-50 dark:from-slate-900 dark:to-slate-800">
-                    <div className="flex items-center gap-4">
-                        <div className={`p-3 rounded-2xl ${isDuplicate ? 'bg-indigo-50 text-indigo-600' : task ? 'bg-indigo-50 text-indigo-600' : 'bg-emerald-50 text-emerald-600'} shadow-sm`}>
-                            {isDuplicate ? <Copy size={24} /> : task ? <Activity size={24} /> : <Briefcase size={24} />}
+                <div className="sticky top-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl z-20 flex items-center justify-between p-5 md:p-8 border-b border-slate-200/50 dark:border-slate-800 bg-gradient-to-r from-slate-50/80 to-white/80 dark:from-slate-900/80 dark:to-slate-800/80 shadow-sm">
+                    <div className="flex items-center gap-5">
+                        <div className={`p-4 rounded-[20px] ${isDuplicate ? 'bg-indigo-50 text-indigo-600 shadow-inner' : task ? 'bg-indigo-50 text-indigo-600 shadow-inner' : 'bg-gradient-to-br from-emerald-50 to-emerald-100/50 text-emerald-600 shadow-sm'} `}>
+                            {isDuplicate ? <Copy size={28} /> : task ? <Activity size={28} /> : <Briefcase size={28} />}
                         </div>
                         <div>
-                            <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100 tracking-tight">{isDuplicate ? 'Duplicate Task' : task ? 'Edit Task' : 'New Project Task'}</h2>
-                            <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">{isDuplicate ? 'Clone existing task details' : task ? 'Update task details' : 'Kickoff a new project'}</p>
+                            <h2 className="text-3xl font-extrabold text-slate-800 dark:text-slate-100 tracking-tight">{isDuplicate ? 'Duplicate Task' : task ? 'Edit Task' : 'New Project Task'}</h2>
+                            <p className="text-sm text-slate-500 dark:text-slate-400 font-medium mt-1">{isDuplicate ? 'Clone existing task details' : task ? 'Update task details' : 'Kickoff a new project'}</p>
                         </div>
                     </div>
                     <CloseButton onClick={handleCloseAttempt} />
                 </div>
 
-                <form onSubmit={handleSubmit} className="p-4 pb-10 md:p-6 space-y-8">
+                <form onSubmit={handleSubmit} className="p-5 md:p-8 space-y-8">
                     {/* Project & Type */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div className="space-y-3">
@@ -679,7 +679,7 @@ export default function TaskModal({ isOpen, onClose, task, defaultAssigneeName, 
                             <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
                                 <Activity size={16} className="text-indigo-500" /> Project Type
                             </label>
-                            <input type="text" name="projectType" value={formData.projectType || ''} onChange={handleChange} className="w-full px-5 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 dark:text-slate-200 dark:placeholder-slate-500 rounded-xl outline-none" placeholder="e.g. Web Development" />
+                            <input type="text" name="projectType" value={formData.projectType || ''} onChange={handleChange} className="w-full px-5 py-3.5 bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 dark:text-slate-200 dark:placeholder-slate-500 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all shadow-inner" placeholder="e.g. Web Development" />
                         </div>
                     </div>
 
@@ -712,58 +712,64 @@ export default function TaskModal({ isOpen, onClose, task, defaultAssigneeName, 
                     </div>
 
                     {/* Performance / Budgeting - NEW SECTION */}
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-100 dark:border-slate-800">
-                        <div className="space-y-2">
-                            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1">
-                                <Calendar size={12} className="text-indigo-500" /> Days Allotted
-                            </label>
-                            <input
-                                type="number"
-                                name="daysAllotted"
-                                value={formData.daysAllotted || 0}
-                                onChange={handleChange}
-                                className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 dark:text-slate-200 rounded-lg outline-none text-sm focus:ring-2 focus:ring-indigo-500/20"
-                                placeholder="0"
-                            />
+                    <div className="bg-slate-50/80 dark:bg-slate-800/30 p-6 rounded-[20px] border border-slate-200/50 dark:border-slate-700/50 shadow-inner">
+                        <div className="flex items-center gap-2 mb-4">
+                            <Activity size={18} className="text-slate-400" />
+                            <h3 className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-widest">Performance & Budget</h3>
                         </div>
-                        <div className="space-y-2">
-                            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1">
-                                <Clock size={12} className="text-indigo-500" /> Time Taken
-                            </label>
-                            <input
-                                type="text"
-                                name="timeTaken"
-                                value={formData.timeTaken || '00:00:00'}
-                                onChange={handleChange}
-                                className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 dark:text-slate-200 rounded-lg outline-none text-sm focus:ring-2 focus:ring-indigo-500/20"
-                                placeholder="00:00:00"
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1">
-                                <Activity size={12} className="text-indigo-500" /> Activity %
-                            </label>
-                            <input
-                                type="number"
-                                name="activityPercentage"
-                                value={formData.activityPercentage || 0}
-                                onChange={handleChange}
-                                className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 dark:text-slate-200 rounded-lg outline-none text-sm focus:ring-2 focus:ring-indigo-500/20"
-                                placeholder="0"
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1">
-                                <AlertCircle size={12} className="text-indigo-500" /> Deviation
-                            </label>
-                            <input
-                                type="number"
-                                name="deviation"
-                                value={formData.deviation || 0}
-                                onChange={handleChange}
-                                className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 dark:text-slate-200 rounded-lg outline-none text-sm focus:ring-2 focus:ring-indigo-500/20"
-                                placeholder="0"
-                            />
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm flex flex-col gap-2 transition-all hover:shadow-md">
+                                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                                    <div className="p-1 bg-indigo-50 dark:bg-indigo-900/30 rounded-md"><Calendar size={12} className="text-indigo-600 dark:text-indigo-400" /></div> Days Allotted
+                                </label>
+                                <input
+                                    type="number"
+                                    name="daysAllotted"
+                                    value={formData.daysAllotted || 0}
+                                    onChange={handleChange}
+                                    className="w-full bg-transparent border-b border-slate-200 dark:border-slate-700 dark:text-slate-200 outline-none text-xl font-black focus:border-indigo-500 transition-colors pb-1"
+                                    placeholder="0"
+                                />
+                            </div>
+                            <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm flex flex-col gap-2 transition-all hover:shadow-md">
+                                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                                    <div className="p-1 bg-sky-50 dark:bg-sky-900/30 rounded-md"><Clock size={12} className="text-sky-600 dark:text-sky-400" /></div> Time Taken
+                                </label>
+                                <input
+                                    type="text"
+                                    name="timeTaken"
+                                    value={formData.timeTaken || '00:00:00'}
+                                    onChange={handleChange}
+                                    className="w-full bg-transparent border-b border-slate-200 dark:border-slate-700 dark:text-slate-200 outline-none text-xl font-black focus:border-sky-500 transition-colors pb-1"
+                                    placeholder="00:00:00"
+                                />
+                            </div>
+                            <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm flex flex-col gap-2 transition-all hover:shadow-md">
+                                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                                    <div className="p-1 bg-emerald-50 dark:bg-emerald-900/30 rounded-md"><Activity size={12} className="text-emerald-600 dark:text-emerald-400" /></div> Activity %
+                                </label>
+                                <input
+                                    type="number"
+                                    name="activityPercentage"
+                                    value={formData.activityPercentage || 0}
+                                    onChange={handleChange}
+                                    className="w-full bg-transparent border-b border-slate-200 dark:border-slate-700 dark:text-slate-200 outline-none text-xl font-black focus:border-emerald-500 transition-colors pb-1"
+                                    placeholder="0"
+                                />
+                            </div>
+                            <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm flex flex-col gap-2 transition-all hover:shadow-md">
+                                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                                    <div className="p-1 bg-orange-50 dark:bg-orange-900/30 rounded-md"><AlertCircle size={12} className="text-orange-600 dark:text-orange-400" /></div> Deviation
+                                </label>
+                                <input
+                                    type="number"
+                                    name="deviation"
+                                    value={formData.deviation || 0}
+                                    onChange={handleChange}
+                                    className="w-full bg-transparent border-b border-slate-200 dark:border-slate-700 dark:text-slate-200 outline-none text-xl font-black focus:border-orange-500 transition-colors pb-1"
+                                    placeholder="0"
+                                />
+                            </div>
                         </div>
                     </div>
 
