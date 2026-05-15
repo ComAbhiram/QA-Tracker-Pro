@@ -6,7 +6,7 @@ export async function POST(request: NextRequest) {
         const { passkey } = await request.json();
 
         // Validate passkey
-        if (passkey !== 'inter223') {
+        if (passkey !== 'intersmart') {
             return NextResponse.json({ error: 'Invalid passkey' }, { status: 401 });
         }
 

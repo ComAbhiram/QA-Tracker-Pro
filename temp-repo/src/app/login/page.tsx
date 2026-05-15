@@ -58,7 +58,7 @@ export default function LoginPage() {
     const { setGuestSession, setPCModeSession } = useGuestMode(); // Import hook at top level
 
     const handleManagerLogin = async () => {
-        if (managerPassword === 'inter223') {
+        if (managerPassword === 'intersmart') {
             try {
                 // Call server-side API to set manager session
                 let response;
