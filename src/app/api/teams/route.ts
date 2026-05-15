@@ -224,22 +224,64 @@ export async function PATCH(request: NextRequest) {
 
         // 3. Update Admin User if profile exists
         if (profile && (adminEmail || adminPassword)) {
-            const updateData: any = {};
-            if (adminEmail) updateData.email = adminEmail;
-            if (adminPassword) updateData.password = adminPassword;
+            try {
+                const updateData: any = {};
+                if (adminEmail) updateData.email = adminEmail.trim().toLowerCase();
+                if (adminPassword) updateData.password = adminPassword;
 
-            // Update Supabase Auth
-            const { error: authError } = await supabaseAdmin.auth.admin.updateUserById(profile.id, updateData);
-            if (authError) throw authError;
-
-            // Update user_profiles table if email changed
-            if (adminEmail) {
-                const { error: profileUpdateError } = await supabaseAdmin
-                    .from('user_profiles')
-                    .update({ email: adminEmail.trim().toLowerCase() })
-                    .eq('id', profile.id);
+                // Attempt to update the user in Supabase Auth
+                const { error: authError } = await supabaseAdmin.auth.admin.updateUserById(profile.id, updateData);
                 
-                if (profileUpdateError) throw profileUpdateError;
+                if (authError) {
+                    // Handle "Email already exists" - Link the existing user instead of updating the current one
+                    if (authError.message.toLowerCase().includes('already registered') || 
+                        authError.message.toLowerCase().includes('already exists')) {
+                        
+                        // 1. Find the existing user's ID
+                        const { data: usersData } = await supabaseAdmin.auth.admin.listUsers();
+                        const targetEmail = adminEmail.trim().toLowerCase();
+                        const existingUser = usersData?.users.find(u => u.email?.toLowerCase() === targetEmail);
+
+                        if (existingUser) {
+                            // 2. Link this existing user to the team and make them team_admin
+                            const { error: linkError } = await supabaseAdmin
+                                .from('user_profiles')
+                                .upsert({
+                                    id: existingUser.id,
+                                    email: targetEmail,
+                                    team_id: teamId,
+                                    role: 'team_admin'
+                                }, { onConflict: 'id' });
+                            
+                            if (linkError) throw linkError;
+
+                            // 3. Optional: Update password for existing user if provided
+                            if (adminPassword) {
+                                await supabaseAdmin.auth.admin.updateUserById(existingUser.id, { password: adminPassword });
+                            }
+
+                            // 4. If the old profile was different, remove its team_id or keep it as a member?
+                            // For simplicity, we'll just leave it. The GET logic will prioritize the one we just made team_admin.
+                        } else {
+                            throw authError;
+                        }
+                    } else {
+                        throw authError;
+                    }
+                } else {
+                    // Update user_profiles table if email changed successfully in Auth
+                    if (adminEmail) {
+                        const { error: profileUpdateError } = await supabaseAdmin
+                            .from('user_profiles')
+                            .update({ email: adminEmail.trim().toLowerCase() })
+                            .eq('id', profile.id);
+                        
+                        if (profileUpdateError) throw profileUpdateError;
+                    }
+                }
+            } catch (err: any) {
+                console.error('[PATCH Teams] Auth/Profile update error:', err);
+                throw err;
             }
         }
 
