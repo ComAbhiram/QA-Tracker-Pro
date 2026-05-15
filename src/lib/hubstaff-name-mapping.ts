@@ -21,6 +21,7 @@ export const HUBSTAFF_TO_QA_NAME_MAP: Record<string, string> = {
     'Sayooj K': 'Sayooj',
     'Sayooj': 'Sayooj',
     'Abhiram': 'Abhiram',
+    'Abhiram P M': 'Abhiram',
     'Abhiram P Mohan': 'Abhiram',
 };
 

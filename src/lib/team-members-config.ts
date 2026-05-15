@@ -48,6 +48,7 @@ export const TEAM_MEMBERS: TeamMemberConfig[] = [
 
     // QA
     { name: 'Aswathi', hubstaffName: 'Aswathi M Ashok', department: 'QA' },
+    { name: 'Abhiram', hubstaffName: 'Abhiram P M', department: 'QA' },
     { name: 'Minnu', hubstaffName: 'Minnu Sebastian', department: 'QA' },
 
 ];

@@ -474,16 +474,16 @@ export default function Home() {
           <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-100">Team Tracker</h1>
           <p className="text-slate-500 dark:text-slate-400">Overview of all active team projects</p>
         </div>
-        <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
+        <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
           <button
             onClick={() => setIsReportModalOpen(true)}
-            className="flex-1 sm:flex-none btn btn-secondary flex items-center justify-center gap-2"
+            className="glint-effect flex-1 sm:flex-none flex items-center justify-center gap-2 bg-gradient-to-br from-indigo-50 to-indigo-100/50 dark:from-indigo-900/30 dark:to-indigo-800/30 text-indigo-700 dark:text-indigo-300 hover:shadow-md hover:shadow-indigo-200/50 dark:hover:shadow-none px-5 py-2.5 rounded-xl transition-all font-semibold border border-indigo-200/50 dark:border-indigo-800 text-sm"
           >
             <FileText size={18} /> Daily Reports
           </button>
           <button
             onClick={() => setIsAvailabilityModalOpen(true)}
-            className="flex-1 sm:flex-none btn btn-secondary flex items-center justify-center gap-2"
+            className="glint-effect flex-1 sm:flex-none flex items-center justify-center gap-2 bg-gradient-to-br from-emerald-50 to-emerald-100/50 dark:from-emerald-900/30 dark:to-emerald-800/30 text-emerald-700 dark:text-emerald-300 hover:shadow-md hover:shadow-emerald-200/50 dark:hover:shadow-none px-5 py-2.5 rounded-xl transition-all font-semibold border border-emerald-200/50 dark:border-emerald-800 text-sm"
           >
             <CalendarClock size={18} /> Check Availability
           </button>
@@ -492,7 +492,7 @@ export default function Home() {
           {!isGuest && (
             <button
               onClick={handleAddTask}
-              className="flex-1 sm:flex-none btn btn-primary flex items-center justify-center gap-2"
+              className="glint-effect flex-1 sm:flex-none flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-700 hover:to-indigo-600 text-white px-6 py-2.5 rounded-xl shadow-lg shadow-indigo-200 dark:shadow-none hover:shadow-indigo-300 transition-all font-bold text-sm"
             >
               <Plus size={18} /> New Task
             </button>
@@ -513,34 +513,34 @@ export default function Home() {
       <div className="flex flex-col gap-8">
         {/* Main Task List - Powered by Paginated Fetch */}
         <div className="w-full bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden flex flex-col transition-colors duration-300">
-          <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <h3 className="font-bold text-lg text-slate-800 dark:text-slate-100 flex items-center gap-2 mb-2 sm:mb-0">
+          <div className="p-4 sm:p-6 border-b border-slate-100 dark:border-slate-800 flex flex-col xl:flex-row xl:items-center justify-between gap-4 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl transition-all">
+            <h3 className="font-bold text-lg text-slate-800 dark:text-slate-100 flex items-center gap-2 mb-2 xl:mb-0">
               <Layers size={20} className="text-indigo-600 dark:text-indigo-400" />
               All Tasks
             </h3>
 
-            <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-3 w-full sm:w-auto">
-              <div className="relative w-full sm:w-auto">
+            <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-3 w-full xl:w-auto">
+              <div className="relative group w-full sm:w-auto">
+                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
                 <input
                   type="text"
                   placeholder="Search tasks..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-9 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 dark:text-slate-100 w-full md:w-64 transition-colors"
+                  className="w-full sm:w-[220px] bg-slate-50 dark:bg-slate-800/50 text-slate-700 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 pl-10 pr-4 py-2.5 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-sm transition-all shadow-inner"
                 />
-                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
               </div>
 
               {/* PC Filter Dropdown */}
-              <div className="relative w-full sm:w-auto">
+              <div className="relative w-full sm:w-[220px]">
                 <select
                   value={pcFilter}
                   onChange={(e) => setPcFilter(e.target.value)}
                   disabled={isPCMode && !!selectedPCName}
-                  className={`appearance-none pl-8 pr-8 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 cursor-pointer transition-all font-medium
+                  className={`appearance-none w-full pl-10 pr-8 py-2.5 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 cursor-pointer transition-all font-medium shadow-inner
                     ${pcFilter !== 'All'
                       ? 'bg-indigo-50 dark:bg-indigo-900/30 border-indigo-300 dark:border-indigo-700 text-indigo-700 dark:text-indigo-300'
-                      : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'
+                      : 'bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300'
                     }`}
                 >
                   <option value="All">All PCs</option>
@@ -549,23 +549,23 @@ export default function Home() {
                   ))}
                 </select>
                 {/* Person icon on left */}
-                <svg className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="4" /><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" /></svg>
+                <svg className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="4" /><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" /></svg>
                 {/* Chevron on right */}
-                <svg className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                <svg className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
               </div>
 
               <div className="flex flex-wrap items-center justify-between sm:justify-start gap-3 w-full sm:w-auto">
-                <span className="text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 px-2 py-1 rounded-md whitespace-nowrap">
+                <span className="text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 px-3 py-1.5 rounded-lg shadow-inner whitespace-nowrap">
                   {totalItems} total results
                 </span>
                 <button
                   onClick={() => setShowTodayOnly(!showTodayOnly)}
-                  className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${showTodayOnly
-                    ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm shadow-indigo-200 dark:shadow-indigo-900/20'
-                    : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700'
+                  className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all border ${showTodayOnly
+                    ? 'bg-gradient-to-r from-indigo-600 to-indigo-500 text-white border-transparent shadow-md shadow-indigo-200 dark:shadow-indigo-900/20'
+                    : 'bg-slate-50 dark:bg-slate-800/50 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 shadow-inner'
                     }`}
                 >
-                  <CalendarClock size={14} />
+                  <CalendarClock size={16} />
                   {showTodayOnly ? 'Today Only' : 'Present Day'}
                 </button>
               </div>
