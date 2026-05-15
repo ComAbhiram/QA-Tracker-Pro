@@ -15,20 +15,22 @@ export async function GET() {
 
         if (teamsError) throw teamsError;
 
-        // Fetch admin emails from user_profiles
+        // Fetch admin emails from user_profiles - fetch all users for these teams
         const { data: profiles, error: profilesError } = await supabaseServer
             .from('user_profiles')
-            .select('team_id, email')
-            .eq('role', 'team_admin');
+            .select('team_id, email, role');
 
         if (profilesError) throw profilesError;
 
         // Merge profiles into teams
         const teamsWithEmails = teams.map(team => {
-            const profile = profiles.find(p => p.team_id === team.id);
+            // Priority: team_admin > any other role
+            const teamProfiles = profiles.filter(p => p.team_id === team.id);
+            const adminProfile = teamProfiles.find(p => p.role === 'team_admin') || teamProfiles[0];
+            
             return {
                 ...team,
-                adminEmail: profile?.email || null
+                adminEmail: adminProfile?.email || null
             };
         });
 
