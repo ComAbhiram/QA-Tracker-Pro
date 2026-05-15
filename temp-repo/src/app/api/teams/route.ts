@@ -4,17 +4,35 @@ import { createClient } from '@supabase/supabase-js';
 
 export const dynamic = 'force-dynamic';
 
-// GET /api/teams - List all teams
+// GET /api/teams - List all teams with their admin emails
 export async function GET() {
     try {
-        const { data: teams, error } = await supabaseServer
+        // Fetch teams and their admin profiles
+        const { data: teams, error: teamsError } = await supabaseServer
             .from('teams')
             .select('*')
             .order('created_at', { ascending: false });
 
-        if (error) throw error;
+        if (teamsError) throw teamsError;
 
-        return NextResponse.json({ teams });
+        // Fetch admin emails from user_profiles
+        const { data: profiles, error: profilesError } = await supabaseServer
+            .from('user_profiles')
+            .select('team_id, email')
+            .eq('role', 'team_admin');
+
+        if (profilesError) throw profilesError;
+
+        // Merge profiles into teams
+        const teamsWithEmails = teams.map(team => {
+            const profile = profiles.find(p => p.team_id === team.id);
+            return {
+                ...team,
+                adminEmail: profile?.email || null
+            };
+        });
+
+        return NextResponse.json({ teams: teamsWithEmails });
     } catch (error: any) {
         console.error('Error fetching teams:', error);
         return NextResponse.json(
@@ -146,6 +164,79 @@ export async function POST(request: NextRequest) {
         console.error('Error creating team:', error);
         return NextResponse.json(
             { error: error.message || 'Failed to create team' },
+            { status: 500 }
+        );
+    }
+}
+
+// PATCH /api/teams - Update team and admin details
+export async function PATCH(request: NextRequest) {
+    try {
+        const body = await request.json();
+        const { teamId, teamName, adminEmail, adminPassword } = body;
+
+        if (!teamId) {
+            return NextResponse.json({ error: 'Team ID is required' }, { status: 400 });
+        }
+
+        const supabaseAdmin = createClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.SUPABASE_SERVICE_ROLE_KEY!,
+            {
+                auth: { autoRefreshToken: false, persistSession: false }
+            }
+        );
+
+        // 1. Update Team Name if provided
+        if (teamName) {
+            const { error: teamError } = await supabaseAdmin
+                .from('teams')
+                .update({ name: teamName })
+                .eq('id', teamId);
+            
+            if (teamError) throw teamError;
+        }
+
+        // 2. Resolve Admin User ID from user_profiles
+        const { data: profile, error: profileFetchError } = await supabaseAdmin
+            .from('user_profiles')
+            .select('id, email')
+            .eq('team_id', teamId)
+            .eq('role', 'team_admin')
+            .maybeSingle();
+
+        if (profileFetchError) throw profileFetchError;
+
+        // 3. Update Admin User if profile exists
+        if (profile && (adminEmail || adminPassword)) {
+            const updateData: any = {};
+            if (adminEmail) updateData.email = adminEmail;
+            if (adminPassword) updateData.password = adminPassword;
+
+            // Update Supabase Auth
+            const { error: authError } = await supabaseAdmin.auth.admin.updateUserById(profile.id, updateData);
+            if (authError) throw authError;
+
+            // Update user_profiles table if email changed
+            if (adminEmail) {
+                const { error: profileUpdateError } = await supabaseAdmin
+                    .from('user_profiles')
+                    .update({ email: adminEmail.trim().toLowerCase() })
+                    .eq('id', profile.id);
+                
+                if (profileUpdateError) throw profileUpdateError;
+            }
+        }
+
+        return NextResponse.json({
+            success: true,
+            message: 'Team updated successfully'
+        });
+
+    } catch (error: any) {
+        console.error('Error updating team:', error);
+        return NextResponse.json(
+            { error: error.message || 'Failed to update team' },
             { status: 500 }
         );
     }
