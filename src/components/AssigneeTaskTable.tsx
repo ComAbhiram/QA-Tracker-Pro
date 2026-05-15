@@ -333,10 +333,11 @@ export default function AssigneeTaskTable({
     const cellClass = isRowExpanded ? "whitespace-normal break-words" : "truncate";
 
     return (
-        <div className={`bg-white dark:bg-slate-900 rounded-lg shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden mb-2 transition-colors ${containerHighlight}`}>
+        <div className={`bg-white dark:bg-slate-900 rounded-xl shadow-md hover:shadow-lg border border-slate-200/60 dark:border-slate-800/60 overflow-hidden mb-4 transition-all duration-300 ${containerHighlight}`}>
             {/* Header Section (Compact) - Always visible per assignee table */}
-            <div className={`px-3 py-1.5 flex flex-col md:flex-row md:items-center justify-between gap-3 border-b dark:border-slate-800/50 ${headerColorClass} transition-colors group`}>
-                <div className="flex items-center gap-3">
+            <div className={`px-4 py-2 flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-b-black/5 dark:border-slate-800/50 ${headerColorClass} transition-colors group relative overflow-hidden`}>
+                <div className="absolute inset-0 bg-gradient-to-r from-white/40 to-transparent dark:from-white/5 pointer-events-none"></div>
+                <div className="flex items-center gap-3 relative z-10">
                     {/* Drag Handle */}
                     {dragHandleProps && (
                         <div {...dragHandleProps} className="cursor-grab active:cursor-grabbing p-1 hover:bg-black/5 rounded transition-colors text-slate-400">
@@ -365,10 +366,10 @@ export default function AssigneeTaskTable({
                     </div>
                 </div>
 
-                <div className="flex items-center gap-2 text-slate-700 dark:text-slate-300">
-                    <div className="flex items-center gap-2 bg-white/50 dark:bg-slate-800/80 px-2 py-0.5 rounded-md border border-black/5 dark:border-slate-700">
+                <div className="flex items-center gap-2 text-slate-700 dark:text-slate-300 relative z-10">
+                    <div className="flex items-center gap-2 bg-white/60 dark:bg-slate-800/80 px-2.5 py-1 rounded-md border border-black/5 dark:border-slate-700 shadow-sm backdrop-blur-sm">
                         <CalendarClock size={12} className="text-red-600 dark:text-red-400" />
-                        <span className="text-[10px] font-bold text-slate-700 dark:text-slate-200">
+                        <span className="text-[10px] font-bold text-slate-700 dark:text-slate-200 tracking-wide uppercase">
                             Available: {format(availabilityDate, 'MMM d')}
                         </span>
                     </div>
@@ -378,7 +379,7 @@ export default function AssigneeTaskTable({
                                 e.stopPropagation();
                                 onAddTask(assignee);
                             }}
-                            className="glint-effect p-1.5 bg-white/60 dark:bg-slate-800/80 hover:bg-white dark:hover:bg-slate-700 rounded-md border border-black/5 dark:border-slate-700 text-indigo-600 dark:text-indigo-400 transition-all hover:scale-110 active:scale-95 shadow-sm"
+                            className="glint-effect p-1.5 bg-white/80 dark:bg-slate-800/90 hover:bg-white dark:hover:bg-slate-700 rounded-md border border-black/5 dark:border-slate-700 text-indigo-600 dark:text-indigo-400 transition-all hover:scale-110 active:scale-95 shadow-sm backdrop-blur-sm"
                             title={`Add task for ${assignee}`}
                         >
                             <Plus size={14} />
@@ -421,7 +422,7 @@ export default function AssigneeTaskTable({
                             <tr
                                 key={task.id}
                                 onClick={() => !isReadOnly && onEditTask(task)}
-                                className={`group hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors ${isReadOnly ? 'cursor-default' : 'cursor-pointer'}`}
+                                className={`group hover:bg-indigo-50/40 dark:hover:bg-indigo-900/20 transition-colors ${isReadOnly ? 'cursor-default' : 'cursor-pointer'}`}
                             >
                                 <td className="px-2 py-1 border-r border-slate-200 dark:border-slate-800 font-medium text-slate-700 dark:text-slate-200 group/cell relative">
                                     <div className="flex items-center justify-between gap-2">

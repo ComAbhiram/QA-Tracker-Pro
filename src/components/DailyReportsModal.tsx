@@ -1076,72 +1076,93 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
             container.style.cssText = 'position: absolute; left: -9999px; top: -9999px; background: white; padding: 30px;';
 
             container.innerHTML = `
-                <div style="font-family: Arial, sans-serif; max-width: 1400px; padding: 40px; background: white;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; border-bottom: 3px solid #cbd5e1; padding-bottom: 24px;">
+                <div style="font-family: 'Poppins', sans-serif; max-width: 1600px; padding: 60px; background: #f8fafc; border-radius: 40px;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 48px; background: white; padding: 40px; border-radius: 32px; box-shadow: 0 10px 40px rgba(0,0,0,0.02); border: 1px solid #f1f5f9;">
                         <div>
-                            <h1 style="color: #0f172a; font-size: 36px; margin-bottom: 12px; font-weight: 800; display: block; font-family: Arial, sans-serif;">
-                                <span style="display: inline-block; margin-right: 10px;">Forecast</span><span style="display: inline-block; margin-right: 10px;">Projects</span><span style="display: inline-block; margin-right: 10px;">-</span><span style="display: inline-block;">${teamName}</span>
-                            </h1>
-                            <p style="color: #334155; font-size: 18px; margin: 0; font-weight: 500;">${currentDate}</p>
+                            <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px;">
+                                <div style="background: #e0e7ff; color: #4f46e5; padding: 12px; border-radius: 16px;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"></path><path d="M12 12v9"></path><path d="m8 17 4 4 4-4"></path></svg>
+                                </div>
+                                <h1 style="color: #0f172a; font-size: 48px; font-weight: 900; margin: 0; letter-spacing: -0.03em;">Forecast Projects</h1>
+                            </div>
+                            <h2 style="color: #64748b; font-size: 24px; font-weight: 800; margin: 0; letter-spacing: -0.01em;">TEAM <span style="color: #0f172a;">${teamName.toUpperCase()}</span></h2>
                         </div>
-                        <div style="text-align: right;">
-                             <p style="color: #475569; font-size: 16px; margin: 0; font-weight: 500;">Total Forecast Projects</p>
-                             <p style="color: #0f172a; font-size: 28px; font-weight: 700; margin: 0;">${sortedTasks.length}</p>
+                        <div style="text-align: right; display: flex; gap: 32px;">
+                            <div>
+                                <p style="color: #94a3b8; font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; margin: 0 0 8px 0;">Generated On</p>
+                                <p style="color: #0f172a; font-size: 20px; font-weight: 700; margin: 0;">${currentDate}</p>
+                            </div>
+                            <div style="width: 2px; background: #f1f5f9; border-radius: 2px;"></div>
+                            <div>
+                                <p style="color: #94a3b8; font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; margin: 0 0 8px 0;">Total Forecast</p>
+                                <p style="color: #4f46e5; font-size: 36px; font-weight: 900; margin: 0; line-height: 1;">${sortedTasks.length}</p>
+                            </div>
                         </div>
                     </div>
 
-                    <table style="width: 100%; border-collapse: separate; border-spacing: 0; background: white; border: 1px solid #64748b; border-radius: 12px; overflow: hidden;">
-                        <thead>
-                            <tr style="background: #0f172a;">
-                                <th style="padding: 16px; text-align: left; color: white; font-weight: 700; font-size: 15px; width: 22%; border-right: 1px solid #334155;">Project</th>
-                                <th style="padding: 16px; text-align: left; color: white; font-weight: 700; font-size: 15px; width: 10%; border-right: 1px solid #334155;">Type</th>
-                                <th style="padding: 16px; text-align: center; color: white; font-weight: 700; font-size: 15px; width: 8%; border-right: 1px solid #334155;">Priority</th>
-                                <th style="padding: 16px; text-align: left; color: white; font-weight: 700; font-size: 15px; width: 15%; border-right: 1px solid #334155;">Phase</th>
-                                <th style="padding: 16px; text-align: left; color: white; font-weight: 700; font-size: 15px; width: 10%; border-right: 1px solid #334155;">PC</th>
-                                <th style="padding: 16px; text-align: center; color: white; font-weight: 700; font-size: 15px; width: 10%; border-right: 1px solid #334155;">Status</th>
-                                <th style="padding: 16px; text-align: left; color: white; font-weight: 700; font-size: 15px;">Timeline</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${sortedTasks.length === 0 ?
-                    '<tr><td colspan="7" style="padding: 40px; text-align: center; color: #64748b; font-size: 18px; font-weight: 500;">No forecast projects found</td></tr>' :
-                    sortedTasks.map((task, index) => {
-                        return `
-                                    <tr style="border-bottom: 1px solid #cbd5e1; ${index % 2 === 0 ? 'background: #f8fafc;' : 'background: white;'}">
-                                        <td style="padding: 16px; color: #0f172a; font-weight: 600; font-size: 15px; vertical-align: middle; border-right: 1px solid #cbd5e1;">
-                                            ${task.projectName || '-'}
-                                        </td>
-                                        <td style="padding: 16px; color: #334155; font-size: 14px; vertical-align: middle; border-right: 1px solid #cbd5e1; font-weight: 500;">
-                                            ${task.projectType || '-'}
-                                        </td>
-                                        <td style="padding: 16px; text-align: center; vertical-align: middle; border-right: 1px solid #cbd5e1;">
-                                            ${(() => {
-                                if (!task.priority) return '<span style="color: #64748b; font-size: 14px;">-</span>';
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 32px;">
+                        ${sortedTasks.length === 0 ?
+                            '<div style="grid-column: span 2; padding: 80px; text-align: center; color: #94a3b8; font-size: 24px; font-weight: 700; background: white; border-radius: 32px; border: 3px dashed #e2e8f0;">No forecast projects scheduled.</div>' :
+                            sortedTasks.map((task, index) => {
+                                // Priority styling
                                 let pColor = '#64748b';
-                                if (task.priority === 'High') pColor = '#dc2626';
-                                else if (task.priority === 'Medium') pColor = '#ea580c';
-                                else if (task.priority === 'Low') pColor = '#16a34a';
-                                return `<span style="font-size: 13px; font-weight: 700; color: ${pColor}; text-transform: uppercase; letter-spacing: 0.5px;">${task.priority}</span>`;
-                            })()}
-                                        </td>
-                                        <td style="padding: 16px; color: #334155; font-size: 14px; vertical-align: middle; border-right: 1px solid #cbd5e1; font-weight: 500;">
-                                            ${task.subPhase || '-'}
-                                        </td>
-                                        <td style="padding: 16px; color: #334155; font-size: 14px; vertical-align: middle; border-right: 1px solid #cbd5e1; font-weight: 500;">
-                                            ${task.pc || '-'}
-                                        </td>
-                                        <td style="padding: 16px; text-align: center; vertical-align: middle; border-right: 1px solid #cbd5e1;">
-                                            <span style="font-size: 14px; font-weight: 800; color: #7c3aed;">
-                                                Forecast
-                                            </span>
-                                        </td>
-                                        <td style="padding: 16px; color: #334155; font-size: 14px; vertical-align: middle;">${task.startDate ? formatDate(task.startDate) : 'TBD'} - ${task.endDate ? formatDate(task.endDate) : 'TBD'}</td>
-                                    </tr>
-        `;
-                    }).join('')
-                }
-                        </tbody>
-                    </table>
+                                if (task.priority === 'High') { pColor = '#dc2626'; }
+                                else if (task.priority === 'Medium') { pColor = '#ea580c'; }
+                                else if (task.priority === 'Low') { pColor = '#16a34a'; }
+
+                                return `
+                                    <div style="background: white; border-radius: 28px; padding: 32px; display: flex; flex-direction: column; gap: 20px; border-left: 12px solid #818cf8; box-shadow: 0 10px 30px rgba(0,0,0,0.03);">
+                                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                                            <div style="background: #eef2ff; color: #4f46e5; padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;">
+                                                FORECAST
+                                            </div>
+                                            ${task.priority ? `
+                                            <div style="color: ${pColor}; font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em;">
+                                                ${task.priority} PRIORITY
+                                            </div>` : ''}
+                                        </div>
+                                        
+                                        <h4 style="color: #0f172a; font-weight: 900; font-size: 28px; line-height: 1.3; margin: 0; letter-spacing: -0.02em;">${task.projectName || 'Untitled Project'}</h4>
+                                        
+                                        <div style="display: flex; gap: 12px;">
+                                            <div style="background: #eef2ff; color: #4f46e5; padding: 6px 16px; border-radius: 20px; font-size: 15px; font-weight: 800;">${task.projectType || 'Project'}</div>
+                                            ${task.subPhase ? `<div style="background: #eef2ff; color: #4f46e5; padding: 6px 16px; border-radius: 20px; font-size: 15px; font-weight: 800;">${task.subPhase}</div>` : ''}
+                                        </div>
+                                        
+                                        <div style="margin-top: 10px; padding-top: 24px; border-top: 2px dashed #f1f5f9; display: flex; align-items: center; gap: 0;">
+                                            <div style="display: flex; align-items: center; gap: 12px; flex: 1;">
+                                                <div style="color: #8b5cf6; display: flex; align-items: center;">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                                                </div>
+                                                <div>
+                                                    <p style="color: #94a3b8; font-size: 10px; font-weight: 800; text-transform: uppercase; margin: 0;">PC</p>
+                                                    <p style="color: #0f172a; font-size: 16px; font-weight: 700; margin: 0;">${task.pc || 'Unassigned'}</p>
+                                                </div>
+                                            </div>
+                                            
+                                            <div style="width: 2px; height: 40px; background: transparent; margin: 0 16px;"></div>
+
+                                            <div style="display: flex; align-items: center; gap: 12px; flex: 1.2;">
+                                                <div style="color: #3b82f6; display: flex; align-items: center;">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                                                </div>
+                                                <div>
+                                                    <p style="color: #94a3b8; font-size: 10px; font-weight: 800; text-transform: uppercase; margin: 0;">Timeline</p>
+                                                    <p style="color: #0f172a; font-size: 16px; font-weight: 700; margin: 0;">${task.startDate ? formatDate(task.startDate) : 'TBD'} <span style="color: #cbd5e1;">—</span> ${task.endDate ? formatDate(task.endDate) : 'TBD'}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('')
+                        }
+                    </div>
+                    
+                    <div style="margin-top: 60px; text-align: center;">
+                        <p style="color: #cbd5e1; font-size: 12px; font-weight: 800; letter-spacing: 0.4em; text-transform: uppercase;">
+                            POWERED BY <span style="color: #94a3b8; font-weight: 900;">QA TRACKER PRO</span>
+                        </p>
+                    </div>
                 </div>
             `;
 

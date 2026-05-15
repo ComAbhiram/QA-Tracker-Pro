@@ -85,17 +85,26 @@ export default function DashboardStats({ tasks, onFilterChange, activeFilter }: 
             {cards.map((card, index) => (
                 <div
                     key={index}
-                    className={`status ${activeFilter === card.filter ? 'ring-2 ring-offset-2 ring-slate-400' : ''}`}
+                    className={`status relative group overflow-hidden ${activeFilter === card.filter ? 'ring-2 ring-offset-2 ring-slate-400 dark:ring-slate-500' : ''}`}
                     style={{
                         '--card-hover-color': card.style['--accent-clr'],
                         '--card-bg-color': card.style['--dot-clr']
                     } as React.CSSProperties}
                     onClick={() => onFilterChange(card.filter)}
                 >
-                    <div className="mac-header">
+                    {/* Background Subtle Gradient Overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-white/40 to-transparent dark:from-white/5 opacity-50 pointer-events-none rounded-2xl"></div>
+                    
+                    <div className="flex justify-between items-start relative z-10 mb-4">
+                        <div className="p-2.5 rounded-xl bg-white/50 dark:bg-black/20 text-slate-800 dark:text-slate-100 shadow-sm backdrop-blur-sm group-hover:scale-110 transition-transform duration-300">
+                            {card.icon}
+                        </div>
                     </div>
-                    <span>{card.value}</span>
-                    <p>{card.title}</p>
+                    
+                    <div className="relative z-10">
+                        <span className="block drop-shadow-sm">{card.value}</span>
+                        <p className="opacity-90">{card.title}</p>
+                    </div>
                 </div>
             ))}
         </div>
