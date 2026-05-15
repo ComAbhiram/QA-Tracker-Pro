@@ -666,21 +666,16 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                     ${sortedAssignees.map(assignee => {
                         const memberTheme = getMemberTheme(assignee);
                         return `
-                        <div>
-                            <!-- Member Header Bar -->
-                            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; background: white; padding: 24px 32px; border-radius: 24px; border: 1px solid #f1f5f9; box-shadow: 0 4px 10px rgba(0,0,0,0.01);">
-                                <div style="display: flex; align-items: center; gap: 20px;">
-                                    <div style="width: 56px; height: 56px; background: ${memberTheme.color}; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 900; font-size: 26px;">
-                                        ${assignee.charAt(0)}
-                                    </div>
-                                    <div>
-                                        <h3 style="color: #0f172a; font-size: 26px; font-weight: 900; margin: 0; letter-spacing: -0.02em;">${assignee}</h3>
-                                        <p style="color: #94a3b8; font-size: 15px; font-weight: 700; margin: 0;">${groupedTasks[assignee].length} Projects Assigned</p>
-                                    </div>
+                        return `
+                        <div style="background: ${memberTheme.bg}; border-radius: 32px; padding: 40px; border: 1px solid white; box-shadow: 0 20px 40px rgba(0,0,0,0.02);">
+                            <!-- Member Header -->
+                            <div style="display: flex; align-items: center; gap: 24px; margin-bottom: 32px;">
+                                <div style="width: 64px; height: 64px; background: ${memberTheme.color}; border-radius: 16px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 900; font-size: 28px;">
+                                    ${assignee.charAt(0)}
                                 </div>
-                                <div style="display: flex; align-items: center; gap: 8px; color: #f97316; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; background: #fff7ed; padding: 8px 16px; border-radius: 10px;">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
-                                    Medium Priority
+                                <div>
+                                    <h3 style="color: #0f172a; font-size: 32px; font-weight: 900; margin: 0; letter-spacing: -0.02em;">${assignee}</h3>
+                                    <p style="color: #64748b; font-size: 16px; font-weight: 700; margin: 4px 0 0 0;">${groupedTasks[assignee].length} Projects Assigned</p>
                                 </div>
                             </div>
 
@@ -690,29 +685,30 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                                     const sStyle = statusStyles[effectiveStatus] || statusStyles['On Hold'];
 
                                     return `
-                                        <div style="background: white; border-radius: 28px; padding: 32px; display: flex; flex-direction: column; gap: 20px; border-left: 12px solid ${sStyle.color}; box-shadow: 0 10px 30px rgba(0,0,0,0.03);">
-                                            
-                                            <div class="pill-badge" style="background: ${effectiveStatus === 'Completed' ? '#ecfdf5' : '#eff6ff'}; color: ${sStyle.color}; width: fit-content;">
-                                                ${sStyle.icon}
-                                                ${effectiveStatus.toUpperCase()}
+                                        <div style="display: flex; flex-direction: column; gap: 16px; border-left: 8px solid ${sStyle.color}; padding-left: 24px;">
+                                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                                <div class="pill-badge" style="background: ${effectiveStatus === 'Completed' ? '#dcfce7' : '#e0f2fe'}; color: ${sStyle.color}; width: fit-content; padding: 6px 16px; border-radius: 20px;">
+                                                    ${effectiveStatus.toUpperCase()}
+                                                </div>
+                                                <div style="color: #ea580c; font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em;">
+                                                    MEDIUM PRIORITY
+                                                </div>
                                             </div>
                                             
                                             <h4 style="color: #0f172a; font-weight: 900; font-size: 28px; line-height: 1.3; margin: 0; letter-spacing: -0.02em;">${task.projectName}</h4>
                                             
                                             <div style="display: flex; gap: 12px;">
-                                                <div style="background: #ecfeff; color: #06b6d4; padding: 6px 16px; border-radius: 10px; font-size: 14px; font-weight: 800;">Project</div>
-                                                <div style="background: #f0fdf4; color: #10b981; padding: 6px 16px; border-radius: 10px; font-size: 14px; font-weight: 800;">${task.subPhase || 'Task'}</div>
+                                                <div style="background: ${effectiveStatus === 'Completed' ? '#dcfce7' : '#e0f2fe'}; color: ${sStyle.color}; padding: 6px 16px; border-radius: 20px; font-size: 15px; font-weight: 800;">Project</div>
+                                                <div style="background: ${effectiveStatus === 'Completed' ? '#dcfce7' : '#e0f2fe'}; color: ${sStyle.color}; padding: 6px 16px; border-radius: 20px; font-size: 15px; font-weight: 800;">${task.subPhase || 'Task'}</div>
                                             </div>
                                             
-                                            <div style="display: flex; align-items: center; gap: 16px; margin-top: 10px; padding-top: 24px; border-top: 2px dashed #f1f5f9;">
-                                                <div style="display: flex; align-items: center; gap: 12px; color: #0f172a; font-size: 16px; font-weight: 700;">
-                                                    <div style="background: #ecfdf5; color: #10b981; padding: 8px; border-radius: 10px;">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                                                    </div>
-                                                    <div style="display: flex; flex-direction: column;">
-                                                        <span style="color: #94a3b8; font-size: 11px; font-weight: 800; text-transform: uppercase;">Period</span>
-                                                        <span>${task.startDate ? formatDate(task.startDate) : '-'} <span style="color: #cbd5e1;">—</span> ${task.endDate ? formatDate(task.endDate) : '-'}</span>
-                                                    </div>
+                                            <div style="display: flex; align-items: center; gap: 12px; margin-top: 8px; color: #0f172a; font-size: 16px; font-weight: 700;">
+                                                <div style="color: ${sStyle.color}; display: flex; align-items: center;">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                                                </div>
+                                                <div style="display: flex; flex-direction: column;">
+                                                    <span style="color: #94a3b8; font-size: 12px; font-weight: 800; text-transform: uppercase;">Period</span>
+                                                    <span>${task.startDate ? formatDate(task.startDate) : '-'} <span style="color: #cbd5e1;">—</span> ${task.endDate ? formatDate(task.endDate) : '-'}</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -925,26 +921,25 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                                 return `
                                     <div style="background: white; border-radius: 28px; padding: 32px; display: flex; flex-direction: column; gap: 20px; border-left: 12px solid ${sStyle.color}; box-shadow: 0 10px 30px rgba(0,0,0,0.03);">
                                         <div style="display: flex; justify-content: space-between; align-items: center;">
-                                            <div style="background: ${sStyle.bg}; color: ${sStyle.color}; padding: 6px 14px; border-radius: 10px; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;">
+                                            <div style="background: ${sStyle.bg}; color: ${sStyle.color}; padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;">
                                                 ${effectiveStatus.toUpperCase()}
                                             </div>
-                                            <div style="display: flex; align-items: center; gap: 6px; color: #f97316; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em;">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
-                                                Medium Priority
+                                            <div style="color: #ea580c; font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em;">
+                                                MEDIUM PRIORITY
                                             </div>
                                         </div>
                                         
                                         <h4 style="color: #0f172a; font-weight: 900; font-size: 28px; line-height: 1.3; margin: 0; letter-spacing: -0.02em;">${task.projectName}</h4>
                                         
                                         <div style="display: flex; gap: 12px;">
-                                            <div style="background: #fffbeb; color: #f59e0b; padding: 6px 16px; border-radius: 10px; font-size: 14px; font-weight: 800;">Project</div>
-                                            <div style="background: #fffbeb; color: #f59e0b; padding: 6px 16px; border-radius: 10px; font-size: 14px; font-weight: 800;">${task.subPhase || 'Task'}</div>
+                                            <div style="background: ${sStyle.bg}; color: ${sStyle.color}; padding: 6px 16px; border-radius: 20px; font-size: 15px; font-weight: 800;">Project</div>
+                                            <div style="background: ${sStyle.bg}; color: ${sStyle.color}; padding: 6px 16px; border-radius: 20px; font-size: 15px; font-weight: 800;">${task.subPhase || 'Task'}</div>
                                         </div>
                                         
                                         <div style="margin-top: 10px; padding-top: 24px; border-top: 2px dashed #f1f5f9; display: flex; align-items: center; gap: 0;">
                                             <div style="display: flex; align-items: center; gap: 12px; flex: 1;">
-                                                <div style="color: #f97316; background: #fff7ed; padding: 8px; border-radius: 10px;">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                                                <div style="color: #f97316; display: flex; align-items: center;">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
                                                 </div>
                                                 <div>
                                                     <p style="color: #94a3b8; font-size: 10px; font-weight: 800; text-transform: uppercase; margin: 0;">Assignee</p>
@@ -952,11 +947,11 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
                                                 </div>
                                             </div>
                                             
-                                            <div style="width: 2px; height: 40px; background: #f1f5f9; margin: 0 32px;"></div>
+                                            <div style="width: 2px; height: 40px; background: transparent; margin: 0 16px;"></div>
 
                                             <div style="display: flex; align-items: center; gap: 12px; flex: 1.2;">
-                                                <div style="color: #3b82f6; background: #eff6ff; padding: 8px; border-radius: 10px;">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                                                <div style="color: #3b82f6; display: flex; align-items: center;">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                                                 </div>
                                                 <div>
                                                     <p style="color: #94a3b8; font-size: 10px; font-weight: 800; text-transform: uppercase; margin: 0;">Period</p>
