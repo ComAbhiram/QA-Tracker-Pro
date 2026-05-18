@@ -660,8 +660,9 @@ export default function TaskModal({ isOpen, onClose, task, defaultAssigneeName, 
                     <CloseButton onClick={handleCloseAttempt} />
                 </div>
 
-                <form onSubmit={handleSubmit} className="p-5 md:p-8 space-y-8">
-                    {/* Project & Type */}
+                <form onSubmit={handleSubmit} className="flex flex-col relative">
+                    <div className="p-5 md:p-8 space-y-8 pb-12">
+                        {/* Project & Type */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div className="space-y-3">
                             <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
@@ -1115,8 +1116,10 @@ export default function TaskModal({ isOpen, onClose, task, defaultAssigneeName, 
                         )}
                     </div>
 
+                    </div>
+
                     {/* Footer */}
-                    <div className="pt-6 flex items-center justify-end gap-3 border-t border-slate-100 dark:border-slate-800 mt-8">
+                    <div className="sticky bottom-0 z-20 flex items-center justify-end gap-3 p-5 md:px-8 md:py-6 border-t border-slate-200/50 dark:border-slate-800/50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-b-[32px] shadow-[0_-20px_40px_-20px_rgba(0,0,0,0.15)]">
                         <button type="button" onClick={handleCloseAttempt} className="btn btn-secondary px-6 py-3 rounded-xl text-sm h-auto">Cancel</button>
                         {task && onDelete && (
                             <Button type="button" variant="destructive" onClick={async () => { if (confirm('Delete?')) { setLoading(true); await onDelete(task.id); setLoading(false); } }} className="btn btn-danger px-6 py-3 rounded-xl shadow-none h-auto">Delete</Button>
