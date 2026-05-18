@@ -18,7 +18,7 @@ export default function MainLayout({ children }: { children: ReactNode }) {
         <>
             <Sidebar />
             <main
-                className={`main-content flex flex-col transition-[margin] duration-300 ease-in-out ${!isAuthPage ? (isCollapsed ? 'lg:ml-20' : 'lg:ml-[16.25rem]') : ''} ${!isAuthPage ? 'pt-16 lg:pt-0' : ''}`}
+                className={`main-content flex flex-col transition-[margin] duration-300 ease-in-out ${!isAuthPage ? (isCollapsed ? 'lg:ml-24' : 'lg:ml-[18.25rem]') : ''} ${!isAuthPage ? 'pt-16 lg:pt-0' : ''}`}
             >
                 {/* Sticky top header bar - visible on all pages */}
                 {!isAuthPage && (

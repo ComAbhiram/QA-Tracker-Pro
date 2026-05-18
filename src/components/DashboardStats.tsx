@@ -82,31 +82,43 @@ export default function DashboardStats({ tasks, onFilterChange, activeFilter }: 
 
     return (
         <div className="status-container mb-8 px-4 lg:px-0">
-            {cards.map((card, index) => (
-                <div
-                    key={index}
-                    className={`status relative group overflow-hidden ${activeFilter === card.filter ? 'ring-2 ring-offset-2 ring-slate-400 dark:ring-slate-500' : ''}`}
-                    style={{
-                        '--card-hover-color': card.style['--accent-clr'],
-                        '--card-bg-color': card.style['--dot-clr']
-                    } as React.CSSProperties}
-                    onClick={() => onFilterChange(card.filter)}
-                >
-                    {/* Background Subtle Gradient Overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-white/40 to-transparent dark:from-white/5 opacity-50 pointer-events-none rounded-2xl"></div>
-                    
-                    <div className="flex justify-between items-start relative z-10 mb-4">
-                        <div className="p-2.5 rounded-xl bg-white/50 dark:bg-black/20 text-slate-800 dark:text-slate-100 shadow-sm backdrop-blur-sm group-hover:scale-110 transition-transform duration-300">
-                            {card.icon}
+            {cards.map((card, index) => {
+                const isActive = activeFilter === card.filter;
+                return (
+                    <div
+                        key={index}
+                        className={`status relative group overflow-hidden transition-all duration-500 ${
+                            isActive 
+                                ? 'scale-[1.03] translate-y-[-4px]' 
+                                : ''
+                        }`}
+                        style={{
+                            '--card-hover-color': card.style['--accent-clr'],
+                            '--card-bg-color': card.style['--dot-clr'],
+                            boxShadow: isActive ? `0 15px 30px -10px rgba(0,0,0,0.05), 0 0 25px -5px ${card.style['--accent-clr']}` : undefined,
+                            borderColor: isActive ? card.style['--accent-clr'] : undefined
+                        } as React.CSSProperties}
+                        onClick={() => onFilterChange(card.filter)}
+                    >
+                        {/* Background Subtle Gradient Overlay */}
+                        <div className="absolute inset-0 bg-gradient-to-br from-white/40 to-transparent dark:from-white/5 opacity-50 pointer-events-none rounded-2xl"></div>
+                        
+                        <div className="flex justify-between items-start relative z-10 mb-4">
+                            <div 
+                                className="p-2.5 rounded-xl bg-white/60 dark:bg-slate-800/60 shadow-sm backdrop-blur-sm group-hover:scale-110 transition-transform duration-300"
+                                style={{ color: card.style['--accent-clr'] }}
+                            >
+                                {card.icon}
+                            </div>
+                        </div>
+                        
+                        <div className="relative z-10">
+                            <span className="block drop-shadow-sm text-2xl font-black text-slate-800 dark:text-slate-100 group-hover:scale-105 transition-transform duration-300 origin-left">{card.value}</span>
+                            <p className="text-[11px] font-extrabold tracking-wider uppercase text-slate-500 dark:text-slate-400 mt-1">{card.title}</p>
                         </div>
                     </div>
-                    
-                    <div className="relative z-10">
-                        <span className="block drop-shadow-sm">{card.value}</span>
-                        <p className="opacity-90">{card.title}</p>
-                    </div>
-                </div>
-            ))}
+                );
+            })}
         </div>
     );
 }

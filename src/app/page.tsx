@@ -512,8 +512,8 @@ export default function Home() {
 
       <div className="flex flex-col gap-8">
         {/* Main Task List - Powered by Paginated Fetch */}
-        <div className="w-full bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden flex flex-col transition-colors duration-300">
-          <div className="p-4 sm:p-6 border-b border-slate-100 dark:border-slate-800 flex flex-col xl:flex-row xl:items-center justify-between gap-4 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl transition-all">
+        <div className="w-full glass-table rounded-3xl overflow-hidden flex flex-col transition-all duration-500">
+          <div className="p-4 sm:p-6 border-b border-slate-100 dark:border-slate-800/40 flex flex-col xl:flex-row xl:items-center justify-between gap-4 bg-white/30 dark:bg-slate-950/20 backdrop-blur-md transition-all">
             <h3 className="font-bold text-lg text-slate-800 dark:text-slate-100 flex items-center gap-2 mb-2 xl:mb-0">
               <Layers size={20} className="text-indigo-600 dark:text-indigo-400" />
               All Tasks
@@ -626,7 +626,7 @@ export default function Home() {
                     <tr
                       key={task.id}
                       onClick={() => handleEditTask(task)}
-                      className="border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors group cursor-pointer"
+                      className="border-b border-slate-100/50 dark:border-slate-800/40 hover:bg-slate-50/60 dark:hover:bg-slate-800/45 transition-all duration-300 group cursor-pointer hover:translate-x-1"
                     >
                       <td className="px-3 py-2 font-medium text-slate-800 dark:text-slate-100 border-r border-slate-100 dark:border-slate-800 truncate max-w-[200px]" title={task.projectName}>
                         <div className="flex flex-col truncate">

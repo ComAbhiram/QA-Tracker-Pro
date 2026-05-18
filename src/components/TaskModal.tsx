@@ -618,7 +618,7 @@ export default function TaskModal({ isOpen, onClose, task, defaultAssigneeName, 
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200 p-4">
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-slate-950/40 backdrop-blur-md animate-in fade-in duration-300 p-4">
             <ConfirmationModal
                 isOpen={showEndDateWarning}
                 onClose={() => setShowEndDateWarning(false)}
@@ -645,9 +645,9 @@ export default function TaskModal({ isOpen, onClose, task, defaultAssigneeName, 
             />
 
 
-            <div className="bg-white dark:bg-slate-900 rounded-[24px] shadow-2xl w-full max-w-4xl max-h-[90dvh] overflow-y-auto custom-scrollbar border border-slate-200/50 dark:border-slate-800 transition-colors duration-300">
+            <div className="bg-white/85 dark:bg-slate-900/85 backdrop-blur-2xl rounded-[32px] shadow-2xl w-full max-w-4xl max-h-[90dvh] overflow-y-auto custom-scrollbar border border-white/20 dark:border-slate-800/40 transition-colors duration-300">
                 {/* Header */}
-                <div className="sticky top-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl z-20 flex items-center justify-between p-5 md:p-8 border-b border-slate-200/50 dark:border-slate-800 bg-gradient-to-r from-slate-50/80 to-white/80 dark:from-slate-900/80 dark:to-slate-800/80 shadow-sm">
+                <div className="sticky top-0 bg-white/40 dark:bg-slate-950/40 backdrop-blur-md z-20 flex items-center justify-between p-5 md:p-8 border-b border-slate-200/40 dark:border-slate-800/40 bg-gradient-to-r from-white/30 to-white/10 dark:from-slate-950/30 dark:to-slate-900/10 shadow-sm">
                     <div className="flex items-center gap-5">
                         <div className={`p-4 rounded-[20px] ${isDuplicate ? 'bg-indigo-50 text-indigo-600 shadow-inner' : task ? 'bg-indigo-50 text-indigo-600 shadow-inner' : 'bg-gradient-to-br from-emerald-50 to-emerald-100/50 text-emerald-600 shadow-sm'} `}>
                             {isDuplicate ? <Copy size={28} /> : task ? <Activity size={28} /> : <Briefcase size={28} />}

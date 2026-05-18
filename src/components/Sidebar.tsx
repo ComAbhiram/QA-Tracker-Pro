@@ -229,7 +229,9 @@ export function Sidebar() {
 
             <nav
                 className={`
-                    fixed top-0 left-0 h-full flex flex-col z-50 bg-white border-r border-slate-100 dark:bg-slate-900 dark:border-slate-800 transition-all duration-300 ease-in-out
+                    fixed z-50 flex flex-col transition-all duration-300 ease-in-out
+                    lg:top-4 lg:bottom-4 lg:left-4 lg:h-[calc(100vh-2rem)] lg:rounded-3xl lg:border lg:shadow-[0_20px_50px_rgba(0,0,0,0.04)] lg:bg-white/75 lg:dark:bg-slate-900/75 lg:backdrop-blur-xl lg:border-slate-200/40 lg:dark:border-slate-800/40
+                    top-0 left-0 h-full bg-white dark:bg-slate-900 border-r border-slate-100 dark:border-slate-800
                     ${showExpanded ? 'translate-x-0 w-[16.25rem]' : '-translate-x-full lg:translate-x-0 lg:w-20'}
                 `}
                 onMouseEnter={handleMouseEnter}
@@ -329,29 +331,25 @@ export function Sidebar() {
                                             key={item.href}
                                             href={item.href}
                                             className={`
-                                                flex items-center rounded-lg cursor-pointer transition-all duration-200 font-medium text-slate-500 dark:text-slate-400 text-sm hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:text-slate-800 dark:hover:text-slate-100 relative overflow-hidden group
-                                                ${isActive ? 'text-yellow-600 dark:text-yellow-500 bg-yellow-50 dark:bg-yellow-900/20 font-semibold active-nav-item' : ''}
-                                                ${!showExpanded ? 'justify-center p-3' : 'px-3 py-2.5'}
+                                                flex items-center rounded-xl cursor-pointer transition-all duration-300 font-medium text-slate-500 dark:text-slate-400 text-sm hover:bg-slate-50/80 dark:hover:bg-slate-800/40 hover:text-slate-800 dark:hover:text-slate-100 relative overflow-hidden group
+                                                ${isActive ? 'active-nav-item font-semibold shadow-[0_4px_12px_rgba(245,158,11,0.06)]' : ''}
+                                                ${!showExpanded ? 'justify-center p-3' : 'px-4 py-3'}
                                             `}
                                             title={!showExpanded ? item.label : ''}
                                         >
-                                            {isActive && showExpanded && (
-                                                <span className="absolute left-0 top-0 bottom-0 w-1 bg-yellow-500 dark:bg-yellow-600 rounded-r-full" />
-                                            )}
-
-                                            <span className={`nav-icon flex items-center justify-center ${showExpanded ? 'mr-3' : ''} ${isActive ? 'text-yellow-600 dark:text-yellow-500' : ''}`}>
+                                            <span className={`nav-icon flex items-center justify-center transition-transform duration-300 group-hover:scale-110 ${showExpanded ? 'mr-3' : ''} ${isActive ? 'text-yellow-600 dark:text-yellow-500' : ''}`}>
                                                 {item.icon}
                                             </span>
 
-                                            {showExpanded && <span className="nav-text truncate">{item.label}</span>}
+                                            {showExpanded && <span className="nav-text truncate transition-colors duration-300">{item.label}</span>}
 
                                             {showExpanded && item.badge && (
-                                                <span className="ml-auto bg-sky-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md">
+                                                <span className="ml-auto bg-amber-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md shadow-sm">
                                                     {item.badge}
                                                 </span>
                                             )}
 
-                                            {/* Tooltip on hover when collapsed - ONLY when NOT expanded (which implies not hovered, so this practically never shows on desktop if hover-expand is on, but keeps for mobile/edge cases) */}
+                                            {/* Tooltip on hover when collapsed */}
                                             {!showExpanded && (
                                                 <div className="absolute left-full ml-2 px-2 py-1 bg-slate-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50 shadow-lg">
                                                     {item.label}
