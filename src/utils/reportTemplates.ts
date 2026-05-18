@@ -94,13 +94,13 @@ export function buildWorkStatusTableHTML(params: {
             const overdueStyle = es === 'Overdue' ? 'background:#fef2f2;' : '';
 
             return `<tr style="border-bottom:1px solid #e2e8f0;">
-                <td style="padding:10px 16px;border-right:1px solid #e2e8f0;font-size:12px;font-weight:600;color:#334155;max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${task.projectName}</td>
-                <td style="padding:10px 16px;border-right:1px solid #e2e8f0;font-size:12px;color:#64748b;">${task.projectType || '-'}</td>
-                <td style="padding:10px 16px;border-right:1px solid #e2e8f0;">${priorityHTML(task.priority)}</td>
-                <td style="padding:10px 16px;border-right:1px solid #e2e8f0;font-size:12px;color:#475569;">${task.subPhase || '-'}</td>
-                <td style="padding:10px 16px;border-right:1px solid #e2e8f0;">${statusHTML(statusLabel)}${es === 'Overdue' && task.endDate ? `<span style="color:#dc2626;font-size:10px;font-weight:700;margin-left:4px;">⚠</span>` : ''}</td>
-                <td style="padding:10px 16px;border-right:1px solid #e2e8f0;font-size:11px;color:#475569;white-space:nowrap;">${startStr}</td>
-                <td style="padding:10px 16px;font-size:11px;color:#475569;white-space:nowrap;${overdueStyle}${es === 'Overdue' ? 'color:#b91c1c;font-weight:600;' : ''}">${endStr}</td>
+                <td style="padding:10px 16px;border-right:1px solid #e2e8f0;font-size:12px;font-weight:600;color:#334155;max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:left;">${task.projectName}</td>
+                <td style="padding:10px 16px;border-right:1px solid #e2e8f0;font-size:12px;color:#64748b;text-align:center;">${task.projectType || '-'}</td>
+                <td style="padding:10px 16px;border-right:1px solid #e2e8f0;text-align:center;">${priorityHTML(task.priority)}</td>
+                <td style="padding:10px 16px;border-right:1px solid #e2e8f0;font-size:12px;color:#475569;text-align:center;">${task.subPhase || '-'}</td>
+                <td style="padding:10px 16px;border-right:1px solid #e2e8f0;text-align:center;">${statusHTML(statusLabel)}${es === 'Overdue' && task.endDate ? `<span style="color:#dc2626;font-size:10px;font-weight:700;margin-left:4px;">⚠</span>` : ''}</td>
+                <td style="padding:10px 16px;border-right:1px solid #e2e8f0;font-size:11px;color:#475569;white-space:nowrap;text-align:center;">${startStr}</td>
+                <td style="padding:10px 16px;font-size:11px;color:#475569;white-space:nowrap;text-align:center;${overdueStyle}${es === 'Overdue' ? 'color:#b91c1c;font-weight:600;' : ''}">${endStr}</td>
             </tr>`;
         }).join('');
 
@@ -118,12 +118,12 @@ export function buildWorkStatusTableHTML(params: {
                 <thead>
                     <tr style="background:#f8fafc;border-bottom:1px solid #e2e8f0;">
                         <th style="padding:8px 16px;text-align:left;font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;border-right:1px solid #e2e8f0;">Project</th>
-                        <th style="padding:8px 16px;text-align:left;font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;border-right:1px solid #e2e8f0;">Type</th>
-                        <th style="padding:8px 16px;text-align:left;font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;border-right:1px solid #e2e8f0;">Priority</th>
-                        <th style="padding:8px 16px;text-align:left;font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;border-right:1px solid #e2e8f0;">Task</th>
-                        <th style="padding:8px 16px;text-align:left;font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;border-right:1px solid #e2e8f0;">Status</th>
-                        <th style="padding:8px 16px;text-align:left;font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;border-right:1px solid #e2e8f0;">Start</th>
-                        <th style="padding:8px 16px;text-align:left;font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;">End</th>
+                        <th style="padding:8px 16px;text-align:center;font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;border-right:1px solid #e2e8f0;">Type</th>
+                        <th style="padding:8px 16px;text-align:center;font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;border-right:1px solid #e2e8f0;">Priority</th>
+                        <th style="padding:8px 16px;text-align:center;font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;border-right:1px solid #e2e8f0;">Task</th>
+                        <th style="padding:8px 16px;text-align:center;font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;border-right:1px solid #e2e8f0;">Status</th>
+                        <th style="padding:8px 16px;text-align:center;font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;border-right:1px solid #e2e8f0;">Start</th>
+                        <th style="padding:8px 16px;text-align:center;font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;">End</th>
                     </tr>
                 </thead>
                 <tbody>${taskRows}</tbody>
@@ -204,13 +204,13 @@ export function buildWorkScheduleTableHTML(params: {
             const endStr = task.endDate ? formatDate(task.endDate) : '-';
             const overdueStyle = es === 'Overdue' ? 'background:#fef2f2;' : '';
             return `<tr style="border-bottom:1px solid #e2e8f0;">
-                <td style="padding:10px 16px;border-right:1px solid #e2e8f0;font-size:12px;font-weight:600;color:#334155;">${task.projectName}</td>
-                <td style="padding:10px 16px;border-right:1px solid #e2e8f0;font-size:12px;color:#64748b;">${task.projectType || '-'}</td>
-                <td style="padding:10px 16px;border-right:1px solid #e2e8f0;">${priorityHTML(task.priority)}</td>
-                <td style="padding:10px 16px;border-right:1px solid #e2e8f0;font-size:12px;color:#475569;">${task.subPhase || '-'}</td>
-                <td style="padding:10px 16px;border-right:1px solid #e2e8f0;">${statusHTML(es)}</td>
-                <td style="padding:10px 16px;border-right:1px solid #e2e8f0;font-size:12px;font-weight:600;color:#475569;">${assignees}</td>
-                <td style="padding:10px 16px;font-size:11px;color:#475569;white-space:nowrap;">${startStr} — ${endStr}</td>
+                <td style="padding:10px 16px;border-right:1px solid #e2e8f0;font-size:12px;font-weight:600;color:#334155;text-align:left;">${task.projectName}</td>
+                <td style="padding:10px 16px;border-right:1px solid #e2e8f0;font-size:12px;color:#64748b;text-align:center;">${task.projectType || '-'}</td>
+                <td style="padding:10px 16px;border-right:1px solid #e2e8f0;text-align:center;">${priorityHTML(task.priority)}</td>
+                <td style="padding:10px 16px;border-right:1px solid #e2e8f0;font-size:12px;color:#475569;text-align:center;">${task.subPhase || '-'}</td>
+                <td style="padding:10px 16px;border-right:1px solid #e2e8f0;text-align:center;">${statusHTML(es)}</td>
+                <td style="padding:10px 16px;border-right:1px solid #e2e8f0;font-size:12px;font-weight:600;color:#475569;text-align:center;">${assignees}</td>
+                <td style="padding:10px 16px;font-size:11px;color:#475569;white-space:nowrap;text-align:center;">${startStr} — ${endStr}</td>
             </tr>`;
         }).join('');
 
@@ -235,12 +235,12 @@ export function buildWorkScheduleTableHTML(params: {
                     <thead>
                         <tr style="background:#f8fafc;border-bottom:1px solid #e2e8f0;">
                             <th style="padding:8px 16px;text-align:left;font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;border-right:1px solid #e2e8f0;">Project</th>
-                            <th style="padding:8px 16px;text-align:left;font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;border-right:1px solid #e2e8f0;">Type</th>
-                            <th style="padding:8px 16px;text-align:left;font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;border-right:1px solid #e2e8f0;">Priority</th>
-                            <th style="padding:8px 16px;text-align:left;font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;border-right:1px solid #e2e8f0;">Task</th>
-                            <th style="padding:8px 16px;text-align:left;font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;border-right:1px solid #e2e8f0;">Status</th>
-                            <th style="padding:8px 16px;text-align:left;font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;border-right:1px solid #e2e8f0;">Assignee</th>
-                            <th style="padding:8px 16px;text-align:left;font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;">Period</th>
+                            <th style="padding:8px 16px;text-align:center;font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;border-right:1px solid #e2e8f0;">Type</th>
+                            <th style="padding:8px 16px;text-align:center;font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;border-right:1px solid #e2e8f0;">Priority</th>
+                            <th style="padding:8px 16px;text-align:center;font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;border-right:1px solid #e2e8f0;">Task</th>
+                            <th style="padding:8px 16px;text-align:center;font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;border-right:1px solid #e2e8f0;">Status</th>
+                            <th style="padding:8px 16px;text-align:center;font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;border-right:1px solid #e2e8f0;">Assignee</th>
+                            <th style="padding:8px 16px;text-align:center;font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;">Period</th>
                         </tr>
                     </thead>
                     <tbody>${taskRows}</tbody>
