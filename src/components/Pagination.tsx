@@ -97,7 +97,7 @@ export default function Pagination({ currentPage, totalItems, itemsPerPage, onPa
                             <button
                                 key={index}
                                 onClick={() => onPageChange(page as number)}
-                                className={`w-8.5 h-8.5 flex items-center justify-center rounded-xl text-xs font-extrabold transition-all border
+                                className={`w-8 h-8 flex items-center justify-center rounded-xl text-xs font-extrabold transition-all border
                                     ${isActive
                                         ? 'bg-gradient-to-r from-amber-500 to-orange-600 text-white border-transparent shadow-md shadow-amber-500/20 animate-glow-pulse'
                                         : 'border-slate-200/50 dark:border-slate-800/80 bg-white/40 dark:bg-slate-900/30 text-slate-600 dark:text-slate-350 hover:border-amber-500/40 hover:bg-amber-500/5 hover:text-amber-500 cursor-pointer'
