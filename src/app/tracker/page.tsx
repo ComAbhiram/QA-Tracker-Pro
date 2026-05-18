@@ -1067,7 +1067,7 @@ export default function Tracker() {
 
 
             {/* STICKY HEADER for All Tables */}
-            <div className="sticky top-0 z-40 bg-white/80 dark:bg-slate-950/85 backdrop-blur-md shadow-lg border-b border-slate-255/15 dark:border-slate-800/40 mb-3 rounded-2xl overflow-x-auto no-scrollbar transition-all duration-300">
+            <div className="sticky top-0 z-40 bg-white/80 dark:bg-slate-950/85 backdrop-blur-md shadow-lg border-b border-slate-255/15 dark:border-slate-800/40 mb-3 rounded-2xl overflow-x-auto table-scrollbar transition-all duration-300">
                 <table className="w-full text-xs text-slate-800 dark:text-slate-200 border-collapse table-fixed">
                     <colgroup>
                         <col style={{ width: columnWidths.projectName }} />

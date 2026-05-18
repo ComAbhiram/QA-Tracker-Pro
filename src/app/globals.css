@@ -1134,6 +1134,39 @@
   background: rgba(156, 163, 175, 0.5);
 }
 
+/* Hide scrollbar completely */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Slim scrollbars for tables - transparent track, thumb visible on hover */
+.table-scrollbar::-webkit-scrollbar {
+  height: 6px;
+  width: 6px;
+}
+
+.table-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.table-scrollbar::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: 9999px;
+  transition: background-color 0.3s ease;
+}
+
+.table-scrollbar:hover::-webkit-scrollbar-thumb {
+  background: rgba(156, 163, 175, 0.4);
+}
+
+.table-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(156, 163, 175, 0.6);
+}
+
 /* Animated Robot AI Character Keyframes & Utilities */
 @keyframes robot-float {
   0%, 100% {
