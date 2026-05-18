@@ -67,7 +67,7 @@ export function buildWorkStatusTableHTML(params: {
             const avgAct = Math.round(teamActivities.reduce((s: number, a: any) => s + (a.activityPercentage || 0), 0) / teamActivities.length);
             const activeMembersCount = sortedAssignees.filter(a => a !== 'Unassigned').length;
             hubstaffSection = `
-            <div style="display:flex;align-items:center;gap:24px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:10px 20px;margin-bottom:12px;">
+            <div style="display:flex;align-items:center;gap:24px;background:#f8fafc;border:2px solid #e2e8f0;border-radius:10px;padding:10px 20px;margin-bottom:12px;">
                 <span style="font-size:11px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:0.05em;">Activity Summary</span>
                 <span style="font-size:11px;color:#64748b;">${activeMembersCount} members</span>
                 <span style="font-size:13px;font-weight:800;color:#0f172a;">⏱ ${formatTime(totalTime)}</span>
@@ -81,7 +81,7 @@ export function buildWorkStatusTableHTML(params: {
         const mc = getMemberColor(assignee);
         const tasks = groupedTasks[assignee];
 
-        const taskRows = tasks.map((task: any) => {
+        const taskRows = tasks.map((task: any, index: number) => {
             const es = getEffectiveStatus(task);
             let statusLabel = es;
             if (es === 'Overdue' && task.endDate) {
@@ -93,20 +93,21 @@ export function buildWorkStatusTableHTML(params: {
             const startStr = task.startDate ? formatDate(task.startDate) : '-';
             const endStr = task.endDate ? formatDate(task.endDate) : '-';
             const overdueStyle = es === 'Overdue' ? 'background:#fef2f2;' : '';
+            const bgStyle = index % 2 !== 0 ? 'background:#f8fafc;' : '';
 
-            return `<tr style="border-bottom:1px solid #e2e8f0;">
-                <td style="padding:10px 16px;border-right:1px solid #e2e8f0;font-size:12px;font-weight:600;color:#334155;max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:left;">${task.projectName}</td>
-                <td style="padding:10px 16px;border-right:1px solid #e2e8f0;font-size:12px;color:#64748b;text-align:center;">${task.projectType || '-'}</td>
-                <td style="padding:10px 16px;border-right:1px solid #e2e8f0;text-align:center;">${priorityHTML(task.priority)}</td>
-                <td style="padding:10px 16px;border-right:1px solid #e2e8f0;font-size:12px;color:#475569;text-align:center;">${task.subPhase || '-'}</td>
-                <td style="padding:10px 16px;border-right:1px solid #e2e8f0;text-align:center;">${statusHTML(statusLabel)}${es === 'Overdue' && task.endDate ? `<span style="color:#dc2626;font-size:10px;font-weight:700;margin-left:4px;">⚠</span>` : ''}</td>
-                <td style="padding:10px 16px;border-right:1px solid #e2e8f0;font-size:11px;color:#475569;white-space:nowrap;text-align:center;">${startStr}</td>
-                <td style="padding:10px 16px;font-size:11px;color:#475569;white-space:nowrap;text-align:center;${overdueStyle}${es === 'Overdue' ? 'color:#b91c1c;font-weight:600;' : ''}">${endStr}</td>
+            return `<tr style="border-bottom:2px solid #e2e8f0;${bgStyle}">
+                <td style="padding:14px 16px;border-right:2px solid #e2e8f0;font-size:12px;font-weight:600;color:#334155;max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:left;">${task.projectName}</td>
+                <td style="padding:14px 16px;border-right:2px solid #e2e8f0;font-size:12px;color:#64748b;text-align:center;">${task.projectType || '-'}</td>
+                <td style="padding:14px 16px;border-right:2px solid #e2e8f0;text-align:center;">${priorityHTML(task.priority)}</td>
+                <td style="padding:14px 16px;border-right:2px solid #e2e8f0;font-size:12px;color:#475569;text-align:center;">${task.subPhase || '-'}</td>
+                <td style="padding:14px 16px;border-right:2px solid #e2e8f0;text-align:center;">${statusHTML(statusLabel)}${es === 'Overdue' && task.endDate ? `<span style="color:#dc2626;font-size:10px;font-weight:700;margin-left:4px;">⚠</span>` : ''}</td>
+                <td style="padding:14px 16px;border-right:2px solid #e2e8f0;font-size:11px;color:#475569;white-space:nowrap;text-align:center;">${startStr}</td>
+                <td style="padding:14px 16px;font-size:11px;color:#475569;white-space:nowrap;text-align:center;${overdueStyle}${es === 'Overdue' ? 'color:#b91c1c;font-weight:600;' : ''}">${endStr}</td>
             </tr>`;
         }).join('');
 
         return `
-        <div style="background:#fff;border-radius:10px;border:1px solid #e2e8f0;overflow:hidden;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,0.04);">
+        <div style="background:#fff;border-radius:10px;border:2px solid #e2e8f0;overflow:hidden;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,0.04);">
             <!-- Member Header matching tracker -->
             <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 12px;background:${mc.bg};border-bottom:1px solid ${mc.light || '#e2e8f0'};">
                 <div style="display:flex;align-items:center;gap:8px;">
@@ -117,13 +118,13 @@ export function buildWorkStatusTableHTML(params: {
             <!-- Task Table -->
             <table style="width:100%;border-collapse:collapse;">
                 <thead>
-                    <tr style="background:#f8fafc;border-bottom:1px solid #e2e8f0;">
-                        <th style="padding:8px 16px;text-align:left;font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;border-right:1px solid #e2e8f0;">Project</th>
-                        <th style="padding:8px 16px;text-align:center;font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;border-right:1px solid #e2e8f0;">Type</th>
-                        <th style="padding:8px 16px;text-align:center;font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;border-right:1px solid #e2e8f0;">Priority</th>
-                        <th style="padding:8px 16px;text-align:center;font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;border-right:1px solid #e2e8f0;">Task</th>
-                        <th style="padding:8px 16px;text-align:center;font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;border-right:1px solid #e2e8f0;">Status</th>
-                        <th style="padding:8px 16px;text-align:center;font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;border-right:1px solid #e2e8f0;">Start</th>
+                    <tr style="background:#f8fafc;border-bottom:2px solid #e2e8f0;">
+                        <th style="padding:8px 16px;text-align:left;font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;border-right:2px solid #e2e8f0;">Project</th>
+                        <th style="padding:8px 16px;text-align:center;font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;border-right:2px solid #e2e8f0;">Type</th>
+                        <th style="padding:8px 16px;text-align:center;font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;border-right:2px solid #e2e8f0;">Priority</th>
+                        <th style="padding:8px 16px;text-align:center;font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;border-right:2px solid #e2e8f0;">Task</th>
+                        <th style="padding:8px 16px;text-align:center;font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;border-right:2px solid #e2e8f0;">Status</th>
+                        <th style="padding:8px 16px;text-align:center;font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;border-right:2px solid #e2e8f0;">Start</th>
                         <th style="padding:8px 16px;text-align:center;font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;">End</th>
                     </tr>
                 </thead>
@@ -148,7 +149,7 @@ export function buildWorkStatusTableHTML(params: {
                     <p style="color:#64748b;font-size:11px;font-weight:600;margin-top:2px;">QA Team • ${dateStr}</p>
                 </div>
                 <div style="display:flex;gap:8px;">
-                    <div style="text-align:center;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:6px 14px;">
+                    <div style="text-align:center;background:#f8fafc;border:2px solid #e2e8f0;border-radius:8px;padding:6px 14px;">
                         <p style="color:#94a3b8;font-size:8px;font-weight:800;text-transform:uppercase;">Total</p>
                         <p style="color:#0f172a;font-size:18px;font-weight:900;">${todayTasks.length}</p>
                     </div>
@@ -198,20 +199,21 @@ export function buildWorkScheduleTableHTML(params: {
 
     const taskRows = scheduleTasks.length === 0
         ? `<tr><td colspan="7" style="padding:30px;text-align:center;color:#94a3b8;font-size:14px;font-weight:600;">No active tasks scheduled.</td></tr>`
-        : scheduleTasks.map(task => {
+        : scheduleTasks.map((task, index) => {
             const es = getEffectiveStatus(task);
             const assignees = [task.assignedTo, task.assignedTo2, ...(task.additionalAssignees || [])].filter(Boolean).join(', ') || 'Unassigned';
             const startStr = task.startDate ? formatDate(task.startDate) : '-';
             const endStr = task.endDate ? formatDate(task.endDate) : '-';
             const overdueStyle = es === 'Overdue' ? 'background:#fef2f2;' : '';
-            return `<tr style="border-bottom:1px solid #e2e8f0;">
-                <td style="padding:10px 16px;border-right:1px solid #e2e8f0;font-size:12px;font-weight:600;color:#334155;text-align:left;">${task.projectName}</td>
-                <td style="padding:10px 16px;border-right:1px solid #e2e8f0;font-size:12px;color:#64748b;text-align:center;">${task.projectType || '-'}</td>
-                <td style="padding:10px 16px;border-right:1px solid #e2e8f0;text-align:center;">${priorityHTML(task.priority)}</td>
-                <td style="padding:10px 16px;border-right:1px solid #e2e8f0;font-size:12px;color:#475569;text-align:center;">${task.subPhase || '-'}</td>
-                <td style="padding:10px 16px;border-right:1px solid #e2e8f0;text-align:center;">${statusHTML(es)}</td>
-                <td style="padding:10px 16px;border-right:1px solid #e2e8f0;font-size:12px;font-weight:600;color:#475569;text-align:center;">${assignees}</td>
-                <td style="padding:10px 16px;font-size:11px;color:#475569;white-space:nowrap;text-align:center;">${startStr} — ${endStr}</td>
+            const bgStyle = index % 2 !== 0 ? 'background:#f8fafc;' : '';
+            return `<tr style="border-bottom:2px solid #e2e8f0;${bgStyle}">
+                <td style="padding:14px 16px;border-right:2px solid #e2e8f0;font-size:12px;font-weight:600;color:#334155;text-align:left;">${task.projectName}</td>
+                <td style="padding:14px 16px;border-right:2px solid #e2e8f0;font-size:12px;color:#64748b;text-align:center;">${task.projectType || '-'}</td>
+                <td style="padding:14px 16px;border-right:2px solid #e2e8f0;text-align:center;">${priorityHTML(task.priority)}</td>
+                <td style="padding:14px 16px;border-right:2px solid #e2e8f0;font-size:12px;color:#475569;text-align:center;">${task.subPhase || '-'}</td>
+                <td style="padding:14px 16px;border-right:2px solid #e2e8f0;text-align:center;">${statusHTML(es)}</td>
+                <td style="padding:14px 16px;border-right:2px solid #e2e8f0;font-size:12px;font-weight:600;color:#475569;text-align:center;">${assignees}</td>
+                <td style="padding:14px 16px;font-size:11px;color:#475569;white-space:nowrap;text-align:center;">${startStr} — ${endStr}</td>
             </tr>`;
         }).join('');
 
@@ -226,21 +228,21 @@ export function buildWorkScheduleTableHTML(params: {
                     <h1 style="color:#0f172a;font-size:22px;font-weight:800;letter-spacing:-0.02em;">Upcoming Work Schedule</h1>
                     <p style="color:#64748b;font-size:11px;font-weight:600;margin-top:2px;">${dateStr}</p>
                 </div>
-                <div style="text-align:center;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:6px 14px;">
+                <div style="text-align:center;background:#f8fafc;border:2px solid #e2e8f0;border-radius:8px;padding:6px 14px;">
                     <p style="color:#94a3b8;font-size:8px;font-weight:800;text-transform:uppercase;">Total</p>
                     <p style="color:#0f172a;font-size:18px;font-weight:900;">${scheduleTasks.length}</p>
                 </div>
             </div>
-            <div style="background:#fff;border-radius:10px;border:1px solid #e2e8f0;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.04);">
+            <div style="background:#fff;border-radius:10px;border:2px solid #e2e8f0;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.04);">
                 <table style="width:100%;border-collapse:collapse;">
                     <thead>
-                        <tr style="background:#f8fafc;border-bottom:1px solid #e2e8f0;">
-                            <th style="padding:8px 16px;text-align:left;font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;border-right:1px solid #e2e8f0;">Project</th>
-                            <th style="padding:8px 16px;text-align:center;font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;border-right:1px solid #e2e8f0;">Type</th>
-                            <th style="padding:8px 16px;text-align:center;font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;border-right:1px solid #e2e8f0;">Priority</th>
-                            <th style="padding:8px 16px;text-align:center;font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;border-right:1px solid #e2e8f0;">Task</th>
-                            <th style="padding:8px 16px;text-align:center;font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;border-right:1px solid #e2e8f0;">Status</th>
-                            <th style="padding:8px 16px;text-align:center;font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;border-right:1px solid #e2e8f0;">Assignee</th>
+                        <tr style="background:#f8fafc;border-bottom:2px solid #e2e8f0;">
+                            <th style="padding:8px 16px;text-align:left;font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;border-right:2px solid #e2e8f0;">Project</th>
+                            <th style="padding:8px 16px;text-align:center;font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;border-right:2px solid #e2e8f0;">Type</th>
+                            <th style="padding:8px 16px;text-align:center;font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;border-right:2px solid #e2e8f0;">Priority</th>
+                            <th style="padding:8px 16px;text-align:center;font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;border-right:2px solid #e2e8f0;">Task</th>
+                            <th style="padding:8px 16px;text-align:center;font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;border-right:2px solid #e2e8f0;">Status</th>
+                            <th style="padding:8px 16px;text-align:center;font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;border-right:2px solid #e2e8f0;">Assignee</th>
                             <th style="padding:8px 16px;text-align:center;font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;">Period</th>
                         </tr>
                     </thead>

@@ -548,7 +548,7 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
 
 
             const container = document.createElement('div');
-            container.style.cssText = 'position: absolute; left: -9999px; top: -9999px; background: #f9fafb; padding: 30px; width: 1200px;';
+            container.style.cssText = 'position: absolute; left: -9999px; top: -9999px; background: #ffffff; padding: 30px; width: 1200px;';
 
             const statusStyles: { [key: string]: { gradient: string, color: string, icon: string } } = {
                 'Completed': { gradient: 'linear-gradient(135deg, #10b981, #059669)', color: '#10b981', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>' },
@@ -655,7 +655,7 @@ export default function DailyReportsModal({ isOpen, onClose }: DailyReportsModal
 
 
             const container = document.createElement('div');
-            container.style.cssText = 'position: absolute; left: -9999px; top: -9999px; background: #f9fafb; padding: 30px; width: 1200px;';
+            container.style.cssText = 'position: absolute; left: -9999px; top: -9999px; background: #ffffff; padding: 30px; width: 1200px;';
 
             container.innerHTML = buildWorkScheduleTableHTML({
                 scheduleTasks,
