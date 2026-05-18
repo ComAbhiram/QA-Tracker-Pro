@@ -43,7 +43,7 @@ interface TeamMember {
 }
 
 export default function Tracker() {
-    const { isGuest, selectedTeamId, selectedTeamName, setGuestSession, isLoading: isGuestLoading, isPCMode, selectedPCName } = useGuestMode();
+    const { isGuest, selectedTeamId, selectedTeamName, setGuestSession, setPCModeSession, isLoading: isGuestLoading, isPCMode, selectedPCName } = useGuestMode();
     const [tasks, setTasks] = useState<Task[]>([]);
     const [leaves, setLeaves] = useState<Leave[]>([]);
     const [loading, setLoading] = useState(true);
@@ -108,7 +108,11 @@ export default function Tracker() {
             }
         }
 
-        setGuestSession(targetTeamId, teamName);
+        if (isPCMode) {
+            setPCModeSession(targetTeamId, teamName);
+        } else {
+            setGuestSession(targetTeamId, teamName);
+        }
         // Force reload to ensure context updates propogate clean
         window.location.reload();
     };

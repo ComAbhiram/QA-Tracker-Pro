@@ -29,7 +29,7 @@ export default function LeavePage() {
     const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false);
     const [currentUser, setCurrentUser] = useState<any>(null);
     const [userTeamId, setUserTeamId] = useState<string | null>(null);
-    const { isGuest, selectedTeamId, selectedTeamName, setGuestSession, isLoading: isGuestLoading } = useGuestMode();
+    const { isGuest, selectedTeamId, selectedTeamName, setGuestSession, isLoading: isGuestLoading, isPCMode, setPCModeSession } = useGuestMode();
     const { teams } = useTeams(isGuest);
 
     useEffect(() => {
@@ -206,7 +206,11 @@ export default function LeavePage() {
     };
 
     const handleTeamSelect = (id: string, name: string) => {
-        setGuestSession(id, name);
+        if (isPCMode) {
+            setPCModeSession(id, name);
+        } else {
+            setGuestSession(id, name);
+        }
         // Force reload to ensure context updates propogate clean - same as tracker/page.tsx
         setTimeout(() => {
             window.location.reload();
