@@ -153,31 +153,88 @@ export default function AIChatAssistant() {
                 </div>
             )}
 
-            {/* Toggle Button */}
+            {/* Animated Floating Bot Character */}
             <div
                 onClick={() => setIsOpen(!isOpen)}
-                className="ai-chat-btn ai-chat-flex"
+                className="relative group cursor-pointer select-none transition-all duration-300 active:scale-95 flex flex-col items-center"
                 role="button"
                 tabIndex={0}
                 aria-label="Toggle AI Chat"
             >
-                <svg
-                    viewBox="0 0 24 24"
-                    height="24"
-                    width="24"
-                    xmlns="http://www.w3.org/2000/svg"
-                >
-                    <g fill="none">
-                        <path
-                            d="m12.594 23.258l-.012.002l-.071.035l-.02.004l-.014-.004l-.071-.036q-.016-.004-.024.006l-.004.01l-.017.428l.005.02l.01.013l.104.074l.015.004l.012-.004l.104-.074l.012-.016l.004-.017l-.017-.427q-.004-.016-.016-.018m.264-.113l-.014.002l-.184.093l-.01.01l-.003.011l.018.43l.005.012l.008.008l.201.092q.019.005.029-.008l.004-.014l-.034-.614q-.005-.019-.02-.022m-.715.002a.02.02 0 0 0-.027.006l-.006.014l-.034.614q.001.018.017.024l.015-.002l.201-.093l.01-.008l.003-.011l.018-.43l-.003-.012l-.01-.01z"
-                        ></path>
-                        <path
-                            d="M9.107 5.448c.598-1.75 3.016-1.803 3.725-.159l.06.16l.807 2.36a4 4 0 0 0 2.276 2.411l.217.081l2.36.806c1.75.598 1.803 3.016.16 3.725l-.16.06l-2.36.807a4 4 0 0 0-2.412 2.276l-.081.216l-.806 2.361c-.598 1.75-3.016 1.803-3.724.16l-.062-.16l-.806-2.36a4 4 0 0 0-2.276-2.412l-.216-.081l-2.36-.806c-1.751-.598-1.804-3.016-.16-3.724l.16-.062l2.36-.806A4 4 0 0 0 8.22 8.025l.081-.216zM11 6.094l-.806 2.36a6 6 0 0 1-3.49 3.649l-.25.091l-2.36.806l2.36.806a6 6 0 0 1 3.649 3.49l.091.25l.806 2.36l.806-2.36a6 6 0 0 1 3.49-3.649l.25-.09l2.36-.807l-2.36-.806a6 6 0 0 1-3.649-3.49l-.09-.25zM19 2a1 1 0 0 1 .898.56l.048.117l.35 1.026l1.027.35a1 1 0 0 1 .118 1.845l-.118.048l-1.026.35l-.35 1.027a1 1 0 0 1-1.845.117l-.048-.117l-.35-1.026l-1.027-.35a1 1 0 0 1-.118-1.845l.118-.048l1.026-.35l.35-1.027A1 1 0 0 1 19 2"
-                            fill="currentColor"
-                        ></path>
-                    </g>
-                </svg>
-                Ask AI
+                {/* Holographic Tooltip Bubble */}
+                <div className="absolute bottom-20 right-2 bg-gradient-to-r from-amber-500 to-amber-600 dark:from-amber-600 dark:to-yellow-500 text-white font-extrabold text-xs px-3.5 py-2 rounded-2xl rounded-br-none shadow-[0_10px_25px_rgba(245,158,11,0.3)] border border-amber-400/30 whitespace-nowrap opacity-0 translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 flex items-center gap-1.5 z-50">
+                    <span className="relative flex h-2 w-2">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+                    </span>
+                    <span>Ask AI Assistant!</span>
+                </div>
+
+                {/* The Floating Bot Character */}
+                <div className="relative w-16 h-16 flex items-center justify-center animate-robot-float">
+                    {/* Glowing Aura Ring */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-amber-500/20 to-yellow-500/20 rounded-full blur-xl opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all duration-500"></div>
+                    
+                    {/* Bot Body SVG */}
+                    <svg viewBox="0 0 100 100" className="w-16 h-16 relative z-10 filter drop-shadow-[0_8px_16px_rgba(0,0,0,0.15)] group-hover:scale-105 transition-transform duration-300">
+                        {/* Antennas */}
+                        <rect x="47" y="10" width="6" height="15" rx="3" fill="url(#bot-metallic)" />
+                        <circle cx="50" cy="8" r="5" fill="#f59e0b" className="animate-pulse" />
+                        
+                        {/* Ears/Side bolts */}
+                        <rect x="15" y="42" width="8" height="16" rx="4" fill="url(#bot-ears)" />
+                        <rect x="77" y="42" width="8" height="16" rx="4" fill="url(#bot-ears)" />
+                        
+                        {/* Head/Body */}
+                        <rect x="20" y="25" width="60" height="50" rx="20" fill="url(#bot-head-gradient)" stroke="url(#bot-stroke)" strokeWidth="1.5" />
+                        
+                        {/* Visor/Screen */}
+                        <rect x="28" y="35" width="44" height="26" rx="10" fill="#0f172a" stroke="#334155" strokeWidth="1.5" />
+                        
+                        {/* Eyes - Glowing Led with blinks */}
+                        <g className="animate-eye-blink origin-center">
+                            {/* Left Eye */}
+                            <circle cx="40" cy="48" r="4" fill="#38bdf8" className="group-hover:hidden" />
+                            {/* Right Eye */}
+                            <circle cx="60" cy="48" r="4" fill="#38bdf8" className="group-hover:hidden" />
+                            
+                            {/* Left Eye Hover - Happy Arc */}
+                            <path d="M 36 50 Q 40 44 44 50" fill="none" stroke="#f59e0b" strokeWidth="2.5" strokeLinecap="round" className="hidden group-hover:block" />
+                            {/* Right Eye Hover - Happy Arc */}
+                            <path d="M 56 50 Q 60 44 64 50" fill="none" stroke="#f59e0b" strokeWidth="2.5" strokeLinecap="round" className="hidden group-hover:block" />
+                        </g>
+
+                        {/* Mouth/LED Signal */}
+                        <rect x="42" y="55" width="16" height="2" rx="1" fill="#f59e0b" className="animate-pulse" />
+                        
+                        {/* Cheek Blushes */}
+                        <circle cx="33" cy="54" r="2.5" fill="#f43f5e" opacity="0.4" className="hidden group-hover:block" />
+                        <circle cx="67" cy="54" r="2.5" fill="#f43f5e" opacity="0.4" className="hidden group-hover:block" />
+                        
+                        {/* Gradients definitions */}
+                        <defs>
+                            <linearGradient id="bot-head-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stopColor="#475569" />
+                                <stop offset="100%" stopColor="#1e293b" />
+                            </linearGradient>
+                            <linearGradient id="bot-stroke" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" stopColor="rgba(255, 255, 255, 0.15)" />
+                                <stop offset="100%" stopColor="rgba(255, 255, 255, 0.05)" />
+                            </linearGradient>
+                            <linearGradient id="bot-metallic" x1="0%" y1="0%" x2="100%" y2="0%">
+                                <stop offset="0%" stopColor="#94a3b8" />
+                                <stop offset="100%" stopColor="#475569" />
+                            </linearGradient>
+                            <linearGradient id="bot-ears" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" stopColor="#f59e0b" />
+                                <stop offset="100%" stopColor="#d97706" />
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+
+                {/* Ambient Shadow beneath character */}
+                <div className="w-10 h-1.5 bg-slate-900/10 dark:bg-black/35 rounded-full mx-auto blur-[1.5px] animate-shadow-pulse mt-0.5"></div>
             </div>
         </div>
     );
