@@ -442,6 +442,11 @@ export default function TaskModal({ isOpen, onClose, task, defaultAssigneeName, 
                 const userTeam = await getCurrentUserTeam();
                 if (userTeam) teamId = userTeam.team_id;
             }
+            // Final fallback: if user is confirmed QA team member, use QA team ID
+            if (!teamId && isQATeam) {
+                teamId = 'ba60298b-8635-4cca-bcd5-7e470fad60e6';
+                console.warn('[TaskModal] Using QA Team ID fallback for save.');
+            }
             if (!teamId) {
                 toastError('Error: Could not determine Team ID.');
                 setLoading(false);

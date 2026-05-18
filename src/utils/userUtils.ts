@@ -22,9 +22,13 @@ export async function getCurrentUserTeam() {
         return null;
     }
 
+    // QA Team ID fallback for super_admins who don't have a team_id assigned
+    const QA_TEAM_ID = 'ba60298b-8635-4cca-bcd5-7e470fad60e6';
+    const resolvedTeamId = profile.team_id || (profile.role === 'super_admin' ? QA_TEAM_ID : null);
+
     return {
-        team_id: profile.team_id,
+        team_id: resolvedTeamId,
         role: profile.role,
-        team_name: (profile.teams as any)?.name || 'Team'
+        team_name: (profile.teams as any)?.name || (profile.role === 'super_admin' ? 'QA Team' : 'Team')
     };
 }
