@@ -3,18 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useGuestMode } from '@/contexts/GuestContext';
-import { Users } from 'lucide-react';
+import { Users, ArrowRight } from 'lucide-react';
 import Loader from '@/components/ui/Loader';
-
-import {
-    Select,
-    SelectContent,
-    SelectGroup,
-    SelectItem,
-    SelectLabel,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
 
 interface Team {
     id: string;
@@ -75,67 +65,124 @@ export default function GuestTeamSelectionPage() {
         router.push('/');
     };
 
+    const getInitials = (name: string) => {
+        return name
+            .split(' ')
+            .map(word => word[0])
+            .join('')
+            .toUpperCase()
+            .slice(0, 2);
+    };
+
+    const getGradientClass = (name: string, index: number) => {
+        const lowerName = name.toLowerCase();
+        if (lowerName.includes('admin') || lowerName.includes('super')) {
+            return 'from-amber-500 to-orange-600 shadow-amber-500/20';
+        }
+        if (lowerName.includes('qa') || lowerName.includes('test')) {
+            return 'from-indigo-500 to-purple-600 shadow-indigo-500/20';
+        }
+        if (lowerName.includes('dev') || lowerName.includes('tech')) {
+            return 'from-emerald-500 to-teal-600 shadow-emerald-500/20';
+        }
+        
+        const gradients = [
+            'from-indigo-500 to-blue-600 shadow-indigo-500/20',
+            'from-emerald-500 to-teal-600 shadow-emerald-500/20',
+            'from-pink-500 to-rose-600 shadow-pink-500/20',
+            'from-cyan-500 to-blue-500 shadow-cyan-500/20',
+            'from-violet-500 to-purple-600 shadow-violet-500/20'
+        ];
+        return gradients[index % gradients.length];
+    };
+
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 p-4">
-            <div className="w-full max-w-2xl bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl p-8 md:p-12 border border-white/50">
+        <div className="min-h-screen flex items-center justify-center p-6 md:p-10 bg-mesh-gradient relative overflow-hidden">
+            {/* Ambient Animated Mesh Background Orbs */}
+            <div className="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] bg-amber-500/5 rounded-full blur-[120px] animate-orb-1 pointer-events-none" />
+            <div className="absolute bottom-[-10%] right-[-10%] w-[60vw] h-[60vw] bg-indigo-500/5 rounded-full blur-[140px] animate-orb-2 pointer-events-none" />
+
+            <div className="w-full max-w-4xl glass-card-premium rounded-3xl shadow-2xl p-8 md:p-12 border border-slate-800/80 backdrop-blur-2xl relative z-10 animate-in fade-in duration-500">
                 {/* Header */}
-                <div className="text-center mb-10">
-                    <div className="bg-gradient-to-br from-indigo-600 to-purple-700 w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-indigo-500/20 transform hover:scale-105 transition-transform duration-300">
-                        <Users className="text-white" size={40} />
+                <div className="text-center mb-12">
+                    <div className="bg-gradient-to-br from-amber-500/10 to-orange-500/10 border border-amber-500/20 w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-amber-500/5 transform hover:scale-105 transition-transform duration-300">
+                        <Users className="text-amber-500 animate-pulse" size={40} />
                     </div>
-                    <h1 className="text-4xl font-bold text-slate-900 mb-3 tracking-tight">Select a Team</h1>
-                    <p className="text-slate-500 text-lg font-medium">Choose which team's dashboard you'd like to view</p>
+                    <h1 className="text-4xl font-black text-white mb-3 tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-slate-100 to-slate-400">Select a Team</h1>
+                    <p className="text-slate-400 text-lg font-medium">Choose which team's dashboard you'd like to explore in guest mode</p>
                 </div>
 
                 {/* Loading State */}
                 {loading && (
-                    <div className="flex items-center justify-center py-12">
+                    <div className="flex items-center justify-center py-16">
                         <Loader size="md" />
                     </div>
                 )}
 
                 {/* Error State */}
                 {error && (
-                    <div className="bg-red-50 border border-red-200 text-red-700 px-6 py-4 rounded-xl text-center mb-8">
-                        <p className="font-medium">{error}</p>
+                    <div className="bg-red-500/10 border border-red-500/20 text-red-400 px-6 py-4 rounded-2xl text-center mb-8 max-w-md mx-auto">
+                        <p className="font-semibold">{error}</p>
                         <button
                             onClick={fetchTeams}
-                            className="mt-3 text-sm text-red-600 hover:text-red-800 underline font-semibold"
+                            className="mt-3 text-sm text-amber-500 hover:text-amber-400 underline font-bold transition-colors"
                         >
                             Try again
                         </button>
                     </div>
                 )}
 
-                {/* Teams Dropdown */}
+                {/* Teams Grid selection */}
                 {!loading && !error && (
-                    <div className="w-full max-w-md mx-auto space-y-6">
-                        <Select onValueChange={handleTeamSelect}>
-                            <SelectTrigger className="w-full h-16 text-lg px-6 rounded-2xl bg-white border-2 border-slate-200 hover:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all duration-300 shadow-sm hover:shadow-md data-[state=open]:border-indigo-500 data-[state=open]:ring-4 data-[state=open]:ring-indigo-500/10">
-                                <SelectValue placeholder="Select a team..." />
-                            </SelectTrigger>
-                            <SelectContent className="rounded-2xl border-2 border-slate-100 shadow-xl max-h-[400px] bg-white">
-                                <SelectGroup className="p-2">
-                                    <SelectLabel className="px-4 py-2 text-xs font-bold uppercase tracking-wider text-slate-400">Available Teams</SelectLabel>
-                                    {teams.map((team) => (
-                                        <SelectItem
-                                            key={team.id}
-                                            value={team.id}
-                                            className="rounded-xl px-4 py-3 text-base font-medium cursor-pointer focus:bg-indigo-50 focus:text-indigo-700 outline-none my-1 transition-colors"
-                                        >
-                                            {team.name}
-                                        </SelectItem>
-                                    ))}
-                                </SelectGroup>
-                            </SelectContent>
-                        </Select>
+                    <div className="space-y-10">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                            {teams.map((team, index) => {
+                                const initials = getInitials(team.name);
+                                const gradient = getGradientClass(team.name, index);
+                                return (
+                                    <div
+                                        key={team.id}
+                                        onClick={() => handleTeamSelect(team.id)}
+                                        className="group relative cursor-pointer overflow-hidden rounded-2xl border border-slate-800/80 bg-slate-900/30 p-6 transition-all duration-300 hover:-translate-y-1 hover:border-amber-500/40 hover:bg-slate-900/60 hover:shadow-[0_0_30px_rgba(245,158,11,0.1)] flex flex-col justify-between h-44"
+                                    >
+                                        {/* Colorful premium stripe */}
+                                        <div className={`absolute top-0 left-0 w-full h-1 bg-gradient-to-r ${gradient.split(' shadow')[0]}`} />
+                                        
+                                        <div className="flex items-start justify-between">
+                                            {/* Beautiful Monogram Avatar */}
+                                            <div className={`bg-gradient-to-br ${gradient} w-14 h-14 rounded-xl flex items-center justify-center text-white font-extrabold text-xl shadow-lg tracking-wider transform group-hover:scale-105 transition-all duration-300`}>
+                                                {initials}
+                                            </div>
+                                            <span className="text-xs font-bold text-slate-400 bg-slate-800/80 px-3.5 py-1.5 rounded-full group-hover:text-amber-400 group-hover:bg-amber-500/10 border border-slate-800 group-hover:border-amber-500/20 transition-all duration-300">
+                                                Access
+                                            </span>
+                                        </div>
 
-                        <div className="text-center pt-8 border-t border-slate-100 mt-8">
+                                        <div className="mt-4 flex items-end justify-between">
+                                            <div>
+                                                <h3 className="text-xl font-bold text-white tracking-tight group-hover:text-amber-400 transition-colors">
+                                                    {team.name}
+                                                </h3>
+                                                <p className="text-xs text-slate-500 font-semibold mt-1">
+                                                    View live status & performance
+                                                </p>
+                                            </div>
+                                            
+                                            <div className="bg-slate-800/80 p-2.5 rounded-xl border border-slate-800 text-slate-400 group-hover:text-amber-400 group-hover:bg-amber-500/10 group-hover:border-amber-500/20 transition-all duration-300 transform group-hover:translate-x-1.5">
+                                                <ArrowRight size={18} />
+                                            </div>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+
+                        <div className="text-center pt-8 border-t border-slate-800/60 mt-8">
                             <button
                                 onClick={() => router.push('/login')}
-                                className="text-slate-500 hover:text-indigo-600 font-semibold transition-colors flex items-center justify-center gap-2 mx-auto group"
+                                className="text-slate-400 hover:text-amber-400 font-bold transition-all duration-300 flex items-center justify-center gap-2 mx-auto group text-base"
                             >
-                                <span className="group-hover:-translate-x-1 transition-transform">←</span> Back to Login
+                                <span className="group-hover:-translate-x-1.5 transition-transform duration-300">←</span> Back to Login
                             </button>
                         </div>
                     </div>

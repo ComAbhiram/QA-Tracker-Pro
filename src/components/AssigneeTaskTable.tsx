@@ -102,7 +102,7 @@ const EditableCell = ({ value, onSave, className, type = 'text', options = [], i
                     onBlur={handleSave}
                     onKeyDown={handleKeyDown}
                     onClick={(e) => e.stopPropagation()}
-                    className={`w-full bg-white dark:bg-slate-800 border border-indigo-300 dark:border-indigo-700 rounded px-1 py-0.5 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:text-slate-100 shadow-sm ${className}`}
+                    className={`w-full bg-white/95 dark:bg-slate-900/95 border border-slate-200/60 dark:border-slate-700/60 rounded-lg px-2 py-1 text-xs focus:outline-none focus:border-amber-500/50 focus:ring-2 focus:ring-amber-500/20 dark:text-slate-100 shadow-sm transition-all duration-200 ${className}`}
                 >
                     {options.map(opt => (
                         <option key={opt} value={opt}>{opt}</option>
@@ -120,7 +120,7 @@ const EditableCell = ({ value, onSave, className, type = 'text', options = [], i
                     onKeyDown={handleKeyDown}
                     onClick={(e) => e.stopPropagation()}
                     rows={2} // slightly taller for multiline if needed, but keeping compact
-                    className={`w-full bg-white dark:bg-slate-800 border border-indigo-300 dark:border-indigo-700 rounded px-1 py-0.5 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:text-slate-100 shadow-sm resize-none overflow-hidden ${className}`}
+                    className={`w-full bg-white/95 dark:bg-slate-900/95 border border-slate-200/60 dark:border-slate-700/60 rounded-lg px-2 py-1 text-xs focus:outline-none focus:border-amber-500/50 focus:ring-2 focus:ring-amber-500/20 dark:text-slate-100 shadow-sm resize-none overflow-hidden transition-all duration-200 ${className}`}
                     style={{ minHeight: '24px' }}
                 />
             );
@@ -134,7 +134,7 @@ const EditableCell = ({ value, onSave, className, type = 'text', options = [], i
                 onBlur={handleSave}
                 onKeyDown={handleKeyDown}
                 onClick={(e) => e.stopPropagation()}
-                className={`w-full bg-white dark:bg-slate-800 border border-indigo-300 dark:border-indigo-700 rounded px-1 py-0.5 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:text-slate-100 shadow-sm ${className}`}
+                className={`w-full bg-white/95 dark:bg-slate-900/95 border border-slate-200/60 dark:border-slate-700/60 rounded-lg px-2 py-1 text-xs focus:outline-none focus:border-amber-500/50 focus:ring-2 focus:ring-amber-500/20 dark:text-slate-100 shadow-sm transition-all duration-200 ${className}`}
             />
         );
     }
@@ -145,7 +145,7 @@ const EditableCell = ({ value, onSave, className, type = 'text', options = [], i
                 e.stopPropagation();
                 setIsEditing(true);
             }}
-            className={`cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 min-h-[20px] rounded px-1 py-0.5 transition-colors border border-transparent hover:border-slate-200 dark:hover:border-slate-700 ${isExpanded ? 'whitespace-normal break-words' : 'truncate'} ${className}`}
+            className={`cursor-pointer hover:bg-amber-500/5 dark:hover:bg-amber-500/5 min-h-[20px] rounded-lg px-2 py-1 transition-all duration-200 border border-transparent hover:border-amber-500/20 hover:scale-[1.01] hover:shadow-sm ${isExpanded ? 'whitespace-normal break-words' : 'truncate'} ${className}`}
             title={value?.toString() || 'Click to edit'}
         >
             {value || <span className="opacity-0 group-hover:opacity-30">-</span>}
@@ -162,19 +162,22 @@ const StatusSelectCell = ({ status, onSave }: { status: string, onSave: (val: st
 
     return (
         <DropdownMenu>
-            <DropdownMenuTrigger className="outline-none w-full text-left focus:ring-0">
-                <div className="cursor-pointer hover:opacity-80 transition-opacity min-w-0 overflow-hidden">
-                    <StatusBadge status={status} />
+            <DropdownMenuTrigger asChild>
+                <div className="cursor-pointer group flex items-center justify-between gap-1 w-full bg-slate-50/50 dark:bg-slate-800/40 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200/60 dark:border-slate-700/50 hover:border-slate-350 dark:hover:border-slate-650 rounded-lg px-2 py-1 text-[11px] font-medium transition-all duration-200 shadow-sm min-h-[24px]">
+                    <div className="truncate">
+                        <StatusBadge status={status} />
+                    </div>
+                    <ArrowUpDown size={10} className="text-slate-400 dark:text-slate-500 group-hover:text-slate-500 transition-colors flex-shrink-0" />
                 </div>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-40 z-50 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
-                {statusOptions.map((s) => (
+            <DropdownMenuContent align="start" className="w-[160px] bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-slate-200 dark:border-slate-800 rounded-xl shadow-lg p-1 z-50">
+                {statusOptions.map((opt) => (
                     <DropdownMenuItem
-                        key={s}
-                        onClick={() => onSave(s)}
-                        className="text-xs cursor-pointer py-1.5 focus:bg-slate-100 dark:focus:bg-slate-700 dark:text-slate-200"
+                        key={opt}
+                        onClick={() => onSave(opt)}
+                        className={`text-xs px-2.5 py-1.5 rounded-lg cursor-pointer transition-colors duration-150 ${status === opt ? 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-semibold' : 'text-slate-700 dark:text-slate-350 hover:bg-slate-100 dark:hover:bg-slate-800/80 hover:text-slate-900 dark:hover:text-white'}`}
                     >
-                        {s}
+                        {opt}
                     </DropdownMenuItem>
                 ))}
             </DropdownMenuContent>
@@ -182,6 +185,21 @@ const StatusSelectCell = ({ status, onSave }: { status: string, onSave: (val: st
     );
 };
 
+// Modern premium colors
+const getHeaderColor = (name: string) => {
+    const colors = [
+        'bg-slate-50/50 dark:bg-slate-800/40 text-slate-800 dark:text-slate-100 border-slate-200/50 dark:border-slate-800/50',
+        'bg-indigo-50/50 dark:bg-indigo-950/40 text-indigo-900 dark:text-indigo-200 border-indigo-200/50 dark:border-indigo-900/50',
+        'bg-blue-50/50 dark:bg-blue-950/40 text-blue-900 dark:text-blue-200 border-blue-200/50 dark:border-blue-900/50',
+        'bg-emerald-50/50 dark:bg-emerald-950/40 text-emerald-900 dark:text-emerald-200 border-emerald-200/50 dark:border-emerald-900/50',
+        'bg-violet-50/50 dark:bg-violet-950/40 text-violet-900 dark:text-violet-200 border-violet-200/50 dark:border-violet-900/50',
+        'bg-amber-50/50 dark:bg-amber-950/40 text-amber-900 dark:text-amber-200 border-amber-200/50 dark:border-amber-900/50',
+    ];
+    let hash = 0;
+    for (let i = 0; i < name.length; i++) { hash = name.charCodeAt(i) + ((hash << 5) - hash); }
+    const index = Math.abs(hash) % colors.length;
+    return colors[index];
+};
 
 export default function AssigneeTaskTable({
     assignee, tasks, leaves, columnWidths, hideHeader = false, isRowExpanded = false,
@@ -249,8 +267,8 @@ export default function AssigneeTaskTable({
     // Check if assignee has leave for the filtered date or today
     const getActiveLeave = () => {
         // Use filtered date if available, otherwise use today in IST
-        const targetDate = dateFilter
-            ? dateFilter.toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' })
+        const targetDate = (dateFilter && dateFilter instanceof Date && !isNaN(dateFilter.getTime()))
+            ? format(dateFilter, 'yyyy-MM-dd')
             : new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
 
         // Normalization helper
@@ -306,8 +324,8 @@ export default function AssigneeTaskTable({
 
     // Determine row background color based on active leave type
     const todayStr = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
-    const currentViewingDate = dateFilter
-        ? dateFilter.toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' })
+    const currentViewingDate = (dateFilter && dateFilter instanceof Date && !isNaN(dateFilter.getTime()))
+        ? format(dateFilter, 'yyyy-MM-dd')
         : todayStr;
 
     // FL: Red, HL: Yellow/Orange, WFH: Blue
@@ -333,7 +351,7 @@ export default function AssigneeTaskTable({
     const cellClass = isRowExpanded ? "whitespace-normal break-words" : "truncate";
 
     return (
-        <div className={`bg-white dark:bg-slate-900 rounded-xl shadow-md hover:shadow-lg border border-slate-200/60 dark:border-slate-800/60 overflow-hidden mb-4 transition-all duration-300 ${containerHighlight}`}>
+        <div className={`bg-white/95 dark:bg-slate-900/80 backdrop-blur-md rounded-2xl shadow-md hover:shadow-xl border border-slate-200/50 dark:border-slate-800/40 overflow-hidden mb-5 transition-all duration-300 hover:border-amber-500/20 dark:hover:border-amber-500/25 ${containerHighlight}`}>
             {/* Header Section (Compact) - Always visible per assignee table */}
             <div className={`px-4 py-2 flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-b-black/5 dark:border-slate-800/50 ${headerColorClass} transition-colors group relative overflow-hidden`}>
                 <div className="absolute inset-0 bg-gradient-to-r from-white/40 to-transparent dark:from-white/5 pointer-events-none"></div>
@@ -422,7 +440,7 @@ export default function AssigneeTaskTable({
                             <tr
                                 key={task.id}
                                 onClick={() => !isReadOnly && onEditTask(task)}
-                                className={`group hover:bg-indigo-50/40 dark:hover:bg-indigo-900/20 transition-colors ${isReadOnly ? 'cursor-default' : 'cursor-pointer'}`}
+                                className={`group hover:bg-slate-500/5 dark:hover:bg-slate-350/5 hover:translate-x-0.5 transition-all duration-205 ${isReadOnly ? 'cursor-default' : 'cursor-pointer'}`}
                             >
                                 <td className="px-2 py-1 border-r border-slate-200 dark:border-slate-800 font-medium text-slate-700 dark:text-slate-200 group/cell relative">
                                     <div className="flex items-center justify-between gap-2">

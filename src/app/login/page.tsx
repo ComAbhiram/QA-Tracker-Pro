@@ -223,37 +223,41 @@ export default function LoginPage() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center p-6 md:p-10 bg-slate-100">
+        <div className="min-h-screen flex items-center justify-center p-6 md:p-10 bg-mesh-gradient relative overflow-hidden">
+            {/* Ambient Animated Mesh Background Orbs */}
+            <div className="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] bg-amber-500/5 rounded-full blur-[120px] animate-orb-1 pointer-events-none" />
+            <div className="absolute bottom-[-10%] right-[-10%] w-[60vw] h-[60vw] bg-indigo-500/5 rounded-full blur-[140px] animate-orb-2 pointer-events-none" />
+
             {/* Manager Password Modal */}
             {showManagerModal && (
-                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 relative animate-in zoom-in-95 duration-200">
+                <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-50 p-4">
+                    <div className="glass-card-premium border border-white/10 rounded-3xl shadow-2xl w-full max-w-md p-8 relative animate-in zoom-in-95 duration-200">
                         <CloseButton
                             onClick={() => {
                                 setShowManagerModal(false);
                                 setManagerPassword('');
                                 setError(null);
                             }}
-                            className="absolute top-4 right-4"
+                            className="absolute top-5 right-5 text-slate-400 hover:text-white transition-colors"
                         />
 
                         <div className="text-center mb-6 pt-2">
-                            <div className="bg-gradient-to-br from-indigo-500 to-indigo-700 w-14 h-14 rounded-2xl shadow-lg shadow-indigo-200 flex items-center justify-center mx-auto mb-4">
-                                <Users className="text-white" size={28} />
+                            <div className="bg-gradient-to-br from-indigo-500/20 to-indigo-700/20 border border-indigo-500/30 w-16 h-16 rounded-2xl shadow-lg flex items-center justify-center mx-auto mb-4 animate-bounce-slow">
+                                <Users className="text-indigo-400" size={32} />
                             </div>
-                            <h2 className="text-xl font-bold text-slate-800 mb-1">Manager Access</h2>
-                            <p className="text-slate-500 text-sm">Enter the secure passkey to retrieve team data.</p>
+                            <h2 className="text-2xl font-bold text-white mb-1 tracking-tight">Manager Access</h2>
+                            <p className="text-slate-400 text-sm">Enter the secure passkey to retrieve team data.</p>
                         </div>
 
                         {error && (
-                            <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl font-medium text-center">
+                            <div className="mb-4 p-3 bg-red-950/40 border border-red-900/50 text-red-400 text-sm rounded-xl font-medium text-center">
                                 <span>{error}</span>
                             </div>
                         )}
 
                         <div className="space-y-4">
                             <div className="relative group">
-                                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors" size={18} />
+                                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-indigo-400 transition-colors" size={18} />
                                 <input
                                     type="password"
                                     value={managerPassword}
@@ -261,13 +265,13 @@ export default function LoginPage() {
                                     onKeyPress={(e) => e.key === 'Enter' && handleManagerLogin()}
                                     placeholder="Enter passkey"
                                     autoFocus
-                                    className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all text-slate-800 placeholder:text-slate-400 font-medium"
+                                    className="w-full pl-11 pr-4 py-3 bg-slate-950/60 border border-slate-800 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all text-white placeholder:text-slate-600 font-medium glow-input-indigo"
                                 />
                             </div>
 
                             <button
                                 onClick={handleManagerLogin}
-                                className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-lg shadow-indigo-200 hover:shadow-indigo-300 transition-all active:scale-[0.98]"
+                                className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl shadow-lg shadow-indigo-500/10 hover:shadow-indigo-500/20 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300"
                             >
                                 Continue
                             </button>
@@ -278,34 +282,34 @@ export default function LoginPage() {
 
             {/* PC Mode Password Modal */}
             {showPCModal && (
-                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 relative animate-in zoom-in-95 duration-200">
+                <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-50 p-4">
+                    <div className="glass-card-premium border border-white/10 rounded-3xl shadow-2xl w-full max-w-md p-8 relative animate-in zoom-in-95 duration-200">
                         <CloseButton
                             onClick={() => {
                                 setShowPCModal(false);
                                 setPCPassword('');
                                 setError(null);
                             }}
-                            className="absolute top-4 right-4"
+                            className="absolute top-5 right-5 text-slate-400 hover:text-white transition-colors"
                         />
 
                         <div className="text-center mb-6 pt-2">
-                            <div className="bg-gradient-to-br from-emerald-500 to-emerald-700 w-14 h-14 rounded-2xl shadow-lg shadow-emerald-200 flex items-center justify-center mx-auto mb-4">
-                                <Lock className="text-white" size={28} />
+                            <div className="bg-gradient-to-br from-emerald-500/20 to-emerald-700/20 border border-emerald-500/30 w-16 h-16 rounded-2xl shadow-lg flex items-center justify-center mx-auto mb-4 animate-bounce-slow">
+                                <Lock className="text-emerald-400" size={32} />
                             </div>
-                            <h2 className="text-xl font-bold text-slate-800 mb-1">PC Mode Access</h2>
-                            <p className="text-slate-500 text-sm">Read-only access to view all team data.</p>
+                            <h2 className="text-2xl font-bold text-white mb-1 tracking-tight">PC Mode Access</h2>
+                            <p className="text-slate-400 text-sm">Read-only access to view all team data.</p>
                         </div>
 
                         {error && (
-                            <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl font-medium text-center">
+                            <div className="mb-4 p-3 bg-red-950/40 border border-red-900/50 text-red-400 text-sm rounded-xl font-medium text-center">
                                 <span>{error}</span>
                             </div>
                         )}
 
                         <div className="space-y-4">
                             <div className="relative group">
-                                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-emerald-500 transition-colors" size={18} />
+                                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-emerald-400 transition-colors" size={18} />
                                 <input
                                     type="password"
                                     value={pcPassword}
@@ -313,13 +317,13 @@ export default function LoginPage() {
                                     onKeyPress={(e) => e.key === 'Enter' && handlePCLogin()}
                                     placeholder="Enter passkey"
                                     autoFocus
-                                    className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all text-slate-800 placeholder:text-slate-400 font-medium"
+                                    className="w-full pl-11 pr-4 py-3 bg-slate-950/60 border border-slate-800 rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all text-white placeholder:text-slate-600 font-medium glow-input-emerald"
                                 />
                             </div>
 
                             <button
                                 onClick={handlePCLogin}
-                                className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg shadow-emerald-200 hover:shadow-emerald-300 transition-all active:scale-[0.98]"
+                                className="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow-lg shadow-emerald-500/10 hover:shadow-emerald-500/20 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300"
                             >
                                 Continue
                             </button>
@@ -328,23 +332,23 @@ export default function LoginPage() {
                 </div>
             )}
 
-            {/* Main Split Card */}
-            <div className="w-full max-w-sm sm:max-w-md md:max-w-4xl bg-white rounded-2xl shadow-xl overflow-hidden grid md:grid-cols-2 min-h-[500px] md:min-h-[600px] border border-slate-200/50 mx-auto">
+            {/* Main Split Card (Glassmorphic Premium) */}
+            <div className="w-full max-w-sm sm:max-w-md md:max-w-4xl glass-card-premium border border-white/10 rounded-[32px] shadow-2xl overflow-hidden grid md:grid-cols-2 min-h-[500px] md:min-h-[600px] mx-auto z-10">
 
                 {/* Left Column: Form Section */}
-                <div className="flex flex-col justify-center p-6 sm:p-8 md:p-12 h-full relative">
+                <div className="flex flex-col justify-center p-8 sm:p-10 md:p-14 h-full relative">
                     <div className="flex flex-col gap-6 w-full max-w-sm mx-auto">
 
                         {/* Header */}
                         <div className="text-center md:text-left space-y-2">
                             <div className="flex items-center justify-center md:justify-start gap-2 mb-2">
-                                <div className=" bg-yellow-400 p-1.5 rounded-lg">
-                                    <LayoutDashboard className="text-white w-5 h-5" />
+                                <div className="bg-amber-500 p-2 rounded-xl shadow-lg shadow-amber-500/20">
+                                    <LayoutDashboard className="text-slate-950 w-5 h-5" />
                                 </div>
-                                <span className="font-bold text-lg tracking-tight text-slate-900">Team Tracker</span>
+                                <span className="font-bold text-lg tracking-tight text-white">Team Tracker</span>
                             </div>
-                            <h1 className="text-2xl font-bold tracking-tight text-slate-900">Welcome back</h1>
-                            <p className="text-sm text-slate-500">
+                            <h1 className="text-3xl font-extrabold tracking-tight text-white">Welcome back</h1>
+                            <p className="text-sm text-slate-400">
                                 Enter your email below to login to your account
                             </p>
                         </div>
@@ -352,13 +356,13 @@ export default function LoginPage() {
                         {/* Login Form */}
                         <form onSubmit={handleLogin} className="space-y-4">
                             {error && !showManagerModal && (
-                                <div className="p-3 bg-red-50 border border-red-200 text-red-600 text-xs font-medium rounded-lg flex items-center justify-center text-center">
+                                <div className="p-3 bg-red-950/40 border border-red-900/50 text-red-400 text-xs font-medium rounded-xl flex items-center justify-center text-center">
                                     <span>{error}</span>
                                 </div>
                             )}
 
                             <div className="space-y-2">
-                                <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-slate-700" htmlFor="email">
+                                <label className="text-sm font-semibold text-slate-300" htmlFor="email">
                                     Email
                                 </label>
                                 <div className="relative">
@@ -369,14 +373,14 @@ export default function LoginPage() {
                                         required
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
-                                        className="flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm ring-offset-white file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-slate-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                        className="flex h-11 w-full rounded-xl border border-slate-800 bg-slate-950/50 px-4 py-2 text-sm text-white placeholder:text-slate-600 focus-visible:outline-none outline-none transition-all glow-input"
                                     />
                                 </div>
                             </div>
 
                             <div className="space-y-2">
                                 <div className="flex items-center justify-between">
-                                    <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-slate-700" htmlFor="password">
+                                    <label className="text-sm font-semibold text-slate-300" htmlFor="password">
                                         Password
                                     </label>
                                 </div>
@@ -388,7 +392,7 @@ export default function LoginPage() {
                                         required
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
-                                        className="flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm ring-offset-white file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-slate-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                        className="flex h-11 w-full rounded-xl border border-slate-800 bg-slate-950/50 px-4 py-2 text-sm text-white placeholder:text-slate-600 focus-visible:outline-none outline-none transition-all glow-input"
                                     />
                                 </div>
                             </div>
@@ -396,78 +400,74 @@ export default function LoginPage() {
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 h-10 px-4 py-2 w-full bg-slate-900 text-slate-50 hover:bg-slate-900/90 shadow-sm"
+                                className="inline-flex items-center justify-center whitespace-nowrap rounded-xl text-sm font-bold transition-all h-11 px-4 py-2 w-full bg-amber-500 text-slate-950 hover:bg-amber-400 hover:shadow-lg hover:shadow-amber-500/10 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50"
                             >
                                 <span className="flex items-center justify-center gap-2">
-                                    {loading && <Loader size="xs" color="white" />}
+                                    {loading && <Loader size="xs" color="black" />}
                                     <span>Sign In</span>
                                 </span>
                             </button>
                         </form>
 
                         {/* Divider */}
-                        <div className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-slate-200">
-                            <span className="relative z-10 bg-white px-2 text-slate-500 font-medium text-xs uppercase tracking-wider">
+                        <div className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-slate-800/80">
+                            <span className="relative z-10 bg-slate-900 px-3 text-slate-500 font-bold text-xs uppercase tracking-wider">
                                 Or continue with
                             </span>
                         </div>
 
-                        {/* Manager Login Trigger */}
-                        <button
-                            type="button"
-                            onClick={() => { setShowManagerModal(true); setError(null); }}
-                            className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 h-10 px-4 py-2 w-full border border-slate-200 bg-white hover:bg-slate-100 hover:text-slate-900"
-                        >
-                            <Users className="mr-2 h-4 w-4" />
-                            Manager Access
-                        </button>
+                        {/* Actions Row */}
+                        <div className="grid grid-cols-2 gap-3">
+                            {/* Manager Login Trigger */}
+                            <button
+                                type="button"
+                                onClick={() => { setShowManagerModal(true); setError(null); }}
+                                className="inline-flex items-center justify-center whitespace-nowrap rounded-xl text-xs font-bold transition-all h-11 px-3 border border-slate-850 bg-slate-950/30 hover:bg-slate-950 text-slate-300 hover:text-white"
+                            >
+                                <Users className="mr-2 h-4 w-4 text-indigo-400" />
+                                Manager
+                            </button>
 
-                        {/* PC Mode Login Trigger */}
-                        <button
-                            type="button"
-                            onClick={() => { setShowPCModal(true); setError(null); }}
-                            className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 h-10 px-4 py-2 w-full border border-emerald-200 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 hover:text-emerald-900"
-                        >
-                            <Lock className="mr-2 h-4 w-4" />
-                            PC Mode
-                        </button>
+                            {/* PC Mode Login Trigger */}
+                            <button
+                                type="button"
+                                onClick={() => { setShowPCModal(true); setError(null); }}
+                                className="inline-flex items-center justify-center whitespace-nowrap rounded-xl text-xs font-bold transition-all h-11 px-3 border border-emerald-950/50 bg-emerald-950/10 hover:bg-emerald-950/30 text-emerald-400 hover:text-emerald-300"
+                            >
+                                <Lock className="mr-2 h-4 w-4 text-emerald-400" />
+                                PC Mode
+                            </button>
+                        </div>
 
-                        <p className="text-center text-xs text-slate-500 mt-4">
-                            By clicking continue, you agree to our <a href="#" className="underline underline-offset-4 hover:text-slate-900">Terms of Service</a> and <a href="#" className="underline underline-offset-4 hover:text-slate-900">Privacy Policy</a>.
+                        <p className="text-center text-xs text-slate-650 mt-4 leading-relaxed">
+                            By clicking continue, you agree to our <a href="#" className="underline underline-offset-4 text-slate-400 hover:text-white">Terms</a> and <a href="#" className="underline underline-offset-4 text-slate-400 hover:text-white">Privacy</a>.
                         </p>
                     </div>
                 </div>
 
                 {/* Right Column: Visual Section */}
-                <div className="hidden md:flex flex-col relative bg-slate-900 text-white p-10 justify-between">
-                    <div className="absolute inset-0 bg-zinc-900">
-                        {/* Abstract Background Pattern */}
-                        <svg className="absolute inset-0 h-full w-full opacity-20" viewBox="0 0 100 100" preserveAspectRatio="none">
-                            <path d="M0 100 C 20 0 50 0 100 100 Z" fill="url(#grad1)" />
-                            <defs>
-                                <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
-                                    <stop offset="0%" style={{ stopColor: 'rgb(100,100,255)', stopOpacity: 1 }} />
-                                    <stop offset="100%" style={{ stopColor: 'rgb(200,200,255)', stopOpacity: 1 }} />
-                                </linearGradient>
-                            </defs>
-                        </svg>
-                        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1557804506-669a67965ba0?ixlib=rb-4.0.3&auto=format&fit=crop&w=1574&q=80')] bg-cover bg-center opacity-40 mix-blend-overlay"></div>
-                        <div className="absolute inset-0 bg-gradient-to-t from-zinc-900 via-zinc-900/50 to-transparent"></div>
+                <div className="hidden md:flex flex-col relative text-white p-12 justify-between overflow-hidden">
+                    <div className="absolute inset-0 bg-slate-950">
+                        {/* Beautiful gradient overlay */}
+                        <div className="absolute inset-0 bg-gradient-to-tr from-amber-500/20 via-transparent to-indigo-500/20 z-10" />
+                        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1557804506-669a67965ba0?ixlib=rb-4.0.3&auto=format&fit=crop&w=1574&q=80')] bg-cover bg-center opacity-30 mix-blend-overlay"></div>
+                        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent"></div>
                     </div>
 
-                    <div className="relative z-10 flex items-center gap-2 font-medium text-lg">
-                        <div className=" bg-white/10 backdrop-blur-sm p-1.5 rounded-lg border border-white/20">
-                            <LayoutDashboard className="text-white w-5 h-5" />
+                    <div className="relative z-20 flex items-center gap-2 font-bold text-lg">
+                        <div className="bg-white/5 backdrop-blur-md p-2 rounded-xl border border-white/10 shadow-lg">
+                            <LayoutDashboard className="text-amber-400 w-5 h-5 animate-pulse-slow" />
                         </div>
                         Team Tracker Inc
                     </div>
 
-                    <div className="relative z-10">
+                    <div className="relative z-20 space-y-4">
                         <blockquote className="space-y-2">
-                            <p className="text-lg font-medium leading-relaxed">
+                            <p className="text-xl font-medium leading-relaxed text-slate-200 italic">
                                 &ldquo;Great teams don&rsquo;t just work &mdash; they track, improve, and succeed.&rdquo;
                             </p>
                         </blockquote>
+                        <div className="h-1 w-12 bg-amber-500 rounded-full" />
                     </div>
                 </div>
             </div>

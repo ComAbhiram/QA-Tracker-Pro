@@ -221,15 +221,41 @@ export default function LeavePage() {
         );
     }
 
+    const getLeaveStyle = (type: string) => {
+        const t = type.toLowerCase();
+        // Unplanned / Full Day Sick -> Red
+        if (t.includes('unplanned') || (t.includes('full day') && t.includes('sick'))) {
+            return {
+                badge: 'bg-rose-500/10 border-rose-500/30 text-rose-450 dark:text-rose-400 shadow-[0_0_10px_rgba(244,63,94,0.1)]',
+                card: 'border-l-4 border-l-rose-500 bg-rose-950/10 dark:bg-rose-950/5 hover:bg-rose-950/20 dark:hover:bg-rose-950/10 border-slate-200 dark:border-slate-800/80 shadow-[0_0_20px_rgba(244,63,94,0.03)]',
+                node: 'bg-rose-500 ring-4 ring-rose-500/20 shadow-[0_0_12px_rgba(244,63,94,0.4)]'
+            };
+        }
+        // Half Day Sick / Half Day Casual -> Amber
+        if (t.includes('half day')) {
+            return {
+                badge: 'bg-amber-500/10 border-amber-500/30 text-amber-500 dark:text-amber-450 shadow-[0_0_10px_rgba(245,158,11,0.1)]',
+                card: 'border-l-4 border-l-amber-500 bg-amber-950/10 dark:bg-amber-950/5 hover:bg-amber-950/20 dark:hover:bg-amber-950/10 border-slate-200 dark:border-slate-800/80 shadow-[0_0_20px_rgba(245,158,11,0.03)]',
+                node: 'bg-amber-500 ring-4 ring-amber-500/20 shadow-[0_0_12px_rgba(245,158,11,0.4)]'
+            };
+        }
+        // Full Day Casual / Fallback -> Blue
+        return {
+            badge: 'bg-blue-500/10 border-blue-500/30 text-blue-500 dark:text-blue-450 shadow-[0_0_10px_rgba(59,130,246,0.1)]',
+            card: 'border-l-4 border-l-blue-500 bg-blue-950/10 dark:bg-blue-950/5 hover:bg-blue-950/20 dark:hover:bg-blue-950/10 border-slate-200 dark:border-slate-800/80 shadow-[0_0_20px_rgba(59,130,246,0.03)]',
+            node: 'bg-blue-500 ring-4 ring-blue-500/20 shadow-[0_0_12px_rgba(59,130,246,0.4)]'
+        };
+    };
+
     return (
         <div className="max-w-[1600px] mx-auto space-y-6">
 
             {/* Header Controls */}
-            <header className="flex flex-col gap-6 bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 transition-colors">
+            <header className="glass-card-premium p-6 rounded-2xl border border-white/20 dark:border-slate-800/80 space-y-6">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
-                        <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-100">Leave Management</h1>
-                        <p className="text-slate-500 dark:text-slate-400">Manage team member leave requests and view calendar</p>
+                        <h1 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-500 tracking-tight">Leave Management</h1>
+                        <p className="text-slate-400 mt-1 font-medium text-sm">Manage team member leave requests and view calendar</p>
                     </div>
 
                     {/* Manager Mode Team Selector */}
@@ -244,12 +270,12 @@ export default function LeavePage() {
                     )}
                 </div>
 
-                <div className="flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-slate-50 dark:border-slate-800">
+                <div className="flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-slate-200/50 dark:border-slate-800">
                     <div className="flex flex-wrap items-center gap-4 w-full md:w-auto">
                         {/* Add Leave Button */}
                         <button
                             onClick={() => setIsLeaveModalOpen(true)}
-                            className="btn btn-primary flex items-center justify-center gap-2 shadow-lg shadow-orange-200 transition-all hover:scale-[1.02] active:scale-[0.98] w-full sm:w-auto"
+                            className="glint-effect px-6 py-2.5 bg-gradient-to-r from-indigo-500 to-blue-500 hover:from-indigo-600 hover:to-blue-600 text-white rounded-xl shadow-lg shadow-indigo-500/20 font-bold transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2 w-full sm:w-auto"
                         >
                             <PlusCircle size={18} />
                             Add Leave
@@ -258,22 +284,22 @@ export default function LeavePage() {
                         <div className="h-8 w-px bg-slate-200 dark:bg-slate-700 hidden md:block"></div>
 
                         {/* View Toggle */}
-                        <div className="flex flex-wrap bg-slate-100 dark:bg-slate-800 p-1 rounded-xl transition-colors w-full sm:w-auto">
+                        <div className="flex flex-wrap bg-slate-100/80 dark:bg-slate-800/60 p-1 rounded-xl transition-all w-full sm:w-auto border border-slate-200/30 dark:border-slate-800">
                             <button
                                 onClick={() => setViewMode('calendar')}
-                                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${viewMode === 'calendar' ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
+                                className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all duration-350 ${viewMode === 'calendar' ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm border-t border-white/10' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-350'}`}
                             >
                                 <CalendarIcon size={16} /> Calendar
                             </button>
                             <button
                                 onClick={() => setViewMode('table')}
-                                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${viewMode === 'table' ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
+                                className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all duration-350 ${viewMode === 'table' ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm border-t border-white/10' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-350'}`}
                             >
                                 <List size={16} /> Table
                             </button>
                             <button
                                 onClick={() => setViewMode('day')}
-                                className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${viewMode === 'day' ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
+                                className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all duration-350 ${viewMode === 'day' ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm border-t border-white/10' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-350'}`}
                             >
                                 <CalendarIcon size={16} /> Day View
                             </button>
@@ -283,18 +309,18 @@ export default function LeavePage() {
                     {/* Navigation */}
                     <div className="flex items-center justify-between sm:justify-end gap-4 w-full md:w-auto">
                         <div className="flex items-center gap-2">
-                            <button onClick={prevPeriod} className="p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 hover:border-indigo-300 dark:hover:border-indigo-500 transition-all">
+                            <button onClick={prevPeriod} className="p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg text-slate-650 dark:text-slate-400 border border-slate-200 dark:border-slate-750 hover:border-indigo-300 dark:hover:border-indigo-500 transition-all active:scale-90">
                                 <ChevronLeft size={20} />
                             </button>
-                            <div className="min-w-[180px] text-center font-bold text-lg text-slate-800 dark:text-slate-100">
+                            <div className="min-w-[180px] text-center font-extrabold text-lg text-slate-800 dark:text-slate-100 tracking-tight">
                                 {viewMode === 'calendar' ? format(currentDate, 'MMMM yyyy') : format(currentDate, 'EEEE, MMM d, yyyy')}
                             </div>
-                            <button onClick={nextPeriod} className="p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 hover:border-indigo-300 dark:hover:border-indigo-500 transition-all">
+                            <button onClick={nextPeriod} className="p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg text-slate-650 dark:text-slate-400 border border-slate-200 dark:border-slate-750 hover:border-indigo-300 dark:hover:border-indigo-500 transition-all active:scale-90">
                                 <ChevronRight size={20} />
                             </button>
                         </div>
 
-                        <button onClick={goToToday} className="text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 px-3 py-1.5 rounded-lg transition-colors">
+                        <button onClick={goToToday} className="text-sm font-bold text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 px-3 py-1.5 rounded-lg transition-all duration-355">
                             Today
                         </button>
                     </div>
@@ -302,20 +328,20 @@ export default function LeavePage() {
             </header>
 
             {/* Content Area */}
-            <div className={`bg-white dark:bg-slate-900 rounded-2xl shadow-xl shadow-slate-200/50 dark:shadow-none border border-white/20 dark:border-slate-800 backdrop-blur-xl transition-colors ${viewMode === 'calendar' ? 'h-[calc(100vh-220px)] overflow-y-auto custom-scrollbar' : 'min-h-[600px]'}`}>
+            <div className={`glass-card-premium rounded-2xl border border-white/20 dark:border-slate-800/80 backdrop-blur-xl transition-all ${viewMode === 'calendar' ? 'h-[calc(100vh-220px)] overflow-y-auto custom-scrollbar' : 'min-h-[600px]'}`}>
 
                 {viewMode === 'calendar' && (
                     <div className="min-h-full flex flex-col">
-                        <div className="grid grid-cols-7 border-b border-slate-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-800/80 sticky top-0 z-10 shadow-sm transition-colors">
+                        <div className="grid grid-cols-7 border-b border-slate-200/50 dark:border-slate-800 bg-slate-50/30 dark:bg-slate-850/40 sticky top-0 z-10 shadow-sm backdrop-blur-md">
                             {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-                                <div key={day} className="py-4 text-center text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider backdrop-blur-md bg-slate-50/90 dark:bg-slate-800/90 transition-colors">
+                                <div key={day} className="py-4 text-center text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider bg-transparent">
                                     {day}
                                 </div>
                             ))}
                         </div>
                         <div className="grid grid-cols-7 auto-rows-[minmax(160px,1fr)] flex-1">
                             {startPadding.map((_, i) => (
-                                <div key={`empty-${i}`} className="bg-slate-50/30 dark:bg-slate-800/30 border-r border-b border-slate-100 dark:border-slate-800 transition-colors"></div>
+                                <div key={`empty-${i}`} className="bg-slate-50/10 dark:bg-slate-900/10 border-r border-b border-slate-200/40 dark:border-slate-800/40"></div>
                             ))}
                             {days.map(day => {
                                 const dayLeaves = leaves.filter(leave => {
@@ -330,37 +356,51 @@ export default function LeavePage() {
                                     <div
                                         key={day.toString()}
                                         onClick={() => { setCurrentDate(day); setViewMode('day'); }}
-                                        className={`border-r border-b border-slate-100 dark:border-slate-800 p-2 transition-all hover:bg-indigo-50/50 dark:hover:bg-indigo-900/30 cursor-pointer group relative flex flex-col
-                                            ${!isSameMonth(day, currentDate) ? 'bg-slate-50/50 dark:bg-slate-800/50 text-slate-400 dark:text-slate-600' : ''} 
-                                            ${isToday(day) ? 'bg-blue-50/30 dark:bg-blue-900/20' : ''}
+                                        className={`border-r border-b border-slate-200/50 dark:border-slate-800/60 p-3 transition-all duration-250 ease-out hover:scale-105 hover:z-20 hover:shadow-[0_10px_35px_rgba(99,102,241,0.18)] hover:rounded-2xl cursor-pointer group relative flex flex-col min-h-[140px] backdrop-blur-md
+                                            ${!isSameMonth(day, currentDate) ? 'bg-slate-50/10 dark:bg-slate-950/5 text-slate-400 dark:text-slate-650' : 'bg-white/10 dark:bg-slate-900/40'} 
+                                            ${isToday(day) ? 'bg-indigo-50/10 dark:bg-indigo-950/15 border-2 border-indigo-500/50 dark:border-indigo-700/50 shadow-[inset_0_0_12px_rgba(99,102,241,0.12)]' : ''}
                                         `}
                                     >
-                                        <div className="flex justify-between items-start mb-1">
-                                            <span className={`text-sm font-medium w-7 h-7 flex items-center justify-center rounded-full transition-colors ${isToday(day) ? 'bg-indigo-600 text-white shadow-md shadow-indigo-200 dark:shadow-none' : 'text-slate-700 dark:text-slate-300 group-hover:bg-white dark:group-hover:bg-slate-700 group-hover:shadow-sm'}`}>
+                                        <div className="flex justify-between items-start mb-1.5">
+                                            <span className={`text-xs font-semibold w-7 h-7 flex items-center justify-center rounded-full transition-colors ${isToday(day) ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-md shadow-indigo-200 dark:shadow-none' : 'text-slate-700 dark:text-slate-350 group-hover:bg-white dark:group-hover:bg-slate-800 group-hover:shadow-sm'}`}>
                                                 {format(day, 'd')}
                                             </span>
                                         </div>
                                         <div className="flex-1 overflow-y-auto space-y-1 custom-scrollbar min-h-0">
-                                            {dayLeaves.slice(0, 3).map(leave => (
-                                                <div key={leave.id} className={`group relative text-[11px] px-2 py-1.5 rounded-md border truncate font-semibold mb-1 transition-all hover:scale-[1.02] ${getLeaveTypeColor(leave.leave_type)} cursor-help`}>
-                                                    {leave.team_member_name}
+                                            {dayLeaves.slice(0, 3).map(leave => {
+                                                const style = getLeaveStyle(leave.leave_type);
+                                                return (
+                                                    <div key={leave.id} className={`group/item relative text-[10px] px-2 py-1.5 rounded-md border truncate font-bold mb-1 transition-all hover:scale-[1.02] ${getLeaveTypeColor(leave.leave_type)} cursor-help`}>
+                                                        {leave.team_member_name}
 
-                                                    {/* Hover Popup */}
-                                                    <div className="hidden group-hover:block absolute left-0 bottom-full mb-2 z-50 w-48 bg-slate-800 text-white text-xs p-2 rounded-lg shadow-xl pointer-events-none">
-                                                        <div className="font-bold mb-1">{leave.team_member_name}</div>
-                                                        <div className="mb-1 opacity-90">{leave.leave_type}</div>
-                                                        {leave.reason && (
-                                                            <div className="text-[10px] opacity-75 italic border-t border-white/20 pt-1 mt-1">
-                                                                "{leave.reason}"
+                                                        {/* Hover Popup */}
+                                                        <div className={`absolute top-1 z-50 opacity-0 invisible group-hover/item:opacity-100 group-hover/item:visible transition-all duration-300 delay-150 transform scale-95 group-hover/item:scale-100 pointer-events-none group-hover/item:pointer-events-auto ${day.getDay() >= 4 ? 'right-[104%] origin-top-right' : 'left-[104%] origin-top-left'} w-64`}>
+                                                            <div className="bg-white/95 dark:bg-slate-950/95 backdrop-blur-xl rounded-2xl shadow-[0_20px_50px_rgba(99,102,241,0.15)] border border-slate-200/60 dark:border-slate-800/80 p-4 flex flex-col gap-2 text-left">
+                                                                <div className="flex items-center gap-3">
+                                                                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500/20 to-blue-500/20 border border-indigo-500/20 flex items-center justify-center text-xs font-black text-indigo-550 dark:text-indigo-400">
+                                                                        {leave.team_member_name.charAt(0)}
+                                                                    </div>
+                                                                    <div className="min-w-0 flex-1">
+                                                                        <div className="font-extrabold text-xs text-slate-800 dark:text-slate-200 truncate leading-tight">{leave.team_member_name}</div>
+                                                                        <div className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mt-0.5">{format(new Date(leave.leave_date), 'EEE, MMM d, yyyy')}</div>
+                                                                    </div>
+                                                                </div>
+                                                                <div className="border-t border-slate-100/50 dark:border-slate-800/40 my-1"></div>
+                                                                <span className={`inline-flex items-center self-start px-2 py-0.5 rounded-full text-[9px] font-bold border ${style.badge}`}>
+                                                                    {leave.leave_type}
+                                                                </span>
+                                                                {leave.reason && (
+                                                                    <div className="text-[10px] text-slate-650 dark:text-slate-400 italic bg-slate-50/50 dark:bg-slate-900/30 p-2.5 rounded-lg border border-slate-100 dark:border-slate-800/60 mt-1">
+                                                                        "{leave.reason}"
+                                                                    </div>
+                                                                )}
                                                             </div>
-                                                        )}
-                                                        {/* Arrow */}
-                                                        <div className="absolute top-full left-4 -mt-1 border-4 border-transparent border-t-slate-800"></div>
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            ))}
+                                                );
+                                            })}
                                             {dayLeaves.length > 3 && (
-                                                <div className="text-[10px] text-slate-400 font-medium pl-1">+{dayLeaves.length - 3} more</div>
+                                                <div className="text-[10px] text-slate-450 dark:text-slate-500 font-bold pl-1">+{dayLeaves.length - 3} more</div>
                                             )}
                                         </div>
                                     </div>
@@ -374,65 +414,68 @@ export default function LeavePage() {
                     <div className="p-8">
                         <div className="flex justify-between items-end mb-6">
                             <div>
-                                <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">Leaves for {format(currentDate, 'MMMM d')}</h2>
-                                <p className="text-slate-500 dark:text-slate-400">{dayViewLeaves.length} leave request(s)</p>
+                                <h2 className="text-2xl font-extrabold text-slate-855 dark:text-slate-100 tracking-tight">Leaves for {format(currentDate, 'MMMM d')}</h2>
+                                <p className="text-slate-400 mt-0.5 text-sm font-medium">{dayViewLeaves.length} leave request(s)</p>
                             </div>
                         </div>
 
                         {dayViewLeaves.length === 0 ? (
-                            <div className="flex flex-col items-center justify-center py-20 text-slate-400 dark:text-slate-500">
-                                <div className="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mb-4 text-3xl">📅</div>
-                                <p className="text-lg font-medium text-slate-600 dark:text-slate-400">No leaves scheduled for this day</p>
-                                <p className="text-sm">All team members are available</p>
+                            <div className="flex flex-col items-center justify-center py-24 text-slate-400 dark:text-slate-500">
+                                <div className="w-16 h-16 bg-slate-100/10 dark:bg-slate-800/40 rounded-full flex items-center justify-center mb-4 text-3xl">📅</div>
+                                <p className="text-lg font-bold text-slate-700 dark:text-slate-300">No leaves scheduled for this day</p>
+                                <p className="text-sm text-slate-500">All team members are available</p>
                             </div>
                         ) : (
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                {dayViewLeaves.map(leave => (
-                                    <div
-                                        key={leave.id}
-                                        className={`rounded-2xl p-6 shadow-sm hover:shadow-md transition-all relative border ${getLeaveTypeColor(leave.leave_type)}`}
-                                    >
-                                        <div className="flex justify-between items-start mb-4">
-                                            <span className="text-[11px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-lg bg-black/20 text-white">
-                                                {leave.leave_type}
-                                            </span>
-                                            <button
-                                                onClick={() => handleDeleteLeave(leave.id)}
-                                                className="p-1.5 hover:bg-white/20 rounded-lg transition-colors text-white"
-                                            >
-                                                <Trash2 size={16} />
-                                            </button>
-                                        </div>
-
-                                        <h3 className="font-bold text-xl text-white mb-1">{leave.team_member_name}</h3>
-                                        <p className="text-sm text-white/80 mb-4 font-medium">{format(new Date(leave.leave_date), 'EEEE, MMMM d, yyyy')}</p>
-
-                                        {leave.reason && (
-                                            <div className="pt-4 border-t border-white/20">
-                                                <p className="text-xs font-semibold text-white/70 mb-1">Reason:</p>
-                                                <p className="text-sm text-white/90">{leave.reason}</p>
+                                {dayViewLeaves.map(leave => {
+                                    const style = getLeaveStyle(leave.leave_type);
+                                    return (
+                                        <div
+                                            key={leave.id}
+                                            className={`rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-300 relative border ${style.card} group`}
+                                        >
+                                            <div className="flex justify-between items-start mb-4">
+                                                <span className={`text-[10px] font-extrabold uppercase tracking-wider px-3 py-1.5 rounded-lg border ${style.badge}`}>
+                                                    {leave.leave_type}
+                                                </span>
+                                                <button
+                                                    onClick={() => handleDeleteLeave(leave.id)}
+                                                    className="p-1.5 bg-white/10 hover:bg-red-500/20 hover:text-red-500 dark:text-slate-450 dark:hover:text-red-400 rounded-lg transition-colors text-white"
+                                                >
+                                                    <Trash2 size={16} />
+                                                </button>
                                             </div>
-                                        )}
-                                    </div>
-                                ))}
+
+                                            <h3 className="font-extrabold text-xl text-slate-800 dark:text-slate-100 mb-1">{leave.team_member_name}</h3>
+                                            <p className="text-xs text-slate-500 dark:text-slate-400 mb-4 font-bold">{format(new Date(leave.leave_date), 'EEEE, MMMM d, yyyy')}</p>
+
+                                            {leave.reason && (
+                                                <div className="pt-4 border-t border-slate-200/50 dark:border-slate-800/80">
+                                                    <p className="text-xs font-bold text-slate-500 dark:text-slate-500 mb-1">Reason:</p>
+                                                    <p className="text-sm text-slate-650 dark:text-slate-300 italic font-medium">"{leave.reason}"</p>
+                                                </div>
+                                            )}
+                                        </div>
+                                    );
+                                })}
                             </div>
                         )}
                     </div>
                 )}
 
                 {viewMode === 'table' && (
-                    <div className="space-y-8">
+                    <div className="space-y-10 p-6 md:p-8">
                         {loading ? (
-                            <div className="flex justify-center py-20 bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800">
+                            <div className="flex justify-center py-20">
                                 <Loader size="lg" color="indigo" />
                             </div>
                         ) : leaves.length === 0 ? (
-                            <div className="flex flex-col items-center justify-center py-20 bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 text-slate-400 dark:text-slate-500">
-                                <div className="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mb-4 text-3xl">
+                            <div className="flex flex-col items-center justify-center py-20 text-slate-400 dark:text-slate-500">
+                                <div className="w-16 h-16 bg-slate-105/10 dark:bg-slate-800/40 rounded-full flex items-center justify-center mb-4 text-3xl">
                                     📅
                                 </div>
-                                <p className="text-lg font-medium text-slate-600 dark:text-slate-400">No leaves found</p>
-                                <p className="text-sm">Add a leave request to get started</p>
+                                <p className="text-lg font-bold text-slate-700 dark:text-slate-300">No leaves found</p>
+                                <p className="text-sm text-slate-500">Add a leave request to get started</p>
                             </div>
                         ) : (
                             // Group leaves by Month and Year
@@ -447,76 +490,80 @@ export default function LeavePage() {
                                         return acc;
                                     }, {} as Record<string, Leave[]>)
                             ) as [string, Leave[]][]).map(([monthYear, monthLeaves]) => (
-                                <div key={monthYear} className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden">
-                                    <div className="px-6 py-4 bg-slate-50/50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
-                                        <h3 className="font-bold text-lg text-slate-800 dark:text-slate-200">{monthYear}</h3>
-                                        <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-800 px-2 py-1 rounded-md border border-slate-200 dark:border-slate-700">
+                                <div key={monthYear} className="space-y-6">
+                                    {/* Month/Year section title */}
+                                    <div className="flex items-center gap-4">
+                                        <h3 className="font-extrabold text-xl text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-blue-400 tracking-tight">{monthYear}</h3>
+                                        <div className="flex-1 h-px bg-gradient-to-r from-slate-200/50 dark:from-slate-800/80 to-transparent"></div>
+                                        <span className="text-xs font-bold text-indigo-455 dark:text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 px-2.5 py-1 rounded-lg">
                                             {monthLeaves.length} {monthLeaves.length === 1 ? 'Leave' : 'Leaves'}
                                         </span>
                                     </div>
-                                    <div className="overflow-x-auto">
-                                        <table className="w-full">
-                                            <thead className="bg-slate-50 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-700">
-                                                <tr>
-                                                    <th className="px-6 py-3 text-left text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Date</th>
-                                                    <th className="px-6 py-3 text-left text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Team Member</th>
-                                                    <th className="px-6 py-3 text-left text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Leave Type</th>
-                                                    <th className="px-6 py-3 text-left text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Reason</th>
-                                                    <th className="px-6 py-3 text-center text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Actions</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                                                {monthLeaves.map((leave) => (
-                                                    <tr key={leave.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors group">
-                                                        <td className="px-6 py-3 whitespace-nowrap">
-                                                            <div className="flex flex-col">
-                                                                <span className="text-sm font-bold text-slate-700 dark:text-slate-300">
-                                                                    {format(new Date(leave.leave_date), 'd')}
-                                                                </span>
-                                                                <span className="text-[10px] font-semibold text-slate-400 uppercase">
-                                                                    {format(new Date(leave.leave_date), 'EEE')}
-                                                                </span>
+
+                                    {/* Beautiful vertical timeline container */}
+                                    <div className="relative pl-8 md:pl-10 space-y-6">
+                                        {/* Vertical Timeline Thread */}
+                                        <div className="absolute left-[15px] md:left-[19px] top-2 bottom-2 w-[2px] bg-gradient-to-b from-indigo-500/30 via-slate-200/40 dark:via-slate-800/40 to-slate-200/10 dark:to-slate-850/10"></div>
+
+                                        {monthLeaves.map((leave) => {
+                                            const style = getLeaveStyle(leave.leave_type);
+                                            const leaveDate = new Date(leave.leave_date);
+                                            
+                                            return (
+                                                <div key={leave.id} className="relative flex flex-col md:flex-row items-start gap-4 group">
+                                                    {/* Node Point */}
+                                                    <div className={`absolute left-[-21px] md:left-[-15px] top-3.5 w-3 h-3 rounded-full ${style.node} z-10 transition-transform duration-300 group-hover:scale-125`}></div>
+
+                                                    {/* Compact Left Column: Date */}
+                                                    <div className="flex flex-row md:flex-col items-center gap-1.5 min-w-[70px] pt-1.5">
+                                                        <span className="text-lg font-black text-slate-800 dark:text-slate-100 tracking-tight leading-none">
+                                                            {format(leaveDate, 'dd')}
+                                                        </span>
+                                                        <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest leading-none">
+                                                            {format(leaveDate, 'EEE')}
+                                                        </span>
+                                                    </div>
+
+                                                    {/* Chronological Card */}
+                                                    <div className={`flex-1 glass-card-premium rounded-2xl p-5 border ${style.card} transition-all duration-300 flex flex-col md:flex-row md:items-center justify-between gap-4 group/card`}>
+                                                        <div className="flex items-center gap-4 flex-1">
+                                                            {/* User Avatar Monogram */}
+                                                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500/20 to-blue-500/20 border-2 border-white dark:border-slate-800 flex items-center justify-center text-sm font-extrabold text-indigo-450 dark:text-indigo-400 shadow-md">
+                                                                {leave.team_member_name.charAt(0)}
                                                             </div>
-                                                        </td>
-                                                        <td className="px-6 py-3">
-                                                            <div className="flex items-center gap-3">
-                                                                <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-xs font-bold text-indigo-700 dark:text-indigo-400 border-2 border-white dark:border-slate-800 shadow-sm">
-                                                                    {leave.team_member_name.charAt(0)}
+                                                            <div className="space-y-1 min-w-0">
+                                                                <div className="flex flex-wrap items-center gap-2">
+                                                                    <h4 className="font-extrabold text-base text-slate-800 dark:text-slate-200 truncate">
+                                                                        {leave.team_member_name}
+                                                                    </h4>
+                                                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-lg text-[10px] font-extrabold border ${style.badge}`}>
+                                                                        {leave.leave_type}
+                                                                    </span>
                                                                 </div>
-                                                                <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                                                                    {leave.team_member_name}
-                                                                </span>
+                                                                {leave.reason ? (
+                                                                    <p className="text-sm text-slate-600 dark:text-slate-400 italic max-w-xl">
+                                                                        "{leave.reason}"
+                                                                    </p>
+                                                                ) : (
+                                                                    <p className="text-xs text-slate-400 dark:text-slate-600 italic">No reason provided</p>
+                                                                )}
                                                             </div>
-                                                        </td>
-                                                        <td className="px-6 py-3">
-                                                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-bold border shadow-sm ${getLeaveTypeColor(leave.leave_type)}`}>
-                                                                {leave.leave_type}
-                                                            </span>
-                                                        </td>
-                                                        <td className="px-6 py-3">
-                                                            {leave.reason ? (
-                                                                <span className="text-sm text-slate-600 dark:text-slate-400 line-clamp-1 max-w-[200px]" title={leave.reason}>
-                                                                    {leave.reason}
-                                                                </span>
-                                                            ) : (
-                                                                <span className="text-xs text-slate-400 italic">No reason</span>
-                                                            )}
-                                                        </td>
-                                                        <td className="px-6 py-3">
-                                                            <div className="flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                                                <button
-                                                                    onClick={() => handleDeleteLeave(leave.id)}
-                                                                    className="p-1.5 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg text-slate-400 hover:text-red-600 dark:text-slate-500 dark:hover:text-red-400 transition-colors"
-                                                                    title="Delete leave"
-                                                                >
-                                                                    <Trash2 size={16} />
-                                                                </button>
-                                                            </div>
-                                                        </td>
-                                                    </tr>
-                                                ))}
-                                            </tbody>
-                                        </table>
+                                                        </div>
+
+                                                        {/* Actions Column */}
+                                                        <div className="flex items-center justify-end gap-2 shrink-0 self-end md:self-auto">
+                                                            <button
+                                                                onClick={() => handleDeleteLeave(leave.id)}
+                                                                className="p-2 bg-slate-100 dark:bg-slate-800/80 hover:bg-red-50 dark:hover:bg-red-950/20 text-slate-450 hover:text-red-550 dark:text-slate-400 dark:hover:text-red-400 rounded-xl border border-slate-200/50 dark:border-slate-800/80 hover:border-red-500/30 transition-all duration-300 active:scale-95"
+                                                                title="Delete Leave Request"
+                                                            >
+                                                                <Trash2 size={16} />
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
                                     </div>
                                 </div>
                             ))

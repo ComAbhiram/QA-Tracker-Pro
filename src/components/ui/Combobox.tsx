@@ -73,8 +73,7 @@ export default function Combobox({
             <button
                 type="button"
                 onClick={() => !disabled && setOpen(!open)}
-                className={`w-full flex items-center justify-between px-5 py-3 text-left bg-slate-50 dark:bg-slate-800 border rounded-xl transition-all outline-none ${open ? 'ring-2 ring-indigo-500/20 border-indigo-500' : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'
-                    } ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                className={`w-full flex items-center justify-between px-5 py-3 text-left bg-white/40 dark:bg-slate-900/40 text-slate-700 dark:text-slate-200 border border-slate-200/40 dark:border-slate-800/80 rounded-xl transition-all outline-none ${open ? 'border-amber-500/50 shadow-[0_0_0_4px_rgba(245,158,11,0.15)] dark:border-amber-500/50 dark:shadow-[0_0_0_4px_rgba(245,158,11,0.15)]' : 'hover:border-slate-300 dark:hover:border-slate-700/80'} ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
                 disabled={disabled}
             >
                 <span className={`block truncate ${!isPlaceholder ? 'text-slate-700 dark:text-slate-200 font-medium' : 'text-slate-400 dark:text-slate-500'}`}>
@@ -96,15 +95,15 @@ export default function Combobox({
             )}
 
             {open && (
-                <div className="absolute z-50 w-full mt-2 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-xl shadow-xl max-h-60 overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-100">
-                    <div className="p-2 border-b border-slate-50 dark:border-slate-700/50">
+                <div className="absolute z-50 w-full mt-2 bg-white/95 dark:bg-slate-900/90 backdrop-blur-xl border border-slate-200/60 dark:border-slate-800/60 rounded-xl shadow-xl max-h-60 overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-100">
+                    <div className="p-2 border-b border-slate-100 dark:border-slate-800/80">
                         <div className="relative">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                             <input
                                 type="text"
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
-                                className="w-full pl-9 pr-4 py-2 text-sm bg-slate-50 dark:bg-slate-900 border-none rounded-lg focus:ring-0 text-slate-700 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                                className="w-full pl-9 pr-4 py-2 text-sm bg-slate-50/50 dark:bg-slate-950/50 border border-slate-200/40 dark:border-slate-800/80 rounded-lg focus:outline-none glow-input text-slate-700 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500"
                                 placeholder={searchPlaceholder}
                                 autoFocus
                             />
@@ -113,8 +112,8 @@ export default function Combobox({
                     <div className="overflow-y-auto p-1 custom-scrollbar">
                         {isLoading ? (
                             <div className="py-6 text-center text-sm text-slate-500 flex items-center justify-center gap-2">
-                                <div className="animate-spin w-4 h-4 border-2 border-indigo-500 border-t-transparent rounded-full" />
-                                <span><span>Loading...</span></span>
+                                <div className="animate-spin w-4 h-4 border-2 border-amber-500 border-t-transparent rounded-full" />
+                                <span>Loading...</span>
                             </div>
                         ) : (
                             <>
@@ -125,7 +124,7 @@ export default function Combobox({
                                             <button
                                                 type="button"
                                                 onClick={() => handleSelect(search)}
-                                                className="mt-2 w-full text-left px-3 py-2 text-sm bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-900/50 font-medium transition-colors"
+                                                className="mt-2 w-full text-left px-3 py-2 text-sm bg-amber-500/10 text-amber-700 dark:text-amber-400 rounded-lg hover:bg-amber-500/20 font-medium transition-colors"
                                             >
                                                 Use &quot;{search}&quot;
                                             </button>
@@ -138,13 +137,13 @@ export default function Combobox({
                                         type="button"
                                         onClick={() => handleSelect(option.id)} // Returning ID (which corresponds to mapped name)
                                         className={`w-full flex items-center justify-between px-3 py-2.5 text-sm rounded-lg transition-colors text-left ${(value === option.id || value === option.label)
-                                            ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 font-medium'
-                                            : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'
+                                            ? 'bg-amber-500/10 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 font-medium'
+                                            : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50'
                                             }`}
                                     >
                                         <span>{option.label}</span>
                                         {(value === option.id || value === option.label) && (
-                                            <Check className="w-4 h-4 text-indigo-600" />
+                                            <Check className="w-4 h-4 text-amber-500" />
                                         )}
                                     </button>
                                 ))}
@@ -152,7 +151,7 @@ export default function Combobox({
                                     <button
                                         type="button"
                                         onClick={() => handleSelect(search)}
-                                        className="w-full flex items-center gap-2 px-3 py-2.5 text-sm rounded-lg text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition-colors border-t border-slate-100 dark:border-slate-800 mt-1"
+                                        className="w-full flex items-center gap-2 px-3 py-2.5 text-sm rounded-lg text-amber-600 dark:text-amber-400 hover:bg-amber-500/10 transition-colors border-t border-slate-100 dark:border-slate-800 mt-1"
                                     >
                                         <span>Use &quot;{search}&quot;</span>
                                     </button>

@@ -898,17 +898,16 @@ export default function Tracker() {
                         </div>
                     )}
                 </div>
-
-                <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200 dark:border-slate-800 p-4 rounded-2xl shadow-sm flex flex-col 2xl:flex-row items-start 2xl:items-center justify-between gap-4 transition-all">
+                <div className="glass-card-premium p-4 rounded-2xl flex flex-col 2xl:flex-row items-start 2xl:items-center justify-between gap-4 transition-all duration-300 hover:border-amber-500/30">
                     <div className="flex flex-col sm:flex-row flex-wrap items-start sm:items-center gap-3 w-full 2xl:w-auto">
                         <div className="relative group w-full sm:w-auto">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors" size={16} />
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-amber-500 transition-colors" size={16} />
                             <input
                                 type="text"
                                 placeholder="Search tasks..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                className="w-full sm:w-[220px] bg-slate-50 dark:bg-slate-800/50 text-slate-700 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 pl-10 pr-4 py-2.5 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-sm transition-all shadow-inner"
+                                className="w-full sm:w-[220px] bg-white/40 dark:bg-slate-900/40 text-slate-700 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 pl-10 pr-4 py-2.5 border border-slate-200/40 dark:border-slate-800/80 rounded-xl focus:outline-none glow-input text-sm transition-all shadow-sm focus:shadow-md"
                             />
                         </div>
 
@@ -918,7 +917,7 @@ export default function Tracker() {
                                     date={dateFilter}
                                     setDate={setDateFilter}
                                     placeholder="Filter by date"
-                                    className="w-full sm:w-[150px] bg-slate-50 dark:bg-slate-800/50 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 min-h-0 py-2.5 px-4 text-sm shadow-inner hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl transition-colors"
+                                    className="w-full sm:w-[150px] bg-white/40 dark:bg-slate-900/40 text-slate-700 dark:text-slate-200 border border-slate-200/40 dark:border-slate-800/80 min-h-0 py-2.5 px-4 text-sm shadow-sm hover:bg-slate-100 dark:hover:bg-slate-800/60 rounded-xl transition-all focus:outline-none glow-input"
                                 />
                             </div>
 
@@ -937,16 +936,23 @@ export default function Tracker() {
                                 />
                             </div>
 
-                            <div className="bg-slate-100/80 dark:bg-slate-800/80 p-1 rounded-xl flex items-center border border-slate-200/50 dark:border-slate-700/50 w-full sm:w-auto shadow-inner">
+                            <div className="bg-slate-100/40 dark:bg-slate-900/40 p-1 rounded-xl flex items-center border border-slate-200/30 dark:border-slate-850 w-full sm:w-auto shadow-inner relative overflow-hidden">
+                                <div 
+                                    className={`absolute top-1 bottom-1 rounded-lg transition-all duration-300 ease-out animate-tab-glide ${
+                                        viewMode === 'active' 
+                                            ? 'left-1 w-[calc(50%-4px)] sm:w-[70px] bg-white dark:bg-slate-700 border border-slate-200/20 dark:border-slate-600/20 shadow-sm' 
+                                            : 'left-[calc(50%)] sm:left-[74px] w-[calc(50%-4px)] sm:w-[85px] bg-gradient-to-r from-purple-500 to-indigo-600 shadow-md shadow-purple-500/15'
+                                    }`}
+                                />
                                 <button
                                     onClick={() => setViewMode('active')}
-                                    className={`flex-1 sm:flex-none px-4 py-2 text-sm font-bold rounded-lg transition-all duration-200 ${viewMode === 'active' ? 'bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
+                                    className={`relative z-10 flex-1 sm:flex-none px-4 py-2 text-sm font-bold rounded-lg transition-all duration-200 ${viewMode === 'active' ? 'text-slate-800 dark:text-slate-100' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-400'}`}
                                 >
                                     Active
                                 </button>
                                 <button
                                     onClick={() => setViewMode('forecast')}
-                                    className={`flex-1 sm:flex-none px-4 py-2 text-sm font-bold rounded-lg transition-all duration-200 ${viewMode === 'forecast' ? 'bg-white dark:bg-slate-700 text-purple-600 dark:text-purple-400 shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
+                                    className={`relative z-10 flex-1 sm:flex-none px-4 py-2 text-sm font-bold rounded-lg transition-all duration-200 ${viewMode === 'forecast' ? 'text-white' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-400'}`}
                                 >
                                     Forecast
                                 </button>
@@ -958,7 +964,7 @@ export default function Tracker() {
                         {!isPCMode && (
                             <button
                                 onClick={() => setIsLeaveModalOpen(true)}
-                                className="glint-effect flex-1 sm:flex-none flex items-center justify-center gap-2 bg-gradient-to-br from-orange-50 to-orange-100/50 dark:from-orange-900/30 dark:to-orange-800/30 text-orange-700 dark:text-orange-300 hover:shadow-md hover:shadow-orange-200/50 dark:hover:shadow-none px-5 py-2.5 rounded-xl transition-all font-semibold border border-orange-200/50 dark:border-orange-800 text-sm"
+                                className="glint-effect flex-1 sm:flex-none flex items-center justify-center gap-2 bg-amber-500/5 text-amber-600 dark:text-amber-400 hover:bg-amber-500/10 px-5 py-2.5 rounded-xl transition-all font-bold border border-amber-500/30 dark:border-amber-500/20 text-sm shadow-sm hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 duration-205"
                             >
                                 <CalendarClock size={18} />
                                 Add Leave
@@ -966,14 +972,14 @@ export default function Tracker() {
                         )}
                         <button
                             onClick={() => setIsAvailabilityCheckOpen(true)}
-                            className="glint-effect flex-1 sm:flex-none flex items-center justify-center gap-2 bg-gradient-to-br from-indigo-50 to-indigo-100/50 dark:from-indigo-900/30 dark:to-indigo-800/30 text-indigo-700 dark:text-indigo-300 hover:shadow-md hover:shadow-indigo-200/50 dark:hover:shadow-none px-5 py-2.5 rounded-xl transition-all font-semibold border border-indigo-200/50 dark:border-indigo-800 text-sm"
+                            className="glint-effect flex-1 sm:flex-none flex items-center justify-center gap-2 bg-indigo-500/5 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-500/10 px-5 py-2.5 rounded-xl transition-all font-bold border border-indigo-500/30 dark:border-indigo-500/20 text-sm shadow-sm hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 duration-205"
                         >
                             <Users size={18} />
-                            Check
+                            Check Availability
                         </button>
                         <button
                             onClick={exportCSV}
-                            className="glint-effect flex-1 sm:flex-none flex items-center justify-center gap-2 bg-gradient-to-br from-emerald-50 to-emerald-100/50 dark:from-emerald-900/30 dark:to-emerald-800/30 text-emerald-700 dark:text-emerald-300 hover:shadow-md hover:shadow-emerald-200/50 dark:hover:shadow-none px-5 py-2.5 rounded-xl transition-all font-semibold border border-emerald-200/50 dark:border-emerald-800 text-sm"
+                            className="glint-effect flex-1 sm:flex-none flex items-center justify-center gap-2 bg-emerald-500/5 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 px-5 py-2.5 rounded-xl transition-all font-bold border border-emerald-500/30 dark:border-emerald-500/20 text-sm shadow-sm hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 duration-205"
                         >
                             <ArrowUpRight size={18} />
                             Export
@@ -981,7 +987,7 @@ export default function Tracker() {
                         {!isPCMode && (
                             <button
                                 onClick={handleAddTask}
-                                className="glint-effect col-span-2 sm:col-span-1 flex-1 sm:flex-none flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-700 hover:to-indigo-600 text-white px-6 py-2.5 rounded-xl shadow-lg shadow-indigo-200 dark:shadow-none hover:shadow-indigo-300 transition-all font-bold text-sm"
+                                className="glint-effect col-span-2 sm:col-span-1 flex-1 sm:flex-none flex items-center justify-center gap-2 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white px-6 py-2.5 rounded-xl shadow-lg shadow-amber-500/20 dark:shadow-none hover:shadow-amber-500/35 hover:-translate-y-0.5 active:translate-y-0 duration-205 font-extrabold text-sm"
                             >
                                 <Plus size={18} />
                                 New Task
@@ -989,32 +995,30 @@ export default function Tracker() {
                         )}
                     </div>
                 </div>
-            </header>
-
-            {/* Availability Check Modal */}
+            </header>            {/* Availability Check Modal */}
             {
                 isAvailabilityCheckOpen && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-                        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden border border-slate-200 dark:border-slate-800">
-                            <div className="flex items-center justify-between p-6 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50">
-                                <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100">Check Availability</h3>
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-md p-4 animate-in fade-in duration-200">
+                        <div className="bg-white/90 dark:bg-slate-950/75 backdrop-blur-2xl rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.3)] w-full max-w-md overflow-hidden border border-slate-200/60 dark:border-slate-800/60 transition-all duration-300">
+                            <div className="flex items-center justify-between p-6 border-b border-slate-100 dark:border-slate-800/80 bg-slate-50/40 dark:bg-slate-900/40">
+                                <h3 className="text-xl font-extrabold text-slate-800 dark:text-slate-100 tracking-tight">Check Availability</h3>
                                 <CloseButton onClick={() => setIsAvailabilityCheckOpen(false)} />
                             </div>
 
                             <div className="p-6 space-y-6">
                                 <div>
-                                    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Select Date needed from</label>
+                                    <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Select Date needed from</label>
                                     <div className="flex gap-2">
                                         <input
                                             type="date"
                                             value={checkDate}
                                             onChange={(e) => setCheckDate(e.target.value)}
-                                            className="flex-1 px-4 py-2.5 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
+                                            className="flex-1 px-4 py-2.5 border border-slate-250/40 dark:border-slate-800/80 bg-white/40 dark:bg-slate-900/40 text-slate-900 dark:text-slate-100 rounded-xl focus:outline-none glow-input text-sm transition-all"
                                         />
                                         <button
                                             onClick={handleCheckAvailability}
                                             disabled={!checkDate}
-                                            className="px-4 py-2.5 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                            className="glint-effect px-5 py-2.5 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white rounded-xl font-bold disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md shadow-amber-500/10 active:scale-95 duration-200"
                                         >
                                             Check
                                         </button>
@@ -1023,24 +1027,30 @@ export default function Tracker() {
 
                                 {hasChecked && (
                                     <div className="animate-in slide-in-from-bottom-2 duration-300">
-                                        <h4 className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-3">
+                                        <h4 className="text-xs font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-3">
                                             {availableMembers.length} Available Member{availableMembers.length !== 1 ? 's' : ''}
                                         </h4>
 
                                         {availableMembers.length > 0 ? (
                                             <div className="space-y-2 max-h-[300px] overflow-y-auto custom-scrollbar pr-2">
                                                 {availableMembers.map((member: string) => (
-                                                    <div key={member} className="flex items-center gap-3 p-3 rounded-xl bg-emerald-50 border border-emerald-100 text-emerald-900">
-                                                        <div className="w-8 h-8 rounded-full bg-emerald-200 dark:bg-emerald-900 flex items-center justify-center text-emerald-800 dark:text-emerald-100 font-bold text-xs">
-                                                            {member.charAt(0)}
+                                                    <div key={member} className="flex items-center justify-between p-3 rounded-xl bg-white/40 dark:bg-slate-900/30 backdrop-blur-md border border-slate-200/30 dark:border-slate-800/60 text-slate-800 dark:text-slate-200 shadow-sm hover:scale-[1.02] hover:-translate-y-0.5 hover:border-emerald-500/30 duration-200 transition-all">
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-extrabold text-xs shadow-md">
+                                                                {member.charAt(0)}
+                                                            </div>
+                                                            <span className="font-bold text-sm tracking-wide">{member}</span>
                                                         </div>
-                                                        <span className="font-semibold text-emerald-900 dark:text-emerald-100">{member}</span>
+                                                        <div className="flex items-center gap-2 bg-emerald-500/5 dark:bg-emerald-500/10 border border-emerald-500/20 dark:border-emerald-500/10 px-2.5 py-1 rounded-lg">
+                                                            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.6)]" />
+                                                            <span className="text-[10px] font-extrabold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Available</span>
+                                                        </div>
                                                     </div>
                                                 ))}
                                             </div>
                                         ) : (
-                                            <div className="text-center py-8 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800 border-dashed">
-                                                <p className="text-slate-500 dark:text-slate-400">No members available on this date.</p>
+                                            <div className="text-center py-8 bg-slate-50/50 dark:bg-slate-950/30 rounded-2xl border border-slate-200/50 dark:border-slate-800/80 border-dashed">
+                                                <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">No members available on this date.</p>
                                             </div>
                                         )}
                                     </div>
@@ -1053,7 +1063,7 @@ export default function Tracker() {
 
 
             {/* STICKY HEADER for All Tables */}
-            <div className="sticky top-0 z-40 bg-white dark:bg-slate-900 shadow-md border-b border-slate-200 dark:border-slate-700 mb-2 rounded-t-lg overflow-x-auto no-scrollbar transition-colors">
+            <div className="sticky top-0 z-40 bg-white/80 dark:bg-slate-950/85 backdrop-blur-md shadow-lg border-b border-slate-255/15 dark:border-slate-800/40 mb-3 rounded-2xl overflow-x-auto no-scrollbar transition-all duration-300">
                 <table className="w-full text-xs text-slate-800 dark:text-slate-200 border-collapse table-fixed">
                     <colgroup>
                         <col style={{ width: columnWidths.projectName }} />
@@ -1070,7 +1080,7 @@ export default function Tracker() {
                         <col style={{ width: columnWidths.deviation }} />
                         <col style={{ width: columnWidths.sprint }} />
                     </colgroup>
-                    <thead className="bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-bold uppercase tracking-wider backdrop-blur-md">
+                    <thead className="bg-slate-55/40 dark:bg-slate-900/60 text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider border-b border-slate-200/20 dark:border-slate-750/25">
                         <tr>
                             <ResizableHeader label="Project" widthKey="projectName" width={columnWidths.projectName} onResizeStart={startResizing} />
 
